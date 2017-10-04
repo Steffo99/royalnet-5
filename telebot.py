@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(asctime)s | %
 # Init the Telegram Bot
 updater = Updater(token=config["Telegram"]["bot_token"])
 
+
 def message_sync(bot: Bot, update: Update):
     tg_user = update.message.from_user
     db_user = session.query(Telegram).filter(Telegram.telegram_id == tg_user.id).first()
@@ -43,6 +44,7 @@ def message_sync(bot: Bot, update: Update):
         db_user.username = tg_user.username
         session.commit()
     bot.send_message(update.message.chat.id, "✅ Sincronizzazione completata!")
+
 
 updater.dispatcher.add_handler(CommandHandler("sync", message_sync))
 updater.start_polling()

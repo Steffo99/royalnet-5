@@ -49,6 +49,24 @@ class Telegram(Base):
             return self.first_name
 
 
+class Steam(Base):
+    __tablename__ = "steam"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal")
+
+    steam_id = Column(String, primary_key=True)
+
+    def __repr__(self):
+        return f"<Steam {self.steam_id}>"
+
+    def __str__(self):
+        if self.steam_name is not None:
+            return self.steam_name
+        else:
+            return self.steam_id
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
