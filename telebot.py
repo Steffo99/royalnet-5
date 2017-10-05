@@ -43,7 +43,9 @@ def message_sync(bot: Bot, update: Update):
         db_user.last_name = tg_user.last_name
         db_user.username = tg_user.username
         session.commit()
-    bot.send_message(update.message.chat.id, "✅ Sincronizzazione completata!")
+    bot.send_message(update.message.chat.id, f"✅ Sincronizzazione Telegram completata!\n"
+                                             f"Sincronizza il tuo account Steam qui:\n"
+                                             f"http://79.26.47.209:1234/login/{db_user.royal_id}")
 
 
 updater.dispatcher.add_handler(CommandHandler("sync", message_sync))
