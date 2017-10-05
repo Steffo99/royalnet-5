@@ -137,37 +137,41 @@ class RocketLeague(Base):
         current_season = str(current_season)
         # Get ranked data
         # Single 1v1
-        self.single_mmr = j["rankedSeasons"][current_season]["10"]["rankPoints"]
-        if j["rankedSeasons"][current_season]["10"]["matchesPlayed"] >= 10:
-            self.single_rank = j["rankedSeasons"][current_season]["10"]["tier"]
-            self.single_div = j["rankedSeasons"][current_season]["10"]["division"]
-        else:
-            self.single_rank = None
-            self.single_div = None
+        if "10" in j["rankedSeasons"][current_season]:
+            self.single_mmr = j["rankedSeasons"][current_season]["10"]["rankPoints"]
+            if j["rankedSeasons"][current_season]["10"]["matchesPlayed"] >= 10:
+                self.single_rank = j["rankedSeasons"][current_season]["10"]["tier"]
+                self.single_div = j["rankedSeasons"][current_season]["10"]["division"]
+            else:
+                self.single_rank = None
+                self.single_div = None
         # Doubles 2v2
-        self.doubles_mmr = j["rankedSeasons"][current_season]["11"]["rankPoints"]
-        if j["rankedSeasons"][current_season]["11"]["matchesPlayed"] >= 10:
-            self.doubles_rank = j["rankedSeasons"][current_season]["11"]["tier"]
-            self.doubles_div = j["rankedSeasons"][current_season]["11"]["division"]
-        else:
-            self.doubles_rank = None
-            self.doubles_div = None
+        if "11" in j["rankedSeasons"][current_season]:
+            self.doubles_mmr = j["rankedSeasons"][current_season]["11"]["rankPoints"]
+            if j["rankedSeasons"][current_season]["11"]["matchesPlayed"] >= 10:
+                self.doubles_rank = j["rankedSeasons"][current_season]["11"]["tier"]
+                self.doubles_div = j["rankedSeasons"][current_season]["11"]["division"]
+            else:
+                self.doubles_rank = None
+                self.doubles_div = None
         # Standard 3v3
-        self.standard_mmr = j["rankedSeasons"][current_season]["13"]["rankPoints"]
-        if j["rankedSeasons"][current_season]["13"]["matchesPlayed"] >= 10:
-            self.standard_rank = j["rankedSeasons"][current_season]["13"]["tier"]
-            self.standard_div = j["rankedSeasons"][current_season]["13"]["division"]
-        else:
-            self.standard_rank = None
-            self.standard_div = None
+        if "13" in j["rankedSeasons"][current_season]:
+            self.standard_mmr = j["rankedSeasons"][current_season]["13"]["rankPoints"]
+            if j["rankedSeasons"][current_season]["13"]["matchesPlayed"] >= 10:
+                self.standard_rank = j["rankedSeasons"][current_season]["13"]["tier"]
+                self.standard_div = j["rankedSeasons"][current_season]["13"]["division"]
+            else:
+                self.standard_rank = None
+                self.standard_div = None
         # Solo Standard 3v3
-        self.solo_std_mmr = j["rankedSeasons"][current_season]["12"]["rankPoints"]
-        if j["rankedSeasons"][current_season]["12"]["matchesPlayed"] >= 10:
-            self.solo_std_rank = j["rankedSeasons"][current_season]["12"]["tier"]
-            self.solo_std_div = j["rankedSeasons"][current_season]["12"]["division"]
-        else:
-            self.solo_std_rank = None
-            self.solo_std_div = None
+        if "12" in j["rankedSeasons"][current_season]:
+            self.solo_std_mmr = j["rankedSeasons"][current_season]["12"]["rankPoints"]
+            if j["rankedSeasons"][current_season]["12"]["matchesPlayed"] >= 10:
+                self.solo_std_rank = j["rankedSeasons"][current_season]["12"]["tier"]
+                self.solo_std_div = j["rankedSeasons"][current_season]["12"]["division"]
+            else:
+                self.solo_std_rank = None
+                self.solo_std_div = None
 
 
 # If run as script, create all the tables in the db
