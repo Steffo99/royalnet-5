@@ -2,6 +2,7 @@ from flask import Flask
 from flask import session as flask_session
 from flask_openid import OpenID
 from db import session, Royal, Steam
+import requests
 import re
 
 # Init the config reader
@@ -29,11 +30,19 @@ def page_after_login(response):
         db_steam = Steam(royal_id=flask_session["royal_id"],
                          steam_id=steam_id)
         session.add(db_steam)
+        db_steam.update()
         session.commit()
         return "Account Steam collegato con successo!"
     else:
         return "Il tuo account Steam è già collegato."
 
 
+@app.route("/update/<int:royal_id>")
+def page_steam_update(royal_id):
+    db_steam = session.query(Steam).filter(Steam.royal_id == royal_id).first()
+    db_steam.update()
+    return "Dati account aggiornati."
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=config["Steam"]["flask_port"])
+    app.run(host="0.0.0.0", port="1234")

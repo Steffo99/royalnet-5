@@ -1,6 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, create_engine
+import requests
+from errors import RequestError
+import re
 
 # Init the config reader
 import configparser
@@ -56,6 +59,8 @@ class Steam(Base):
     royal = relationship("Royal")
 
     steam_id = Column(String, primary_key=True)
+    persona_name = Column(String)
+    avatar_hex = Column(String)
 
     def __repr__(self):
         return f"<Steam {self.steam_id}>"
@@ -66,6 +71,13 @@ class Steam(Base):
         else:
             return self.steam_id
 
+    def update(self):
+        r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={self.steam_id}")
+        if r.status_code != 200:
+            raise RequestError(f"Steam returned {r.status_code}")
+        j = r.json()
+        self.persona_name = j["response"]["players"][0]["personaname"]
+        self.avatar_hex = re.search("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
