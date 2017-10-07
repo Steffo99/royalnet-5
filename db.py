@@ -61,6 +61,7 @@ class Steam(Base):
     steam_id = Column(String, primary_key=True)
     persona_name = Column(String)
     avatar_hex = Column(String)
+    trade_token = Column(String)
 
     def __repr__(self):
         return f"<Steam {self.steam_id}>"
@@ -114,9 +115,11 @@ class RocketLeague(Base):
         rl = session.query(RocketLeague).filter(RocketLeague.steam_id == steam_id).first()
         if rl is not None:
             return None
-        r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={steam_id}&platform_id=1")
-        if r.status_code != 200:
+        r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={str(steam_id)}&platform_id=1")
+        if r.status_code == 404:
             return None
+        elif r.status_code == 500:
+            raise RequestError("Rocket League Stats returned {r.status_code}")
         new_record = RocketLeague(steam_id=steam_id)
         new_record.update()
         return new_record
