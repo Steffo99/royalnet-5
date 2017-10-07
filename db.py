@@ -72,6 +72,22 @@ class Steam(Base):
         else:
             return self.steam_id
 
+    def steam_id_1(self):
+        return self.steam_id
+
+    def steam_id_2(self):
+        # Got this code from a random github gist. It could be completely wrong.
+        z = (int(self.steam_id) - 76561197960265728) // 2
+        y = int(self.steam_id) % 2
+        return f"STEAM_0:{y}:{z}"
+
+    def steam_id_3(self, full=False):
+        # Got this code from a random github gist. It could be completely wrong.
+        if full:
+            return f"[U:1:{int(self.steam_id) - 76561197960265728}]"
+        else:
+            return f"{int(self.steam_id) - 76561197960265728}"
+
     def update(self):
         r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={self.steam_id}")
         if r.status_code != 200:
