@@ -1,3 +1,4 @@
+import time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, Enum, create_engine
@@ -33,7 +34,7 @@ class Royal(Base):
 class Telegram(Base):
     __tablename__ = "telegram"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal")
 
     telegram_id = Column(BigInteger, primary_key=True)
@@ -56,7 +57,7 @@ class Telegram(Base):
 class Steam(Base):
     __tablename__ = "steam"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal")
 
     steam_id = Column(String, primary_key=True)
@@ -172,10 +173,12 @@ class RocketLeague(Base):
         for season in data["rankedSeasons"]:
             if int(season) > current_season:
                 current_season = int(season)
-        self.season = current_season
         if current_season == 0:
             return
+        self.season = current_season
         current_season = str(current_season)
+        # Get wins
+        self.wins = data["stats"]["wins"]
         # Get ranked data
         # Single 1v1
         if "10" in data["rankedSeasons"][current_season]:
@@ -285,7 +288,7 @@ class RomanNumerals(enum.Enum):
 class LeagueOfLegends(Base):
     __tablename__ = "leagueoflegends"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal")
 
     summoner_id = Column(BigInteger, primary_key=True)
@@ -366,6 +369,71 @@ class LeagueOfLegends(Base):
             self.twtr_rank = None
 
 
+class Osu(Base):
+    __tablename__ = "osu"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal")
+
+    osu_id = Column(Integer, primary_key=True)
+    osu_name = Column(String)
+
+    std_pp = Column(Float)
+    taiko_pp = Column(Float)
+    catch_pp = Column(Float)
+    mania_pp = Column(Float)
+
+    @staticmethod
+    def get_or_create(royal_id, osu_name):
+        o = session.query(Osu).filter(Osu.royal_id == royal_id).first()
+        if o is not None:
+            return o
+        r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=0")
+        r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=1")
+        r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=2")
+        r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=3")
+        if r0.status_code != 200 or r1.status_code != 200 or r2.status_code != 200 or r3.status_code != 200:
+            raise RequestError(f"Osu! API returned an error ({r0.status_code} {r1.status_code} {r2.status_code} {r3.status_code})")
+        j0 = r0.json()[0]
+        j1 = r1.json()[0]
+        j2 = r2.json()[0]
+        j3 = r3.json()[0]
+        new_record = Osu(royal_id=royal_id,
+                         osu_id=j0["user_id"],
+                         osu_name=j0["username"],
+                         std_pp=j0["pp_raw"],
+                         taiko_pp=j1["pp_raw"],
+                         catch_pp=j2["pp_raw"],
+                         mania_pp=j3["pp_raw"])
+        return new_record
+
+    def update(self):
+        r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=0")
+        r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=1")
+        r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=2")
+        r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=3")
+        if r0.status_code != 200 or r1.status_code != 200 or r2.status_code != 200 or r3.status_code != 200:
+            raise RequestError(
+                f"Osu! API returned an error ({r0.status_code} {r1.status_code} {r2.status_code} {r3.status_code})")
+        j0 = r0.json()[0]
+        j1 = r1.json()[0]
+        j2 = r2.json()[0]
+        j3 = r3.json()[0]
+        self.osu_name = j0["username"]
+        self.std_pp = j0["pp_raw"]
+        self.taiko_pp = j1["pp_raw"]
+        self.catch_pp = j2["pp_raw"]
+        self.mania_pp = j3["pp_raw"]
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
+    for player in session.query(Royal).all():
+        name = input(f"{player}: ")
+        if name == "":
+            continue
+        o = Osu.get_or_create(player.id, name)
+        print(o)
+        session.add(o)
+    session.commit()
