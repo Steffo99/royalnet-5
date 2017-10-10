@@ -257,7 +257,7 @@ class Dota(Base):
         if r.status_code != 200:
             raise RequestError("OpenDota returned {r.status_code}")
         data = r.json()
-        r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(steam_id)}/wl")
+        r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}/wl")
         if r.status_code != 200:
             raise RequestError("OpenDota returned {r.status_code}")
         wl = r.json()
@@ -408,10 +408,10 @@ class Osu(Base):
         return new_record
 
     def update(self):
-        r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=0")
-        r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=1")
-        r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=2")
-        r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=3")
+        r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=0")
+        r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=1")
+        r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=2")
+        r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=3")
         if r0.status_code != 200 or r1.status_code != 200 or r2.status_code != 200 or r3.status_code != 200:
             raise RequestError(
                 f"Osu! API returned an error ({r0.status_code} {r1.status_code} {r2.status_code} {r3.status_code})")
@@ -429,11 +429,3 @@ class Osu(Base):
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
-    for player in session.query(Royal).all():
-        name = input(f"{player}: ")
-        if name == "":
-            continue
-        o = Osu.get_or_create(player.id, name)
-        print(o)
-        session.add(o)
-    session.commit()
