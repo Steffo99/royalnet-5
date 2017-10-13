@@ -1,0 +1,70 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Username
+            </th>
+            <th>
+                Singolo <small>1v1</small>
+            </th>
+            <th>
+                Doppio <small>2v2</small>
+            </th>
+            <th>
+                Standard <small>3v3</small>
+            </th>
+            <th>
+                Solo Standard <small>Solo 3v3</small>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in query %}
+            <tr>
+                <td class="rl-name">
+                    {{ record[0] }}
+                </td>
+                <td>
+                    {% if record[1] %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record[1] }}.png">
+                        <span class="rl-mmr">
+                            {{ record[3] }}
+                        </span>
+                    {% else %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record[4] %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record[4] }}.png">
+                        <span class="rl-mmr">
+                            {{ record[6] }}
+                        </span>
+                    {% else %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record[7] %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record[7] }}.png">
+                        <span class="rl-mmr">
+                            {{ record[9] }}
+                        </span>
+                    {% else %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record[10] %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record[10] }}.png">
+                        <span class="rl-mmr">
+                            {{ record[12] }}
+                        </span>
+                    {% else %}
+                        <img class="rl-rank" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
