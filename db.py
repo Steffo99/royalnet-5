@@ -1,7 +1,7 @@
 import time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, Enum, create_engine
+from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint
 import requests
 from errors import RequestError, NotFoundError
 import re
@@ -26,6 +26,13 @@ class Royal(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
+
+    @staticmethod
+    def get_or_create(username):
+        r = session.query(Royal).filter_by(username=username).first()
+        if r is not None:
+            return r
+        return Royal(username=username)
 
     def __repr__(self):
         return f"<Royal {self.username}>"
@@ -61,8 +68,8 @@ class Steam(Base):
     royal = relationship("Royal")
 
     steam_id = Column(String, primary_key=True)
-    persona_name = Column(String)
-    avatar_hex = Column(String)
+    persona_name = Column(String, nullable=False)
+    avatar_hex = Column(String, nullable=False)
     trade_token = Column(String)
 
     def __repr__(self):
@@ -88,12 +95,12 @@ class Steam(Base):
         s = Steam(royal_id=royal_id,
                   steam_id=steam_id,
                   persona_name=j["response"]["players"][0]["personaname"],
-                  avatar_hex=re.search("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1))
+                  avatar_hex=re.search(r"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1))
         return s
 
     @staticmethod
     def find_trade_token(trade_url):
-        return re.search("https://steamcommunity\.com/tradeoffer/new/\?partner=[0-9]+&token=(.{8})", trade_url).group(1)
+        return re.search(r"https://steamcommunity\.com/tradeoffer/new/\?partner=[0-9]+&token=(.{8})", trade_url).group(1)
 
     @staticmethod
     def to_steam_id_2(steam_id):
@@ -116,7 +123,7 @@ class Steam(Base):
             raise RequestError(f"Steam returned {r.status_code}")
         j = r.json()
         self.persona_name = j["response"]["players"][0]["personaname"]
-        self.avatar_hex = re.search("https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
+        self.avatar_hex = re.search(r"https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
 
 
 class RocketLeague(Base):
@@ -227,8 +234,8 @@ class Dota(Base):
     solo_mmr = Column(Integer)
     party_mmr = Column(Integer)
 
-    wins = Column(Integer)
-    losses = Column(Integer)
+    wins = Column(Integer, nullable=False)
+    losses = Column(Integer, nullable=False)
 
     @staticmethod
     def get_or_create(steam_id):
@@ -292,7 +299,7 @@ class LeagueOfLegends(Base):
     royal = relationship("Royal")
 
     summoner_id = Column(BigInteger, primary_key=True)
-    summoner_name = Column(String)
+    summoner_name = Column(String, nullable=False)
 
     level = Column(Integer, nullable=False)
     solo_division = Column(Enum(LeagueOfLegendsRanks))
@@ -372,11 +379,11 @@ class LeagueOfLegends(Base):
 class Osu(Base):
     __tablename__ = "osu"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal")
 
     osu_id = Column(Integer, primary_key=True)
-    osu_name = Column(String)
+    osu_name = Column(String, nullable=False)
 
     std_pp = Column(Float)
     taiko_pp = Column(Float)
@@ -385,7 +392,7 @@ class Osu(Base):
 
     @staticmethod
     def get_or_create(royal_id, osu_name):
-        o = session.query(Osu).filter(Osu.royal_id == royal_id).first()
+        o = session.query(Osu).filter(Osu.osu_name == osu_name).first()
         if o is not None:
             return o
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=0")
@@ -425,6 +432,92 @@ class Osu(Base):
         self.catch_pp = j2["pp_raw"]
         self.mania_pp = j3["pp_raw"]
 
+
+class Discord(Base):
+    __tablename__ = "discord"
+    __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal = relationship("Royal")
+
+    discord_id = Column(BigInteger, primary_key=True)
+    name = Column(String, nullable=False)
+    discriminator = Column(Integer, nullable=False)
+    avatar_hex = Column(String)
+
+    def __str__(self):
+        return f"{self.username}#{self.discriminator}"
+
+    def __repr__(self):
+        return f"<Discord user {self.id}>"
+
+    def mention(self):
+        return f"<@{self.id}>"
+
+    def avatar_url(self, size=256):
+        if self.avatar_hex is None:
+            return "https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png"
+        return f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png?size={size}"
+
+
+class Overwatch(Base):
+    __tablename__ = "overwatch"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal = relationship("Royal")
+
+    battletag = Column(String, primary_key=True)
+    discriminator = Column(Integer, primary_key=True)
+    icon = Column(String, nullable=False)
+
+    level = Column(Integer, nullable=False)
+    rank = Column(Integer)
+
+    def __str__(self, separator="#"):
+        return f"{self.battletag}{separator}{self.discriminator}"
+
+    def __repr__(self):
+        return f"<Overwatch {self}>"
+
+    @staticmethod
+    def get_or_create(royal_id, battletag, discriminator=None):
+        if discriminator is None:
+            battletag, discriminator = battletag.split("#", 1)
+        o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
+        if o is not None:
+            return o
+        r = requests.get(f"https://owapi.net/api/v3/u/{battletag}-{discriminator}/stats", headers={
+            "User-Agent": "Royal-Bot/4.0",
+            "From": "ste.pigozzi@gmail.com"
+        })
+        if r.status_code != 200:
+            raise RequestError(f"OWAPI.net returned {r.status_code}")
+        try:
+            j = r.json()["eu"]["stats"]["quickplay"]["overall_stats"]
+        except TypeError:
+            raise RequestError("Something went wrong when retrieving the stats.")
+        o = Overwatch(royal_id=royal_id,
+                      battletag=battletag,
+                      discriminator=discriminator,
+                      icon=re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1),
+                      level=j["prestige"] * 100 + j["level"],
+                      rank=j["comprank"])
+        return o
+
+    def update(self):
+        r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
+            "User-Agent": "Royal-Bot/4.0",
+            "From": "ste.pigozzi@gmail.com"
+        })
+        if r.status_code != 200:
+            raise RequestError(f"OWAPI.net returned {r.status_code}")
+        try:
+            j = r.json()["eu"]["stats"]["quickplay"]["overall_stats"]
+        except TypeError:
+            raise RequestError("Something went wrong when retrieving the stats.")
+        self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
+        self.level = j["prestige"] * 100 + j["level"]
+        self.rank = j["comprank"]
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
