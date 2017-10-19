@@ -1,4 +1,5 @@
 import time
+import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint
@@ -518,6 +519,42 @@ class Overwatch(Base):
         self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
         self.level = j["prestige"] * 100 + j["level"]
         self.rank = j["comprank"]
+
+
+class Diario(Base):
+    __tablename__ = "diario"
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, nullable=False)
+    saver_id = Column(Integer, ForeignKey("telegram.telegram_id"))
+    saver = relationship("Telegram", foreign_keys=saver_id)
+    author_id = Column(Integer, ForeignKey("telegram.telegram_id"))
+    author = relationship("Telegram", foreign_keys=author_id)
+    text = Column(String)
+
+    def __repr__(self):
+        return f"<Diario {self.id}>"
+
+    def __str__(self):
+        return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
+
+    @staticmethod
+    def import_from_json(file):
+        import json
+        file = open(file, "r")
+        j = json.load(file)
+        for entry in j:
+            if "sender" in entry:
+                author = session.query(Telegram).filter_by(username=entry["sender"].lstrip("@")).first()
+            else:
+                author = None
+            d = Diario(timestamp=datetime.datetime.fromtimestamp(float(entry["timestamp"])),
+                       author=author,
+                       text=entry["text"])
+            print(d)
+            session.add(d)
+        session.commit()
+
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
