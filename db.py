@@ -21,7 +21,6 @@ Session = sessionmaker(bind=engine)
 # Create a new default session
 session = Session()
 
-
 class Royal(Base):
     __tablename__ = "royals"
 
@@ -81,6 +80,9 @@ class Steam(Base):
             return self.persona_name
         else:
             return self.steam_id
+
+    def avatar_url(self):
+        return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/{self.avatar_hex}.jpg"
 
     @staticmethod
     def get_or_create(royal_id, steam_id):
@@ -505,6 +507,9 @@ class Overwatch(Base):
                       rank=j["comprank"])
         return o
 
+    def icon_url(self):
+        return f"https://d1u1mce87gyfbn.cloudfront.net/game/unlocks/{self.icon}.png"
+
     def update(self):
         r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
             "User-Agent": "Royal-Bot/4.0",
@@ -559,3 +564,4 @@ class Diario(Base):
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
+    session.close()

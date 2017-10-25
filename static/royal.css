@@ -1,0 +1,55 @@
+body {
+    background-color: #ff7f00;
+    color: black;
+}
+
+table {
+    background-color: #fff2cd !important;
+    border-radius: 5px;
+}
+
+.table td, .table th {
+    border: none !important;
+}
+
+table.rl {
+    background: linear-gradient(to bottom,rgba(35,91,139,.5),rgba(16,54,84,.5)),linear-gradient(to right,rgba(35,91,139,.7),rgba(16,54,84,.7)) !important;
+    border-radius: 6px !important;
+    border: none !important;
+    padding: 12px !important;
+    color: white !important;
+}
+
+.rl-rank-hidden {
+    display: none;
+}
+
+.rl-rank-text {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.rl-rank-division {
+    font-size: 9px;
+}
+
+.thirtytwo {
+    width: 32px;
+    height: 32px;
+}
+
+.round {
+    border-radius: 16px;
+}
+
+.slightly-round {
+    border-radius: 2px;
+}
+
+.rl-rank-number {
+    line-height: 14px;
+}
+
+.rl-unranked {
+    color: grey;
+}
