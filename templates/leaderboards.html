@@ -27,7 +27,7 @@
                 {% for record in dota_data %}
                     <tr>
                         <td>{{ record.steam.royal.username }}</td>
-                        <td><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</td>
+                        <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
                         <td>{{ record.wins }}</td>
                         <td>{{ record.solo_mmr if record.solo_mmr is not none}}</td>
                         <td>{{ record.party_mmr if record.party_mmr is not none}}</td>
@@ -53,7 +53,7 @@
                 {% for record in rl_data %}
                     <tr>
                         <td>{{ record.steam.royal.username }}</td>
-                        <td><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</td>
+                        <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
                         <td class="rl-rank" sorttable_customkey="{{ record.single_mmr if record.single_mmr is not none }}">
                             {% if record.single_rank is not none %}
                                 <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.single_rank }}.png">
