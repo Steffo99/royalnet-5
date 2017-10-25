@@ -53,3 +53,7 @@ table.rl {
 .rl-unranked {
     color: grey;
 }
+
+th {
+    cursor: pointer !important;
+}

@@ -11,13 +11,13 @@ else:
     db.session.add(steam)
 try:
     dota = db.Dota.get_or_create(steam.steam_id)
-except KeyboardInterrupt:
+except:
     pass
 else:
     db.session.add(dota)
 try:
     rl = db.RocketLeague.get_or_create(steam.steam_id)
-except KeyboardInterrupt:
+except:
     pass
 else:
     db.session.add(rl)
