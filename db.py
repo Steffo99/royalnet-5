@@ -7,6 +7,7 @@ import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
 import enum
+from discord import User as DiscordUser
 
 # Init the config reader
 import configparser
@@ -452,7 +453,25 @@ class Discord(Base):
         return f"{self.username}#{self.discriminator}"
 
     def __repr__(self):
-        return f"<Discord user {self.id}>"
+        return f"<Discord user {self.discord_id}>"
+
+    @staticmethod
+    def create(royal_username, discord_user: DiscordUser):
+        d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
+        if d is not None:
+            raise AlreadyExistingError(repr(d))
+        r = session.query(Royal).filter(Royal.username == royal_username).first()
+        if r is None:
+            raise NotFoundError("No Royal exists with that username")
+        d = session.query(Discord).filter(Discord.royal_id == r.id).first()
+        if d is not None:
+            raise AlreadyExistingError(repr(d))
+        d = Discord(royal=r,
+                    discord_id=discord_user.id,
+                    name=discord_user.name,
+                    discriminator=discord_user.discriminator,
+                    avatar_hex=discord_user.avatar)
+        return d
 
     def mention(self):
         return f"<@{self.id}>"
