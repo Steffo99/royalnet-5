@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, BigInteger, Integer, String, Numeric, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint
 import requests
-from errors import RequestError, NotFoundError
+from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
 import enum
 
@@ -28,10 +28,10 @@ class Royal(Base):
     username = Column(String, unique=True, nullable=False)
 
     @staticmethod
-    def get_or_create(username):
+    def create(username):
         r = session.query(Royal).filter_by(username=username).first()
         if r is not None:
-            return r
+            raise AlreadyExistingError(repr(r))
         return Royal(username=username)
 
     def __repr__(self):
@@ -85,10 +85,10 @@ class Steam(Base):
         return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/{self.avatar_hex}.jpg"
 
     @staticmethod
-    def get_or_create(royal_id, steam_id):
+    def create(royal_id, steam_id):
         s = session.query(Steam).get(steam_id)
         if s is not None:
-            return s
+            raise AlreadyExistingError(repr(s))
         r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={steam_id}")
         if r.status_code != 200:
             raise RequestError(f"Steam returned {r.status_code}")
@@ -159,10 +159,10 @@ class RocketLeague(Base):
         return f"<RocketLeague {self.steam_id}>"
 
     @staticmethod
-    def get_or_create(steam_id):
+    def create(steam_id):
         rl = session.query(RocketLeague).get(steam_id)
         if rl is not None:
-            return rl
+            raise AlreadyExistingError(repr(rl))
         r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={str(steam_id)}&platform_id=1")
         if r.status_code == 404:
             raise NotFoundError("The specified user has never played Rocket League")
@@ -241,10 +241,10 @@ class Dota(Base):
     losses = Column(Integer, nullable=False)
 
     @staticmethod
-    def get_or_create(steam_id):
+    def create(steam_id):
         d = session.query(Dota).get(steam_id)
         if d is not None:
-            return d
+            raise AlreadyExistingError(repr(d))
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(steam_id)}")
         if r.status_code != 200:
             raise RequestError("OpenDota returned {r.status_code}")
@@ -313,7 +313,7 @@ class LeagueOfLegends(Base):
     twtr_rank = Column(Enum(RomanNumerals))
 
     @staticmethod
-    def get_or_create(royal_id, summoner_name=None, summoner_id=None):
+    def create(royal_id, summoner_name=None, summoner_id=None):
         if summoner_name:
             lol = session.query(LeagueOfLegends).filter(LeagueOfLegends.summoner_name == summoner_name).first()
         elif summoner_id:
@@ -321,7 +321,7 @@ class LeagueOfLegends(Base):
         else:
             raise SyntaxError("Neither summoner_name or summoner_id are specified")
         if lol is not None:
-            return lol
+            raise AlreadyExistingError(repr(lol))
         # Get the summoner_id
         if summoner_name:
             r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/by-name/{summoner_name}?api_key={config['League of Legends']['riot_api_key']}")
@@ -394,10 +394,10 @@ class Osu(Base):
     mania_pp = Column(Float)
 
     @staticmethod
-    def get_or_create(royal_id, osu_name):
+    def create(royal_id, osu_name):
         o = session.query(Osu).filter(Osu.osu_name == osu_name).first()
         if o is not None:
-            return o
+            raise AlreadyExistingError(repr(o))
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=0")
         r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=1")
         r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={osu_name}&m=2")
@@ -483,12 +483,12 @@ class Overwatch(Base):
         return f"<Overwatch {self}>"
 
     @staticmethod
-    def get_or_create(royal_id, battletag, discriminator=None):
+    def create(royal_id, battletag, discriminator=None):
         if discriminator is None:
             battletag, discriminator = battletag.split("#", 1)
         o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
         if o is not None:
-            return o
+            raise AlreadyExistingError(repr(o))
         r = requests.get(f"https://owapi.net/api/v3/u/{battletag}-{discriminator}/stats", headers={
             "User-Agent": "Royal-Bot/4.0",
             "From": "ste.pigozzi@gmail.com"

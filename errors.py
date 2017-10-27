@@ -3,3 +3,6 @@ class RequestError(Exception):
 
 class NotFoundError(Exception):
     pass
+
+class AlreadyExistingError(Exception):
+    pass

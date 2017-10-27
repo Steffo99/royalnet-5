@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from db import session, Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends
+from db import session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends
 
 app = Flask(__name__)
 
@@ -16,5 +16,8 @@ def page_leaderboards():
     return render_template("leaderboards.html", dota_data=dota_data, rl_data=rl_data, ow_data=ow_data, osu_data=osu_data, lol_data=lol_data)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1234, debug=True)
+    try:
+        app.run(host="0.0.0.0", port=1234, debug=True)
+    except KeyboardInterrupt:
+        pass
     session.close()
