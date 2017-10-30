@@ -8,6 +8,7 @@ from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
 import enum
 from discord import User as DiscordUser
+from telegram import User as TelegramUser
 
 # Init the config reader
 import configparser
@@ -19,9 +20,6 @@ engine = create_engine(config["Database"]["database_uri"])
 Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
 
-# Create a new default session
-session = Session()
-
 class Royal(Base):
     __tablename__ = "royals"
 
@@ -29,7 +27,7 @@ class Royal(Base):
     username = Column(String, unique=True, nullable=False)
 
     @staticmethod
-    def create(username):
+    def create(session: Session, username: str):
         r = session.query(Royal).filter_by(username=username).first()
         if r is not None:
             raise AlreadyExistingError(repr(r))
@@ -49,6 +47,24 @@ class Telegram(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String)
     username = Column(String)
+
+    @staticmethod
+    def create(session: Session, royal_username, telegram_user: TelegramUser):
+        t = session.query(Telegram).filter_by(telegram_id=telegram_user.id).first()
+        if t is not None:
+            raise AlreadyExistingError(repr(t))
+        r = session.query(Royal).filter(Royal.username == royal_username).first()
+        if r is None:
+            raise NotFoundError("No Royal exists with that username")
+        t = session.query(Telegram).filter(Telegram.royal_id == r.id).first()
+        if t is not None:
+            raise AlreadyExistingError(repr(t))
+        return Telegram(royal=r,
+                        telegram_id=telegram_user.id,
+                        first_name=telegram_user.first_name,
+                        last_name=telegram_user.last_name,
+                        username=telegram_user.username)
+
 
     def __repr__(self):
         return f"<Telegram {self.id}>"
@@ -86,7 +102,7 @@ class Steam(Base):
         return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/{self.avatar_hex}.jpg"
 
     @staticmethod
-    def create(royal_id, steam_id):
+    def create(session: Session, royal_id: int, steam_id: str):
         s = session.query(Steam).get(steam_id)
         if s is not None:
             raise AlreadyExistingError(repr(s))
@@ -160,7 +176,7 @@ class RocketLeague(Base):
         return f"<RocketLeague {self.steam_id}>"
 
     @staticmethod
-    def create(steam_id):
+    def create(session: Session, steam_id: str):
         rl = session.query(RocketLeague).get(steam_id)
         if rl is not None:
             raise AlreadyExistingError(repr(rl))
@@ -242,7 +258,7 @@ class Dota(Base):
     losses = Column(Integer, nullable=False)
 
     @staticmethod
-    def create(steam_id):
+    def create(session: Session, steam_id: int):
         d = session.query(Dota).get(steam_id)
         if d is not None:
             raise AlreadyExistingError(repr(d))
@@ -314,7 +330,7 @@ class LeagueOfLegends(Base):
     twtr_rank = Column(Enum(RomanNumerals))
 
     @staticmethod
-    def create(royal_id, summoner_name=None, summoner_id=None):
+    def create(session: Session, royal_id, summoner_name=None, summoner_id=None):
         if summoner_name:
             lol = session.query(LeagueOfLegends).filter(LeagueOfLegends.summoner_name == summoner_name).first()
         elif summoner_id:
@@ -395,7 +411,7 @@ class Osu(Base):
     mania_pp = Column(Float)
 
     @staticmethod
-    def create(royal_id, osu_name):
+    def create(session: Session, royal_id, osu_name):
         o = session.query(Osu).filter(Osu.osu_name == osu_name).first()
         if o is not None:
             raise AlreadyExistingError(repr(o))
@@ -456,7 +472,7 @@ class Discord(Base):
         return f"<Discord user {self.discord_id}>"
 
     @staticmethod
-    def create(royal_username, discord_user: DiscordUser):
+    def create(session: Session, royal_username, discord_user: DiscordUser):
         d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
         if d is not None:
             raise AlreadyExistingError(repr(d))
@@ -502,7 +518,7 @@ class Overwatch(Base):
         return f"<Overwatch {self}>"
 
     @staticmethod
-    def create(royal_id, battletag, discriminator=None):
+    def create(session: Session, royal_id, battletag, discriminator=None):
         if discriminator is None:
             battletag, discriminator = battletag.split("#", 1)
         o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
@@ -565,6 +581,7 @@ class Diario(Base):
     @staticmethod
     def import_from_json(file):
         import json
+        session = Session()
         file = open(file, "r")
         j = json.load(file)
         for entry in j:
@@ -578,9 +595,9 @@ class Diario(Base):
             print(d)
             session.add(d)
         session.commit()
+        session.close()
 
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
-    session.close()
