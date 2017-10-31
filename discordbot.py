@@ -1,4 +1,5 @@
 import discord
+import discord.opus
 from discord.ext import commands
 import db
 import re
@@ -16,6 +17,9 @@ config.read("config.ini")
 
 # Init the discord bot
 client = discord.Client()
+discord.opus.load_opus("libopus-0.dll")
+voice_client = None
+voice_player = None
 
 @client.event
 async def on_message(message: discord.Message):
@@ -38,6 +42,28 @@ async def on_message(message: discord.Message):
             session.add(d)
             session.commit()
             await client.send_message(message.channel, "✅ Sincronizzazione completata!")
+        elif message.content.startswith("!cv") and discord.opus.is_loaded():
+            if message.author.voice.voice_channel is None:
+                await client.send_message(message.channel, "⚠ Non sei in nessun canale!")
+                return
+            global voice_client
+            voice_client = await client.join_voice_channel(message.author.voice.voice_channel)
+            await client.send_message(message.channel, f"✅ Mi sono connesso in <#{message.author.voice.voice_channel.id}>.")
+        elif message.content.startswith("!music"):
+            if voice_client is None or not voice_client.is_connected():
+                await client.send_message(message.channel, f"⚠ Il bot non è connesso in nessun canale.")
+                return
+            try:
+                url = message.content.split(" ", 1)[1]
+            except IndexError:
+                await client.send_message(message.channel, "⚠️ Non hai specificato un URL.")
+                return
+            new_voice_player = await voice_client.create_ytdl_player(url)
+            global voice_player
+            if voice_player is not None:
+                voice_player.stop()
+            voice_player = new_voice_player
+            voice_player.start()
     finally:
         session.close()
 

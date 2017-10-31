@@ -2,3 +2,4 @@ config.ini
 .idea/
 __pycache__
 diario.json
+libopus-0.dll
