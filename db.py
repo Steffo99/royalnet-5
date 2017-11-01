@@ -598,6 +598,25 @@ class Diario(Base):
         session.close()
 
 
+class CVMusic(Base):
+    __tablename__ = "cvmusic"
+
+    id = Column(BigInteger, primary_key=True)
+    title = Column(String, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
+
+    player_id = Column(Integer, ForeignKey("royals.id"))
+    player = relationship("Royal")
+
+    @staticmethod
+    def create_and_add(title: str, player_id: int):
+        session = Session()
+        session.add(CVMusic(title=title,
+                            timestamp=datetime.datetime.now(),
+                            player_id=player_id))
+        session.commit()
+        session.close()
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
