@@ -1,16 +1,13 @@
 import datetime
-
 import discord
 import discord.opus
 import functools
-from discord.ext import commands
 import db
-import re
 import errors
+import youtube_dl
 
 # Init the event loop
 import asyncio
-
 loop = asyncio.get_event_loop()
 
 # Init the config reader
@@ -23,12 +20,38 @@ client = discord.Client()
 discord.opus.load_opus("libopus-0.dll")
 voice_client = None
 voice_player = None
+voice_queue = asyncio.Queue()
 
 
 async def find_user(user: discord.User):
     session = await loop.run_in_executor(None, db.Session)
     user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).first)
     return user
+
+
+def create_music_embed(ytdl_data: dict):
+    embed = discord.Embed(type="rich",
+                          title=ytdl_data['title'] if 'title' in ytdl_data else None,
+                          url=ytdl_data['webpage_url'] if 'webpage_url' in ytdl_data else None,
+                          colour=discord.Colour(13375518))
+    # Uploader
+    if "uploader" in ytdl_data and ytdl_data["uploader"] is not None:
+        embed.set_author(name=ytdl_data["uploader"], url=ytdl_data["uploader_url"] if "uploader_url" in ytdl_data else None)
+    # Thumbnail
+    if "thumbnail" in ytdl_data:
+        embed.set_thumbnail(url=ytdl_data["thumbnail"])
+    # Duration
+    embed.add_field(name="Durata", value=str(datetime.timedelta(seconds=ytdl_data["duration"])))
+    # Views
+    if "view_count" in ytdl_data and ytdl_data["view_count"] is not None:
+        embed.add_field(name="Visualizzazioni", value="{:_}".format(ytdl_data["view_count"]).replace("_", " "))
+    # Likes
+    if "like_count" in ytdl_data and ytdl_data["like_count"] is not None:
+        embed.add_field(name="Mi piace", value="{:_}".format(ytdl_data["like_count"]).replace("_", " "))
+    # Dislikes
+    if "dislike_count" in ytdl_data and ytdl_data["dislike_count"] is not None:
+        embed.add_field(name="Non mi piace", value="{:_}".format(ytdl_data["dislike_count"]).replace("_", " "))
+    return embed
 
 
 @client.event
@@ -39,7 +62,8 @@ async def on_message(message: discord.Message):
         try:
             username = message.content.split(" ", 1)[1]
         except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato un username!")
+            await client.send_message(message.channel, "⚠️ Non hai specificato un username!\n"
+                                                       "Sintassi corretta: `!register <username_ryg>`")
             return
         try:
             d = db.Discord.create(session,
@@ -60,70 +84,72 @@ async def on_message(message: discord.Message):
         global voice_client
         voice_client = await client.join_voice_channel(message.author.voice.voice_channel)
         await client.send_message(message.channel, f"✅ Mi sono connesso in <#{message.author.voice.voice_channel.id}>.")
-    elif message.content.startswith("!play"):
-        # Display typing status
+    elif message.content.startswith("!madd"):
         await client.send_typing(message.channel)
-        # Check if the bot is connected to voice chat
-        if voice_client is None or not voice_client.is_connected():
-            await client.send_message(message.channel, f"⚠ Il bot non è connesso in nessun canale.")
-            return
-        # Get the URL from the message
+        # The bot should be in voice chat
+        if voice_client is None:
+            await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
+                                                       "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
+        # Find the sent url
         try:
             url = message.content.split(" ", 1)[1]
         except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato un URL.")
+            await client.send_message(message.channel, "⚠️ Non hai specificato un url!\n"
+                                                       "Sintassi corretta: `!madd <video>`")
             return
-        # Download the file and create a new voice player
-        new_voice_player = await voice_client.create_ytdl_player(url, ytdl_options={
-            "noplaylist": True
-        })
-        # Replace the old voice player with the new one
-        global voice_player
-        if voice_player is not None:
-            voice_player.stop()
-        voice_player = new_voice_player
-        # Start playing the music
-        voice_player.start()
-        # Create the video rich embed
-        embed = discord.Embed(type="rich",
-                              title=voice_player.title,
-                              url=voice_player.url,
-                              colour=discord.Colour(13375518))
-        embed.set_author(name=voice_player.uploader)
-        embed.add_field(name="Durata", value=str(datetime.timedelta(seconds=voice_player.duration)), inline=False)
-        if voice_player.views is not None:
-            embed.add_field(name="Visualizzazioni", value="{:_}".format(voice_player.views).replace("_", " "))
-        if voice_player.likes is not None:
-            embed.add_field(name="Mi piace", value="{:_}".format(voice_player.likes).replace("_", " "))
-        if voice_player.dislikes is not None:
-            embed.add_field(name="Non mi piace", value="{:_}".format(voice_player.dislikes).replace("_", " "))
-        # Send the embed in the chat channel where the command was sent
-        await client.send_message(message.channel, f"▶️ In riproduzione:", embed=embed)
-        # Find the message sender in the db
-        user = await find_user(message.author)
-        # Add the audio to the database
-        await loop.run_in_executor(None, functools.partial(db.CVMusic.create_and_add, voice_player.title, user.royal_id))
-    elif message.content.startswith("!pause"):
-        await client.send_typing(message.channel)
-        if voice_player is None:
-            await client.send_message(message.channel, f"⚠ Nessun file audio sta venendo attualmente riprodotto.")
+        # Se è una playlist, informa che potrebbe essere richiesto un po' di tempo
+        if "playlist" in url:
+            await client.send_message(message.channel, f"ℹ️ Hai inviato una playlist al bot.\n"
+                                                       f"L'elaborazione potrebbe richiedere un po' di tempo.")
+        # Extract the info from the url
+        try:
+            with youtube_dl.YoutubeDL({"quiet": True, "skip_download": True, "noplaylist": True, "format": "webm[abr>0]/bestaudio/best"}) as ytdl:
+                info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, url))
+        except youtube_dl.utils.DownloadError as e:
+            if "is not a valid URL" in str(e):
+                await client.send_message(message.channel, f"⚠️ Il link inserito non è valido.\n"
+                                                           f"Se vuoi cercare un video su YouTube, usa `!msearch <query>`")
             return
-        voice_player.pause()
-        await client.send_message(message.channel, f"⏸ Riproduzione messa in pausa.")
-    elif message.content.startswith("!resume"):
-        await client.send_typing(message.channel)
-        if voice_player is None:
-            await client.send_message(message.channel, f"⚠ Nessun file audio sta venendo attualmente riprodotto.")
-            return
-        voice_player.resume()
-        await client.send_message(message.channel, f"▶️ Riproduzione ripresa.")
-    elif message.content.startswith("!stop"):
-        await client.send_typing(message.channel)
-        if voice_player is None:
-            await client.send_message(message.channel, f"⚠ Nessun file audio sta venendo attualmente riprodotto.")
-            return
-        voice_player.stop()
-        await client.send_message(message.channel, f"⏹ Riproduzione interrotta.")
+        if "_type" not in info:
+            # If target is a single video
+            await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=create_music_embed(info))
+            voice_queue.put(info)
+        elif info["_type"] == "playlist":
+            # If target is a playlist
+            if len(info["entries"]) < 20:
+                for video in info["entries"]:
+                    await client.send_message(message.channel, f"✅ Aggiunto alla coda:",
+                                              embed=create_music_embed(video))
+                    voice_queue.put(video)
+            else:
+                await client.send_message(message.channel, f"ℹ La playlist contiene {len(info['entries'])} video.\n"
+                                                           f"Sei sicuro di volerli aggiungere alla coda?\n"
+                                                           f"Rispondi **sì** o **no**.\n"
+                                                           f"_(Il bot potrebbe crashare.)_")
+                answer = await client.wait_for_message(timeout=60, author=message.author, channel=message.channel)
+                if "sì" in answer.content.lower() or "si" in answer.content.lower():
+                    for video in info["entries"]:
+                        await client.send_message(message.channel, f"✅ Aggiunto alla coda:",
+                                                  embed=create_music_embed(video))
+                        voice_queue.put(video)
+                elif "no" in answer.content.lower():
+                    await client.send_message(message.channel, f"ℹ Operazione annullata.")
+                    return
+    elif message.content.startswith("!mstart"):
+        await update_music_queue()
+    elif message.content.startswith("!msearch"):
+        raise NotImplementedError()
+    elif message.content.startswith("!mskip"):
+        raise NotImplementedError()
+    elif message.content.startswith("!mpause"):
+        raise NotImplementedError()
+    elif message.content.startswith("!mresume"):
+        raise NotImplementedError()
+    elif message.content.startswith("!mcancel"):
+        raise NotImplementedError()
+    elif message.content.startswith("!mstop"):
+        raise NotImplementedError()
+
 
 async def update_users_pipe(users_connection):
     await client.wait_until_ready()
@@ -133,6 +159,24 @@ async def update_users_pipe(users_connection):
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
 
+
+async def update_music_queue():
+    # Get the last video in the queue
+    info = voice_queue.get()
+    # Download the video
+    with youtube_dl.YoutubeDL({"noplaylist": True,
+                               "format": "bestaudio",
+                               "postprocessors": [{
+                                   "key": 'FFmpegExtractAudio',
+                                   "preferredcodec": 'opus'
+                               }],
+                               "outtmpl": "music.%(ext)s"}) as ytdl:
+        info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, info["webpage_url"]))
+    # Play the video
+    global voice_player
+    voice_player = voice_client.create_ffmpeg_player(f"music.opus")
+    voice_player.start()
+    pass
 
 def process(users_connection):
     print("Discordbot starting...")
