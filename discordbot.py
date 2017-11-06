@@ -23,36 +23,66 @@ voice_player = None
 voice_queue = asyncio.Queue()
 
 
+class Video:
+    def __init__(self):
+        self.user = None
+        self.info = None
+        self.timestamp = None
+
+    @staticmethod
+    async def init(author, info, timestamp):
+        self = Video()
+        discord_user = await find_user(author)
+        self.user = discord_user.royal
+        self.info = info
+        self.timestamp = timestamp
+        return self
+
+    def add_to_db(self):
+        db.CVMusic.create_and_add(title=self.info["title"],
+                                  user=self.user,
+                                  timestamp=self.timestamp)
+        
+    def create_embed(self):
+        embed = discord.Embed(type="rich",
+                              title=self.info['title'] if 'title' in self.info else None,
+                              url=self.info['webpage_url'] if 'webpage_url' in self.info else None,
+                              colour=discord.Colour(13375518))
+        # Uploader
+        if "uploader" in self.info and self.info["uploader"] is not None:
+            embed.set_author(name=self.info["uploader"],
+                             url=self.info["uploader_url"] if "uploader_url" in self.info else None)
+        # Thumbnail
+        if "thumbnail" in self.info:
+            embed.set_thumbnail(url=self.info["thumbnail"])
+        # Duration
+        embed.add_field(name="Durata", value=str(datetime.timedelta(seconds=self.info["duration"])))
+        # Views
+        if "view_count" in self.info and self.info["view_count"] is not None:
+            embed.add_field(name="Visualizzazioni", value="{:_}".format(self.info["view_count"]).replace("_", " "))
+        # Likes
+        if "like_count" in self.info and self.info["like_count"] is not None:
+            embed.add_field(name="Mi piace", value="{:_}".format(self.info["like_count"]).replace("_", " "))
+        # Dislikes
+        if "dislike_count" in self.info and self.info["dislike_count"] is not None:
+            embed.add_field(name="Non mi piace", value="{:_}".format(self.info["dislike_count"]).replace("_", " "))
+        return embed
+
+    async def download(self):
+        with youtube_dl.YoutubeDL({"noplaylist": True,
+                                   "format": "bestaudio",
+                                   "postprocessors": [{
+                                       "key": 'FFmpegExtractAudio',
+                                       "preferredcodec": 'opus'
+                                   }],
+                                   "outtmpl": "music.%(ext)s"}) as ytdl:
+            info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, self.info["webpage_url"]))
+
+
 async def find_user(user: discord.User):
     session = await loop.run_in_executor(None, db.Session)
-    user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).first)
+    user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
     return user
-
-
-def create_music_embed(ytdl_data: dict):
-    embed = discord.Embed(type="rich",
-                          title=ytdl_data['title'] if 'title' in ytdl_data else None,
-                          url=ytdl_data['webpage_url'] if 'webpage_url' in ytdl_data else None,
-                          colour=discord.Colour(13375518))
-    # Uploader
-    if "uploader" in ytdl_data and ytdl_data["uploader"] is not None:
-        embed.set_author(name=ytdl_data["uploader"], url=ytdl_data["uploader_url"] if "uploader_url" in ytdl_data else None)
-    # Thumbnail
-    if "thumbnail" in ytdl_data:
-        embed.set_thumbnail(url=ytdl_data["thumbnail"])
-    # Duration
-    embed.add_field(name="Durata", value=str(datetime.timedelta(seconds=ytdl_data["duration"])))
-    # Views
-    if "view_count" in ytdl_data and ytdl_data["view_count"] is not None:
-        embed.add_field(name="Visualizzazioni", value="{:_}".format(ytdl_data["view_count"]).replace("_", " "))
-    # Likes
-    if "like_count" in ytdl_data and ytdl_data["like_count"] is not None:
-        embed.add_field(name="Mi piace", value="{:_}".format(ytdl_data["like_count"]).replace("_", " "))
-    # Dislikes
-    if "dislike_count" in ytdl_data and ytdl_data["dislike_count"] is not None:
-        embed.add_field(name="Non mi piace", value="{:_}".format(ytdl_data["dislike_count"]).replace("_", " "))
-    return embed
-
 
 @client.event
 async def on_message(message: discord.Message):
@@ -112,15 +142,16 @@ async def on_message(message: discord.Message):
             return
         if "_type" not in info:
             # If target is a single video
-            await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=create_music_embed(info))
-            voice_queue.put(info)
+            video = await Video.init(author=message.author, info=info, timestamp=datetime.datetime.now())
+            await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
+            await voice_queue.put(video)
         elif info["_type"] == "playlist":
             # If target is a playlist
             if len(info["entries"]) < 20:
-                for video in info["entries"]:
-                    await client.send_message(message.channel, f"✅ Aggiunto alla coda:",
-                                              embed=create_music_embed(video))
-                    voice_queue.put(video)
+                for single_info in info["entries"]:
+                    video = await Video.init(author=message.author, info=single_info, timestamp=datetime.datetime.now())
+                    await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
+                    await voice_queue.put(video)
             else:
                 await client.send_message(message.channel, f"ℹ La playlist contiene {len(info['entries'])} video.\n"
                                                            f"Sei sicuro di volerli aggiungere alla coda?\n"
@@ -128,15 +159,14 @@ async def on_message(message: discord.Message):
                                                            f"_(Il bot potrebbe crashare.)_")
                 answer = await client.wait_for_message(timeout=60, author=message.author, channel=message.channel)
                 if "sì" in answer.content.lower() or "si" in answer.content.lower():
-                    for video in info["entries"]:
-                        await client.send_message(message.channel, f"✅ Aggiunto alla coda:",
-                                                  embed=create_music_embed(video))
-                        voice_queue.put(video)
+                    for single_info in info["entries"]:
+                        video = await Video.init(author=message.author, info=single_info,
+                                                 timestamp=datetime.datetime.now())
+                        await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
+                        await voice_queue.put(video)
                 elif "no" in answer.content.lower():
                     await client.send_message(message.channel, f"ℹ Operazione annullata.")
                     return
-    elif message.content.startswith("!mstart"):
-        await update_music_queue()
     elif message.content.startswith("!msearch"):
         raise NotImplementedError()
     elif message.content.startswith("!mskip"):
@@ -161,24 +191,27 @@ async def update_users_pipe(users_connection):
 
 
 async def update_music_queue():
-    # Get the last video in the queue
-    info = voice_queue.get()
-    # Download the video
-    with youtube_dl.YoutubeDL({"noplaylist": True,
-                               "format": "bestaudio",
-                               "postprocessors": [{
-                                   "key": 'FFmpegExtractAudio',
-                                   "preferredcodec": 'opus'
-                               }],
-                               "outtmpl": "music.%(ext)s"}) as ytdl:
-        info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, info["webpage_url"]))
-    # Play the video
-    global voice_player
-    voice_player = voice_client.create_ffmpeg_player(f"music.opus")
-    voice_player.start()
-    pass
+    await client.wait_until_ready()
+    while True:
+        global voice_player
+        # Wait until there is nothing playing
+        if voice_player is None or voice_player.is_playing():
+            if voice_queue.qsize() == 0:
+                await asyncio.sleep(1)
+                continue
+        # Get the last video in the queue
+        video = await voice_queue.get()
+        # Download the video
+        await video.download()
+        # Play the video
+        voice_player = voice_client.create_ffmpeg_player(f"music.opus")
+        voice_player.start()
+        # Add the video to the db
+        await loop.run_in_executor(None, video.add_to_db)
+
 
 def process(users_connection):
     print("Discordbot starting...")
     loop.create_task(update_users_pipe(users_connection))
+    loop.create_task(update_music_queue())
     client.run(config["Discord"]["bot_token"])

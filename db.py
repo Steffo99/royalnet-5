@@ -605,15 +605,15 @@ class CVMusic(Base):
     title = Column(String, nullable=False)
     timestamp = Column(DateTime, nullable=False)
 
-    player_id = Column(Integer, ForeignKey("royals.id"))
-    player = relationship("Royal")
+    user_id = Column(Integer, ForeignKey("royals.id"))
+    user = relationship("Royal")
 
     @staticmethod
-    def create_and_add(title: str, player_id: int):
+    def create_and_add(title: str, user: Royal, timestamp: datetime):
         session = Session()
         session.add(CVMusic(title=title,
-                            timestamp=datetime.datetime.now(),
-                            player_id=player_id))
+                            timestamp=timestamp,
+                            user_id=user.id))
         session.commit()
         session.close()
 
