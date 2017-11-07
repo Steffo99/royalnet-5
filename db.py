@@ -602,17 +602,19 @@ class CVMusic(Base):
     __tablename__ = "cvmusic"
 
     id = Column(BigInteger, primary_key=True)
-    title = Column(String, nullable=False)
-    timestamp = Column(DateTime, nullable=False)
+    url = Column(String, nullable=False)
+    enqueued = Column(DateTime, nullable=False)
+    started = Column(DateTime, nullable=False)
 
     user_id = Column(Integer, ForeignKey("royals.id"))
     user = relationship("Royal")
 
     @staticmethod
-    def create_and_add(title: str, user: Royal, timestamp: datetime):
+    def create_and_add(url: str, user: Royal, enqueued: datetime.datetime, started: datetime.datetime):
         session = Session()
-        session.add(CVMusic(title=title,
-                            timestamp=timestamp,
+        session.add(CVMusic(url=url,
+                            enqueued=enqueued,
+                            started=started,
                             user_id=user.id))
         session.commit()
         session.close()
