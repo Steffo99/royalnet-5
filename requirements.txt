@@ -1,0 +1,6 @@
+discord.py
+python-telegram-bot
+flask
+sqlalchemy
+youtube-dl
+requests

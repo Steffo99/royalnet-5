@@ -611,13 +611,16 @@ class CVMusic(Base):
 
     @staticmethod
     def create_and_add(url: str, user: Royal, enqueued: datetime.datetime, started: datetime.datetime):
-        session = Session()
-        session.add(CVMusic(url=url,
-                            enqueued=enqueued,
-                            started=started,
-                            user_id=user.id))
-        session.commit()
-        session.close()
+        try:
+            session = Session()
+            session.add(CVMusic(url=url,
+                                enqueued=enqueued,
+                                started=started,
+                                user_id=user.id))
+            session.commit()
+            session.close()
+        except Exception as e:
+            print(f"ERRORE CVMusic: {e}")
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":

@@ -2,6 +2,9 @@ import datetime
 import discord
 import discord.opus
 import functools
+
+import sys
+
 import db
 import errors
 import youtube_dl
@@ -95,6 +98,14 @@ async def find_user(user: discord.User):
     user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
     return user
 
+def on_error(event, *args, **kwargs):
+    print(f"ERRORE CRITICO NELL'EVENTO `{event}`\n"
+          f"Il bot si è chiuso per prevenire altri errori.\n"
+          f"Dettagli dell'errore:\n"
+          f"{sys.exc_info()}")
+    sys.exit(1)
+
+
 @client.event
 async def on_message(message: discord.Message):
     global voice_queue
@@ -130,12 +141,13 @@ async def on_message(message: discord.Message):
         else:
             voice_client = await client.join_voice_channel(message.author.voice.voice_channel)
         await client.send_message(message.channel, f"✅ Mi sono connesso in <#{message.author.voice.voice_channel.id}>.")
-    elif message.content.startswith("!madd"):
+    elif message.content.startswith("!play"):
         await client.send_typing(message.channel)
         # The bot should be in voice chat
         if voice_client is None:
             await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
                                                        "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
+            return
         # Find the sent url
         try:
             url = message.content.split(" ", 1)[1]
@@ -158,14 +170,14 @@ async def on_message(message: discord.Message):
             return
         if "_type" not in info:
             # If target is a single video
-            video = await Video.init(author=message.author, info=info, timestamp=datetime.datetime.now(), channel=message.channel)
+            video = await Video.init(author=message.author, info=info, enqueued=datetime.datetime.now(), channel=message.channel)
             await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
             voice_queue.append(video)
         elif info["_type"] == "playlist":
             # If target is a playlist
             if len(info["entries"]) < 20:
                 for single_info in info["entries"]:
-                    video = await Video.init(author=message.author, info=single_info, timestamp=datetime.datetime.now(), channel=message.channel)
+                    video = await Video.init(author=message.author, info=single_info, enqueued=datetime.datetime.now(), channel=message.channel)
                     await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
                     voice_queue.append(video)
             else:
@@ -177,18 +189,19 @@ async def on_message(message: discord.Message):
                 if "sì" in answer.content.lower() or "si" in answer.content.lower():
                     for single_info in info["entries"]:
                         video = await Video.init(author=message.author, info=single_info,
-                                                 timestamp=datetime.datetime.now(), channel=message.channel)
+                                                 enqueued=datetime.datetime.now(), channel=message.channel)
                         await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
                         voice_queue.append(video)
                 elif "no" in answer.content.lower():
                     await client.send_message(message.channel, f"ℹ Operazione annullata.")
                     return
-    elif message.content.startswith("!msearch"):
+    elif message.content.startswith("!search"):
         await client.send_typing(message.channel)
         # The bot should be in voice chat
         if voice_client is None:
             await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
                                                        "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
+            return
         # Find the sent text
         try:
             text = message.content.split(" ", 1)[1]
@@ -208,32 +221,32 @@ async def on_message(message: discord.Message):
         video = await Video.init(author=message.author, info=info["entries"][0], enqueued=datetime.datetime.now(), channel=message.channel)
         await client.send_message(message.channel, f"✅ Aggiunto alla coda:", embed=video.create_embed())
         voice_queue.append(video)
-    elif message.content.startswith("!mskip"):
+    elif message.content.startswith("!skip"):
         global voice_player
         voice_player.stop()
         voice_player = None
         await client.send_message(message.channel, f"⏩ Video saltato.")
-    elif message.content.startswith("!mpause"):
+    elif message.content.startswith("!pause"):
         if voice_player is None or not voice_player.is_playing():
             await client.send_message(message.channel, f"⚠️ Non è in corso la riproduzione di un video, pertanto non c'è niente da pausare.")
             return
         voice_player.pause()
         await client.send_message(message.channel, f"⏸ Riproduzione messa in pausa.\n"
                                                    f"Riprendi con `!mresume`.")
-    elif message.content.startswith("!mresume"):
+    elif message.content.startswith("!resume"):
         if voice_player is None or voice_player.is_playing():
             await client.send_message(message.channel, f"⚠️ Non c'è nulla in pausa da riprendere!")
             return
         voice_player.resume()
         await client.send_message(message.channel, f"▶️ Riproduzione ripresa.")
-    elif message.content.startswith("!mcancel"):
+    elif message.content.startswith("!cancel"):
         try:
             video = voice_queue.pop()
         except IndexError:
             await client.send_message(message.channel, f"⚠ La playlist è vuota.")
             return
         await client.send_message(message.channel, f"❌ Rimosso dalla playlist:", embed=video.create_embed())
-    elif message.content.startswith("!mstop"):
+    elif message.content.startswith("!stop"):
         if voice_player is None:
             await client.send_message(message.channel, f"⚠ Non c'è nulla da interrompere!")
             return
@@ -241,6 +254,28 @@ async def on_message(message: discord.Message):
         voice_player.stop()
         voice_player = None
         await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
+    elif message.content.startswith("!np"):
+        if voice_player is None:
+            await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
+            return
+        voice_queue = []
+        voice_player.stop()
+        voice_player = None
+        await client.send_message(message.channel, f"ℹ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
+    elif message.content.startswith("!queue"):
+        if voice_player is None:
+            await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
+            return
+        to_send = ""
+        to_send += f"0. {voice_playing.info['title'] if voice_playing.info['title'] is not None else '_Senza titolo_'} - <{voice_playing.info['webpage_url'] if voice_playing.info['webpage_url'] is not None else ''}>\n"
+        for n, video in enumerate(voice_queue):
+            to_send += f"{n+1}. {video.info['title'] if video.info['title'] is not None else '_Senza titolo_'} - <{video.info['webpage_url'] if video.info['webpage_url'] is not None else ''}>\n"
+            if len(to_send) >= 2000:
+                to_send = to_send[0:1997] + "..."
+                break
+        await client.send_message(message.channel, to_send)
+    elif __debug__ and message.content.startswith("!exception"):
+        raise Exception("sei un mostro")
 
 
 async def update_users_pipe(users_connection):
@@ -256,17 +291,22 @@ async def update_music_queue():
     await client.wait_until_ready()
     while True:
         global voice_player
+        global voice_playing
         # Wait until there is nothing playing
         if voice_client is not None and voice_player is not None and (voice_player.is_playing() and not voice_player.is_done()):
             await asyncio.sleep(1)
             continue
         if len(voice_queue) == 0:
+            if voice_playing is not None:
+                # Set the playing status
+                voice_playing = None
+                await client.change_presence()
             await asyncio.sleep(1)
             continue
         # Get the last video in the queue
         video = voice_queue.pop(0)
         # Notify the chat of the download
-        await client.send_message(video.channel, f"ℹ E' iniziato il download di:", embed=video.create_embed())
+        await client.send_message(video.channel, f"ℹ E' iniziato il download della prossima canzone.")
         # Download the video
         await video.download()
         # Play the video
@@ -274,15 +314,16 @@ async def update_music_queue():
         voice_player.start()
         # Notify the chat of the start
         await client.send_message(video.channel, f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=video.create_embed())
+        # Set the playing status
+        voice_playing = video
+        await client.change_presence(game=discord.Game(name=video.info.get("title"), type=2))
         # Add the video to the db
-        try:
-            await loop.run_in_executor(None, functools.partial(video.add_to_db, started=datetime.datetime.now()))
-        except sqlalchemy.exc.OperationalError:
-            await client.send_message(video.channel, f"⚠ Ehi, <@77703771181817856>, il database si è rotto. Vallo a sistemare!")
+        await loop.run_in_executor(None, functools.partial(video.add_to_db, started=datetime.datetime.now()))
 
 
 def process(users_connection):
     print("Discordbot starting...")
     loop.create_task(update_users_pipe(users_connection))
     loop.create_task(update_music_queue())
+    client.on_error = on_error
     client.run(config["Discord"]["bot_token"])

@@ -20,6 +20,17 @@ table.rl {
     color: white !important;
 }
 
+table.dota {
+    background-color: #2e2d45 !important;
+    border: none !important;
+    padding: 12px !important;
+    color: white !important;
+}
+
+th.dota {
+    border-bottom: 4px solid #6BF !important;
+}
+
 .rl-rank-hidden {
     display: none;
 }
