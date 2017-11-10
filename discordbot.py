@@ -2,9 +2,7 @@ import datetime
 import discord
 import discord.opus
 import functools
-
 import sys
-
 import db
 import errors
 import youtube_dl
@@ -84,7 +82,8 @@ class Video:
                                            "key": 'FFmpegExtractAudio',
                                            "preferredcodec": 'opus'
                                        }],
-                                       "outtmpl": "music.%(ext)s"}) as ytdl:
+                                       "outtmpl": "music.%(ext)s",
+                                       "quiet": True}) as ytdl:
                 info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, self.info["webpage_url"]))
         except Exception as e:
             client.send_message(self.channel, f"⚠ Errore durante il download del video:\n"
@@ -98,12 +97,28 @@ async def find_user(user: discord.User):
     user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
     return user
 
-def on_error(event, *args, **kwargs):
-    print(f"ERRORE CRITICO NELL'EVENTO `{event}`\n"
-          f"Il bot si è chiuso per prevenire altri errori.\n"
-          f"Dettagli dell'errore:\n"
-          f"{sys.exc_info()}")
+
+async def on_error(event, *args, **kwargs):
+    type, exception, traceback = sys.exc_info()
+    try:
+        await client.send_message(client.get_channel("368447084518572034"), f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
+              f"Il bot si è chiuso per prevenire altri errori.\n\n"
+              f"Dettagli dell'errore:\n"
+              f"```python\n"
+              f"{repr(exception)}\n"
+              f"```")
+        await client.change_presence(status=discord.Status.invisible)
+        await client.close()
+    except Exception as e:
+        print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n" + repr(sys.exc_info()))
+    loop.stop()
     sys.exit(1)
+
+
+@client.event
+async def on_ready():
+    await client.send_message(client.get_channel("368447084518572034"), f"ℹ Bot avviato e pronto a ricevere comandi!")
+    await client.change_presence(game=None, status=discord.Status.online)
 
 
 @client.event
@@ -275,7 +290,7 @@ async def on_message(message: discord.Message):
                 break
         await client.send_message(message.channel, to_send)
     elif __debug__ and message.content.startswith("!exception"):
-        raise Exception("sei un mostro")
+        raise Exception("!exception was called")
 
 
 async def update_users_pipe(users_connection):
