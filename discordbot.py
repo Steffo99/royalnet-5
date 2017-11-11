@@ -1,4 +1,5 @@
 import datetime
+import random
 import discord
 import discord.opus
 import functools
@@ -6,7 +7,6 @@ import sys
 import db
 import errors
 import youtube_dl
-import sqlalchemy.exc
 
 # Init the event loop
 import asyncio
@@ -17,6 +17,18 @@ import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+# Find the latest git tag
+import subprocess
+import os
+old_wd = os.getcwd()
+try:
+    os.chdir(os.path.dirname(__file__))
+    version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
+except:
+    version = "v???"
+finally:
+    os.chdir(old_wd)
+
 # Init the discord bot
 client = discord.Client()
 discord.opus.load_opus("libopus-0.dll")
@@ -24,6 +36,7 @@ voice_client = None
 voice_player = None
 voice_queue = []
 voice_playing = None
+
 
 
 class Video:
@@ -51,13 +64,13 @@ class Video:
         
     def create_embed(self):
         embed = discord.Embed(type="rich",
-                              title=self.info['title'] if 'title' in self.info else None,
-                              url=self.info['webpage_url'] if 'webpage_url' in self.info else None,
+                              title=self.info.get("title"),
+                              url=self.info.get("webpage_url"),
                               colour=discord.Colour(13375518))
         # Uploader
-        if "uploader" in self.info and self.info["uploader"] is not None:
+        if self.info.get("uploader"):
             embed.set_author(name=self.info["uploader"],
-                             url=self.info["uploader_url"] if "uploader_url" in self.info else None)
+                             url=self.info.get("uploader_url"))
         # Thumbnail
         if "thumbnail" in self.info:
             embed.set_thumbnail(url=self.info["thumbnail"])
@@ -107,6 +120,7 @@ async def on_error(event, *args, **kwargs):
               f"```python\n"
               f"{repr(exception)}\n"
               f"```")
+        await voice_client.disconnect()
         await client.change_presence(status=discord.Status.invisible)
         await client.close()
     except Exception as e:
@@ -117,7 +131,7 @@ async def on_error(event, *args, **kwargs):
 
 @client.event
 async def on_ready():
-    await client.send_message(client.get_channel("368447084518572034"), f"ℹ Bot avviato e pronto a ricevere comandi!")
+    await client.send_message(client.get_channel("368447084518572034"), f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
     await client.change_presence(game=None, status=discord.Status.online)
 
 
@@ -145,7 +159,7 @@ async def on_message(message: discord.Message):
         session.commit()
         session.close()
         await client.send_message(message.channel, "✅ Sincronizzazione completata!")
-    elif message.content.startswith("!cv") and discord.opus.is_loaded():
+    elif message.content.startswith("!cv"):
         await client.send_typing(message.channel)
         if message.author.voice.voice_channel is None:
             await client.send_message(message.channel, "⚠ Non sei in nessun canale!")
@@ -168,7 +182,7 @@ async def on_message(message: discord.Message):
             url = message.content.split(" ", 1)[1]
         except IndexError:
             await client.send_message(message.channel, "⚠️ Non hai specificato un url!\n"
-                                                       "Sintassi corretta: `!madd <video>`")
+                                                       "Sintassi corretta: `!play <video>`")
             return
         # Se è una playlist, informa che potrebbe essere richiesto un po' di tempo
         if "playlist" in url:
@@ -181,7 +195,12 @@ async def on_message(message: discord.Message):
         except youtube_dl.utils.DownloadError as e:
             if "is not a valid URL" in str(e) or "Unsupported URL" in str(e):
                 await client.send_message(message.channel, f"⚠️ Il link inserito non è valido.\n"
-                                                           f"Se vuoi cercare un video su YouTube, usa `!msearch <query>`")
+                                                           f"Se vuoi cercare un video su YouTube, usa `!search <query>`")
+            else:
+                await client.send_message(message.channel, f"⚠ Errore:\n"
+                                                           f"```\n"
+                                                           f"{e}"
+                                                           f"```")
             return
         if "_type" not in info:
             # If target is a single video
@@ -222,7 +241,7 @@ async def on_message(message: discord.Message):
             text = message.content.split(" ", 1)[1]
         except IndexError:
             await client.send_message(message.channel, "⚠️ Non hai specificato il titolo!\n"
-                                                       "Sintassi corretta: `!msearch <titolo>`")
+                                                       "Sintassi corretta: `!search <titolo>`")
             return
         # Extract the info from the url
         try:
@@ -247,7 +266,7 @@ async def on_message(message: discord.Message):
             return
         voice_player.pause()
         await client.send_message(message.channel, f"⏸ Riproduzione messa in pausa.\n"
-                                                   f"Riprendi con `!mresume`.")
+                                                   f"Riprendi con `!resume`.")
     elif message.content.startswith("!resume"):
         if voice_player is None or voice_player.is_playing():
             await client.send_message(message.channel, f"⚠️ Non c'è nulla in pausa da riprendere!")
@@ -289,6 +308,27 @@ async def on_message(message: discord.Message):
                 to_send = to_send[0:1997] + "..."
                 break
         await client.send_message(message.channel, to_send)
+    elif message.content.startswith("!cast"):
+        try:
+            spell = message.content.split(" ", 1)[1]
+        except IndexError:
+            await client.send_message("⚠️ Non hai specificato nessun incantesimo!\n"
+                                      "Sintassi corretta: `!cast <nome_incantesimo>`")
+            return
+        target = random.sample(list(message.server.members), 1)[0]
+        # Seed the rng with the spell name
+        # so that spells always deal the same damage
+        random.seed(spell)
+        dmg_mod = random.randrange(-2, 3)
+        dmg_dice = random.randrange(1, 4)
+        dmg_max = random.sample([4, 6, 8, 10, 12, 20, 100], 1)[0]
+        # Reseed the rng with a random value
+        # so that the dice roll always deals a different damage
+        random.seed()
+        total = dmg_mod
+        for dice in range(0, dmg_dice):
+            total += random.randrange(1, dmg_max+1)
+        await client.send_message(message.channel, f"❇️ Ho lanciato **{spell}** su **{target.nick if target.nick is not None else target.name}** per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}=**{total if total > 0 else 0}** danni!")
     elif __debug__ and message.content.startswith("!exception"):
         raise Exception("!exception was called")
 
@@ -332,8 +372,6 @@ async def update_music_queue():
         # Set the playing status
         voice_playing = video
         await client.change_presence(game=discord.Game(name=video.info.get("title"), type=2))
-        # Add the video to the db
-        await loop.run_in_executor(None, functools.partial(video.add_to_db, started=datetime.datetime.now()))
 
 
 def process(users_connection):

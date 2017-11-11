@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends, CVMusic
+from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
@@ -18,14 +18,6 @@ def page_leaderboards():
     lol_data = session.query(LeagueOfLegends).options(joinedload(LeagueOfLegends.royal)).join(Royal).all()
     session.close()
     return render_template("leaderboards.html", dota_data=dota_data, rl_data=rl_data, ow_data=ow_data, osu_data=osu_data, lol_data=lol_data)
-
-
-@app.route("/music")
-def page_music():
-    session = Session()
-    top_plays = session.execute("SELECT cvmusic.url, COUNT(cvmusic.url) FROM cvmusic GROUP BY cvmusic.url ORDER BY COUNT(cvmusic.url);").fetchall()
-    session.close()
-    return render_template("music.html", top_plays=top_plays)
 
 
 if __name__ == "__main__":

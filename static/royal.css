@@ -27,8 +27,8 @@ table.dota {
     color: white !important;
 }
 
-th.dota {
-    border-bottom: 4px solid #6BF !important;
+table.dota th {
+    border-bottom: 1px solid #666 !important;
 }
 
 .rl-rank-hidden {
