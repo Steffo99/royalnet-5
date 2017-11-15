@@ -10,8 +10,6 @@ from discord import Status as DiscordStatus
 
 # Init the config reader
 import configparser
-
- = u.idle()
 config = configparser.ConfigParser()
 config.read("config.ini")
 

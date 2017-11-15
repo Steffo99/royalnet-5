@@ -7,6 +7,7 @@ import sys
 import db
 import errors
 import youtube_dl
+import os
 
 # Init the event loop
 import asyncio
@@ -55,12 +56,6 @@ class Video:
         self.enqueued = enqueued
         self.channel = channel
         return self
-
-    def add_to_db(self, started):
-        db.CVMusic.create_and_add(url=self.info["webpage_url"],
-                                  user=self.user,
-                                  enqueued=self.enqueued,
-                                  started=started)
         
     def create_embed(self):
         embed = discord.Embed(type="rich",
@@ -115,7 +110,7 @@ async def on_error(event, *args, **kwargs):
     type, exception, traceback = sys.exc_info()
     try:
         await client.send_message(client.get_channel("368447084518572034"), f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
-              f"Il bot si è chiuso per prevenire altri errori.\n\n"
+              f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n\n"
               f"Dettagli dell'errore:\n"
               f"```python\n"
               f"{repr(exception)}\n"
@@ -126,7 +121,8 @@ async def on_error(event, *args, **kwargs):
     except Exception as e:
         print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n" + repr(sys.exc_info()))
     loop.stop()
-    sys.exit(1)
+    os._exit(1)
+    pass
 
 
 @client.event
