@@ -10,6 +10,8 @@ from discord import Status as DiscordStatus
 
 # Init the config reader
 import configparser
+
+ = u.idle()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
@@ -127,4 +129,3 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
     u.start_polling()
-    u.idle()

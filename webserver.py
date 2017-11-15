@@ -1,7 +1,6 @@
 from flask import Flask, render_template
 from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func
 
 app = Flask(__name__)
 

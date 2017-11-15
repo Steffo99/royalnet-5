@@ -11,214 +11,227 @@
 <body>
     <div class="container">
         <h1>
-            Dota 2
+            Royal Games Leaderboards
         </h1>
-        <table id="dota" class="table table-hover sortable dota">
-            <thead>
-                <tr>
-                    <th>Royal</th>
-                    <th>Steam</th>
-                    <th>Wins</th>
-                    <th>Solo MMR</th>
-                    <th>Party MMR</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in dota_data %}
+        <div id="dota">
+            <h2>
+                Dota 2
+            </h2>
+            <table class="table table-hover sortable dota">
+                <thead>
                     <tr>
-                        <td>{{ record.steam.royal.username }}</td>
-                        <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
-                        <td>{{ record.wins }}</td>
-                        <td>{{ record.solo_mmr if record.solo_mmr is not none}}</td>
-                        <td>{{ record.party_mmr if record.party_mmr is not none}}</td>
+                        <th>Royal</th>
+                        <th>Steam</th>
+                        <th>Wins</th>
+                        <th>Solo MMR</th>
+                        <th>Party MMR</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h1>
-            Rocket League
-        </h1>
-        <table id="rl" class="table table-hover sortable rl">
-            <thead>
-                <tr>
-                    <th>Royal</th>
-                    <th>Steam</th>
-                    <th>Singolo <small>1v1</small></th>
-                    <th>Doppio <small>2v2</small></th>
-                    <th>Standard <small>3v3</small></th>
-                    <th>Solo Standard <small>SoloQ</small></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in rl_data %}
+                </thead>
+                <tbody>
+                    {% for record in dota_data %}
+                        <tr>
+                            <td>{{ record.steam.royal.username }}</td>
+                            <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
+                            <td>{{ record.wins }}</td>
+                            <td>{{ record.solo_mmr if record.solo_mmr is not none}}</td>
+                            <td>{{ record.party_mmr if record.party_mmr is not none}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="rl">
+            <h2>
+                Rocket League
+            </h2>
+            <table class="table table-hover sortable rl">
+                <thead>
                     <tr>
-                        <td>{{ record.steam.royal.username }}</td>
-                        <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
-                        <td class="rl-rank" sorttable_customkey="{{ record.single_mmr if record.single_mmr is not none }}">
-                            {% if record.single_rank is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.single_rank }}.png">
-                                <div class="rl-rank-text">
-                                    <div class="rl-rank-number">{{ record.single_mmr }}</div>
-                                    <div class="rl-rank-division">Div {{ record.single_div + 1 }}</div>
-                                </div>
-                            {% elif record.single_mmr is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
-                                <div class="rl-rank-text rl-unranked">
-                                    <div class="rl-rank-number">{{ record.single_mmr }}</div>
-                                    <div class="rl-rank-division">Inattivo</div>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td class="rl-rank" sorttable_customkey="{{ record.doubles_mmr if record.doubles_mmr is not none }}">
-                            {% if record.doubles_rank is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.doubles_rank }}.png">
-                                <div class="rl-rank-text">
-                                    <div class="rl-rank-number">{{ record.doubles_mmr }}</div>
-                                    <div class="rl-rank-division">Div {{ record.doubles_div + 1 }}</div>
-                                </div>
-                            {% elif record.doubles_mmr is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
-                                <div class="rl-rank-text rl-unranked">
-                                    <div class="rl-rank-number">{{ record.doubles_mmr }}</div>
-                                    <div class="rl-rank-division">Inattivo</div>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td class="rl-rank" sorttable_customkey="{{ record.standard_mmr if record.standard_mmr is not none }}">
-                            {% if record.standard_rank is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.standard_rank }}.png">
-                                <div class="rl-rank-text">
-                                    <div class="rl-rank-number">{{ record.standard_mmr }}</div>
-                                    <div class="rl-rank-division">Div {{ record.standard_div + 1 }}</div>
-                                </div>
-                            {% elif record.standard_mmr is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
-                                <div class="rl-rank-text rl-unranked">
-                                    <div class="rl-rank-number">{{ record.standard_mmr }}</div>
-                                    <div class="rl-rank-division">Inattivo</div>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td class="rl-rank" sorttable_customkey="{{ record.solo_std_mmr if record.solo_std_mmr is not none }}">
-                            {% if record.solo_std_rank is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.solo_std_rank }}.png">
-                                <div class="rl-rank-text">
-                                    <div class="rl-rank-number">{{ record.solo_std_mmr }}</div>
-                                    <div class="rl-rank-division">Div {{ record.solo_std_div + 1 }}</div>
-                                </div>
-                            {% elif record.solo_std_mmr is not none %}
-                                <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
-                                <div class="rl-rank-text rl-unranked">
-                                    <div class="rl-rank-number">{{ record.solo_std_mmr }}</div>
-                                    <div class="rl-rank-division">Inattivo</div>
-                                </div>
-                            {% endif %}
-                        </td>
+                        <th>Royal</th>
+                        <th>Steam</th>
+                        <th>Singolo <small>1v1</small></th>
+                        <th>Doppio <small>2v2</small></th>
+                        <th>Standard <small>3v3</small></th>
+                        <th>Solo Standard <small>SoloQ</small></th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h1>
-            Overwatch
-        </h1>
-        <table id="overwatch" class="table table-hover sortable">
-            <thead>
-                <tr>
-                    <th>Royal</th>
-                    <th>Battletag</th>
-                    <th>Livello</th>
-                    <th>Rank</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in ow_data %}
+                </thead>
+                <tbody>
+                    {% for record in rl_data %}
+                        <tr>
+                            <td>{{ record.steam.royal.username }}</td>
+                            <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
+                            <td class="rl-rank" sorttable_customkey="{{ record.single_mmr if record.single_mmr is not none }}">
+                                {% if record.single_rank is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.single_rank }}.png">
+                                    <div class="rl-rank-text">
+                                        <div class="rl-rank-number">{{ record.single_mmr }}</div>
+                                        <div class="rl-rank-division">Div {{ record.single_div + 1 }}</div>
+                                    </div>
+                                {% elif record.single_mmr is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                                    <div class="rl-rank-text rl-unranked">
+                                        <div class="rl-rank-number">{{ record.single_mmr }}</div>
+                                        <div class="rl-rank-division">Inattivo</div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="rl-rank" sorttable_customkey="{{ record.doubles_mmr if record.doubles_mmr is not none }}">
+                                {% if record.doubles_rank is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.doubles_rank }}.png">
+                                    <div class="rl-rank-text">
+                                        <div class="rl-rank-number">{{ record.doubles_mmr }}</div>
+                                        <div class="rl-rank-division">Div {{ record.doubles_div + 1 }}</div>
+                                    </div>
+                                {% elif record.doubles_mmr is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                                    <div class="rl-rank-text rl-unranked">
+                                        <div class="rl-rank-number">{{ record.doubles_mmr }}</div>
+                                        <div class="rl-rank-division">Inattivo</div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="rl-rank" sorttable_customkey="{{ record.standard_mmr if record.standard_mmr is not none }}">
+                                {% if record.standard_rank is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.standard_rank }}.png">
+                                    <div class="rl-rank-text">
+                                        <div class="rl-rank-number">{{ record.standard_mmr }}</div>
+                                        <div class="rl-rank-division">Div {{ record.standard_div + 1 }}</div>
+                                    </div>
+                                {% elif record.standard_mmr is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                                    <div class="rl-rank-text rl-unranked">
+                                        <div class="rl-rank-number">{{ record.standard_mmr }}</div>
+                                        <div class="rl-rank-division">Inattivo</div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="rl-rank" sorttable_customkey="{{ record.solo_std_mmr if record.solo_std_mmr is not none }}">
+                                {% if record.solo_std_rank is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{{ record.solo_std_rank }}.png">
+                                    <div class="rl-rank-text">
+                                        <div class="rl-rank-number">{{ record.solo_std_mmr }}</div>
+                                        <div class="rl-rank-division">Div {{ record.solo_std_div + 1 }}</div>
+                                    </div>
+                                {% elif record.solo_std_mmr is not none %}
+                                    <img class="thirtytwo" src="https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/0.png">
+                                    <div class="rl-rank-text rl-unranked">
+                                        <div class="rl-rank-number">{{ record.solo_std_mmr }}</div>
+                                        <div class="rl-rank-division">Inattivo</div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="overwatch">
+            <h2>
+                Overwatch
+            </h2>
+            <table class="table table-hover sortable">
+                <thead>
                     <tr>
-                        <td>{{ record.royal.username }}</td>
-                        <td><a href="https://playoverwatch.com/en-us/career/pc/eu/{{ record.__str__(separator='-') }}"><img class="thirtytwo slightly-round" src="{{ record.icon_url() }}"> {{ record }}</a></td>
-                        <td>{{ record.level }}</td>
-                        <td>
-                            {% if record.rank is not none %}
-                                <img class="thirtytwo" src="https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/season-2/rank-
-                                {% if record.rank < 1500 %}1
-                                {% elif record.rank < 2000 %}2
-                                {% elif record.rank < 2500 %}3
-                                {% elif record.rank < 3000 %}4
-                                {% elif record.rank < 3500 %}5
-                                {% elif record.rank < 4000 %}6
-                                {% endif %}.png">
-                                {{ record.rank }}
+                        <th>Royal</th>
+                        <th>Battletag</th>
+                        <th>Livello</th>
+                        <th>Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in ow_data %}
+                        <tr>
+                            <td>{{ record.royal.username }}</td>
+                            <td><a href="https://playoverwatch.com/en-us/career/pc/eu/{{ record.__str__(separator='-') }}"><img class="thirtytwo slightly-round" src="{{ record.icon_url() }}"> {{ record }}</a></td>
+                            <td>{{ record.level }}</td>
+                            <td>
+                                {% if record.rank is not none %}
+                                    <img class="thirtytwo" src="https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/season-2/rank-
+                                    {% if record.rank < 1500 %}1
+                                    {% elif record.rank < 2000 %}2
+                                    {% elif record.rank < 2500 %}3
+                                    {% elif record.rank < 3000 %}4
+                                    {% elif record.rank < 3500 %}5
+                                    {% elif record.rank < 4000 %}6
+                                    {% endif %}.png">
+                                    {{ record.rank }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="osu">
+            <h2>
+                Osu!
+            </h2>
+            <table class="table table-hover sortable">
+                <thead>
+                    <tr>
+                        <th>Royal</th>
+                        <th>Username</th>
+                        <th>osu!</th>
+                        <th>osu!taiko</th>
+                        <th>osu!catch</th>
+                        <th>osu!mania</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in osu_data %}
+                        <tr>
+                            <td>{{ record.royal.username }}</td>
+                            <td><a href="https://osu.ppy.sh/users/{{ record.osu_id }}"><img class="thirtytwo" src="https://a.ppy.sh/{{ record.osu_id }}"> {{ record.osu_name }}</a></td>
+                            <td sorttable_customkey="{{ record.std_pp }}">{{ record.std_pp|round(0, "floor")|int if record.std_pp is not none and record.std_pp >= 1 }}</td>
+                            <td sorttable_customkey="{{ record.taiko_pp }}">{{ record.taiko_pp|round(0, "floor")|int if record.taiko_pp is not none and record.taiko_pp >= 1 }}</td>
+                            <td sorttable_customkey="{{ record.catch_pp }}">{{ record.catch_pp|round(0, "floor")|int if record.catch_pp is not none and record.catch_pp >= 1 }}</td>
+                            <td sorttable_customkey="{{ record.mania_pp }}">{{ record.mania_pp|round(0, "floor")|int if record.mania_pp is not none and record.mania_pp >= 1 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="league">
+            <h2>
+                League of Legends
+            </h2>
+            <table class="table table-hover sortable">
+                <thead>
+                    <tr>
+                        <th>Royal</th>
+                        <th>Summoner</th>
+                        <th>Livello</th>
+                        <th>Solo <small>SR</small></th>
+                        <th>Flex <small>SR</small></th>
+                        <th>Flex <small>TT</small></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in lol_data %}
+                        <tr>
+                            <td>{{ record.royal.username }}</td>
+                            <td><img class="thirtytwo round" src="http://avatar.leagueoflegends.com/EUW1/{{ record.summoner_name }}.png"> {{ record.summoner_name }}</td>
+                            <td>{{ record.level }}</td>
+                            {% if record.solo_division is not none %}
+                                <td sorttable_customkey="{{ (record.solo_division.value + 1) * 6 - record.solo_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.solo_division.name|lower + "_" + record.solo_rank.name|lower + ".png") }}"> {{ record.solo_division.name|capitalize }} {{ record.solo_rank.name }}</td>
+                            {% else %}
+                                <td></td>
                             {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h1>
-            Osu!
-        </h1>
-        <table id="osu" class="table table-hover sortable">
-            <thead>
-                <tr>
-                    <th>Royal</th>
-                    <th>Username</th>
-                    <th>osu!</th>
-                    <th>osu!taiko</th>
-                    <th>osu!catch</th>
-                    <th>osu!mania</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in osu_data %}
-                    <tr>
-                        <td>{{ record.royal.username }}</td>
-                        <td><a href="https://osu.ppy.sh/users/{{ record.osu_id }}"><img class="thirtytwo" src="https://a.ppy.sh/{{ record.osu_id }}"> {{ record.osu_name }}</a></td>
-                        <td sorttable_customkey="{{ record.std_pp }}">{{ record.std_pp|round(0, "floor")|int if record.std_pp is not none and record.std_pp >= 1 }}</td>
-                        <td sorttable_customkey="{{ record.taiko_pp }}">{{ record.taiko_pp|round(0, "floor")|int if record.taiko_pp is not none and record.taiko_pp >= 1 }}</td>
-                        <td sorttable_customkey="{{ record.catch_pp }}">{{ record.catch_pp|round(0, "floor")|int if record.catch_pp is not none and record.catch_pp >= 1 }}</td>
-                        <td sorttable_customkey="{{ record.mania_pp }}">{{ record.mania_pp|round(0, "floor")|int if record.mania_pp is not none and record.mania_pp >= 1 }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h1>
-            League of Legends
-        </h1>
-        <table class="table table-hover sortable">
-            <thead>
-                <tr>
-                    <th>Royal</th>
-                    <th>Summoner</th>
-                    <th>Livello</th>
-                    <th>Solo <small>SR</small></th>
-                    <th>Flex <small>SR</small></th>
-                    <th>Flex <small>TT</small></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in lol_data %}
-                    <tr>
-                        <td>{{ record.royal.username }}</td>
-                        <td><img class="thirtytwo round" src="http://avatar.leagueoflegends.com/EUW1/{{ record.summoner_name }}.png"> {{ record.summoner_name }}</td>
-                        <td>{{ record.level }}</td>
-                        {% if record.solo_division is not none %}
-                            <td sorttable_customkey="{{ (record.solo_division.value + 1) * 6 - record.solo_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.solo_division.name|lower + "_" + record.solo_rank.name|lower + ".png") }}"> {{ record.solo_division.name|capitalize }} {{ record.solo_rank.name }}</td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                        {% if record.flex_division is not none %}
-                        <td sorttable_customkey="{{ (record.flex_division.value + 1) * 6 - record.flex_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.flex_division.name|lower + "_" + record.flex_rank.name|lower + ".png") }}"> {{ record.flex_division.name|capitalize }} {{ record.flex_rank.name }}</td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                        {% if record.twtr_division is not none %}
-                        <td sorttable_customkey="{{ (record.twtr_division.value + 1) * 6 - record.twtr_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.twtr_division.name|lower + "_" + record.twtr_rank.name|lower + ".png") }}"> {{ record.twtr_division.name|capitalize }} {{ record.twtr_rank.name }}</td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            {% if record.flex_division is not none %}
+                            <td sorttable_customkey="{{ (record.flex_division.value + 1) * 6 - record.flex_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.flex_division.name|lower + "_" + record.flex_rank.name|lower + ".png") }}"> {{ record.flex_division.name|capitalize }} {{ record.flex_rank.name }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            {% if record.twtr_division is not none %}
+                            <td sorttable_customkey="{{ (record.twtr_division.value + 1) * 6 - record.twtr_rank.value }}"><img class="thirtytwo" src="{{ url_for('static', filename='lol-rank-icons/' + record.twtr_division.name|lower + "_" + record.twtr_rank.name|lower + ".png") }}"> {{ record.twtr_division.name|capitalize }} {{ record.twtr_rank.name }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
