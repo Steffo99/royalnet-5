@@ -7,7 +7,6 @@ import sys
 import db
 import errors
 import youtube_dl
-import os
 
 # Init the event loop
 import asyncio
@@ -109,7 +108,7 @@ async def find_user(user: discord.User):
 async def on_error(event, *args, **kwargs):
     type, exception, traceback = sys.exc_info()
     try:
-        await client.send_message(client.get_channel("368447084518572034"), f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
               f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n\n"
               f"Dettagli dell'errore:\n"
               f"```python\n"
@@ -340,9 +339,9 @@ async def update_users_pipe(users_connection):
 
 async def update_music_queue():
     await client.wait_until_ready()
+    global voice_player
+    global voice_playing
     while True:
-        global voice_player
-        global voice_playing
         # Wait until there is nothing playing
         if voice_client is not None and voice_player is not None and (voice_player.is_playing() and not voice_player.is_done()):
             await asyncio.sleep(1)
