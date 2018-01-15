@@ -39,7 +39,7 @@ voice_queue = []
 voice_playing = None
 
 # Init the executor
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 class Video:
     def __init__(self):
@@ -289,9 +289,6 @@ async def on_message(message: discord.Message):
         if voice_player is None:
             await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
             return
-        voice_queue = []
-        voice_player.stop()
-        voice_player = None
         await client.send_message(message.channel, f"ℹ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
     elif message.content.startswith("!queue"):
         if voice_player is None:
