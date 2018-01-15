@@ -7,6 +7,7 @@ import sys
 import db
 import errors
 import youtube_dl
+import concurrent.futures
 
 # Init the event loop
 import asyncio
@@ -37,7 +38,8 @@ voice_player = None
 voice_queue = []
 voice_playing = None
 
-
+# Init the executor
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
 class Video:
     def __init__(self):
@@ -91,7 +93,7 @@ class Video:
                                        }],
                                        "outtmpl": "music.%(ext)s",
                                        "quiet": True}) as ytdl:
-                info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, self.info["webpage_url"]))
+                info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.info["webpage_url"]))
         except Exception as e:
             client.send_message(self.channel, f"⚠ Errore durante il download del video:\n"
                                               f"```"
@@ -100,8 +102,8 @@ class Video:
 
 
 async def find_user(user: discord.User):
-    session = await loop.run_in_executor(None, db.Session)
-    user = await loop.run_in_executor(None, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
+    session = await loop.run_in_executor(executor, db.Session)
+    user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
     return user
 
 
@@ -136,7 +138,7 @@ async def on_message(message: discord.Message):
     global voice_player
     if message.content.startswith("!register"):
         await client.send_typing(message.channel)
-        session = await loop.run_in_executor(None, db.Session())
+        session = await loop.run_in_executor(executor, db.Session())
         try:
             username = message.content.split(" ", 1)[1]
         except IndexError:
@@ -186,7 +188,7 @@ async def on_message(message: discord.Message):
         # Extract the info from the url
         try:
             with youtube_dl.YoutubeDL({"quiet": True, "skip_download": True, "noplaylist": True, "format": "webm[abr>0]/bestaudio/best"}) as ytdl:
-                info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, url))
+                info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, url))
         except youtube_dl.utils.DownloadError as e:
             if "is not a valid URL" in str(e) or "Unsupported URL" in str(e):
                 await client.send_message(message.channel, f"⚠️ Il link inserito non è valido.\n"
@@ -241,7 +243,7 @@ async def on_message(message: discord.Message):
         # Extract the info from the url
         try:
             with youtube_dl.YoutubeDL({"quiet": True, "skip_download": True, "noplaylist": True, "format": "webm[abr>0]/bestaudio/best"}) as ytdl:
-                info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, f"ytsearch:{text}"))
+                info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, f"ytsearch:{text}"))
         except youtube_dl.utils.DownloadError as e:
             if "is not a valid URL" in str(e) or "Unsupported URL" in str(e):
                 await client.send_message(message.channel, f"⚠️ Il video ottenuto dalla ricerca non è valido. Prova a cercare qualcos'altro...")
@@ -331,7 +333,7 @@ async def on_message(message: discord.Message):
 async def update_users_pipe(users_connection):
     await client.wait_until_ready()
     while True:
-        msg = await loop.run_in_executor(None, users_connection.recv)
+        msg = await loop.run_in_executor(executor, users_connection.recv)
         if msg == "/cv":
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
@@ -369,9 +371,14 @@ async def update_music_queue():
         await client.change_presence(game=discord.Game(name=video.info.get("title"), type=2))
 
 
-def process(users_connection):
+def process(users_connection=None):
     print("Discordbot starting...")
-    loop.create_task(update_users_pipe(users_connection))
-    loop.create_task(update_music_queue())
+    if users_connection is not None:
+        asyncio.ensure_future(update_users_pipe(users_connection))
+    asyncio.ensure_future(update_music_queue())
     client.on_error = on_error
     client.run(config["Discord"]["bot_token"])
+
+
+if __name__ == "__main__":
+    process()
