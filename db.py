@@ -258,7 +258,7 @@ class Dota(Base):
 
     def get_rank_icon_url(self):
         if self.rank_tier is None or self.rank_tier < 10:
-            f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png"
+            return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png"
         return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{self.rank_tier - 10 // 6}.png"
 
     @staticmethod
