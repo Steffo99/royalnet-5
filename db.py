@@ -251,11 +251,15 @@ class Dota(Base):
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam")
 
-    solo_mmr = Column(Integer)
-    party_mmr = Column(Integer)
+    rank_tier = Column(Integer)
 
     wins = Column(Integer, nullable=False)
     losses = Column(Integer, nullable=False)
+
+    def get_rank_icon_url(self):
+        if self.rank_tier is None or self.rank_tier < 10:
+            f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png"
+        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{self.rank_tier - 10 // 6}.png"
 
     @staticmethod
     def create(session: Session, steam_id: int):
@@ -273,8 +277,7 @@ class Dota(Base):
             raise RequestError("OpenDota returned {r.status_code}")
         wl = r.json()
         new_record = Dota(steam_id=steam_id,
-                          solo_mmr=data["solo_competitive_rank"],
-                          party_mmr=data["competitive_rank"],
+                          rank_tier=data["rank_tier"],
                           wins=wl["win"],
                           losses=wl["lose"])
         return new_record
@@ -288,8 +291,7 @@ class Dota(Base):
         if r.status_code != 200:
             raise RequestError("OpenDota returned {r.status_code}")
         wl = r.json()
-        self.solo_mmr = data["solo_competitive_rank"]
-        self.party_mmr = data["competitive_rank"]
+        self.rank_tier = data["rank_tier"]
         self.wins = wl["win"]
         self.losses = wl["lose"]
 

@@ -51,41 +51,62 @@ def cmd_register(bot: Bot, update: Update):
 def cmd_discord(bot: Bot, update: Update):
     discord_connection.send("/cv")
     server_members = discord_connection.recv()
+    channels = {0:None}
+    members_in_channels = {0:[]}
     message = ""
+    # Find all the channels
     for member in server_members:
-        if member.status == DiscordStatus.offline and member.voice.voice_channel is None:
-            continue
-        if member.bot:
-            continue
-        # Online status emoji
-        if member.status == DiscordStatus.online:
-            message += "🔵 "
-        elif member.status == DiscordStatus.idle:
-            message += "⚫️ "
-        elif member.status == DiscordStatus.dnd:
-            message += "🔴 "
-        elif member.status == DiscordStatus.offline:
-            message += "⚪️ "
-        # Nickname
-        if member.nick is not None:
-            message += member.nick
-        else:
-            message += member.name
-        # Voice
         if member.voice.voice_channel is not None:
-            # Voice status
-            if member.voice.self_deaf:
-                message += f" | 🔇 {member.voice.voice_channel.name}"
-            elif member.voice.self_mute:
-                message += f" | 🔈 {member.voice.voice_channel.name}"
+            channel = members_in_channels.get(member.voice.voice_channel.id)
+            if channel is None:
+                members_in_channels[member.voice.voice_channel.id] = list()
+                channel = members_in_channels[member.voice.voice_channel.id]
+                channels[member.voice.voice_channel.id] = member.voice.voice_channel
+            channel.append(member)
+        else:
+            members_in_channels[0].append(member)
+    # Edit the message, sorted by channel
+    for channel in channels:
+        members_in_channels[channel].sort(key=lambda x: x.nick if x.nick is not None else x.name)
+        if channel == 0:
+            message += "Non in chat vocale:\n"
+        else:
+            message += f"In #{channels[channel].name}:\n"
+        for member in members_in_channels[channel]:
+            if member.status == DiscordStatus.offline and member.voice.voice_channel is None:
+                continue
+            if member.bot:
+                continue
+            # Online status emoji
+            if member.status == DiscordStatus.online:
+                message += "🔵 "
+            elif member.status == DiscordStatus.idle:
+                message += "⚫️ "
+            elif member.status == DiscordStatus.dnd:
+                message += "🔴 "
+            elif member.status == DiscordStatus.offline:
+                message += "⚪️ "
+            # Voice
+            if channel != 0:
+                # Voice status
+                if member.voice.self_deaf:
+                    message += f"🔇 "
+                elif member.voice.self_mute:
+                    message += f"🔈 "
+                else:
+                    message += f"🔊 "
+            # Nickname
+            if member.nick is not None:
+                message += member.nick
             else:
-                message += f" | 🔊 {member.voice.voice_channel.name}"
-        # Game or stream
-        if member.game is not None:
-            if member.game.type == 0:
-                message += f" | 🎮 {member.game.name}"
-            elif member.game.type == 1:
-                message += f" | 📡 [{member.game.name}]({member.game.url})"
+                message += member.name
+            # Game or stream
+            if member.game is not None:
+                if member.game.type == 0:
+                    message += f" | 🎮 {member.game.name}"
+                elif member.game.type == 1:
+                    message += f" | 📡 [{member.game.name}]({member.game.url})"
+            message += "\n"
         message += "\n"
     bot.send_message(update.message.chat.id, message, disable_web_page_preview=True, parse_mode="Markdown")
 

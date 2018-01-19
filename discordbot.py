@@ -289,7 +289,7 @@ async def on_message(message: discord.Message):
         if voice_player is None:
             await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
             return
-        await client.send_message(message.channel, f"ℹ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
+        await client.send_message(message.channel, f"▶️ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
     elif message.content.startswith("!queue"):
         if voice_player is None:
             await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")

@@ -23,8 +23,7 @@
                         <th>Royal</th>
                         <th>Steam</th>
                         <th>Wins</th>
-                        <th>Solo MMR</th>
-                        <th>Party MMR</th>
+                        <th>Rank</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,8 +32,7 @@
                             <td>{{ record.steam.royal.username }}</td>
                             <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
                             <td>{{ record.wins }}</td>
-                            <td>{{ record.solo_mmr if record.solo_mmr is not none}}</td>
-                            <td>{{ record.party_mmr if record.party_mmr is not none}}</td>
+                            <td><img src="{{ record.get_rank_icon_url() }}"</td>
                         </tr>
                     {% endfor %}
                 </tbody>
