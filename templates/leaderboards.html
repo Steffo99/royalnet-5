@@ -32,7 +32,7 @@
                             <td>{{ record.steam.royal.username }}</td>
                             <td><a href="http://steamcommunity.com/profiles/{{ record.steam.steam_id }}"><img src="{{ record.steam.avatar_url() }}"> {{ record.steam.persona_name }}</a></td>
                             <td>{{ record.wins }}</td>
-                            <td><img src="{{ record.get_rank_icon_url() }}"</td>
+                            <td><img sorttable_customkey={{ record.rank_tier }} class="thirtytwo" src="{{ record.get_rank_icon_url() }}"></td>
                         </tr>
                     {% endfor %}
                 </tbody>
