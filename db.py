@@ -257,9 +257,39 @@ class Dota(Base):
     losses = Column(Integer, nullable=False)
 
     def get_rank_icon_url(self):
+        # Rank icon is determined by the first digit of the rank tier
+        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{str(self.rank_tier)[0] if self.rank_tier is not None else '0'}.png"
+
+    def get_rank_stars_url(self):
+        # Rank stars are determined by the second digit of the rank tier
+        if self.rank_tier is None or str(self.rank_tier)[1] == "0":
+            return ""
+        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_star_{str(self.rank_tier)[1]}.png"
+
+    def get_rank_name(self):
+        # This should probably be an enum, but who cares
         if self.rank_tier is None or self.rank_tier < 10:
-            return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png"
-        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{self.rank_tier - 10 // 6}.png"
+            return "Unranked"
+        number = str(self.rank_tier)[0]
+        if number == "1":
+            return "Harald"
+        elif number == "2":
+            return "Guardian"
+        elif number == "3":
+            return "Crusader"
+        elif number == "4":
+            return "Archon"
+        elif number == "5":
+            return "Legend"
+        elif number == "6":
+            return "Ancient"
+        elif number == "7":
+            return "Divine"
+
+    def get_rank_number(self):
+        if self.rank_tier is None or self.rank_tier < 10:
+            return ""
+        return str(self.rank_tier)[1]
 
     @staticmethod
     def create(session: Session, steam_id: int):
