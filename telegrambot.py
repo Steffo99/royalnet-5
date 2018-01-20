@@ -152,6 +152,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
     u.start_polling()
+    u.idle()
 
 if __name__ == "__main__":
     process(None)
