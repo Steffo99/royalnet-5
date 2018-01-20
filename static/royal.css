@@ -34,6 +34,7 @@ table.dota th {
 .dota-rank-medal-stars {
     position: relative;
     left: -32px;
+    margin-right: -32px;
 }
 
 .rl-rank-hidden {

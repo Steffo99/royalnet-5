@@ -49,6 +49,9 @@ def cmd_register(bot: Bot, update: Update):
 
 
 def cmd_discord(bot: Bot, update: Update):
+    if discord_connection is None:
+        bot.send_message(update.message.chat.id, "⚠ Il bot non è sincronizzato con Discord al momento.")
+        return
     discord_connection.send("/cv")
     server_members = discord_connection.recv()
     channels = {0:None}
@@ -108,7 +111,7 @@ def cmd_discord(bot: Bot, update: Update):
                     message += f" | 📡 [{member.game.name}]({member.game.url})"
             message += "\n"
         message += "\n"
-    bot.send_message(update.message.chat.id, message, disable_web_page_preview=True, parse_mode="Markdown")
+    bot.send_message(update.message.chat.id, message, disable_web_page_preview=True)
 
 
 def cmd_cast(bot: Bot, update: Update):
@@ -141,10 +144,14 @@ def cmd_cast(bot: Bot, update: Update):
 
 def process(arg_discord_connection):
     print("Telegrambot starting...")
-    global discord_connection
-    discord_connection = arg_discord_connection
+    if arg_discord_connection is not None:
+        global discord_connection
+        discord_connection = arg_discord_connection
     u = Updater(config["Telegram"]["bot_token"])
     u.dispatcher.add_handler(CommandHandler("register", cmd_register))
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
     u.start_polling()
+
+if __name__ == "__main__":
+    process(None)
