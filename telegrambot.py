@@ -139,7 +139,7 @@ def cmd_cast(bot: Bot, update: Update):
     total = dmg_mod
     for dice in range(0, dmg_dice):
         total += random.randrange(1, dmg_max + 1)
-    bot.send_message(update.message.chat.id, f"❇️ Ho lanciato {spell} su {target.username if target.username is not None else target.first_name} per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}={total if total > 0 else 0} danni!")
+    bot.send_message(update.message.chat.id, f"❇️ Ho lanciato {spell} su @​{target.username if target.username is not None else target.first_name} per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}={total if total > 0 else 0} danni!")
 
 
 def process(arg_discord_connection):
