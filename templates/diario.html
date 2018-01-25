@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario - RYG</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+          integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='royal.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>
+            Diario Royal Games
+        </h1>
+        {% for entry in diario_data %}
+            <div id="diario-{{ entry.id }}" class="diario-entry">
+                <div class="row">
+                    <div class="col-6">
+                        {% if entry.author %}
+                            <div id="author-{{ entry.id }}" class="author-data diario-data">
+                                {{ entry.author.royal.username }}
+                            </div>
+                        {% endif %}
+                        {% if entry.saver %}
+                            <div id="saver-{{ entry.id }}" class="saver-data diario-data">
+                                {{ entry.saver.royal.username }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <div id="timestamp-{{ entry.id }}" class="timestamp-data diario-data">
+                            {{ entry.timestamp.ctime() }}
+                        </div>
+                    </div>
+                </div>
+                <div id="text-{{ entry.id }}" class="scatola">
+                    {{ entry.text }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

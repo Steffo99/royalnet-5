@@ -41,7 +41,7 @@ class Telegram(Base):
     __tablename__ = "telegram"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     telegram_id = Column(BigInteger, primary_key=True)
     first_name = Column(String, nullable=False)
@@ -82,7 +82,7 @@ class Steam(Base):
     __tablename__ = "steam"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     steam_id = Column(String, primary_key=True)
     persona_name = Column(String, nullable=False)
@@ -150,7 +150,7 @@ class RocketLeague(Base):
     __tablename__ = "rocketleague"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
-    steam = relationship("Steam")
+    steam = relationship("Steam", lazy="joined")
 
     season = Column(Integer)
 
@@ -249,7 +249,7 @@ class Dota(Base):
     __tablename__ = "dota"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
-    steam = relationship("Steam")
+    steam = relationship("Steam", lazy="joined")
 
     rank_tier = Column(Integer)
 
@@ -348,7 +348,7 @@ class LeagueOfLegends(Base):
     __tablename__ = "leagueoflegends"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     summoner_id = Column(BigInteger, primary_key=True)
     summoner_name = Column(String, nullable=False)
@@ -432,7 +432,7 @@ class Osu(Base):
     __tablename__ = "osu"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     osu_id = Column(Integer, primary_key=True)
     osu_name = Column(String, nullable=False)
@@ -490,7 +490,7 @@ class Discord(Base):
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     discord_id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
@@ -534,7 +534,7 @@ class Overwatch(Base):
     __tablename__ = "overwatch"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal")
+    royal = relationship("Royal", lazy="joined")
 
     battletag = Column(String, primary_key=True)
     discriminator = Column(Integer, primary_key=True)
@@ -599,9 +599,9 @@ class Diario(Base):
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, nullable=False)
     saver_id = Column(Integer, ForeignKey("telegram.telegram_id"))
-    saver = relationship("Telegram", foreign_keys=saver_id)
+    saver = relationship("Telegram", foreign_keys=saver_id, lazy="joined")
     author_id = Column(Integer, ForeignKey("telegram.telegram_id"))
-    author = relationship("Telegram", foreign_keys=author_id)
+    author = relationship("Telegram", foreign_keys=author_id, lazy="joined")
     text = Column(String)
 
     def __repr__(self):
@@ -616,18 +616,50 @@ class Diario(Base):
         session = Session()
         file = open(file, "r")
         j = json.load(file)
-        for entry in j:
-            if "sender" in entry:
-                author = session.query(Telegram).filter_by(username=entry["sender"].lstrip("@")).first()
-            else:
-                author = None
+        author_ids = {
+            "@Steffo": 25167391,
+            "@GoodBalu": 19611986,
+            "@gattopandacorno": 200821462,
+            "@Albertino04": 131057096,
+            "@Francesco_Cuoghi": 48371848,
+            "@VenomousDoc": 48371848,
+            "@MaxSensei": 1258401,
+            "@Protoh": 125711787,
+            "@McspKap": 304117728,
+            "@FrankRekt": 31436195,
+            "@EvilBalu": 26842090,
+            "@Dailir": 135816455,
+            "@Paltri": 186843362,
+            "@Doom_darth_vader": 165792255,
+            "@httpIma": 292086686,
+            "@DavidoMessori": 509208316,
+            "@DavidoNiichan": 509208316,
+            "@Peraemela99": 63804599,
+            "@infopz": 20403805,
+            "@Baithoven": 121537369,
+            "@Tauei": 102833717
+        }
+        for n, entry in enumerate(j):
+            author = author_ids[entry["sender"]] if "sender" in entry and entry["sender"] in author_ids else None
             d = Diario(timestamp=datetime.datetime.fromtimestamp(float(entry["timestamp"])),
-                       author=author,
+                       author_id=author,
                        text=entry["text"])
-            print(d)
+            print(f"{n} - {d}")
             session.add(d)
         session.commit()
         session.close()
+
+
+class BaluRage(Base):
+    __tablename__ = "balurage"
+
+    id = Column(Integer, primary_key=True)
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal", lazy="joined")
+    reason = Column(String)
+
+    def __repr__(self):
+        return f"<BaluRage {self.id}>"
 
 
 # If run as script, create all the tables in the db

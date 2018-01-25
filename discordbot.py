@@ -8,6 +8,7 @@ import db
 import errors
 import youtube_dl
 import concurrent.futures
+import stagismo
 
 # Init the event loop
 import asyncio
@@ -286,7 +287,7 @@ async def on_message(message: discord.Message):
         voice_player = None
         await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
     elif message.content.startswith("!np"):
-        if voice_player is None:
+        if voice_player is None or not voice_player.is_playing():
             await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
             return
         await client.send_message(message.channel, f"▶️ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
@@ -323,6 +324,9 @@ async def on_message(message: discord.Message):
         for dice in range(0, dmg_dice):
             total += random.randrange(1, dmg_max+1)
         await client.send_message(message.channel, f"❇️ Ho lanciato **{spell}** su **{target.nick if target.nick is not None else target.name}** per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}=**{total if total > 0 else 0}** danni!")
+    elif message.content.startswith("!smecds"):
+        ds = random.sample(stagismo.listona, 1)[0]
+        await client.send_message(message.channel, f"Secondo me, è colpa {ds}.", tts=True)
     elif __debug__ and message.content.startswith("!exception"):
         raise Exception("!exception was called")
 

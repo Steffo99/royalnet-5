@@ -1,9 +1,9 @@
+import datetime
 import random
-
 import math
-
 import db
 import errors
+import stagismo
 from telegram import Bot, Update, Message
 from telegram.ext import Updater, CommandHandler
 from discord import Status as DiscordStatus
@@ -34,6 +34,7 @@ def cmd_register(bot: Bot, update: Update):
         username = update.message.text.split(" ", 1)[1]
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato un username!")
+        session.close()
         return
     try:
         t = db.Telegram.create(session,
@@ -41,6 +42,7 @@ def cmd_register(bot: Bot, update: Update):
                                telegram_user=update.message.from_user)
     except errors.AlreadyExistingError:
         bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram è già collegato a un account RYG o l'account RYG che hai specificato è già collegato a un account Telegram.")
+        session.close()
         return
     session.add(t)
     session.commit()
@@ -139,7 +141,86 @@ def cmd_cast(bot: Bot, update: Update):
     total = dmg_mod
     for dice in range(0, dmg_dice):
         total += random.randrange(1, dmg_max + 1)
-    bot.send_message(update.message.chat.id, f"❇️ Ho lanciato {spell} su @​{target.username if target.username is not None else target.first_name} per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}={total if total > 0 else 0} danni!")
+    bot.send_message(update.message.chat.id, f"❇️ Ho lanciato {spell} su {target.username if target.username is not None else target.first_name} per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}={total if total > 0 else 0} danni!")
+
+
+def cmd_color(bot: Bot, update: Update):
+    bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request, Admin were notified")
+
+
+def cmd_smecds(bot: Bot, update: Update):
+    ds = random.sample(stagismo.listona, 1)[0]
+    bot.send_message(update.message.chat.id, f"Secondo me, è colpa {ds}.")
+
+
+def cmd_ciaoruozi(bot: Bot, update: Update):
+    if update.message.from_user.username.lstrip("@") == "MeStakes":
+        bot.send_message(update.message.chat.id, "Ciao me!")
+    else:
+        bot.send_message(update.message.chat.id, "Ciao Ruozi!")
+
+
+def cmd_ahnonlosoio(bot: Bot, update: Update):
+    if update.message.reply_to_message is not None and update.message.reply_to_message.text in ["/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!"]:
+        bot.send_message(update.message.chat.id, "Ah, non lo so neppure io!")
+    else:
+        bot.send_message(update.message.chat.id, "Ah, non lo so io!")
+
+
+def cmd_balurage(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        if user is None:
+            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+            return
+        try:
+            reason = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            reason = None
+        br = db.BaluRage(royal_id=user.royal_id, reason=reason)
+        session.add(br)
+        session.commit()
+        bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
+    except Exception as e:
+        raise
+    finally:
+        session.close()
+
+
+def cmd_diario(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        if user is None:
+            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+            return
+        try:
+            text = update.message.text.split(" ", 1)[1]
+            author = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+            saver = author
+        except IndexError:
+            if update.message.reply_to_message is None:
+                bot.send_message(update.message.chat.id, f"⚠ Non hai specificato cosa aggiungere al diario! Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario oppure scrivere `/diario@royalgamesbot <messaggio>` per aggiungere quel messaggio nel diario.\n"
+                                                         f"Se l'hai fatto, e continua a comparire questo errore, allora Telegram è stupido e non mi vuole far vedere il messaggio a cui hai risposto.")
+                return
+            text = update.message.reply_to_message.text
+            author = session.query(db.Telegram).filter_by(telegram_id=update.message.reply_to_message.from_user.id).one_or_none()
+            saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        if text is None:
+            bot.send_message(update.message.chat.id, f"⚠ Il messaggio a cui hai risposto non contiene testo.")
+            return
+        diario = db.Diario(timestamp=datetime.datetime.now(),
+                           saver=saver,
+                           author=author,
+                           text=text)
+        session.add(diario)
+        session.commit()
+        bot.send_message(update.message.chat.id, f"✅ Aggiunto al diario!")
+    except Exception:
+        raise
+    finally:
+        session.close()
 
 
 def process(arg_discord_connection):
@@ -150,7 +231,14 @@ def process(arg_discord_connection):
     u = Updater(config["Telegram"]["bot_token"])
     u.dispatcher.add_handler(CommandHandler("register", cmd_register))
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
+    u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
+    u.dispatcher.add_handler(CommandHandler("color", cmd_color))
+    u.dispatcher.add_handler(CommandHandler("smecds", cmd_smecds))
+    u.dispatcher.add_handler(CommandHandler("ciaoruozi", cmd_ciaoruozi))
+    u.dispatcher.add_handler(CommandHandler("ahnonlosoio", cmd_ahnonlosoio))
+    u.dispatcher.add_handler(CommandHandler("balurage", cmd_balurage))
+    u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
     u.start_polling()
     u.idle()
 
