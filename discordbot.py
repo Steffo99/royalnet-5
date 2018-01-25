@@ -33,7 +33,7 @@ finally:
 
 # Init the discord bot
 client = discord.Client()
-discord.opus.load_opus("libopus-0.dll")
+discord.opus.load_opus("/usr/lib/x86_64-linux-gnu/libopus.so")
 voice_client = None
 voice_player = None
 voice_queue = []
@@ -58,7 +58,7 @@ class Video:
         self.enqueued = enqueued
         self.channel = channel
         return self
-        
+
     def create_embed(self):
         embed = discord.Embed(type="rich",
                               title=self.info.get("title"),
