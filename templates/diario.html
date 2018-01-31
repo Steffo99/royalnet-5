@@ -17,14 +17,14 @@
             <div id="diario-{{ entry.id }}" class="diario-entry">
                 <div class="row">
                     <div class="col-6">
+                        {% if entry.saver %}
+                            <div id="saver-{{ entry.id }}" class="saver-data diario-data">
+                                Salvato da {{ entry.saver.royal.username }}
+                            </div>
+                        {% endif %}
                         {% if entry.author %}
                             <div id="author-{{ entry.id }}" class="author-data diario-data">
                                 {{ entry.author.royal.username }}
-                            </div>
-                        {% endif %}
-                        {% if entry.saver %}
-                            <div id="saver-{{ entry.id }}" class="saver-data diario-data">
-                                {{ entry.saver.royal.username }}
                             </div>
                         {% endif %}
                     </div>
