@@ -31,7 +31,7 @@ def page_leaderboards():
 @app.route("/challenge/1")
 def page_challenge_one():
     session = Session()
-    result = session.execute(r"SELECT sum(osu.std_pp) + sum(osu.taiko_pp) + sum(osu.catch_pp) + sum(osu.mania_pp) total_pp FROM osu;")
+    result = session.execute(r"SELECT sum(osu.std_pp) + sum(osu.taiko_pp) + sum(osu.catch_pp) + sum(osu.mania_pp) total_pp FROM osu;").first()[0]
     session.close()
     return render_template("challenge1.html", starting=4959.518703999999, result=result, target=5200)
 
