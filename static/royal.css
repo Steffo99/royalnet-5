@@ -101,3 +101,16 @@ th {
 .timestamp-data {
     text-align: right;
 }
+
+.challenge-bar {
+    height: 100px;
+}
+
+.challenge-bar.progress {
+    background-color: orange;
+}
+
+.challenge-bar.progress-bar {
+    background-color: yellow;
+    color: black;
+}

@@ -11,13 +11,23 @@
 <body>
     <div class="container">
         <h1>
-            La Sfida di questa settimana
+            Royal Challenge
         </h1>
         <h2>
-            Raggiungiamo i {{ target }}pp di gruppo su osu!
+            La Prima Sfida
         </h2>
-        <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: {{ (result-starting) / (target-starting) * 100 }}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        <p>
+            L'obiettivo di questa settimana sarà di raggiungere {{ target }}pp totali su osu! Ovvero, di guadagnare <b>{{ target-starting }}pp</b> in qualsiasi modalità partendo da adesso.
+        </p>
+        <p>
+            <small>
+                Più che altro è per provare una roba con il database della Royal Games, però sarebbe bello che tutti provassero a fare qualche pp...
+            </small>
+        </p>
+        <div class="progress challenge-bar">
+            <div class="progress-bar challenge-bar" role="progressbar" style="width: {{ (result-starting) / (target-starting) * 100 | int }}%">
+                {{ result-starting }}pp
+            </div>
         </div>
     </div>
 </body>
