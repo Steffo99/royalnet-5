@@ -38,11 +38,13 @@
                             <td>{{ record.wins }}</td>
                             <td sorttable_customkey="{{ record.rank_tier }}">
                                 <div class="dota-rank-medal">
-                                    <img class="thirtytwo dota-rank-medal-icon" src="{{ record.get_rank_icon_url() }}">{% if record.get_rank_stars_url() %}<img class="thirtytwo dota-rank-medal-stars" src="{{ record.get_rank_stars_url() }}">{% endif %}
-                                    {% if record.rank_tier is not none and record.rank_tier >= 10 %}
-                                        {{ record.get_rank_name() }} {{ record.get_rank_number() }}
-                                    {% else %}
+                                    {% if record.rank_tier is not None %}
+                                        <img class="thirtytwo dota-rank-medal-icon" src="{{ record.get_rank_icon_url() }}">{% if record.get_rank_stars_url() %}<img class="thirtytwo dota-rank-medal-stars" src="{{ record.get_rank_stars_url() }}">{% endif %}
+                                    {% endif %}
+                                    {% if record.rank_tier is not None and record.rank_tier < 10 %}
                                         <span class="rl-unranked">Unranked</span>
+                                    {% else %}
+                                        {{ record.get_rank_name() }} {{ record.get_rank_number() }}
                                     {% endif %}
                                 </div>
                             </td>

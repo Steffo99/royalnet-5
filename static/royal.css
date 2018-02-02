@@ -94,6 +94,10 @@ th {
     font-size: small;
 }
 
+.saver-data {
+    font-size: smaller;
+}
+
 .timestamp-data {
     text-align: right;
 }

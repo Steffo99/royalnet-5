@@ -4,7 +4,7 @@ import math
 import db
 import errors
 import stagismo
-from telegram import Bot, Update, Message
+from telegram import Bot, Update
 from telegram.ext import Updater, CommandHandler
 from discord import Status as DiscordStatus
 
@@ -80,10 +80,10 @@ def cmd_discord(bot: Bot, update: Update):
         for member in members_in_channels[channel]:
             if member.status == DiscordStatus.offline and member.voice.voice_channel is None:
                 continue
-            if member.bot:
-                continue
             # Online status emoji
-            if member.status == DiscordStatus.online:
+            if member.bot:
+                message += "🤖 "
+            elif member.status == DiscordStatus.online:
                 message += "🔵 "
             elif member.status == DiscordStatus.idle:
                 message += "⚫️ "
@@ -111,6 +111,10 @@ def cmd_discord(bot: Bot, update: Update):
                     message += f" | 🎮 {member.game.name}"
                 elif member.game.type == 1:
                     message += f" | 📡 [{member.game.name}]({member.game.url})"
+                elif member.game.type == 2:
+                    message += f" | 🎧 {member.game.name}"
+                elif member.game.type == 3:
+                    message += f" | 📺 {member.game.name}"
             message += "\n"
         message += "\n"
     bot.send_message(update.message.chat.id, message, disable_web_page_preview=True)
