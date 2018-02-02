@@ -4,7 +4,7 @@ import math
 import db
 import errors
 import stagismo
-from telegram import Bot, Update, Message
+from telegram import Bot, Update
 from telegram.ext import Updater, CommandHandler
 from discord import Status as DiscordStatus
 
