@@ -25,8 +25,8 @@
             </small>
         </p>
         <div class="progress challenge-bar">
-            <div class="progress-bar challenge-bar" role="progressbar" style="width: {{ (result-starting) / (target-starting) * 100 | int }}%">
-                {{ result-starting }}pp
+            <div class="progress-bar challenge-bar" role="progressbar" style="width: {{ (result-starting) / (target-starting) * 100 | round | int }}%">
+                {{ result-starting | round | int }}pp
             </div>
         </div>
     </div>
