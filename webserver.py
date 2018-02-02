@@ -38,6 +38,6 @@ def page_challenge_one():
 
 if __name__ == "__main__":
     try:
-        app.run(host="0.0.0.0", port=1234, debug=True)
+        app.run(host="0.0.0.0", port=1234)
     except KeyboardInterrupt:
         pass
