@@ -1,4 +1,3 @@
-import datetime
 import random
 import discord
 import discord.opus
@@ -11,8 +10,8 @@ import youtube_dl
 import concurrent.futures
 import stagismo
 import platform
-import uuid
 import typing
+import os
 
 # Init the event loop
 import asyncio
@@ -22,6 +21,9 @@ loop = asyncio.get_event_loop()
 import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
+
+class DurationError(Exception):
+    pass
 
 class Video:
     def __init__(self):
@@ -40,18 +42,27 @@ class Video:
         self.ytdl_url = ytdl_url
         return self
 
-    async def download(self) -> bool:
-        # Don't download already existent files
-        if self.filename is not None:
-            return True
-        file_id = uuid.uuid4()
+    async def download(self):
+        # Retrieve info before downloading
+        try:
+            with youtube_dl.YoutubeDL() as ytdl:
+                info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url, download=False))
+            file_id = info["entries"][0].get("title", hash(self.ytdl_url))
+        except Exception as e:
+            print(e)
+            raise e
+        if os.path.exists(f"opusfiles/{file_id}.opus"):
+            return
+        if info["entries"][0]["duration"] > int(config["YouTube"]["max_duration"]):
+            raise DurationError(f"File duration is over the limit set in the config ({config['YouTube']['max_duration']}).")
         ytdl_args = {"noplaylist": True,
-                     "format": "bestaudio",
+                     "format": "best",
                      "postprocessors": [{
                          "key": 'FFmpegExtractAudio',
                          "preferredcodec": 'opus'
                      }],
-                     "outtmpl": f"opusfiles/{file_id}.opus"}
+                     "outtmpl": f"opusfiles/{file_id}.opus",
+                     "quiet": True}
         if "youtu" in self.ytdl_url:
             ytdl_args["username"] = config["YouTube"]["username"]
             ytdl_args["password"] = config["YouTube"]["password"]
@@ -61,17 +72,15 @@ class Video:
                 await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.ytdl_url]))
         except Exception as e:
             print(e)
-            return False
+            raise e
         # Set the filename to the downloaded video
         self.filename = f"opusfiles/{file_id}.opus"
-        return True
 
 if __debug__:
     version = "Dev"
 else:
     # Find the latest git tag
     import subprocess
-    import os
     old_wd = os.getcwd()
     try:
         os.chdir(os.path.dirname(__file__))
@@ -327,15 +336,22 @@ async def update_music_queue():
         video = voice_queue.pop()
         if video.ytdl_url:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"ℹ E' iniziato il download di `{video.ytdl_url}`.")
-            success = await video.download()
-            if not success:
-                await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`")
+            try:
+                await video.download()
+            except DurationError:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"⚠ Il file supera il limite di durata impostato in config.ini (`{config['YouTube']['max_duration']}` secondi).")
+                continue
+            except Exception as e:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`:\n"
+                                                                                                 f"```\n"
+                                                                                                 f"{e}\n"
+                                                                                                 f"```")
                 continue
         voice_player = voice_client.create_ffmpeg_player(video.filename)
         voice_player.start()
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
                                                  f"`{video.filename}`")
-        await client.change_presence(game=discord.Game(name="YouTube", type=2))
+        await client.change_presence(game=discord.Game(name="youtube-dl", type=2))
 
 
 def process(users_connection=None):
