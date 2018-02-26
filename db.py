@@ -19,6 +19,7 @@ engine = create_engine(config["Database"]["database_uri"])
 Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
 
+
 class Royal(Base):
     __tablename__ = "royals"
 
@@ -63,7 +64,6 @@ class Telegram(Base):
                         first_name=telegram_user.first_name,
                         last_name=telegram_user.last_name,
                         username=telegram_user.username)
-
 
     def __repr__(self):
         return f"<Telegram {self.id}>"
