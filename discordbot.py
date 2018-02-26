@@ -1,4 +1,6 @@
 import random
+import re
+
 import discord
 import discord.opus
 import discord.voice_client
@@ -15,13 +17,15 @@ import os
 import asyncio
 import configparser
 
+# Queue emojis
+queue_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
 # Init the event loop
 loop = asyncio.get_event_loop()
 
 # Init the config reader
 config = configparser.ConfigParser()
 config.read("config.ini")
-
 
 class DurationError(Exception):
     pass
@@ -46,16 +50,13 @@ class Video:
 
     async def download(self):
         # Retrieve info before downloading
-        try:
-            with youtube_dl.YoutubeDL() as ytdl:
-                info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url, download=False))
-            file_id = info["entries"][0].get("title", hash(self.ytdl_url))
-        except Exception as e:
-            print(e)
-            raise e
+        with youtube_dl.YoutubeDL() as ytdl:
+            info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url, download=False))
+        file_id = info.get("title", str(hash(self.ytdl_url)))
+        file_id = re.sub(r"(?:\/|\\|\?|\*|\"|<|>|\||:)", "_", file_id)
         if os.path.exists(f"opusfiles/{file_id}.opus"):
             return
-        if info["entries"][0]["duration"] > int(config["YouTube"]["max_duration"]):
+        if info.get("duration", 1) > int(config["YouTube"]["max_duration"]):
             raise DurationError(f"File duration is over the limit "
                                 f"set in the config ({config['YouTube']['max_duration']}).")
         ytdl_args = {"noplaylist": True,
@@ -70,14 +71,10 @@ class Video:
             ytdl_args["username"] = config["YouTube"]["username"]
             ytdl_args["password"] = config["YouTube"]["password"]
         # Download the video
-        try:
-            with youtube_dl.YoutubeDL(ytdl_args) as ytdl:
-                await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.ytdl_url]))
-        except Exception as e:
-            print(e)
-            raise e
+        with youtube_dl.YoutubeDL(ytdl_args) as ytdl:
+            await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.ytdl_url]))
         # Set the filename to the downloaded video
-        self.filename = f"opusfiles/{file_id}.opus"
+        self.filename = file_id
 
 
 if __debug__:
@@ -90,7 +87,7 @@ else:
         os.chdir(os.path.dirname(__file__))
         version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
     except Exception:
-        version = "v???"
+        version = "❓"
     finally:
         os.chdir(old_wd)
 
@@ -199,7 +196,7 @@ async def on_message(message: discord.Message):
                                                        f"L'elaborazione potrebbe richiedere un po' di tempo.")
         # If target is a single video
         video = await Video.init(user=message.author, ytdl_url=url)
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: `{url}`")
+        await client.send_message(message.channel, f"✅ Aggiunto alla coda: <{url}>")
         voice_queue.append(video)
     elif message.content.startswith("!search"):
         await client.send_typing(message.channel)
@@ -232,10 +229,6 @@ async def on_message(message: discord.Message):
         except IndexError:
             await client.send_message(message.channel, "⚠️ Non hai specificato il nome del file!\n"
                                                        "Sintassi corretta: `!file <nomefile>`")
-            return
-        # Ensure the filename ends with .opus
-        if not text.endswith(".opus"):
-            await client.send_message(message.channel, "⚠️ Il nome file specificato non è valido.")
             return
         # If target is a single video
         video = await Video.init(user=message.author, filename=text)
@@ -274,16 +267,16 @@ async def on_message(message: discord.Message):
         voice_player = None
         await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
     elif message.content.startswith("!queue"):
-        message = "Video in coda:\n"
-        for text, emoji in voice_queue[0:10], ["▶️", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]:
-            message += f"{emoji} `{text}`\n"
-        await client.send_message(message.channel, message)
+        msg = "Video in coda:\n"
+        for position in range(10) if len(voice_queue) > 10 else range(len(voice_queue)):
+            msg += f"{queue_emojis[position]} {'`' + voice_queue[position].filename + '`' if voice_queue[position].filename is not None else '<' + voice_queue[position].ytdl_url + '>'}\n"
+        await client.send_message(message.channel, msg)
     elif message.content.startswith("!cast"):
         try:
             spell = message.content.split(" ", 1)[1]
         except IndexError:
-            await client.send_message("⚠️ Non hai specificato nessun incantesimo!\n"
-                                      "Sintassi corretta: `!cast <nome_incantesimo>`")
+            await client.send_message(message.channel, "⚠️ Non hai specificato nessun incantesimo!\n"
+                                                       "Sintassi corretta: `!cast <nome_incantesimo>`")
             return
         target = random.sample(list(message.server.members), 1)[0]
         # Seed the rng with the spell name
@@ -354,12 +347,12 @@ async def update_music_queue():
                                           f"{e}\n"
                                           f"```")
                 continue
-        voice_player = voice_client.create_ffmpeg_player(video.filename)
+        voice_player = voice_client.create_ffmpeg_player(f"opusfiles/{video.filename}.opus")
         voice_player.start()
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                   f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
                                   f"`{video.filename}`")
-        await client.change_presence(game=discord.Game(name="youtube-dl", type=2))
+        await client.change_presence(game=discord.Game(name=video.filename, type=2))
 
 
 def process(users_connection=None):
