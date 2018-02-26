@@ -12,18 +12,20 @@ import stagismo
 import platform
 import typing
 import os
+import asyncio
+import configparser
 
 # Init the event loop
-import asyncio
 loop = asyncio.get_event_loop()
 
 # Init the config reader
-import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+
 class DurationError(Exception):
     pass
+
 
 class Video:
     def __init__(self):
@@ -54,7 +56,8 @@ class Video:
         if os.path.exists(f"opusfiles/{file_id}.opus"):
             return
         if info["entries"][0]["duration"] > int(config["YouTube"]["max_duration"]):
-            raise DurationError(f"File duration is over the limit set in the config ({config['YouTube']['max_duration']}).")
+            raise DurationError(f"File duration is over the limit "
+                                f"set in the config ({config['YouTube']['max_duration']}).")
         ytdl_args = {"noplaylist": True,
                      "format": "best",
                      "postprocessors": [{
@@ -76,6 +79,7 @@ class Video:
         # Set the filename to the downloaded video
         self.filename = f"opusfiles/{file_id}.opus"
 
+
 if __debug__:
     version = "Dev"
 else:
@@ -85,7 +89,7 @@ else:
     try:
         os.chdir(os.path.dirname(__file__))
         version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
-    except:
+    except Exception:
         version = "v???"
     finally:
         os.chdir(old_wd)
@@ -104,6 +108,7 @@ voice_queue: typing.List[Video] = []
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
+
 async def find_user(user: discord.User):
     session = await loop.run_in_executor(executor, db.Session)
     user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
@@ -113,12 +118,13 @@ async def find_user(user: discord.User):
 async def on_error(event, *args, **kwargs):
     type, exception, traceback = sys.exc_info()
     try:
-        await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
-              f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n\n"
-              f"Dettagli dell'errore:\n"
-              f"```python\n"
-              f"{repr(exception)}\n"
-              f"```")
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                  f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
+                                  f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n\n"
+                                  f"Dettagli dell'errore:\n"
+                                  f"```python\n"
+                                  f"{repr(exception)}\n"
+                                  f"```")
         await voice_client.disconnect()
         await client.change_presence(status=discord.Status.invisible)
         await client.close()
@@ -131,7 +137,8 @@ async def on_error(event, *args, **kwargs):
 
 @client.event
 async def on_ready():
-    await client.send_message(client.get_channel("368447084518572034"), f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
+    await client.send_message(client.get_channel("368447084518572034"),
+                              f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
     await client.change_presence(game=None, status=discord.Status.online)
 
 
@@ -153,7 +160,9 @@ async def on_message(message: discord.Message):
                                   royal_username=username,
                                   discord_user=message.author)
         except errors.AlreadyExistingError:
-            await client.send_message(message.channel, "⚠ Il tuo account Discord è già collegato a un account RYG o l'account RYG che hai specificato è già collegato a un account Discord.")
+            await client.send_message(message.channel,
+                                      "⚠ Il tuo account Discord è già collegato a un account RYG "
+                                      "o l'account RYG che hai specificato è già collegato a un account Discord.")
             return
         session.add(d)
         session.commit()
@@ -238,7 +247,8 @@ async def on_message(message: discord.Message):
         await client.send_message(message.channel, f"⏩ Video saltato.")
     elif message.content.startswith("!pause"):
         if voice_player is None or not voice_player.is_playing():
-            await client.send_message(message.channel, f"⚠️ Non è in corso la riproduzione di un video, pertanto non c'è niente da pausare.")
+            await client.send_message(message.channel, f"⚠️ Non è in corso la riproduzione di un video, "
+                                                       f"pertanto non c'è niente da pausare.")
             return
         voice_player.pause()
         await client.send_message(message.channel, f"⏸ Riproduzione messa in pausa.\n"
@@ -263,23 +273,11 @@ async def on_message(message: discord.Message):
         voice_player.stop()
         voice_player = None
         await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
-    #elif message.content.startswith("!np"):
-    #    if voice_player is None or not voice_player.is_playing():
-    #        await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
-    #        return
-    #    await client.send_message(message.channel, f"▶️ Ora in riproduzione in <#{voice_client.channel.id}>:", embed=voice_playing.create_embed())
-    #elif message.content.startswith("!queue"):
-    #    if voice_player is None:
-    #        await client.send_message(message.channel, f"ℹ Non c'è nulla in riproduzione al momento.")
-    #        return
-    #    to_send = ""
-    #    to_send += f"0. {voice_playing.info['title'] if voice_playing.info['title'] is not None else '_Senza titolo_'} - <{voice_playing.info['webpage_url'] if voice_playing.info['webpage_url'] is not None else ''}>\n"
-    #    for n, video in enumerate(voice_queue):
-    #        to_send += f"{n+1}. {video.info['title'] if video.info['title'] is not None else '_Senza titolo_'} - <{video.info['webpage_url'] if video.info['webpage_url'] is not None else ''}>\n"
-    #        if len(to_send) >= 2000:
-    #            to_send = to_send[0:1997] + "..."
-    #            break
-    #    await client.send_message(message.channel, to_send)
+    elif message.content.startswith("!queue"):
+        message = "Video in coda:\n"
+        for text, emoji in voice_queue[0:10], ["▶️", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]:
+            message += f"{emoji} `{text}`\n"
+        await client.send_message(message.channel, message)
     elif message.content.startswith("!cast"):
         try:
             spell = message.content.split(" ", 1)[1]
@@ -300,7 +298,12 @@ async def on_message(message: discord.Message):
         total = dmg_mod
         for dice in range(0, dmg_dice):
             total += random.randrange(1, dmg_max+1)
-        await client.send_message(message.channel, f"❇️ Ho lanciato **{spell}** su **{target.nick if target.nick is not None else target.name}** per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}=**{total if total > 0 else 0}** danni!")
+        await client.send_message(message.channel,
+                                  f"❇️ Ho lanciato **{spell}** "
+                                  f"su **{target.nick if target.nick is not None else target.name}** "
+                                  f"per {dmg_dice}d{dmg_max}"
+                                  f"{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}"
+                                  f"=**{total if total > 0 else 0}** danni!")
     elif message.content.startswith("!smecds"):
         ds = random.sample(stagismo.listona, 1)[0]
         await client.send_message(message.channel, f"Secondo me, è colpa {ds}.", tts=True)
@@ -335,22 +338,27 @@ async def update_music_queue():
             continue
         video = voice_queue.pop()
         if video.ytdl_url:
-            await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"ℹ E' iniziato il download di `{video.ytdl_url}`.")
+            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                      f"ℹ E' iniziato il download di `{video.ytdl_url}`.")
             try:
                 await video.download()
             except DurationError:
-                await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"⚠ Il file supera il limite di durata impostato in config.ini (`{config['YouTube']['max_duration']}` secondi).")
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠ Il file supera il limite di durata impostato in config.ini "
+                                          f"(`{config['YouTube']['max_duration']}` secondi).")
                 continue
             except Exception as e:
-                await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`:\n"
-                                                                                                 f"```\n"
-                                                                                                 f"{e}\n"
-                                                                                                 f"```")
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`:\n"
+                                          f"```\n"
+                                          f"{e}\n"
+                                          f"```")
                 continue
         voice_player = voice_client.create_ffmpeg_player(video.filename)
         voice_player.start()
-        await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
-                                                 f"`{video.filename}`")
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                  f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
+                                  f"`{video.filename}`")
         await client.change_presence(game=discord.Game(name="youtube-dl", type=2))
 
 
