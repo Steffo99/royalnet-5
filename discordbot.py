@@ -52,6 +52,8 @@ class Video:
         # Retrieve info before downloading
         with youtube_dl.YoutubeDL() as ytdl:
             info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url, download=False))
+        if "entries" in info:
+            info = info["entries"][0]
         file_id = info.get("title", str(hash(self.ytdl_url)))
         file_id = re.sub(r"(?:\/|\\|\?|\*|\"|<|>|\||:)", "_", file_id)
         if os.path.exists(f"opusfiles/{file_id}.opus"):
