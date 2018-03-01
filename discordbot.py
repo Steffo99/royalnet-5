@@ -18,7 +18,7 @@ import asyncio
 import configparser
 
 # Queue emojis
-queue_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
 
 # Init the event loop
 loop = asyncio.get_event_loop()
@@ -331,7 +331,7 @@ async def update_music_queue():
             await client.change_presence()
             await asyncio.sleep(1)
             continue
-        video = voice_queue.pop()
+        video = voice_queue.pop(0)
         if video.ytdl_url:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f"ℹ E' iniziato il download di `{video.ytdl_url}`.")
