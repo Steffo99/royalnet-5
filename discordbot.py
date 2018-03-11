@@ -56,6 +56,8 @@ class Video:
             info = info["entries"][0]
         file_id = info.get("title", str(hash(self.ytdl_url)))
         file_id = re.sub(r"(?:\/|\\|\?|\*|\"|<|>|\||:)", "_", file_id)
+        # Set the filename to the downloaded video
+        self.filename = file_id
         if os.path.exists(f"opusfiles/{file_id}.opus"):
             return
         if info.get("duration", 1) > int(config["YouTube"]["max_duration"]):
@@ -75,8 +77,6 @@ class Video:
         # Download the video
         with youtube_dl.YoutubeDL(ytdl_args) as ytdl:
             await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.ytdl_url]))
-        # Set the filename to the downloaded video
-        self.filename = file_id
 
 
 if __debug__:
