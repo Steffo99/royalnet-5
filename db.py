@@ -661,6 +661,19 @@ class BaluRage(Base):
         return f"<BaluRage {self.id}>"
 
 
+class PlayedMusic(Base):
+    __tablename__ = "playedmusic"
+
+    id = Column(Integer, primary_key=True)
+    enqueuer_id = Column(Integer, ForeignKey("royals.id"))
+    enqueuer = relationship("Royal", lazy="joined")
+    filename = Column(String)
+
+    def __repr__(self):
+        return f"<PlayedMusic {self.filename}>"
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
+    print("Creating new tables...")
     Base.metadata.create_all(bind=engine)
+    print("Done!")

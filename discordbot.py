@@ -27,13 +27,19 @@ loop = asyncio.get_event_loop()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+async def find_user(user: discord.User):
+    session = await loop.run_in_executor(executor, db.Session)
+    user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
+    await loop.run_in_executor(executor, session.close)
+    return user
+
 class DurationError(Exception):
     pass
 
 
 class Video:
     def __init__(self):
-        self.user = None
+        self.enqueuer = None
         self.filename = None
         self.ytdl_url = None
 
@@ -43,7 +49,7 @@ class Video:
             raise Exception("Filename or url must be specified")
         self = Video()
         discord_user = await find_user(user)
-        self.user = discord_user.royal if discord_user is not None else None
+        self.enqueuer = discord_user.royal if discord_user is not None else None
         self.filename = filename
         self.ytdl_url = ytdl_url
         return self
@@ -78,6 +84,13 @@ class Video:
         with youtube_dl.YoutubeDL(ytdl_args) as ytdl:
             await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.ytdl_url]))
 
+    async def add_to_db(self):
+        session = await loop.run_in_executor(executor, db.Session)
+        pm = db.PlayedMusic(enqueuer=self.enqueuer,
+                            filename=self.filename)
+        session.add(pm)
+        await loop.run_in_executor(executor, session.commit)
+        await loop.run_in_executor(executor, session.close)
 
 if __debug__:
     version = "Dev"
@@ -106,13 +119,6 @@ voice_queue: typing.List[Video] = []
 
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-
-
-async def find_user(user: discord.User):
-    session = await loop.run_in_executor(executor, db.Session)
-    user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
-    return user
-
 
 async def on_error(event, *args, **kwargs):
     type, exception, traceback = sys.exc_info()
@@ -334,7 +340,7 @@ async def update_music_queue():
         video = voice_queue.pop(0)
         if video.ytdl_url:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                      f"ℹ E' iniziato il download di `{video.ytdl_url}`.")
+                                      f"⬇️ E' iniziato il download di `{video.ytdl_url}`.")
             try:
                 await video.download()
             except DurationError:
@@ -355,6 +361,7 @@ async def update_music_queue():
                                   f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
                                   f"`{video.filename}`")
         await client.change_presence(game=discord.Game(name=video.filename, type=2))
+        await video.add_to_db()
 
 
 def process(users_connection=None):

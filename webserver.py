@@ -1,5 +1,6 @@
 from flask import Flask, render_template
-from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends, Diario, Telegram
+from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends, Diario, Telegram, PlayedMusic
+from sqlalchemy import func
 
 app = Flask(__name__)
 
@@ -28,12 +29,12 @@ def page_leaderboards():
     session.close()
     return render_template("leaderboards.html", dota_data=dota_data, rl_data=rl_data, ow_data=ow_data, osu_data=osu_data, lol_data=lol_data)
 
-@app.route("/challenge/1")
-def page_challenge_one():
+@app.route("/music")
+def page_music():
     session = Session()
-    result = session.execute(r"SELECT sum(osu.std_pp) + sum(osu.taiko_pp) + sum(osu.catch_pp) + sum(osu.mania_pp) total_pp FROM osu;").first()[0]
+    music_data = session.query(PlayedMusic.filename, func.count(PlayedMusic.filename)).group_by(PlayedMusic.filename).all()
     session.close()
-    return render_template("challenge1.html", starting=4959.518703999999, result=result, target=5200)
+    return render_template("music.html", music_data=music_data)
 
 
 if __name__ == "__main__":
