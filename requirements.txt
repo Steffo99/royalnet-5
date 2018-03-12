@@ -4,3 +4,5 @@ flask
 sqlalchemy
 youtube-dl
 requests
+psycopg2
+PyNaCl

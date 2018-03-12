@@ -27,11 +27,13 @@ loop = asyncio.get_event_loop()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+
 async def find_user(user: discord.User):
     session = await loop.run_in_executor(executor, db.Session)
     user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
     await loop.run_in_executor(executor, session.close)
     return user
+
 
 class DurationError(Exception):
     pass
@@ -44,12 +46,11 @@ class Video:
         self.ytdl_url = None
 
     @staticmethod
-    async def init(user, filename=None, ytdl_url=None):
+    async def init(user_id: str, *, filename=None, ytdl_url=None):
         if filename is None and ytdl_url is None:
             raise Exception("Filename or url must be specified")
         self = Video()
-        discord_user = await find_user(user)
-        self.enqueuer = discord_user.royal if discord_user is not None else None
+        self.enqueuer = int(user_id)
         self.filename = filename
         self.ytdl_url = ytdl_url
         return self
@@ -61,7 +62,7 @@ class Video:
         if "entries" in info:
             info = info["entries"][0]
         file_id = info.get("title", str(hash(self.ytdl_url)))
-        file_id = re.sub(r"(?:\/|\\|\?|\*|\"|<|>|\||:)", "_", file_id)
+        file_id = re.sub(r'[/\\?*"<>|]', "_", file_id)
         # Set the filename to the downloaded video
         self.filename = file_id
         if os.path.exists(f"opusfiles/{file_id}.opus"):
@@ -86,11 +87,12 @@ class Video:
 
     async def add_to_db(self):
         session = await loop.run_in_executor(executor, db.Session)
-        pm = db.PlayedMusic(enqueuer=self.enqueuer,
+        pm = db.PlayedMusic(enqueuer_id=self.enqueuer,
                             filename=self.filename)
         session.add(pm)
         await loop.run_in_executor(executor, session.commit)
         await loop.run_in_executor(executor, session.close)
+
 
 if __debug__:
     version = "Dev"
@@ -120,8 +122,9 @@ voice_queue: typing.List[Video] = []
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
+
 async def on_error(event, *args, **kwargs):
-    type, exception, traceback = sys.exc_info()
+    t, exception, traceback = sys.exc_info()
     try:
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                   f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
@@ -200,10 +203,10 @@ async def on_message(message: discord.Message):
             return
         # Se è una playlist, informa che potrebbe essere richiesto un po' di tempo
         if "playlist" in url:
-            await client.send_message(message.channel, f"ℹ️ Hai inviato una playlist al bot.\n"
-                                                       f"L'elaborazione potrebbe richiedere un po' di tempo.")
+            await client.send_message(message.channel, f"⚠ Le playlist non sono ancora supportate dal bot.\n"
+                                                       f"Prova mettendo i video singoli a mano!")
         # If target is a single video
-        video = await Video.init(user=message.author, ytdl_url=url)
+        video = await Video.init(user_id=message.author.id, ytdl_url=url)
         await client.send_message(message.channel, f"✅ Aggiunto alla coda: <{url}>")
         voice_queue.append(video)
     elif message.content.startswith("!search"):
@@ -221,7 +224,7 @@ async def on_message(message: discord.Message):
                                                        "Sintassi corretta: `!search <titolo>`")
             return
         # If target is a single video
-        video = await Video.init(user=message.author, ytdl_url=f"ytsearch:{text}")
+        video = await Video.init(user_id=message.author.id, ytdl_url=f"ytsearch:{text}")
         await client.send_message(message.channel, f"✅ Aggiunto alla coda: `ytsearch:{text}`")
         voice_queue.append(video)
     elif message.content.startswith("!file"):
@@ -239,7 +242,7 @@ async def on_message(message: discord.Message):
                                                        "Sintassi corretta: `!file <nomefile>`")
             return
         # If target is a single video
-        video = await Video.init(user=message.author, filename=text)
+        video = await Video.init(user_id=message.author.id, filename=text)
         await client.send_message(message.channel, f"✅ Aggiunto alla coda: `{text}`")
         voice_queue.append(video)
     elif message.content.startswith("!skip"):
@@ -264,7 +267,7 @@ async def on_message(message: discord.Message):
         if not len(voice_queue) > 1:
             await client.send_message(message.channel, f"⚠ Non ci sono video da annullare.")
             return
-        video = voice_queue.pop()
+        voice_queue.pop()
         await client.send_message(message.channel, f"❌ L'ultimo video aggiunto alla playlist è stato rimosso.")
     elif message.content.startswith("!stop"):
         if voice_player is None:

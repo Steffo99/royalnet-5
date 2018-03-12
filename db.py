@@ -497,7 +497,7 @@ class Discord(Base):
     avatar_hex = Column(String)
 
     def __str__(self):
-        return f"{self.username}#{self.discriminator}"
+        return f"{self.name}#{self.discriminator}"
 
     def __repr__(self):
         return f"<Discord user {self.discord_id}>"
@@ -526,7 +526,7 @@ class Discord(Base):
     def avatar_url(self, size=256):
         if self.avatar_hex is None:
             return "https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png"
-        return f"https://cdn.discordapp.com/avatars/{self.id}/{self.avatar}.png?size={size}"
+        return f"https://cdn.discordapp.com/avatars/{self.discord_id}/{self.avatar_hex}.png?size={size}"
 
 
 class Overwatch(Base):
@@ -665,8 +665,8 @@ class PlayedMusic(Base):
     __tablename__ = "playedmusic"
 
     id = Column(Integer, primary_key=True)
-    enqueuer_id = Column(Integer, ForeignKey("royals.id"))
-    enqueuer = relationship("Royal", lazy="joined")
+    enqueuer_id = Column(BigInteger, ForeignKey("discord.discord_id"))
+    enqueuer = relationship("Discord", lazy="joined")
     filename = Column(String)
 
     def __repr__(self):

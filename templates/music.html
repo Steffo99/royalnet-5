@@ -26,10 +26,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for record in music_data %}
+                    {% for record in music_counts %}
                         <tr>
-                            <td>{{ record.filename }}</td>
+                            <td><a href="https://royal.steffo.eu/music/{{ record.filename }}.opus">{{ record.filename }}</a></td>
                             <td sorttable_customkey="{{ record[1] }}">{{ record[1] }} volt{{ 'a' if record[1] == 1 else 'e' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h2>
+                Cronologia
+            </h2>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Aggiunto da</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in music_last %}
+                        <tr>
+                            <td><a href="https://royal.steffo.eu/music/{{ record.filename }}.opus">{{ record.filename }}</a></td>
+                            {% if record.enqueuer is not none %}
+                                <td><img class="thirtytwo round" src="{{ record.enqueuer.avatar_url(size=32) }}"> {{ record.enqueuer }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends, Diario, Telegram, PlayedMusic
+from db import Session, Royal, Steam, RocketLeague, Dota, Osu, Overwatch, LeagueOfLegends, Diario, Telegram, PlayedMusic, Discord
 from sqlalchemy import func
 
 app = Flask(__name__)
@@ -7,9 +7,11 @@ app = Flask(__name__)
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
+
 @app.route("/")
 def page_index():
     return render_template("index.html")
+
 
 @app.route("/diario")
 def page_diario():
@@ -17,6 +19,7 @@ def page_diario():
     diario_data = session.query(Diario).outerjoin((Telegram, Diario.author), aliased=True).outerjoin(Royal, aliased=True).outerjoin((Telegram, Diario.saver), aliased=True).outerjoin(Royal, aliased=True).all()
     session.close()
     return render_template("diario.html", diario_data=diario_data)
+
 
 @app.route("/leaderboards")
 def page_leaderboards():
@@ -29,12 +32,14 @@ def page_leaderboards():
     session.close()
     return render_template("leaderboards.html", dota_data=dota_data, rl_data=rl_data, ow_data=ow_data, osu_data=osu_data, lol_data=lol_data)
 
+
 @app.route("/music")
 def page_music():
     session = Session()
-    music_data = session.query(PlayedMusic.filename, func.count(PlayedMusic.filename)).group_by(PlayedMusic.filename).all()
+    music_counts = session.query(PlayedMusic.filename, func.count(PlayedMusic.filename)).group_by(PlayedMusic.filename).all()
+    music_last = session.query(PlayedMusic).join(Discord).join(Royal).order_by(PlayedMusic.id.desc()).limit(50).all()
     session.close()
-    return render_template("music.html", music_data=music_data)
+    return render_template("music.html", music_counts=music_counts, music_last=music_last)
 
 
 if __name__ == "__main__":
