@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -66,11 +66,17 @@ class Telegram(Base):
                         username=telegram_user.username)
 
     def __repr__(self):
-        return f"<Telegram {self.id}>"
+        return f"<Telegram {self.telegram_id}>"
+
+    def mention(self):
+        if self.username is not None:
+            return f"@{self.username}"
+        else:
+            return self.first_name
 
     def __str__(self):
         if self.username is not None:
-            return f"@{self.username}"
+            return self.username
         elif self.last_name is not None:
             return f"{self.first_name} {self.last_name}"
         else:
@@ -672,8 +678,75 @@ class PlayedMusic(Base):
     def __repr__(self):
         return f"<PlayedMusic {self.filename}>"
 
+
+class VoteQuestion(Base):
+    __tablename__ = "votequestion"
+
+    id = Column(Integer, primary_key=True)
+    message_id = Column(BigInteger)
+    question = Column(String, nullable=False)
+    anonymous = Column(Boolean, nullable=False)
+    open = Column(Boolean, default=True)
+
+    def __repr__(self):
+        return f"<Vote {self.id}>"
+
+    def generate_text(self, session: Session):
+        query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.id = 8) answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
+        text = f"<b>{self.question}</b>\n\n"
+        none, yes, no, abstain = 0, 0, 0, 0
+        for record in query:
+            if record["username"] == "royalgamesbot":
+                continue
+            elif record["question_id"] is None:
+                text += "⚪️"
+                none += 1
+            elif record["choice"] == "YES":
+                text += "🔵"
+                yes += 1
+            elif record["choice"] == "NO":
+                text += "🔴"
+                no += 1
+            elif record["choice"] == "ABSTAIN":
+                text += "⚫️"
+                abstain += 1
+            if not self.anonymous:
+                text += f" {str(record['username'])}\n"
+        if self.anonymous:
+            text += "\n"
+        text += f"\n" \
+                f"⚪ {none}\n" \
+                f"🔵 {yes}\n" \
+                f"🔴 {no}\n" \
+                f"⚫️ {abstain}"
+        return text
+
+
+class VoteChoices(enum.Enum):
+    ABSTAIN = 1
+    YES = 2
+    NO = 3
+
+
+class VoteAnswer(Base):
+    __tablename__ = "voteanswer"
+
+    question_id = Column(Integer, ForeignKey("votequestion.id"))
+    question = relationship("VoteQuestion")
+    user_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
+    user = relationship("Telegram")
+    choice = Column(Enum(VoteChoices), nullable=False)
+
+    __table_args__ = (PrimaryKeyConstraint("question_id", "user_id"),)
+
+    def __repr__(self):
+        return f"<VoteAnswer {self.question_id} {self.user} {self.choice}>"
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
-    print("Creating new tables...")
-    Base.metadata.create_all(bind=engine)
-    print("Done!")
+    session = Session()
+    session.query(VoteQuestion).first().generate_text(session)
+    #print("Creating new tables...")
+    #Base.metadata.create_all(bind=engine)
+    #print("Done!")

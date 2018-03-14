@@ -4,8 +4,8 @@ import math
 import db
 import errors
 import stagismo
-from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler
+from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from discord import Status as DiscordStatus
 
 # Init the config reader
@@ -186,7 +186,7 @@ def cmd_balurage(bot: Bot, update: Update):
         session.add(br)
         session.commit()
         bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
-    except Exception as e:
+    except Exception:
         raise
     finally:
         session.close()
@@ -227,6 +227,86 @@ def cmd_diario(bot: Bot, update: Update):
         session.close()
 
 
+def cmd_vote(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        if user is None:
+            bot.send_message(update.message.chat.id,
+                             "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+            return
+        try:
+            _, mode, question = update.message.text.split(" ", 2)
+        except IndexError:
+            bot.send_message(update.message.chat.id,
+                             "⚠ Non hai specificato tutti i parametri necessari!"
+                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`")
+            return
+        if mode == "public":
+            vote = db.VoteQuestion(question=question, anonymous=False)
+        elif mode == "secret":
+            vote = db.VoteQuestion(question=question, anonymous=True)
+        else:
+            bot.send_message(update.message.chat.id,
+                             "⚠ Non hai specificato una modalità valida!"
+                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`")
+            return
+        session.add(vote)
+        session.flush()
+        inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
+                                                [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
+                                                [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
+        message = bot.send_message(update.message.chat.id, vote.generate_text(session=session), reply_markup=inline_keyboard,
+                                   parse_mode="HTML")
+        vote.message_id = message.message_id
+        session.commit()
+    except Exception:
+        raise
+    finally:
+        session.close()
+
+
+def on_callback_query(bot: Bot, update: Update):
+    if update.callback_query.data == "vote_yes":
+        choice = db.VoteChoices.YES
+        emoji = "🔵"
+    elif update.callback_query.data == "vote_no":
+        choice = db.VoteChoices.NO
+        emoji = "🔴"
+    elif update.callback_query.data == "vote_abstain":
+        choice = db.VoteChoices.ABSTAIN
+        emoji = "⚫️"
+    else:
+        raise NotImplementedError()
+    if update.callback_query.data.startswith("vote_"):
+        session = db.Session()
+        try:
+            user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
+            if user is None:
+                bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                          text="⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+                return
+            question = session.query(db.VoteQuestion).filter_by(message_id=update.callback_query.message.message_id).one()
+            answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
+            if answer is None:
+                answer = db.VoteAnswer(question=question, choice=choice, user=user)
+                session.add(answer)
+            else:
+                answer.choice = choice
+            session.commit()
+            bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
+            inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
+                                                    [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
+                                                    [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
+            bot.edit_message_text(message_id=update.callback_query.message.message_id, chat_id=update.callback_query.message.chat.id,
+                                  text=question.generate_text(session), reply_markup=inline_keyboard,
+                                  parse_mode="HTML")
+        except Exception as e:
+            raise
+        finally:
+            session.close()
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -243,6 +323,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ahnonlosoio", cmd_ahnonlosoio))
     u.dispatcher.add_handler(CommandHandler("balurage", cmd_balurage))
     u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
+    u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
+    u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.start_polling()
     u.idle()
 
