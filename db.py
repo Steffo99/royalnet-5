@@ -692,33 +692,34 @@ class VoteQuestion(Base):
         return f"<Vote {self.id}>"
 
     def generate_text(self, session: Session):
-        query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.message_id = " + str(self.message_id) + ") answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
         text = f"<b>{self.question}</b>\n\n"
         none, yes, no, abstain = 0, 0, 0, 0
-        for record in query:
-            if record["username"] == "royalgamesbot":
-                continue
-            elif record["question_id"] is None:
-                text += "⚪️"
-                none += 1
-            elif record["choice"] == "YES":
-                text += "🔵"
-                yes += 1
-            elif record["choice"] == "NO":
-                text += "🔴"
-                no += 1
-            elif record["choice"] == "ABSTAIN":
-                text += "⚫️"
-                abstain += 1
-            if not self.anonymous:
-                text += f" {str(record['username'])}\n"
-        if self.anonymous:
-            text += "\n"
-        text += f"\n" \
-                f"⚪ {none}\n" \
-                f"🔵 {yes}\n" \
-                f"🔴 {no}\n" \
-                f"⚫️ {abstain}"
+        if self.message_id is not None:
+            query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.message_id = " + str(self.message_id) + ") answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
+            for record in query:
+                if record["username"] == "royalgamesbot":
+                    continue
+                elif record["question_id"] is None:
+                    text += "⚪️"
+                    none += 1
+                elif record["choice"] == "YES":
+                    text += "🔵"
+                    yes += 1
+                elif record["choice"] == "NO":
+                    text += "🔴"
+                    no += 1
+                elif record["choice"] == "ABSTAIN":
+                    text += "⚫️"
+                    abstain += 1
+                if not self.anonymous:
+                    text += f" {str(record['username'])}\n"
+            if self.anonymous:
+                text += "\n"
+            text += f"\n" \
+                    f"⚪ {none}\n" \
+                    f"🔵 {yes}\n" \
+                    f"🔴 {no}\n" \
+                    f"⚫@roy️ {abstain}"
         return text
 
 
