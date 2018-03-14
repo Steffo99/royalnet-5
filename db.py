@@ -692,7 +692,7 @@ class VoteQuestion(Base):
         return f"<Vote {self.id}>"
 
     def generate_text(self, session: Session):
-        query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.id = 8) answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
+        query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.message_id = " + str(self.message_id) + ") answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
         text = f"<b>{self.question}</b>\n\n"
         none, yes, no, abstain = 0, 0, 0, 0
         for record in query:
