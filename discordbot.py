@@ -145,7 +145,7 @@ async def on_error(event, *args, **kwargs):
 
 @client.event
 async def on_ready():
-    await client.send_message(client.get_channel("368447084518572034"),
+    await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                               f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
     await client.change_presence(game=None, status=discord.Status.online)
 
@@ -156,7 +156,7 @@ async def on_message(message: discord.Message):
     global voice_player
     if message.content.startswith("!register"):
         await client.send_typing(message.channel)
-        session = await loop.run_in_executor(executor, db.Session())
+        session = await loop.run_in_executor(executor, db.Session)
         try:
             username = message.content.split(" ", 1)[1]
         except IndexError:
