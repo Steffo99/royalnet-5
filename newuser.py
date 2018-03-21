@@ -1,7 +1,10 @@
 import db
 
 session = db.Session()
-user = db.Royal.create(session, input("Nome account: "))
+username = input("Nome account: ")
+user = session.query(db.Royal).filter_by(username=username).one_or_none()
+if user is None:
+    user = db.Royal.create(session, username)
 session.add(user)
 session.commit()
 try:
