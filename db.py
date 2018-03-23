@@ -719,7 +719,7 @@ class VoteQuestion(Base):
                     f"⚪ {none}\n" \
                     f"🔵 {yes}\n" \
                     f"🔴 {no}\n" \
-                    f"⚫@roy️ {abstain}"
+                    f"⚫️ {abstain}"
         return text
 
 
@@ -746,8 +746,6 @@ class VoteAnswer(Base):
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
-    session = Session()
-    session.query(VoteQuestion).first().generate_text(session)
-    #print("Creating new tables...")
-    #Base.metadata.create_all(bind=engine)
-    #print("Done!")
+    print("Creating new tables...")
+    Base.metadata.create_all(bind=engine)
+    print("Done!")
