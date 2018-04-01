@@ -744,6 +744,15 @@ class VoteAnswer(Base):
         return f"<VoteAnswer {self.question_id} {self.user} {self.choice}>"
 
 
+class AprilFoolsBan(Base):
+    __tablename__ = "aprilfoolsban"
+
+    id = Column(Integer, primary_key=True)
+    from_user_id = Column(BigInteger, nullable=False)
+    to_user_id = Column(BigInteger, nullable=False)
+    datetime = Column(DateTime, nullable=False)
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

@@ -307,6 +307,46 @@ def on_callback_query(bot: Bot, update: Update):
             session.close()
 
 
+def cmd_ban(bot: Bot, update: Update):
+    if datetime.date.today() != datetime.date(2018, 4, 1):
+        bot.send_message(update.message.chat.id, "⚠ Non è il giorno adatto per bannare persone!")
+        return
+    session = db.Session()
+    try:
+        last_bans = session.query(db.AprilFoolsBan).filter(db.AprilFoolsBan.datetime > (datetime.datetime.now() - datetime.timedelta(minutes=5))).all()
+        if len(last_bans) > 0:
+            bot.send_message(update.message.chat.id, "⚠ /ban è in cooldown.\n"
+                                                     "Può essere usato solo 1 volta a testa ogni 5 minuti!")
+            return
+        try:
+            arg = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, "⚠ Devi specificare un bersaglio!")
+            return
+        target_user = session.query(db.Telegram).filter_by(username=arg).one_or_none()
+        if target_user is None:
+            bot.send_message(update.message.chat.id, "⚠ Il bersaglio specificato non esiste nel RYGdb.\n"
+                                                     "Le possibilità sono due: non è un membro RYG, oppure non si è ancora registrato e va bannato manualmente.")
+            return
+        if int(target_user.telegram_id) == 25167391:
+            bot.send_message(update.message.chat.id, "⚠ Il creatore della chat non può essere espulso.")
+            return
+        bannerino = db.AprilFoolsBan(from_user_id=update.message.from_user.id, to_user_id=target_user.telegram_id, datetime=datetime.datetime.now())
+        session.add(bannerino)
+        session.commit()
+        bot.kick_chat_member(update.message.chat.id, target_user.telegram_id)
+        bot.unban_chat_member(update.message.chat.id, target_user.telegram_id)
+        try:
+            bot.send_message(target_user.telegram_id, "https://t.me/joinchat/AYAGH0TEav8WcbPVfNe75A")
+        except Exception:
+            pass
+        bot.send_message(update.message.chat.id, "🔨")
+    except Exception as e:
+        pass
+    finally:
+        session.close()
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -324,6 +364,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("balurage", cmd_balurage))
     u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
+    u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.start_polling()
     u.idle()
