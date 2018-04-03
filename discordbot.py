@@ -264,7 +264,7 @@ async def on_message(message: discord.Message):
         voice_player.resume()
         await client.send_message(message.channel, f"▶️ Riproduzione ripresa.")
     elif message.content.startswith("!cancel"):
-        if not len(voice_queue) > 1:
+        if not len(voice_queue) > 0:
             await client.send_message(message.channel, f"⚠ Non ci sono video da annullare.")
             return
         voice_queue.pop()
