@@ -16,6 +16,7 @@ import os
 import asyncio
 import configparser
 import subprocess
+import async_timeout
 
 # Queue emojis
 queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
@@ -343,7 +344,7 @@ async def update_music_queue():
         if voice_client is None:
             await asyncio.sleep(5)
             continue
-        if voice_player is not None and not voice_player._end.is_set():
+        if voice_player is not None and not voice_player.is_done():
             await asyncio.sleep(1)
             continue
         if len(voice_queue) == 0:
@@ -355,7 +356,13 @@ async def update_music_queue():
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f"⬇️ E' iniziato il download di `{video.ytdl_url}`.")
             try:
-                await video.download()
+                async with async_timeout.timeout(30):
+                    await video.download()
+            except asyncio.TimeoutError:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠️ Il download della canzone ha richiesto più di 30 secondi ed è stato "
+                                          f"annullato. ")
+                continue
             except DurationError:
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           f"⚠️ Il file supera il limite di durata impostato in config.ini "
@@ -383,13 +390,7 @@ def process(users_connection=None):
         asyncio.ensure_future(update_users_pipe(users_connection))
     asyncio.ensure_future(update_music_queue())
     client.on_error = on_error
-    while True:
-        try:
-            client.run(config["Discord"]["bot_token"])
-        except Exception as e:
-            on_error("client_run")
-            print(e)
-            print("Discordbot restarting...")
+    client.run(config["Discord"]["bot_token"])
 
 
 if __name__ == "__main__":
