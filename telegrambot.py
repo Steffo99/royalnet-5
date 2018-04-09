@@ -6,9 +6,11 @@ import errors
 import stagismo
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+import telegram.error
 from discord import Status as DiscordStatus
 import subprocess
 import os
+import time
 
 # Init the config reader
 import configparser
@@ -371,8 +373,14 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"], f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
-    u.start_polling()
-    u.idle()
+    while True:
+        try:
+            u.start_polling()
+            u.idle()
+        except telegram.error.TimedOut:
+            print("Telegrambot timed out.")
+            time.sleep(60)
+            print("Telegrambot restarting...")
 
 if __name__ == "__main__":
     process(None)
