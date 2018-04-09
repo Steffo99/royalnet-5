@@ -1,6 +1,5 @@
 import random
 import re
-
 import discord
 import discord.opus
 import discord.voice_client
@@ -16,6 +15,7 @@ import typing
 import os
 import asyncio
 import configparser
+import subprocess
 
 # Queue emojis
 queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
@@ -98,7 +98,6 @@ if __debug__:
     version = "Dev"
 else:
     # Find the latest git tag
-    import subprocess
     old_wd = os.getcwd()
     try:
         os.chdir(os.path.dirname(__file__))
@@ -113,7 +112,7 @@ client = discord.Client()
 if platform.system() == "Linux":
     discord.opus.load_opus("/usr/lib/x86_64-linux-gnu/libopus.so")
 elif platform.system() == "Windows":
-    discord.opus.load_opus("libopus-0.dll")
+    discord.opus.load_opus("libopus-0.x64.dll")
 
 voice_client: typing.Optional[discord.VoiceClient] = None
 voice_player: typing.Optional[discord.voice_client.StreamPlayer] = None
@@ -236,7 +235,7 @@ async def on_message(message: discord.Message):
             return
         # Find the sent text
         try:
-            text:str = message.content.split(" ", 1)[1]
+            text: str = message.content.split(" ", 1)[1]
         except IndexError:
             await client.send_message(message.channel, "⚠️ Non hai specificato il nome del file!\n"
                                                        "Sintassi corretta: `!file <nomefile>`")
@@ -277,6 +276,17 @@ async def on_message(message: discord.Message):
         voice_player.stop()
         voice_player = None
         await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
+    elif message.content.startswith("!disconnect"):
+        if voice_client is None:
+            await client.send_message(message.channel, "⚠ Il bot in questo momento non è in chat vocale.")
+            return
+        if voice_player is not None:
+            await client.send_message(message.channel, "⚠ Prima di disconnettere il bot, interrompi la riproduzione di "
+                                                       "una canzone scrivendo `!stop`.")
+            return
+        await voice_client.disconnect()
+        voice_client = None
+        await client.send_message(message.channel, "✅ Mi sono disconnesso dalla chat vocale.")
     elif message.content.startswith("!queue"):
         msg = "Video in coda:\n"
         for position in range(10) if len(voice_queue) > 10 else range(len(voice_queue)):
@@ -348,7 +358,7 @@ async def update_music_queue():
                 await video.download()
             except DurationError:
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                          f"⚠ Il file supera il limite di durata impostato in config.ini "
+                                          f"⚠️ Il file supera il limite di durata impostato in config.ini "
                                           f"(`{config['YouTube']['max_duration']}` secondi).")
                 continue
             except Exception as e:
@@ -373,7 +383,13 @@ def process(users_connection=None):
         asyncio.ensure_future(update_users_pipe(users_connection))
     asyncio.ensure_future(update_music_queue())
     client.on_error = on_error
-    client.run(config["Discord"]["bot_token"])
+    while True:
+        try:
+            client.run(config["Discord"]["bot_token"])
+        except Exception as e:
+            on_error("client_run")
+            print(e)
+            print("Discordbot restarting...")
 
 
 if __name__ == "__main__":
