@@ -314,15 +314,15 @@ def on_callback_query(bot: Bot, update: Update):
 
 
 def cmd_ban(bot: Bot, update: Update):
-    if datetime.date.today() != datetime.date(2018, 4, 1):
+    if datetime.date.today() != datetime.date(2019, 4, 1):
         bot.send_message(update.message.chat.id, "⚠ Non è il giorno adatto per bannare persone!")
         return
     session = db.Session()
     try:
-        last_bans = session.query(db.AprilFoolsBan).filter(db.AprilFoolsBan.datetime > (datetime.datetime.now() - datetime.timedelta(minutes=5))).all()
+        last_bans = session.query(db.AprilFoolsBan).filter(db.AprilFoolsBan.datetime > (datetime.datetime.now() - datetime.timedelta(minutes=15))).all()
         if len(last_bans) > 0:
             bot.send_message(update.message.chat.id, "⚠ /ban è in cooldown.\n"
-                                                     "Può essere usato solo 1 volta a testa ogni 5 minuti!")
+                                                     "Può essere usato solo 1 volta ogni 15 minuti!")
             return
         try:
             arg = update.message.text.split(" ", 1)[1]

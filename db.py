@@ -311,7 +311,7 @@ class Dota(Base):
         if r.status_code != 200:
             raise RequestError("OpenDota returned {r.status_code}")
         wl = r.json()
-        new_record = Dota(steam_id=steam_id,
+        new_record = Dota(steam_id=str(steam_id),
                           rank_tier=data["rank_tier"],
                           wins=wl["win"],
                           losses=wl["lose"])

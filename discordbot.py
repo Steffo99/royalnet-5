@@ -17,6 +17,7 @@ import asyncio
 import configparser
 import subprocess
 import async_timeout
+import raven
 
 # Queue emojis
 queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
@@ -122,23 +123,31 @@ voice_queue: typing.List[Video] = []
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
+# Init the Sentry client
+sentry = raven.Client(config["Sentry"]["token"],
+                      release=version)
+
 
 async def on_error(event, *args, **kwargs):
-    t, exception, traceback = sys.exc_info()
+    ei = sys.exc_info()
+    print("ERRORE CRITICO:\n" + repr(ei[1]) + "\n\n" + repr(ei))
     try:
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                   f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
-                                  f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n\n"
+                                  f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
+                                  f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
                                   f"Dettagli dell'errore:\n"
                                   f"```python\n"
-                                  f"{repr(exception)}\n"
+                                  f"{repr(ei[1])}\n"
                                   f"```")
-        await voice_client.disconnect()
+        if voice_client is not None:
+            await voice_client.disconnect()
         await client.change_presence(status=discord.Status.invisible)
         await client.close()
     except Exception as e:
-        print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n" + repr(sys.exc_info()))
+        print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n\n" + repr(sys.exc_info()))
     loop.stop()
+    sentry.captureException(exc_info=ei)
     os._exit(1)
     pass
 
@@ -154,25 +163,48 @@ async def on_ready():
 async def on_message(message: discord.Message):
     global voice_queue
     global voice_player
-    if message.content.startswith("!register"):
-        await client.send_typing(message.channel)
-        session = await loop.run_in_executor(executor, db.Session)
+    if not message.content.startswith("!"):
+        return
+    sentry.user_context({
+        "discord": {
+            "discord_id": message.author.id,
+            "name": message.author.name,
+            "discriminator": message.author.discriminator
+        }
+    })
+    await client.send_typing(message.channel)
+    session = await loop.run_in_executor(executor, db.Session)
+    user = session.query(db.Discord).filter_by(discord_id=message.author.id).one_or_none()
+    if user is None:
+        user = db.Discord(discord_id=message.author.id,
+                          name=message.author.name,
+                          discriminator=message.author.discriminator,
+                          avatar_hex=message.author.avatar)
+        await loop.run_in_executor(executor, session.commit)
+    else:
+        sentry.user_context({
+            "royal": {
+                "user_id": user.royal_id
+            }
+        })
+    if message.content.startswith("!link"):
+        if user.royal_id is None:
+            await client.send_message(message.channel,
+                                      "⚠️ Il tuo account Discord è già collegato a un account RYG "
+                                      "o l'account RYG che hai specificato è già collegato a un account Discord.")
+            return
         try:
             username = message.content.split(" ", 1)[1]
         except IndexError:
             await client.send_message(message.channel, "⚠️ Non hai specificato un username!\n"
-                                                       "Sintassi corretta: `!register <username_ryg>`")
+                                                       "Sintassi corretta: `!link <username_ryg>`")
             return
-        try:
-            d = db.Discord.create(session,
-                                  royal_username=username,
-                                  discord_user=message.author)
-        except errors.AlreadyExistingError:
+        royal = session.query(db.Royal).filter_by(username=username).one_or_none()
+        if royal is None:
             await client.send_message(message.channel,
-                                      "⚠ Il tuo account Discord è già collegato a un account RYG "
-                                      "o l'account RYG che hai specificato è già collegato a un account Discord.")
+                                      "⚠️ Non esiste nessun account RYG con questo nome.")
             return
-        session.add(d)
+        user.royal_id = royal.id
         session.commit()
         session.close()
         await client.send_message(message.channel, "✅ Sincronizzazione completata!")
