@@ -183,6 +183,11 @@ async def on_message(message: discord.Message):
         await loop.run_in_executor(executor, session.commit)
     else:
         sentry.user_context({
+            "discord": {
+                "discord_id": message.author.id,
+                "name": message.author.name,
+                "discriminator": message.author.discriminator
+            },
             "royal": {
                 "user_id": user.royal_id
             }
