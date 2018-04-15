@@ -380,7 +380,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
-                       f"Ultimo aggiornamento: `{version}: {commit_msg}`")
+                       f"Ultimo aggiornamento: `{version}: {commit_msg}`",
+                       parse_mode="Markdown")
     while True:
         try:
             u.start_polling()
