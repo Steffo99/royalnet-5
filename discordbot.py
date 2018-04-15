@@ -133,7 +133,7 @@ async def on_error(event, *args, **kwargs):
     print("ERRORE CRITICO:\n" + repr(ei[1]) + "\n\n" + repr(ei))
     try:
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                  f"☢️ ERRORE CRITICO NELL'EVENTO `{event}`\n"
+                                  f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event}`\n"
                                   f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
                                   f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
                                   f"Dettagli dell'errore:\n"
@@ -180,6 +180,7 @@ async def on_message(message: discord.Message):
                           name=message.author.name,
                           discriminator=message.author.discriminator,
                           avatar_hex=message.author.avatar)
+        session.add(user)
         await loop.run_in_executor(executor, session.commit)
     else:
         sentry.user_context({
@@ -378,47 +379,68 @@ async def update_music_queue():
     global voice_player
     global voice_queue
     while True:
-        if voice_client is None:
-            await asyncio.sleep(5)
-            continue
-        if voice_player is not None and not voice_player.is_done():
-            await asyncio.sleep(1)
-            continue
-        if len(voice_queue) == 0:
-            await client.change_presence()
-            await asyncio.sleep(1)
-            continue
-        video = voice_queue.pop(0)
-        if video.ytdl_url:
+        try:
+            if voice_client is None:
+                await asyncio.sleep(5)
+                continue
+            if voice_player is not None and not voice_player.is_done():
+                await asyncio.sleep(1)
+                continue
+            if len(voice_queue) == 0:
+                await client.change_presence()
+                await asyncio.sleep(1)
+                continue
+            video = voice_queue.pop(0)
+            if video.ytdl_url:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⬇️ E' iniziato il download di `{video.ytdl_url}`.")
+                try:
+                    async with async_timeout.timeout(30):
+                        await video.download()
+                except asyncio.TimeoutError:
+                    await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                              f"⚠️ Il download della canzone ha richiesto più di 30 secondi ed è stato "
+                                              f"annullato. ")
+                    continue
+                except DurationError:
+                    await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                              f"⚠️ Il file supera il limite di durata impostato in config.ini "
+                                              f"(`{config['YouTube']['max_duration']}` secondi).")
+                    continue
+                except Exception as e:
+                    await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                              f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`:\n"
+                                              f"```\n"
+                                              f"{e}\n"
+                                              f"```")
+                    continue
+            voice_player = voice_client.create_ffmpeg_player(f"opusfiles/{video.filename}.opus")
+            voice_player.start()
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                      f"⬇️ E' iniziato il download di `{video.ytdl_url}`.")
+                                      f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
+                                      f"`{video.filename}`")
+            await client.change_presence(game=discord.Game(name=video.filename, type=2))
+            await video.add_to_db()
+        except Exception:
+            ei = sys.exc_info()
             try:
-                async with async_timeout.timeout(30):
-                    await video.download()
-            except asyncio.TimeoutError:
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                          f"⚠️ Il download della canzone ha richiesto più di 30 secondi ed è stato "
-                                          f"annullato. ")
-                continue
-            except DurationError:
-                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                          f"⚠️ Il file supera il limite di durata impostato in config.ini "
-                                          f"(`{config['YouTube']['max_duration']}` secondi).")
-                continue
-            except Exception as e:
-                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                          f"⚠️ C'è stato un errore durante il download di `{video.ytdl_url}`:\n"
-                                          f"```\n"
-                                          f"{e}\n"
+                                          f"☢️ **ERRORE CRITICO NELL'AGGIORNAMENTO DELLA CODA DI VIDEO**\n"
+                                          f"Il bot si è disconnesso dalla chat vocale, e ha svuotato la coda.\n"
+                                          f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
+                                          f"Dettagli dell'errore:\n"
+                                          f"```python\n"
+                                          f"{repr(ei[1])}\n"
                                           f"```")
-                continue
-        voice_player = voice_client.create_ffmpeg_player(f"opusfiles/{video.filename}.opus")
-        voice_player.start()
-        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                  f"▶ Ora in riproduzione in <#{voice_client.channel.id}>:\n"
-                                  f"`{video.filename}`")
-        await client.change_presence(game=discord.Game(name=video.filename, type=2))
-        await video.add_to_db()
+                if voice_player is not None:
+                    await voice_player.stop()
+                voice_player = None
+                await voice_client.disconnect()
+                voice_client = None
+                voice_queue = []
+            except Exception as e:
+                print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n\n" + repr(sys.exc_info()))
+            sentry.captureException(exc_info=ei)
 
 
 def process(users_connection=None):

@@ -47,7 +47,9 @@ def cmd_register(bot: Bot, update: Update):
                                royal_username=username,
                                telegram_user=update.message.from_user)
     except errors.AlreadyExistingError:
-        bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram è già collegato a un account RYG o l'account RYG che hai specificato è già collegato a un account Telegram.")
+        bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram è già collegato a un account RYG o"
+                                                 " l'account RYG che hai specificato è già collegato a un account"
+                                                 " Telegram.")
         session.close()
         return
     session.add(t)
@@ -290,7 +292,8 @@ def on_callback_query(bot: Bot, update: Update):
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text="⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+                                          text="⚠ Il tuo account Telegram non è registrato al RYGdb!"
+                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
                 return
             question = session.query(db.VoteQuestion).filter_by(message_id=update.callback_query.message.message_id).one()
             answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
@@ -307,7 +310,7 @@ def on_callback_query(bot: Bot, update: Update):
             bot.edit_message_text(message_id=update.callback_query.message.message_id, chat_id=update.callback_query.message.chat.id,
                                   text=question.generate_text(session), reply_markup=inline_keyboard,
                                   parse_mode="HTML")
-        except Exception as e:
+        except Exception:
             raise
         finally:
             session.close()
@@ -332,7 +335,8 @@ def cmd_ban(bot: Bot, update: Update):
         target_user = session.query(db.Telegram).filter_by(username=arg).one_or_none()
         if target_user is None:
             bot.send_message(update.message.chat.id, "⚠ Il bersaglio specificato non esiste nel RYGdb.\n"
-                                                     "Le possibilità sono due: non è un membro RYG, oppure non si è ancora registrato e va bannato manualmente.")
+                                                     "Le possibilità sono due: non è un membro RYG, "
+                                                     "oppure non si è ancora registrato e va bannato manualmente.")
             return
         if int(target_user.telegram_id) == 25167391:
             bot.send_message(update.message.chat.id, "⚠ Il creatore della chat non può essere espulso.")
