@@ -98,12 +98,14 @@ class Video:
 
 if __debug__:
     version = "Dev"
+    commit_msg = "_in sviluppo_"
 else:
     # Find the latest git tag
     old_wd = os.getcwd()
     try:
         os.chdir(os.path.dirname(__file__))
         version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
+        commit_msg = str(subprocess.check_output(["git", "log", "-1", "--pretty=%B"]), encoding="utf8").strip()
     except Exception:
         version = "❓"
     finally:
@@ -155,7 +157,8 @@ async def on_error(event, *args, **kwargs):
 @client.event
 async def on_ready():
     await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                              f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
+                              f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
+                              f"Ultimo aggiornamento: `{version}: {commit_msg}`")
     await client.change_presence(game=None, status=discord.Status.online)
 
 

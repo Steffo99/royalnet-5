@@ -22,12 +22,14 @@ discord_connection = None
 # Find the latest git tag
 if __debug__:
     version = "Dev"
+    commit_msg = "_in sviluppo_"
 else:
     # Find the latest git tag
     old_wd = os.getcwd()
     try:
         os.chdir(os.path.dirname(__file__))
         version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
+        commit_msg = str(subprocess.check_output(["git", "log", "-1", "--pretty=%B"]), encoding="utf8").strip()
     except Exception:
         version = "❓"
     finally:
@@ -376,7 +378,9 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
     u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
-    u.bot.send_message(config["Telegram"]["main_group"], f"ℹ Royal Bot {version} avviato e pronto a ricevere comandi!")
+    u.bot.send_message(config["Telegram"]["main_group"],
+                       f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
+                       f"Ultimo aggiornamento: `{version}: {commit_msg}`")
     while True:
         try:
             u.start_polling()
