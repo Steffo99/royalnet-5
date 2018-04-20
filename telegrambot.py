@@ -11,6 +11,7 @@ from discord import Status as DiscordStatus
 import subprocess
 import os
 import time
+import cast
 
 # Init the config reader
 import configparser
@@ -132,7 +133,7 @@ def cmd_discord(bot: Bot, update: Update):
 
 def cmd_cast(bot: Bot, update: Update):
     try:
-        spell = update.message.text.split(" ", 1)[1]
+        spell: str = update.message.text.split(" ", 1)[1]
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato nessun incantesimo!\n"
                                                  "Sintassi corretta: `/cast <nome_incantesimo>`")
@@ -143,19 +144,10 @@ def cmd_cast(bot: Bot, update: Update):
     target = random.sample(session.query(db.Telegram).all(), 1)[0]
     # Close the session
     session.close()
-    # Seed the rng with the spell name
-    # so that spells always deal the same damage
-    random.seed(spell)
-    dmg_dice = random.randrange(1, 11)
-    dmg_max = random.sample([4, 6, 8, 10, 12, 20, 100], 1)[0]
-    dmg_mod = random.randrange(math.floor(-dmg_max / 5), math.ceil(dmg_max / 5) + 1)
-    # Reseed the rng with a random value
-    # so that the dice roll always deals a different damage
-    random.seed()
-    total = dmg_mod
-    for dice in range(0, dmg_dice):
-        total += random.randrange(1, dmg_max + 1)
-    bot.send_message(update.message.chat.id, f"❇️ Ho lanciato {spell} su {target.username if target.username is not None else target.first_name} per {dmg_dice}d{dmg_max}{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}={total if total > 0 else 0} danni!")
+    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell,
+                                                       target_name=target.username if target.username is not None
+                                                       else target.first_name, platform="telegram"),
+                     parse_mode="HTML")
 
 
 def cmd_color(bot: Bot, update: Update):
@@ -390,6 +382,7 @@ def process(arg_discord_connection):
             print("Telegrambot timed out.")
             time.sleep(60)
             print("Telegrambot restarting...")
+
 
 if __name__ == "__main__":
     process(None)

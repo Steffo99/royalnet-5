@@ -6,7 +6,6 @@ import discord.voice_client
 import functools
 import sys
 import db
-import errors
 import youtube_dl
 import concurrent.futures
 import stagismo
@@ -18,6 +17,7 @@ import configparser
 import subprocess
 import async_timeout
 import raven
+import cast
 
 # Queue emojis
 queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
@@ -341,25 +341,9 @@ async def on_message(message: discord.Message):
             await client.send_message(message.channel, "⚠️ Non hai specificato nessun incantesimo!\n"
                                                        "Sintassi corretta: `!cast <nome_incantesimo>`")
             return
-        target = random.sample(list(message.server.members), 1)[0]
-        # Seed the rng with the spell name
-        # so that spells always deal the same damage
-        random.seed(spell)
-        dmg_mod = random.randrange(-2, 3)
-        dmg_dice = random.randrange(1, 4)
-        dmg_max = random.sample([4, 6, 8, 10, 12, 20, 100], 1)[0]
-        # Reseed the rng with a random value
-        # so that the dice roll always deals a different damage
-        random.seed()
-        total = dmg_mod
-        for dice in range(0, dmg_dice):
-            total += random.randrange(1, dmg_max+1)
-        await client.send_message(message.channel,
-                                  f"❇️ Ho lanciato **{spell}** "
-                                  f"su **{target.nick if target.nick is not None else target.name}** "
-                                  f"per {dmg_dice}d{dmg_max}"
-                                  f"{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}"
-                                  f"=**{total if total > 0 else 0}** danni!")
+        target: discord.Member = random.sample(list(message.server.members), 1)[0]
+        await client.send_message(message.channel, cast.cast(spell_name=spell, target_name=target.name,
+                                                             platform="discord"))
     elif message.content.startswith("!smecds"):
         ds = random.sample(stagismo.listona, 1)[0]
         await client.send_message(message.channel, f"Secondo me, è colpa {ds}.", tts=True)
