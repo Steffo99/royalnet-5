@@ -8,3 +8,4 @@ psycopg2
 PyNaCl
 async_timeout
 raven
+bcrypt

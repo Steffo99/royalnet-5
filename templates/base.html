@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block pagetitle %}{% endblock %} - Royal Games</title>
+        {% block prehead %}{% endblock %}
+        <link href="{{ url_for('static', filename='nryg.css') }}" rel="stylesheet">
+        {% block posthead %}{% endblock %}
+    </head>
+    <body>
+        {% block body %}{% endblock %}
+    </body>
+</html>
