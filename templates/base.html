@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <title>{% block pagetitle %}{% endblock %} - Royal Games</title>
         {% block prehead %}{% endblock %}
-        <link href="{{ url_for('static', filename='nryg.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='nryg.less') }}" rel="stylesheet/less" type="text/css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.0.2/less.min.js" ></script>
         {% block posthead %}{% endblock %}
     </head>
     <body>
