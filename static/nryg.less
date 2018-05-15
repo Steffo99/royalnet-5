@@ -1,13 +1,23 @@
-@ryg-dark-blue: #0d193b;
-@ryg-light-blue: #a0ccff;
+@background-color: #0d193b;
+@text-color: #a0ccff;
+@accent-color: white;
 
 body {
     font-family: sans-serif;
-    color: @ryg-light-blue;
-    background-color: @ryg-dark-blue;
+    color: @text-color;
+    background-color: @background-color;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: white;
+    color: @accent-color;
 }
 
+input {
+    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
+    color: @text-color;
+    border: none;
+    border-bottom: 1px dashed @text-color;
+    padding: 2px;
+    font-size: medium;
+    font-family: sans-serif;
+}

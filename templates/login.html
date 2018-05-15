@@ -9,13 +9,13 @@
         Login
     </h1>
     <form action="{{ url_for('page_loggedin') }}" method="POST">
-        <label>
+        <label id="label-username">
             Username
-            <input name="username" type="text">
+            <input id="input-username" name="username" type="text">
         </label>
-        <label>
+        <label id="label-password">
             Password
-            <input name="password" type="password">
+            <input id="input-password" name="password" type="password">
         </label>
         <input type="submit" value="Login">
     </form>
