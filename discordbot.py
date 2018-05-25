@@ -20,7 +20,16 @@ import raven
 import cast
 
 # Queue emojis
-queue_emojis = [":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:", ":ten:"]
+queue_emojis = [":one:",
+                ":two:",
+                ":three:",
+                ":four:",
+                ":five:",
+                ":six:",
+                ":seven:",
+                ":eight:",
+                ":nine:",
+                ":keycap_ten:"]
 
 # Init the event loop
 loop = asyncio.get_event_loop()
@@ -29,32 +38,26 @@ loop = asyncio.get_event_loop()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-
-async def find_user(user: discord.User):
-    session = await loop.run_in_executor(executor, db.Session)
-    user = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=user.id).join(db.Royal).first)
-    await loop.run_in_executor(executor, session.close)
-    return user
-
-
 class DurationError(Exception):
     pass
 
 
 class Video:
     def __init__(self):
-        self.enqueuer = None
-        self.filename = None
-        self.ytdl_url = None
+        self.enqueuer = None  # type: typing.Optional[discord.User]
+        self.filename = None  # type: typing.Optional[str]
+        self.ytdl_url = None  # type: typing.Optional[str]
+        self.data = None      # type: typing.Optional[dict]
 
     @staticmethod
-    async def init(user_id: str, *, filename=None, ytdl_url=None):
+    async def init(user_id: str, *, filename=None, ytdl_url=None, data=None):
         if filename is None and ytdl_url is None:
             raise Exception("Filename or url must be specified")
         self = Video()
         self.enqueuer = int(user_id)
         self.filename = filename
         self.ytdl_url = ytdl_url
+        self.data = data if data is not None else {}
         return self
 
     async def download(self):
@@ -95,6 +98,14 @@ class Video:
         await loop.run_in_executor(executor, session.commit)
         await loop.run_in_executor(executor, session.close)
 
+    def __str__(self):
+        if self.data.get("title") is not None:
+            return f"{self.data.get('title')}"
+        elif self.filename is not None:
+            return f"`{self.filename}`"
+        else:
+            return f"<{self.ytdl_url}>"
+
 
 if __debug__:
     version = "Dev"
@@ -116,7 +127,7 @@ client = discord.Client()
 if platform.system() == "Linux":
     discord.opus.load_opus("/usr/lib/x86_64-linux-gnu/libopus.so")
 elif platform.system() == "Windows":
-    discord.opus.load_opus("libopus-0.x64.dll")
+    discord.opus.load_opus("libopus-0.dll")
 
 voice_client: typing.Optional[discord.VoiceClient] = None
 voice_player: typing.Optional[discord.voice_client.StreamPlayer] = None
@@ -127,7 +138,9 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 # Init the Sentry client
 sentry = raven.Client(config["Sentry"]["token"],
-                      release=version)
+                      release=version,
+                      install_logging_hook=False,
+                      hook_libraries=[])
 
 
 async def on_error(event, *args, **kwargs):
@@ -196,7 +209,11 @@ async def on_message(message: discord.Message):
                 "user_id": user.royal_id
             }
         })
-    if message.content.startswith("!link"):
+    if message.content.startswith("!ping"):
+        await ping(channel=message.channel,
+                   author=message.author,
+                   params=["/ping"])
+    elif message.content.startswith("!link"):
         if user.royal_id is None:
             await client.send_message(message.channel,
                                       "⚠️ Il tuo account Discord è già collegato a un account RYG "
@@ -218,16 +235,9 @@ async def on_message(message: discord.Message):
         session.close()
         await client.send_message(message.channel, "✅ Sincronizzazione completata!")
     elif message.content.startswith("!cv"):
-        await client.send_typing(message.channel)
-        if message.author.voice.voice_channel is None:
-            await client.send_message(message.channel, "⚠ Non sei in nessun canale!")
-            return
-        global voice_client
-        if voice_client is not None and voice_client.is_connected():
-            await voice_client.move_to(message.author.voice.voice_channel)
-        else:
-            voice_client = await client.join_voice_channel(message.author.voice.voice_channel)
-        await client.send_message(message.channel, f"✅ Mi sono connesso in <#{message.author.voice.voice_channel.id}>.")
+        cmd_cv(channel=message.channel,
+               author=message.author,
+               params=message.content.split(" "))
     elif message.content.startswith("!play"):
         await client.send_typing(message.channel)
         # The bot should be in voice chat
@@ -242,14 +252,30 @@ async def on_message(message: discord.Message):
             await client.send_message(message.channel, "⚠️ Non hai specificato un url!\n"
                                                        "Sintassi corretta: `!play <video>`")
             return
-        # Se è una playlist, informa che potrebbe essere richiesto un po' di tempo
         if "playlist" in url:
-            await client.send_message(message.channel, f"⚠ Le playlist non sono ancora supportate dal bot.\n"
-                                                       f"Prova mettendo i video singoli a mano!")
-        # If target is a single video
-        video = await Video.init(user_id=message.author.id, ytdl_url=url)
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: <{url}>")
-        voice_queue.append(video)
+            # If target is a playlist
+            await client.send_message(message.channel,
+                                      f"ℹ️ Il link che hai inviato contiene una playlist.\n"
+                                      f"L'elaborazione delle playlist solitamente richiede molto tempo.")
+            with youtube_dl.YoutubeDL({"quiet": True,
+                                       "ignoreerrors": True,
+                                       "simulate": True}) as ytdl:
+                playlist_data = await loop.run_in_executor(executor,
+                                                           functools.partial(ytdl.extract_info, url, download=False))
+            for entry in playlist_data["entries"]:
+                # Ignore empty videos
+                if entry is None:
+                    continue
+                # Add the video to the queue
+                video = await Video.init(user_id=message.author.id, ytdl_url=entry["webpage_url"], data=entry)
+                voice_queue.append(video)
+            await client.send_message(message.channel,
+                                      f"✅ Aggiunti alla coda **{len(playlist_data['entries']) } video**.")
+        else:
+            # If target is a single video
+            video = await Video.init(user_id=message.author.id, ytdl_url=url)
+            await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
+            voice_queue.append(video)
     elif message.content.startswith("!search"):
         await client.send_typing(message.channel)
         # The bot should be in voice chat
@@ -266,7 +292,7 @@ async def on_message(message: discord.Message):
             return
         # If target is a single video
         video = await Video.init(user_id=message.author.id, ytdl_url=f"ytsearch:{text}")
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: `ytsearch:{text}`")
+        await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
         voice_queue.append(video)
     elif message.content.startswith("!file"):
         await client.send_typing(message.channel)
@@ -284,7 +310,7 @@ async def on_message(message: discord.Message):
             return
         # If target is a single video
         video = await Video.init(user_id=message.author.id, filename=text)
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: `{text}`")
+        await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
         voice_queue.append(video)
     elif message.content.startswith("!skip"):
         global voice_player
@@ -330,9 +356,11 @@ async def on_message(message: discord.Message):
         voice_client = None
         await client.send_message(message.channel, "✅ Mi sono disconnesso dalla chat vocale.")
     elif message.content.startswith("!queue"):
-        msg = "Video in coda:\n"
-        for position in range(10) if len(voice_queue) > 10 else range(len(voice_queue)):
-            msg += f"{queue_emojis[position]} {'`' + voice_queue[position].filename + '`' if voice_queue[position].filename is not None else '<' + voice_queue[position].ytdl_url + '>'}\n"
+        msg = "**Video in coda:**\n"
+        for position, video in enumerate(voice_queue[:10]):
+            msg += f"{queue_emojis[position]} {str(voice_queue[position])}\n"
+        if len(voice_queue) > 10:
+            msg += f"e altri {len(voice_queue) - 10} video!\n"
         await client.send_message(message.channel, msg)
     elif message.content.startswith("!cast"):
         try:
@@ -360,6 +388,79 @@ async def update_users_pipe(users_connection):
             users_connection.send(discord_members)
 
 
+def command(func):
+    """Decorator. Runs the function as a Discord command."""
+    async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
+        sentry.user_context({
+            "discord_id": author.id,
+            "username": f"{author.name}#{author.discriminator}"
+        })
+        try:
+            result = await func(channel=channel, author=author, params=params, *args, **kwargs)
+        except Exception:
+            try:
+                await client.send_message(channel,
+                                          f"☢ **ERRORE DURANTE L'ESECUZIONE DEL COMANDO {params[0]}**\n"
+                                          f"Il comando è stato ignorato.\n"
+                                          f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
+                                          f"Dettagli dell'errore:\n"
+                                          f"```python\n"
+                                          f"{repr(ei[1])}\n"
+                                          f"```")
+            except Exception:
+                pass
+            ei = sys.exc_info()
+            sentry.captureException(exc_info=ei)
+        else:
+            return result
+    return new_func
+
+
+def requires_cv(func):
+    "Decorator. Ensures the voice client is connected before running the command."
+    async def new_func(channel: discord.Channel, author: discord.User, params: typing.List[str], *args, **kwargs):
+        global voice_client
+        if voice_client is None or not voice_client.is_connected():
+            await client.send_message(channel,
+                                      "⚠️ Non sono connesso alla cv!\n"
+                                      "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
+            return
+        return await func(channel=channel, author=author, params=params, *args, **kwargs)
+    return new_func
+
+
+def requires_rygdb(func):
+    async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
+        session = await loop.run_in_executor(executor, db.Session)
+        dbuser = await loop.run_in_executor(executor,
+                                            session.query(db.Discord)
+                                            .filter_by(discord_id=author.id)
+                                            .join(db.Royal)
+                                            .first)
+        await loop.run_in_executor(executor, session.close)
+        return await func(channel=channel, author=author, params=params, dbuser=dbuser, *args, **kwargs)
+    return new_func
+
+
+@command
+async def ping(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    await client.send_message(channel, f"Pong!")
+
+
+@command
+async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    await client.send_typing(channel)
+    if author.voice.voice_channel is None:
+        await client.send_message(channel, "⚠ Non sei in nessun canale!")
+        return
+    global voice_client
+    if voice_client is not None and voice_client.is_connected():
+        await voice_client.move_to(author.voice.voice_channel)
+    else:
+        voice_client = await client.join_voice_channel(author.voice.voice_channel)
+    await client.send_message(channel, f"✅ Mi sono connesso in <#{author.voice.voice_channel.id}>.")
+
+
 async def update_music_queue():
     await client.wait_until_ready()
     global voice_client
@@ -380,7 +481,7 @@ async def update_music_queue():
             video = voice_queue.pop(0)
             if video.ytdl_url:
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                          f"⬇️ E' iniziato il download di `{video.ytdl_url}`.")
+                                          f"⬇️ E' iniziato il download di {str(video)}.")
                 try:
                     async with async_timeout.timeout(30):
                         await video.download()
