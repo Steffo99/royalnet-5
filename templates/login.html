@@ -8,15 +8,15 @@
     <h1>
         Login
     </h1>
-    <form action="{{ url_for('page_loggedin') }}" method="POST">
-        <label id="label-username">
+    <form class="input-grid" action="{{ url_for('page_loggedin') }}" method="POST">
+        <label id="label-username" for="input-username">
             Username
-            <input id="input-username" name="username" type="text">
         </label>
-        <label id="label-password">
+        <input id="input-username" name="username" type="text">
+        <label id="label-password" for="input-password">
             Password
-            <input id="input-password" name="password" type="password">
         </label>
+        <input id="input-password" name="password" type="password">
         <input type="submit" value="Login">
     </form>
 {% endblock %}

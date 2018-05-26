@@ -41,8 +41,11 @@ config.read("config.ini")
 class DurationError(Exception):
     pass
 
+class LocalFileError(Exception):
+    pass
 
-class Video:
+
+class OldVideo:
     def __init__(self):
         self.enqueuer = None  # type: typing.Optional[discord.User]
         self.filename = None  # type: typing.Optional[str]
@@ -53,7 +56,7 @@ class Video:
     async def init(user_id: str, *, filename=None, ytdl_url=None, data=None):
         if filename is None and ytdl_url is None:
             raise Exception("Filename or url must be specified")
-        self = Video()
+        self = OldVideo()
         self.enqueuer = int(user_id)
         self.filename = filename
         self.ytdl_url = ytdl_url
@@ -107,6 +110,24 @@ class Video:
             return f"<{self.ytdl_url}>"
 
 
+class Video:
+    def __init__(self, url=None, file=None):
+        self.url = url
+        self.file = file
+
+    def __str__(self):
+        pass
+
+    async def retrieve_info(self):
+        if url is None:
+            raise LocalFileError()
+        with youtube_dl.YoutubeDL({"quiet": True,
+                                   "ignoreerrors": True,
+                                   "simulate": True}) as ytdl:
+            await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, url=self.url, download=False)
+            # TODO
+
+
 if __debug__:
     version = "Dev"
     commit_msg = "_in sviluppo_"
@@ -131,7 +152,7 @@ elif platform.system() == "Windows":
 
 voice_client: typing.Optional[discord.VoiceClient] = None
 voice_player: typing.Optional[discord.voice_client.StreamPlayer] = None
-voice_queue: typing.List[Video] = []
+voice_queue: typing.List[OldVideo] = []
 
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -210,9 +231,9 @@ async def on_message(message: discord.Message):
             }
         })
     if message.content.startswith("!ping"):
-        await ping(channel=message.channel,
-                   author=message.author,
-                   params=["/ping"])
+        await cmd_ping(channel=message.channel,
+                       author=message.author,
+                       params=["/ping"])
     elif message.content.startswith("!link"):
         if user.royal_id is None:
             await client.send_message(message.channel,
@@ -239,12 +260,6 @@ async def on_message(message: discord.Message):
                author=message.author,
                params=message.content.split(" "))
     elif message.content.startswith("!play"):
-        await client.send_typing(message.channel)
-        # The bot should be in voice chat
-        if voice_client is None:
-            await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
-                                                       "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
-            return
         # Find the sent url
         try:
             url = message.content.split(" ", 1)[1]
@@ -267,13 +282,13 @@ async def on_message(message: discord.Message):
                 if entry is None:
                     continue
                 # Add the video to the queue
-                video = await Video.init(user_id=message.author.id, ytdl_url=entry["webpage_url"], data=entry)
+                video = await OldVideo.init(user_id=message.author.id, ytdl_url=entry["webpage_url"], data=entry)
                 voice_queue.append(video)
             await client.send_message(message.channel,
                                       f"✅ Aggiunti alla coda **{len(playlist_data['entries']) } video**.")
         else:
             # If target is a single video
-            video = await Video.init(user_id=message.author.id, ytdl_url=url)
+            video = await OldVideo.init(user_id=message.author.id, ytdl_url=url)
             await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
             voice_queue.append(video)
     elif message.content.startswith("!search"):
@@ -291,7 +306,7 @@ async def on_message(message: discord.Message):
                                                        "Sintassi corretta: `!search <titolo>`")
             return
         # If target is a single video
-        video = await Video.init(user_id=message.author.id, ytdl_url=f"ytsearch:{text}")
+        video = await OldVideo.init(user_id=message.author.id, ytdl_url=f"ytsearch:{text}")
         await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
         voice_queue.append(video)
     elif message.content.startswith("!file"):
@@ -309,7 +324,7 @@ async def on_message(message: discord.Message):
                                                        "Sintassi corretta: `!file <nomefile>`")
             return
         # If target is a single video
-        video = await Video.init(user_id=message.author.id, filename=text)
+        video = await OldVideo.init(user_id=message.author.id, filename=text)
         await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
         voice_queue.append(video)
     elif message.content.startswith("!skip"):
@@ -429,7 +444,7 @@ def requires_cv(func):
     return new_func
 
 
-def requires_rygdb(func):
+def requires_rygdb(func, optional=False):
     async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
         session = await loop.run_in_executor(executor, db.Session)
         dbuser = await loop.run_in_executor(executor,
@@ -437,13 +452,17 @@ def requires_rygdb(func):
                                             .filter_by(discord_id=author.id)
                                             .join(db.Royal)
                                             .first)
+        if not optional and dbuser is None:
+            await client.send_message(channel,
+                                      "⚠️ Devi essere registrato su Royalnet per poter utilizzare questo comando.")
+            return
         await loop.run_in_executor(executor, session.close)
         return await func(channel=channel, author=author, params=params, dbuser=dbuser, *args, **kwargs)
     return new_func
 
 
 @command
-async def ping(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+async def cmd_ping(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     await client.send_message(channel, f"Pong!")
 
 
@@ -459,6 +478,29 @@ async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typin
     else:
         voice_client = await client.join_voice_channel(author.voice.voice_channel)
     await client.send_message(channel, f"✅ Mi sono connesso in <#{author.voice.voice_channel.id}>.")
+
+
+@command
+@requires_cv
+async def cmd_play(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if len(params) < 2:
+        await client.send_message(channel, "⚠ Non hai specificato una canzone da riprodurre!\n"
+                                           "Sintassi: `!play <url|ricercayoutube|nomefile>`")
+        return
+    # Parse the parameter as URL
+    url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", params[1].strip("<>"))
+    if url.group(0) is not None:
+        # This is a url
+        return
+    # Parse the parameter as file
+    file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), params[1])
+    if os.path.exists(file_path):
+        # This is a file
+        return
+    # Search the parameter on youtube
+    search = params[1]
+    # This is a search
+    return
 
 
 async def update_music_queue():

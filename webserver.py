@@ -69,6 +69,12 @@ def page_loggedin():
         db_session = db.Session()
         user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
         db_session.close()
+        if user is None:
+            abort(403)
+            return
+        if user.password is None:
+            fl_session["username"] = username
+            return redirect(url_for(page_password))
         if bcrypt.checkpw(bytes(password, encoding="utf8"), user.password):
             fl_session["username"] = username
             return username
@@ -86,11 +92,11 @@ def page_password():
             return
         return render_template("password.html")
     elif request.method == "POST":
-        old_password = request.form["old"]
+        old_password = request.form.get("old")
         new_password = request.form["new"]
         db_session = db.Session()
         user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
-        if bcrypt.checkpw(bytes(old_password, encoding="utf8"), user.password):
+        if user.password is None or bcrypt.checkpw(bytes(old_password, encoding="utf8"), user.password):
             user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
             db_session.commit()
             db_session.close()
@@ -101,6 +107,6 @@ def page_password():
 
 if __name__ == "__main__":
     try:
-        app.run(host="0.0.0.0", port=1234)
+        app.run(host="0.0.0.0", port=1234, debug=__debug__)
     except KeyboardInterrupt:
         pass

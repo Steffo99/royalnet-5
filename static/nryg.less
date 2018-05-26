@@ -12,12 +12,27 @@ h1, h2, h3, h4, h5, h6 {
     color: @accent-color;
 }
 
-input {
+input[type="text"], input[type="password"] {
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
     color: @text-color;
     border: none;
     border-bottom: 1px dashed @text-color;
     padding: 2px;
+    margin: 1px;
     font-size: medium;
     font-family: sans-serif;
+}
+
+.input-grid {
+    display: grid;
+
+    label {
+        margin: 3px;
+        grid-column: 1;
+        max-width: 120px;
+    }
+
+    input {
+        grid-column: 2;
+    }
 }
