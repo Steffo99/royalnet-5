@@ -351,6 +351,20 @@ def cmd_ban(bot: Bot, update: Update):
         session.close()
 
 
+def cmd_eat(bot: Bot, update: Update):
+    try:
+        food: str = update.message.text.split(" ", 1)[1].capitalize()
+    except IndexError:
+        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
+                                                 "Sintassi corretta: `/food <cibo>`")
+        return
+    if food == "Uranio" and discord_connection is not None:
+        bot.send_message(update.message.chat.id, f"☢️ Ti senti improvvisamente radioattivo.")
+        discord_connection.send("/uranium")
+        return
+    bot.send_message(update.message.chat.id, f"🍗 Hai mangiato {food}!")
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -369,6 +383,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
     u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
+    u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"

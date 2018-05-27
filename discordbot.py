@@ -308,6 +308,14 @@ async def on_message(message: discord.Message):
         await cmd_play(channel=message.channel,
                        author=message.author,
                        params=message.content.split(" "))
+    elif message.content.startswith("!remove"):
+        await cmd_remove(channel=message.channel,
+                         author=message.author,
+                         params=message.content.split(" "))
+    elif message.content.startswith("!queue"):
+        await cmd_queue(channel=message.channel,
+                        author=message.author,
+                        params=message.content.split(" "))
     elif message.content.startswith("!cast"):
         try:
             spell = message.content.split(" ", 1)[1]
@@ -332,6 +340,8 @@ async def update_users_pipe(users_connection):
         if msg == "/cv":
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
+        if msg == "/uranium":
+            add_video_from_url("https://www.youtube.com/watch?v=iutuQbMAx04")
 
 
 def command(func):
@@ -463,6 +473,51 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
     # This is a search
     await add_video_from_url(url=f"ytsearch:{search}")
     await client.send_message(channel, f"✅ Video aggiunto alla coda.")
+
+
+@command
+@requires_cv
+async def cmd_skip(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    global voice_player
+    voice_player.stop()
+    await client.send_message(channel, f"⏩ Video saltato.")
+
+
+@command
+@requires_cv
+async def cmd_remove(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if len(voice_queue) == 0:
+        await client.send_message(channel, "⚠ Non c'è nessun video in coda.")
+        return
+    if len(params) < 2:
+        index = len(voice_queue) - 1
+    else:
+        try:
+            index = int(params[1]) - 1
+        except ValueError:
+            await client.send_message(channel, "⚠ Il numero inserito non è valido.\n"
+                                      "Sintassi: `!remove [numerovideo]`")
+            return
+    if abs(index) >= len(voice_queue):
+        await client.send_message(channel, "⚠ Il numero inserito non corrisponde a nessun video nella playlist.\n"
+                                  "Sintassi: `!remove [numerovideo]`")
+        return
+    video = voice_queue.pop(index)
+    await client.send_message(channel, f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
+
+
+@command
+async def cmd_queue(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if len(voice_queue) == 0:
+        await client.send_message(channel, "**Video in coda:**\n"
+                                           "nessuno")
+        return
+    msg = "**Video in coda:**\n"
+    for index, video in enumerate(voice_queue[:10]):
+        msg += f"{queue_emojis[index]} {str(video)}\n"
+    if len(voice_queue) > 10:
+        msg += f"più altri {len(voice_queue) - 10} video!"
+    await client.send_message(channel, msg)
 
 
 async def queue_predownload_videos():
