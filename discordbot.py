@@ -18,6 +18,7 @@ import subprocess
 import async_timeout
 import raven
 import cast
+import pickle
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -38,10 +39,20 @@ loop = asyncio.get_event_loop()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+
 class DurationError(Exception):
     pass
 
-class LocalFileError(Exception):
+
+class InfoNotRetrievedError(Exception):
+    pass
+
+
+class FileNotDownloadedError(Exception):
+    pass
+
+
+class AlreadyDownloadedError(Exception):
     pass
 
 
@@ -66,7 +77,8 @@ class OldVideo:
     async def download(self):
         # Retrieve info before downloading
         with youtube_dl.YoutubeDL() as ytdl:
-            info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url, download=False))
+            info = await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, self.ytdl_url,
+                                                                          download=False))
         if "entries" in info:
             info = info["entries"][0]
         file_id = info.get("title", str(hash(self.ytdl_url)))
@@ -111,23 +123,54 @@ class OldVideo:
 
 
 class Video:
-    def __init__(self, url=None, file=None):
+    def __init__(self, url: str=None, file: str=None, info: dict=None):
         self.url = url
-        self.file = file
+        if file is None and info is None:
+            self.file = str(hash(url)) + ".opus"
+        elif info is not None:
+            self.file = re.sub(r'[/\\?*"<>|!]', "_", info["title"]) + ".opus"
+        else:
+            self.file = file
+        self.downloaded = False if file is None else True
+        self.info = info
 
     def __str__(self):
-        pass
+        if self.info is None or "title" not in self.info:
+            return f"`{self.file}`"
+        return f"_{self.info['title']}_"
 
-    async def retrieve_info(self):
-        if url is None:
-            raise LocalFileError()
-        with youtube_dl.YoutubeDL({"quiet": True,
-                                   "ignoreerrors": True,
-                                   "simulate": True}) as ytdl:
-            await loop.run_in_executor(executor, functools.partial(ytdl.extract_info, url=self.url, download=False)
-            # TODO
+    async def download(self, progress_hooks: typing.List["function"]=None):
+        # File already downloaded
+        if self.downloaded:
+            raise AlreadyDownloadedError()
+        # No progress hooks
+        if progress_hooks is None:
+            progress_hooks = []
+        # Check if under max duration
+        if self.info is not None and self.info.get("duration", 0) > int(config["YouTube"]["max_duration"]):
+            raise DurationError()
+        # Download the file
+        with youtube_dl.YoutubeDL({"noplaylist": True,
+                                   "format": "best",
+                                   "postprocessors": [{
+                                       "key": 'FFmpegExtractAudio',
+                                       "preferredcodec": 'opus'
+                                   }],
+                                   "outtmpl": f"./opusfiles/{self.file}",
+                                   "progress_hooks": progress_hooks,
+                                   "quiet": True}) as ytdl:
+            await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.url]))
+            self.downloaded = True
+
+    async def create_player(self) -> discord.voice_client.ProcessPlayer:
+        # Check if the file has been downloaded
+        if not self.downloaded:
+            raise FileNotDownloadedError()
+        global voice_client
+        return voice_client.create_ffmpeg_player(f"./opusfiles/{self.file}")
 
 
+# noinspection PyUnreachableCode
 if __debug__:
     version = "Dev"
     commit_msg = "_in sviluppo_"
@@ -150,9 +193,10 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     discord.opus.load_opus("libopus-0.dll")
 
-voice_client: typing.Optional[discord.VoiceClient] = None
-voice_player: typing.Optional[discord.voice_client.StreamPlayer] = None
-voice_queue: typing.List[OldVideo] = []
+voice_client = None
+voice_player = None
+voice_queue = []
+old_voice_queue = []
 
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -198,7 +242,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
-    global voice_queue
+    global voice_client
+    global old_voice_queue
     global voice_player
     if not message.content.startswith("!"):
         return
@@ -256,127 +301,13 @@ async def on_message(message: discord.Message):
         session.close()
         await client.send_message(message.channel, "✅ Sincronizzazione completata!")
     elif message.content.startswith("!cv"):
-        cmd_cv(channel=message.channel,
-               author=message.author,
-               params=message.content.split(" "))
+        await cmd_cv(channel=message.channel,
+                     author=message.author,
+                     params=message.content.split(" "))
     elif message.content.startswith("!play"):
-        # Find the sent url
-        try:
-            url = message.content.split(" ", 1)[1]
-        except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato un url!\n"
-                                                       "Sintassi corretta: `!play <video>`")
-            return
-        if "playlist" in url:
-            # If target is a playlist
-            await client.send_message(message.channel,
-                                      f"ℹ️ Il link che hai inviato contiene una playlist.\n"
-                                      f"L'elaborazione delle playlist solitamente richiede molto tempo.")
-            with youtube_dl.YoutubeDL({"quiet": True,
-                                       "ignoreerrors": True,
-                                       "simulate": True}) as ytdl:
-                playlist_data = await loop.run_in_executor(executor,
-                                                           functools.partial(ytdl.extract_info, url, download=False))
-            for entry in playlist_data["entries"]:
-                # Ignore empty videos
-                if entry is None:
-                    continue
-                # Add the video to the queue
-                video = await OldVideo.init(user_id=message.author.id, ytdl_url=entry["webpage_url"], data=entry)
-                voice_queue.append(video)
-            await client.send_message(message.channel,
-                                      f"✅ Aggiunti alla coda **{len(playlist_data['entries']) } video**.")
-        else:
-            # If target is a single video
-            video = await OldVideo.init(user_id=message.author.id, ytdl_url=url)
-            await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
-            voice_queue.append(video)
-    elif message.content.startswith("!search"):
-        await client.send_typing(message.channel)
-        # The bot should be in voice chat
-        if voice_client is None:
-            await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
-                                                       "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
-            return
-        # Find the sent text
-        try:
-            text = message.content.split(" ", 1)[1]
-        except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato il titolo!\n"
-                                                       "Sintassi corretta: `!search <titolo>`")
-            return
-        # If target is a single video
-        video = await OldVideo.init(user_id=message.author.id, ytdl_url=f"ytsearch:{text}")
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
-        voice_queue.append(video)
-    elif message.content.startswith("!file"):
-        await client.send_typing(message.channel)
-        # The bot should be in voice chat
-        if voice_client is None:
-            await client.send_message(message.channel, "⚠️ Non sono connesso alla cv!\n"
-                                                       "Fammi entrare scrivendo `!cv` mentre sei in chat vocale.")
-            return
-        # Find the sent text
-        try:
-            text: str = message.content.split(" ", 1)[1]
-        except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato il nome del file!\n"
-                                                       "Sintassi corretta: `!file <nomefile>`")
-            return
-        # If target is a single video
-        video = await OldVideo.init(user_id=message.author.id, filename=text)
-        await client.send_message(message.channel, f"✅ Aggiunto alla coda: {str(video)}")
-        voice_queue.append(video)
-    elif message.content.startswith("!skip"):
-        global voice_player
-        voice_player.stop()
-        await client.send_message(message.channel, f"⏩ Video saltato.")
-    elif message.content.startswith("!pause"):
-        if voice_player is None or not voice_player.is_playing():
-            await client.send_message(message.channel, f"⚠️ Non è in corso la riproduzione di un video, "
-                                                       f"pertanto non c'è niente da pausare.")
-            return
-        voice_player.pause()
-        await client.send_message(message.channel, f"⏸ Riproduzione messa in pausa.\n"
-                                                   f"Riprendi con `!resume`.")
-    elif message.content.startswith("!resume"):
-        if voice_player is None or voice_player.is_playing():
-            await client.send_message(message.channel, f"⚠️ Non c'è nulla in pausa da riprendere!")
-            return
-        voice_player.resume()
-        await client.send_message(message.channel, f"▶️ Riproduzione ripresa.")
-    elif message.content.startswith("!cancel"):
-        if not len(voice_queue) > 0:
-            await client.send_message(message.channel, f"⚠ Non ci sono video da annullare.")
-            return
-        voice_queue.pop()
-        await client.send_message(message.channel, f"❌ L'ultimo video aggiunto alla playlist è stato rimosso.")
-    elif message.content.startswith("!stop"):
-        if voice_player is None:
-            await client.send_message(message.channel, f"⚠ Non c'è nulla da interrompere!")
-            return
-        voice_queue = []
-        voice_player.stop()
-        voice_player = None
-        await client.send_message(message.channel, f"⏹ Riproduzione interrotta e playlist svuotata.")
-    elif message.content.startswith("!disconnect"):
-        if voice_client is None:
-            await client.send_message(message.channel, "⚠ Il bot in questo momento non è in chat vocale.")
-            return
-        if voice_player is not None:
-            await client.send_message(message.channel, "⚠ Prima di disconnettere il bot, interrompi la riproduzione di "
-                                                       "una canzone scrivendo `!stop`.")
-            return
-        await voice_client.disconnect()
-        voice_client = None
-        await client.send_message(message.channel, "✅ Mi sono disconnesso dalla chat vocale.")
-    elif message.content.startswith("!queue"):
-        msg = "**Video in coda:**\n"
-        for position, video in enumerate(voice_queue[:10]):
-            msg += f"{queue_emojis[position]} {str(voice_queue[position])}\n"
-        if len(voice_queue) > 10:
-            msg += f"e altri {len(voice_queue) - 10} video!\n"
-        await client.send_message(message.channel, msg)
+        await cmd_play(channel=message.channel,
+                       author=message.author,
+                       params=message.content.split(" "))
     elif message.content.startswith("!cast"):
         try:
             spell = message.content.split(" ", 1)[1]
@@ -413,6 +344,7 @@ def command(func):
         try:
             result = await func(channel=channel, author=author, params=params, *args, **kwargs)
         except Exception:
+            ei = sys.exc_info()
             try:
                 await client.send_message(channel,
                                           f"☢ **ERRORE DURANTE L'ESECUZIONE DEL COMANDO {params[0]}**\n"
@@ -422,9 +354,8 @@ def command(func):
                                           f"```python\n"
                                           f"{repr(ei[1])}\n"
                                           f"```")
-            except Exception:
+            except Exception as e:
                 pass
-            ei = sys.exc_info()
             sentry.captureException(exc_info=ei)
         else:
             return result
@@ -433,7 +364,7 @@ def command(func):
 
 def requires_cv(func):
     "Decorator. Ensures the voice client is connected before running the command."
-    async def new_func(channel: discord.Channel, author: discord.User, params: typing.List[str], *args, **kwargs):
+    async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
         global voice_client
         if voice_client is None or not voice_client.is_connected():
             await client.send_message(channel,
@@ -480,6 +411,26 @@ async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typin
     await client.send_message(channel, f"✅ Mi sono connesso in <#{author.voice.voice_channel.id}>.")
 
 
+async def add_video_from_url(url):
+    # Retrieve info
+    with youtube_dl.YoutubeDL({"quiet": True,
+                               "ignoreerrors": True,
+                               "simulate": True}) as ytdl:
+        info = await loop.run_in_executor(executor,
+                                          functools.partial(ytdl.extract_info, url=url, download=False))
+    if "entries" in info:
+        # This is a playlist
+        for entry in info["entries"]:
+            voice_queue.append(Video(url=entry["webpage_url"], info=entry))
+        return
+    # This is a single video
+    voice_queue.append(Video(url=url, info=info))
+
+
+async def add_video_from_file(file):
+    voice_queue.append(Video(file=file))
+
+
 @command
 @requires_cv
 async def cmd_play(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
@@ -488,26 +439,94 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
                                            "Sintassi: `!play <url|ricercayoutube|nomefile>`")
         return
     # Parse the parameter as URL
-    url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", params[1].strip("<>"))
-    if url.group(0) is not None:
+    url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
+    if url is not None:
         # This is a url
+        await add_video_from_url(url.group(0))
+        await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     # Parse the parameter as file
-    file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), params[1])
+    file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
     if os.path.exists(file_path):
         # This is a file
+        await add_video_from_file(file=file_path)
+        await client.send_message(channel, f"✅ Video aggiunto alla coda.")
+        return
+    file_path += ".opus"
+    if os.path.exists(file_path):
+        # This is a file
+        await add_video_from_file(file=file_path)
+        await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     # Search the parameter on youtube
     search = params[1]
     # This is a search
-    return
+    await add_video_from_url(url=f"ytsearch:{search}")
+    await client.send_message(channel, f"✅ Video aggiunto alla coda.")
 
 
-async def update_music_queue():
+async def queue_predownload_videos():
+    while True:
+        for index, video in enumerate(voice_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
+            if video.downloaded:
+                continue
+            try:
+                with async_timeout.timeout(int(config["YouTube"]["download_timeout"])):
+                    await video.download()
+            except asyncio.TimeoutError:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠️ Il download di {str(video)} ha richiesto più di"
+                                          f" {config['YouTube']['download_timeout']} secondi, pertanto è stato rimosso"
+                                          f" dalla coda.")
+                del voice_queue[index]
+                continue
+            except DurationError:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠️ {str(video)} dura più di {config['YouTube']['download_timeout']}"
+                                          f" secondi, quindi è stato rimosso dalla coda.")
+                del voice_queue[index]
+                continue
+            except Exception as e:
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          f"⚠️ E' stato incontrato un errore durante il download di {str(video)},"
+                                          f" quindi è stato rimosso dalla coda.\n\n"
+                                          f"```python\n"
+                                          f"{str(e)}"
+                                          f"```")
+                del voice_queue[index]
+                continue
+        await asyncio.sleep(1)
+
+
+async def queue_play_next_video():
     await client.wait_until_ready()
     global voice_client
     global voice_player
-    global voice_queue
+    while True:
+        if voice_client is None:
+            await asyncio.sleep(1)
+            continue
+        if voice_player is not None and not voice_player.is_done():
+            await asyncio.sleep(0.5)
+            continue
+        if len(voice_queue) == 0:
+            await client.change_presence()
+            await asyncio.sleep(0.5)
+            continue
+        next_video = voice_queue[0]
+        if not next_video.downloaded:
+            await asyncio.sleep(0.5)
+            continue
+        voice_player = await next_video.create_player()
+        voice_player.start()
+        del voice_queue[0]
+
+
+async def update_old_music_queue():
+    await client.wait_until_ready()
+    global voice_client
+    global voice_player
+    global old_voice_queue
     while True:
         try:
             if voice_client is None:
@@ -516,11 +535,11 @@ async def update_music_queue():
             if voice_player is not None and not voice_player.is_done():
                 await asyncio.sleep(1)
                 continue
-            if len(voice_queue) == 0:
+            if len(old_voice_queue) == 0:
                 await client.change_presence()
                 await asyncio.sleep(1)
                 continue
-            video = voice_queue.pop(0)
+            video = old_voice_queue.pop(0)
             if video.ytdl_url:
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           f"⬇️ E' iniziato il download di {str(video)}.")
@@ -567,7 +586,7 @@ async def update_music_queue():
                 voice_player = None
                 await voice_client.disconnect()
                 voice_client = None
-                voice_queue = []
+                old_voice_queue = []
             except Exception as e:
                 print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n\n" + repr(sys.exc_info()))
             sentry.captureException(exc_info=ei)
@@ -577,7 +596,8 @@ def process(users_connection=None):
     print("Discordbot starting...")
     if users_connection is not None:
         asyncio.ensure_future(update_users_pipe(users_connection))
-    asyncio.ensure_future(update_music_queue())
+    asyncio.ensure_future(queue_predownload_videos())
+    asyncio.ensure_future(queue_play_next_video())
     client.on_error = on_error
     client.run(config["Discord"]["bot_token"])
 
