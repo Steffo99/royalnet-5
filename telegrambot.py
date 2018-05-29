@@ -358,9 +358,14 @@ def cmd_eat(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
                                                  "Sintassi corretta: `/food <cibo>`")
         return
-    if food == "Uranio" and discord_connection is not None:
-        bot.send_message(update.message.chat.id, f"☢️ Ti senti improvvisamente radioattivo.")
+    if food.startswith("Uran") and discord_connection is not None:
+        bot.send_message(update.message.chat.id, "☢️ Ti senti improvvisamente radioattivo.\n\n"
+                                                 "__Qualcosa sta succedendo da qualche parte!__")
         discord_connection.send("/uranium")
+        return
+    elif "tonnuooooooro" in food.lower():
+        bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"
+                                                 "Spooky!")
         return
     bot.send_message(update.message.chat.id, f"🍗 Hai mangiato {food}!")
 
