@@ -308,6 +308,10 @@ async def on_message(message: discord.Message):
         await cmd_play(channel=message.channel,
                        author=message.author,
                        params=message.content.split(" "))
+    elif message.content.startswith("!skip"):
+        await cmd_skip(channel=message.channel,
+                       author=message.author,
+                       params=message.content.split(" "))
     elif message.content.startswith("!remove"):
         await cmd_remove(channel=message.channel,
                          author=message.author,
@@ -341,7 +345,7 @@ async def update_users_pipe(users_connection):
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
         if msg == "/uranium":
-            add_video_from_url("https://www.youtube.com/watch?v=iutuQbMAx04")
+            await add_video_from_url("https://www.youtube.com/watch?v=iutuQbMAx04")
 
 
 def command(func):
@@ -479,6 +483,9 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
 @requires_cv
 async def cmd_skip(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     global voice_player
+    if voice_player is None:
+        await client.send_message(channel, "⚠ Non c'è nessun video in riproduzione.")
+        return
     voice_player.stop()
     await client.send_message(channel, f"⏩ Video saltato.")
 
@@ -565,7 +572,6 @@ async def queue_play_next_video():
             await asyncio.sleep(0.5)
             continue
         if len(voice_queue) == 0:
-            await client.change_presence()
             await asyncio.sleep(0.5)
             continue
         next_video = voice_queue[0]
