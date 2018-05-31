@@ -12,6 +12,7 @@ import subprocess
 import os
 import time
 import cast
+import re
 
 # Init the config reader
 import configparser
@@ -370,6 +371,31 @@ def cmd_eat(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, f"🍗 Hai mangiato {food}!")
 
 
+def cmd_ship(bot: Bot, update: Update):
+    try:
+        _, name_one, name_two = update.message.text.split(" ", 2)
+    except IndexError:
+        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato correttamente i due nomi!\n"
+                                                 "Sintassi corretta: `/ship <nome> <nome>`")
+        return
+    name_one = name_one.lower()
+    name_two = name_two.lower()
+    part_one = re.search(r"^[A-Za-z][^aeiouAEIOU]*[aeiouAEIOU]?", name_one)
+    part_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
+    try:
+        mixed = part_one.group(0) + part_two.group(0)
+    except:
+        bot.send_message(update.message.chat.id, "⚠ I nomi specificati non sono validi.\n"
+                                                 "Riprova con dei nomi diversi!")
+        return
+    if part_one is None or part_two is None:
+        bot.send_message(update.message.chat.id, "⚠ I nomi specificati non sono validi.\n"
+                                                 "Riprova con dei nomi diversi!")
+        return
+    bot.send_message(update.message.chat.id, f"💕 {name_one.capitalize()} + {name_two.capitalize()} ="
+                                             f" {mixed.capitalize()}")
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -389,6 +415,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
     u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
+    u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
