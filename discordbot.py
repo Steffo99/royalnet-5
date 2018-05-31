@@ -18,6 +18,9 @@ import subprocess
 import async_timeout
 import raven
 import cast
+import logging
+
+logging.basicConfig()
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -61,7 +64,7 @@ class Video:
         if file is None and info is None:
             self.file = str(hash(url)) + ".opus"
         elif info is not None:
-            self.file = re.sub(r'[/\\?*"<>|!]', "_", info["title"]) + ".opus"
+            self.file = re.sub(r'[/\\?*"<>|!:]', "_", info["title"]) + ".opus"
         else:
             self.file = file
         self.downloaded = False if file is None else True
@@ -131,8 +134,6 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     discord.opus.load_opus("libopus-0.dll")
 
-main_channel = None
-
 voice_client = None
 voice_player = None
 now_playing = None
@@ -152,7 +153,7 @@ async def on_error(event, *args, **kwargs):
     ei = sys.exc_info()
     print("ERRORE CRITICO:\n" + repr(ei[1]) + "\n\n" + repr(ei))
     try:
-        await client.send_message(main_channel,
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                   f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event}`\n"
                                   f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
                                   f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
@@ -174,7 +175,7 @@ async def on_error(event, *args, **kwargs):
 
 @client.event
 async def on_ready():
-    await client.send_message(main_channel,
+    await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                               f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
                               f"Ultimo aggiornamento: `{version}: {commit_msg}`")
     await client.change_presence(game=None, status=discord.Status.online)
@@ -183,7 +184,6 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     global voice_client
-    global old_voice_queue
     global voice_player
     if not message.content.startswith("!"):
         return
@@ -194,52 +194,10 @@ async def on_message(message: discord.Message):
             "discriminator": message.author.discriminator
         }
     })
-    await client.send_typing(message.channel)
-    session = await loop.run_in_executor(executor, db.Session)
-    user = session.query(db.Discord).filter_by(discord_id=message.author.id).one_or_none()
-    if user is None:
-        user = db.Discord(discord_id=message.author.id,
-                          name=message.author.name,
-                          discriminator=message.author.discriminator,
-                          avatar_hex=message.author.avatar)
-        session.add(user)
-        await loop.run_in_executor(executor, session.commit)
-    else:
-        sentry.user_context({
-            "discord": {
-                "discord_id": message.author.id,
-                "name": message.author.name,
-                "discriminator": message.author.discriminator
-            },
-            "royal": {
-                "user_id": user.royal_id
-            }
-        })
     if message.content.startswith("!ping"):
         await cmd_ping(channel=message.channel,
                        author=message.author,
                        params=["/ping"])
-    elif message.content.startswith("!link"):
-        if user.royal_id is None:
-            await client.send_message(message.channel,
-                                      "⚠️ Il tuo account Discord è già collegato a un account RYG "
-                                      "o l'account RYG che hai specificato è già collegato a un account Discord.")
-            return
-        try:
-            username = message.content.split(" ", 1)[1]
-        except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato un username!\n"
-                                                       "Sintassi corretta: `!link <username_ryg>`")
-            return
-        royal = session.query(db.Royal).filter_by(username=username).one_or_none()
-        if royal is None:
-            await client.send_message(message.channel,
-                                      "⚠️ Non esiste nessun account RYG con questo nome.")
-            return
-        user.royal_id = royal.id
-        session.commit()
-        session.close()
-        await client.send_message(message.channel, "✅ Sincronizzazione completata!")
     elif message.content.startswith("!cv"):
         await cmd_cv(channel=message.channel,
                      author=message.author,
@@ -308,7 +266,7 @@ def command(func):
                                           f"```python\n"
                                           f"{repr(ei[1])}\n"
                                           f"```")
-            except Exception as e:
+            except Exception:
                 pass
             sentry.captureException(exc_info=ei)
         else:
@@ -353,7 +311,6 @@ async def cmd_ping(channel: discord.Channel, author: discord.Member, params: typ
 
 @command
 async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
-    await client.send_typing(channel)
     if author.voice.voice_channel is None:
         await client.send_message(channel, "⚠ Non sei in nessun canale!")
         return
@@ -467,6 +424,16 @@ async def cmd_queue(channel: discord.Channel, author: discord.Member, params: ty
     await client.send_message(channel, msg)
 
 
+@command
+@requires_cv
+async def cmd_shuffle(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if len(voice_queue) == 0:
+        await client.send_message(channel, "⚠ Non ci sono video in coda!")
+        return
+    random.shuffle(voice_queue)
+    await client.send_message("♠️ ♦️ ♣️ ♥️ Shuffle completo!")
+
+
 async def queue_predownload_videos():
     while True:
         for index, video in enumerate(voice_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
@@ -476,21 +443,21 @@ async def queue_predownload_videos():
                 with async_timeout.timeout(int(config["YouTube"]["download_timeout"])):
                     await video.download()
             except asyncio.TimeoutError:
-                await client.send_message(main_channel,
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           f"⚠️ Il download di {str(video)} ha richiesto più di"
                                           f" {config['YouTube']['download_timeout']} secondi, pertanto è stato rimosso"
                                           f" dalla coda.")
                 del voice_queue[index]
                 continue
             except DurationError:
-                await client.send_message(main_channel,
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           f"⚠️ {str(video)} dura più di"
                                           f" {str(int(config['YouTube']['max_duration']) // 60)}"
                                           f" minuti, quindi è stato rimosso dalla coda.")
                 del voice_queue[index]
                 continue
             except Exception as e:
-                await client.send_message(main_channel,
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           f"⚠️ E' stato incontrato un errore durante il download di {str(video)},"
                                           f" quindi è stato rimosso dalla coda.\n\n"
                                           f"```python\n"
@@ -526,20 +493,20 @@ async def queue_play_next_video():
         voice_player = await now_playing.create_player()
         voice_player.start()
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
-        await client.send_message(main_channel, f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
         del voice_queue[0]
 
 
 def process(users_connection=None):
     print("Discordbot starting...")
-    global main_channel
-    main_channel = client.get_channel(config["Discord"]["main_channel"])
     if users_connection is not None:
         asyncio.ensure_future(update_users_pipe(users_connection))
     asyncio.ensure_future(queue_predownload_videos())
     asyncio.ensure_future(queue_play_next_video())
     client.on_error = on_error
-    client.run(config["Discord"]["bot_token"])
+    loop.run_until_complete(client.login(config["Discord"]["bot_token"], bot=True))
+    loop.run_until_complete(client.connect())
+    loop.run_until_complete(client.logout())
 
 
 if __name__ == "__main__":
