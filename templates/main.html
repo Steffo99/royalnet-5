@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    Royal Games
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Login
+    </h1>
+    <form class="input-grid" action="{{ url_for('page_loggedin') }}" method="POST">
+        <label id="label-username" for="input-username">
+            Username
+        </label>
+        <input id="input-username" name="username" type="text">
+        <label id="label-password" for="input-password">
+            Password
+        </label>
+        <input id="input-password" name="password" type="password">
+        <input type="submit" value="Login">
+    </form>
+{% endblock %}
