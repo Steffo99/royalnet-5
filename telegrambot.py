@@ -361,8 +361,7 @@ def cmd_eat(bot: Bot, update: Update):
         return
     if food.startswith("Uran") and discord_connection is not None:
         bot.send_message(update.message.chat.id, "☢️ Ti senti improvvisamente radioattivo.\n\n"
-                                                 "__Qualcosa sta succedendo da qualche parte!__")
-        discord_connection.send("/uranium")
+                                                 "__Il sito RYG, https://rygc.steffo.eu/, si è aggiornato!__")
         return
     elif "tonnuooooooro" in food.lower():
         bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"

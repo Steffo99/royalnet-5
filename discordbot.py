@@ -242,8 +242,6 @@ async def update_users_pipe(users_connection):
         if msg == "/cv":
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
-        if msg == "/uranium":
-            await add_video_from_url("https://www.youtube.com/watch?v=iutuQbMAx04")
 
 
 def command(func):
