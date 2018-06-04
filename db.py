@@ -251,6 +251,34 @@ class RocketLeague(Base):
                 self.solo_std_rank = None
                 self.solo_std_div = None
 
+    def solo_rank_image(self):
+        if self.single_rank is None:
+            rank = 0
+        else:
+            rank = self.single_rank
+        return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
+
+    def doubles_rank_image(self):
+        if self.doubles_rank is None:
+            rank = 0
+        else:
+            rank = self.doubles_rank
+        return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
+
+    def standard_rank_image(self):
+        if self.standard_rank is None:
+            rank = 0
+        else:
+            rank = self.standard_rank
+        return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
+
+    def solo_std_rank_image(self):
+        if self.solo_std_rank is None:
+            rank = 0
+        else:
+            rank = self.solo_std_rank
+        return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
+
 
 class Dota(Base):
     __tablename__ = "dota"

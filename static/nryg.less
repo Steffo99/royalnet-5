@@ -38,19 +38,20 @@ input[type="text"], input[type="password"] {
 }
 
 .game-panel {
+    display: grid;
     max-width: 400px;
+    position: relative;
+    border-radius: 10px;
+    height: 80px;
 }
 
 .osu {
-    display: grid;
-    position: relative;
     font-family: 'Exo 2', 'Helvetica Neue', 'Arial', sans-serif;
     font-style: italic;
     border: 8px solid #ffffff;
-    border-radius: 10px;
     color: #ffffff;
     padding: 10px;
-    grid-row-gap: 4px;
+    grid-row-gap: 5px;
 
     .background-image {
         position: absolute;
@@ -128,4 +129,59 @@ input[type="text"], input[type="password"] {
     .pp {
         font-size: x-small;
     }
+}
+
+.rl {
+    background-image: linear-gradient(to bottom,rgba(35,91,139,.5),rgba(16,54,84,.5)),
+                      linear-gradient(to right,rgba(35,91,139,.7),rgba(16,54,84,.7));
+    padding: 18px;
+    grid-row-gap: 5px;
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 4;
+        font-size: large;
+
+        a {
+            text-decoration: none;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            vertical-align: middle;
+        }
+
+        .player-name {
+            vertical-align: middle;
+        }
+    }
+
+    .game-title {
+        grid-row: 2;
+        font-size: smaller;
+        font-style: normal;
+    }
+
+    .game-score {
+        grid-row: 3;
+    }
+
+    .duel {
+        grid-column: 1;
+    }
+
+    .doubles {
+        grid-column: 2;
+    }
+
+    .standard {
+        grid-column: 3;
+    }
+
+    .solostd {
+        grid-column: 4;
+    }
+
 }

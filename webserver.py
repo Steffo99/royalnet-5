@@ -33,7 +33,8 @@ def page_profile(name: str):
         abort(404)
         return
     osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
-    return render_template("profile.html", royal=user, osu=osu)
+    rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
+    return render_template("profile.html", royal=user, osu=osu, rl=rl)
 
 
 @app.route("/login")
