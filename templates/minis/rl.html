@@ -1,35 +1,34 @@
-<style>
-    @import url('https://fonts.googleapis.com/css?family=Exo+2');
-</style>
-<div class="game-panel rl">
-    <div class="player">
-        <a href="http://steamcommunity.com/profiles/{{ rl.steam.steam_id }}">
-            <img src="{{ rl.steam.avatar_url() }}" class="player-image">
-            <span class="player-name">{{ rl.steam.persona_name }}</span>
-        </a>
-    </div>
-    <div class="game-title duel">
-        DUELLO
-    </div>
-    <div class="game-score duel">
-       <img src="{{ rl.solo_rank_image() }}">
-    </div>
-    <div class="game-title doubles">
-        DOPPIO
-    </div>
-    <div class="game-score doubles">
-        <img src="{{ rl.doubles_rank_image() }}">
-    </div>
-    <div class="game-title standard">
-        STANDARD
-    </div>
-    <div class="game-score standard">
-        <img src="{{ rl.standard_rank_image() }}">
-    </div>
-    <div class="game-title solostd">
-        SOLO STD
-    </div>
-    <div class="game-score solostd">
-        <img src="{{ rl.solo_std_rank_image() }}">
+<div class="game-panel">
+    <div class="game-grid rl">
+        <div class="player">
+            <a href="http://steamcommunity.com/profiles/{{ rl.steam.steam_id }}">
+                <img src="{{ rl.steam.avatar_url() }}" class="player-image">
+                <span class="player-name">{{ rl.steam.persona_name }}</span>
+            </a>
+        </div>
+        <div class="game-title duel">
+            DUELLO
+        </div>
+        <div class="game-score duel">
+            <img src="{{ rl.solo_rank_image() }}" title="{{ rl.single_mmr }} MMR">
+        </div>
+        <div class="game-title doubles">
+            DOPPIO
+        </div>
+        <div class="game-score doubles">
+            <img src="{{ rl.doubles_rank_image() }}" title="{{ rl.doubles_mmr }} MMR">
+        </div>
+        <div class="game-title standard">
+            STANDARD
+        </div>
+        <div class="game-score standard">
+            <img src="{{ rl.standard_rank_image() }}" title="{{ rl.standard_mmr }} MMR">
+        </div>
+        <div class="game-title solostd">
+            SOLO STD
+        </div>
+        <div class="game-score solostd">
+            <img src="{{ rl.solo_std_rank_image() }}" title="{{ rl.solo_std_mmr }} MMR">
+        </div>
     </div>
 </div>
