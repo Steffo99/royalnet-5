@@ -391,6 +391,18 @@ def cmd_ship(bot: Bot, update: Update):
                                              f" {mixed.capitalize()}")
 
 
+def cmd_profile(bot: Bot, update: Update):
+    session = db.Session()
+    user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
+    session.close()
+    if user is None:
+        bot.send_message(update.message.chat.id, "⚠ Non sei connesso a Royalnet!\n"
+                                                 "Per registrarti, utilizza il comando /register.")
+        return
+    bot.send_message(update.message.chat.id, "👤 [Profilo di {user.royals.username}]"
+                                             "(https://ryg.steffo.eu/profile/{user.royals.username})")
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -411,6 +423,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
+    u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"

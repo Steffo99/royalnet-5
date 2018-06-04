@@ -43,7 +43,7 @@ input[type="text"], input[type="password"] {
 
 .game-grid {
     display: grid;
-    width: 400px;
+    width: 360px;
     height: 100px;
     border-radius: 10px;
     margin: 4px;
@@ -202,7 +202,7 @@ input[type="text"], input[type="password"] {
     padding: 15px;
     border: 3px solid #000000;
     grid-row-gap: 5px;
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 25% 75%;
     background-image: linear-gradient(to bottom, #440b0b, #631013);
     color: #ffffff;
 
@@ -268,5 +268,65 @@ input[type="text"], input[type="password"] {
         img.medal {
             height: 44px;
         }
+    }
+}
+
+.lol {
+    font-family: "BeaufortLoL", "Times New Roman", serif;
+    padding: 15px;
+    color: #c9aa71;
+    border: 3px solid #463714;
+    background-color: #010a13;
+    grid-row-gap: 5px;
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 4;
+        font-size: large;
+
+        a {
+            text-decoration: none;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            vertical-align: middle;
+            border-radius: 16px;
+        }
+    }
+
+    .level {
+        grid-column: 1;
+        font-size: x-large;
+    }
+
+    .soloq {
+        grid-column: 2;
+    }
+
+    .flexq {
+        grid-column: 3;
+    }
+
+    .twtrq {
+        grid-column: 4;
+    }
+
+    .title {
+        grid-row: 2;
+        font-size: x-small;
+        text-align: center;
+    }
+
+    .value {
+        grid-row: 3;
+        text-align: center;
+        margin: auto;
+    }
+
+    .rank {
+        height: 40px;
     }
 }
