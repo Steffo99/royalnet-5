@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    Royal Games
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Profilo di {{ royal.username }}
+    </h1>
+    {% if osu %}
+        {% include "minis/osu.html" %}
+    {% endif %}
+{% endblock %}

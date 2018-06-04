@@ -1,0 +1,37 @@
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Exo+2');
+</style>
+<div class="game-panel osu">
+    <div class="background-image"></div>
+    <div class="background-color"></div>
+    <div class="player">
+        <a href="https://osu.ppy.sh/users/{{ osu.osu_id }}">
+            <img src="https://a.ppy.sh/{{ osu.osu_id }}" class="player-image">
+            <span class="player-name">{{ osu.osu_name }}</span>
+        </a>
+    </div>
+    <div class="game-title standard">
+        osu!
+    </div>
+    <div class="game-score standard">
+        <span class="number">{{ osu.std_pp | int }}</span><span class="pp">pp</span>
+    </div>
+    <div class="game-title taiko">
+        osu!taiko
+    </div>
+    <div class="game-score taiko">
+        <span class="number">{{ osu.taiko_pp | int }}</span><span class="pp">pp</span>
+    </div>
+    <div class="game-title catch">
+        osu!catch
+    </div>
+    <div class="game-score catch">
+        <span class="number">{{ osu.catch_pp | int }}</span><span class="pp">pp</span>
+    </div>
+    <div class="game-title mania">
+        osu!mania
+    </div>
+    <div class="game-score mania">
+        <span class="number">{{ osu.mania_pp | int }}</span><span class="pp">pp</span>
+    </div>
+</div>

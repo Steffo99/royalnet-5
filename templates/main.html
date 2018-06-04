@@ -4,42 +4,14 @@
     Royal Games
 {% endblock %}
 
-{% block posthead %}
-    <script>
-        function send() {
-            document.querySelector("#send").setAttribute("disabled", "true");
-            var x = new XMLHttpRequest();
-            x.open("GET", "{{ easter_egg }}", true);
-            x.send();
-        }
-    </script>
-{% endblock %}
-
 {% block body %}
     <h1>
-        Admin Dashboard
+        Royal Games
     </h1>
-
     <p>
-        <button>Ban</button> <input type="text" value="Sensei"> for <input type="text" value="sending nudes">
+        Benvenuto al sito web della Royal Games! E' ancora un po' triste e spoglio, ma spero che collaboriate a migliorarlo!
     </p>
     <p>
-        <button>Create</button> useless Consiglio
-    </p>
-    <p>
-        <button>Generate</button> random russian insults
-    </p>
-    <p>
-        <button>Delete</button> some random messages from Telegram
-    </p>
-    <p>
-        <button>Trigger</button> either @EvilBalu or @Protoh
-    </p>
-    <p>
-        <button id="send" onclick="send()">Send</button> super secret file
-    </p>
-    <p>
-        <h3>GDPR compliance</h3>
-        <a href="{{ url_for('static', filename='passwordisryg.kdbx') }}">Download</a> RYG members' passwords
+        Attualmente, sto sviluppando i <b>profili RYG</b>! Clicca <a href="/profile/{{ session['username'] }}">qui</a> per vedere il tuo.
     </p>
 {% endblock %}

@@ -359,11 +359,7 @@ def cmd_eat(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
                                                  "Sintassi corretta: `/food <cibo>`")
         return
-    if food.startswith("Uran") and discord_connection is not None:
-        bot.send_message(update.message.chat.id, "☢️ Ti senti improvvisamente radioattivo.\n\n"
-                                                 "__Il sito RYG, https://rygc.steffo.eu/, si è aggiornato!__")
-        return
-    elif "tonnuooooooro" in food.lower():
+    if "tonnuooooooro" in food.lower():
         bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"
                                                  "Spooky!")
         return

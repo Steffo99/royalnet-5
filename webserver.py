@@ -24,6 +24,18 @@ def page_main():
     return redirect(url_for("page_login"))
 
 
+@app.route("/profile/<name>")
+def page_profile(name: str):
+    db_session = db.Session()
+    user = db_session.query(db.Royal).filter_by(username=name).one_or_none()
+    if user is None:
+        db_session.close()
+        abort(404)
+        return
+    osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
+    return render_template("profile.html", royal=user, osu=osu)
+
+
 @app.route("/login")
 def page_login():
     return render_template("login.html")
@@ -71,22 +83,6 @@ def page_password():
             db_session.close()
             abort(403)
             return
-
-
-@app.route(config["Flask"]["easter_egg"])
-def page_easter_egg():
-    username = fl_session.get("username")
-    if username is None:
-        abort(403)
-        return
-    db_session = db.Session()
-    user = db_session.query(db.Telegram).join(db.Royal).filter_by(username=username).one()
-    db_session.close()
-    requests.get("https://api.telegram.org/bot490383363:AAG-_iipLeU2Vl0CfAG-YbRzy-mAndfANBc/sendDocument", params={
-        "chat_id": user.telegram_id,
-        "document": "BQADAgADqgEAAu2JiEjObmr6xD7y7AI",
-        "caption": "Super-secret file"
-    })
 
 
 if __name__ == "__main__":

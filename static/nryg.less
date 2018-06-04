@@ -36,3 +36,96 @@ input[type="text"], input[type="password"] {
         grid-column: 2;
     }
 }
+
+.game-panel {
+    max-width: 400px;
+}
+
+.osu {
+    display: grid;
+    position: relative;
+    font-family: 'Exo 2', 'Helvetica Neue', 'Arial', sans-serif;
+    font-style: italic;
+    border: 8px solid #ffffff;
+    border-radius: 10px;
+    color: #ffffff;
+    padding: 10px;
+    grid-row-gap: 4px;
+
+    .background-image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        background-image: url("https://osu.ppy.sh/images/layout/nav-backgrounds/triangles-combined.png");
+        z-index: -2;
+    }
+
+    .background-color {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        background-color: rgba(187, 17, 119, 0.9);
+        z-index: -1;
+    }
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 4;
+        font-size: large;
+
+        a {
+            text-decoration: none;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            vertical-align: middle;
+        }
+
+        .player-name {
+            vertical-align: middle;
+            color: #ffffff;
+        }
+    }
+
+    .game-title {
+        grid-row: 2;
+        font-size: smaller;
+        font-style: normal;
+    }
+
+    .game-score {
+        grid-row: 3;
+    }
+
+    .standard {
+        grid-column: 1;
+    }
+
+    .taiko {
+        grid-column: 2;
+    }
+
+    .catch {
+        grid-column: 3;
+    }
+
+    .mania {
+        grid-column: 4;
+    }
+
+    .number {
+        font-size: large;
+    }
+
+    .pp {
+        font-size: x-small;
+    }
+}
