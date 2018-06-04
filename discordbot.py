@@ -372,7 +372,7 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
         await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     # Search the parameter on youtube
-    search = params[1]
+    search = " ".join(params[1:])
     # This is a search
     await add_video_from_url(url=f"ytsearch:{search}")
     await client.send_message(channel, f"✅ Video aggiunto alla coda.")
