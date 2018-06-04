@@ -218,6 +218,10 @@ async def on_message(message: discord.Message):
         await cmd_queue(channel=message.channel,
                         author=message.author,
                         params=message.content.split(" "))
+    elif message.content.startswith("!shuffle"):
+        await cmd_shuffle(channel=message.channel,
+                          author=message.author,
+                          params=message.content.split(" "))
     elif message.content.startswith("!cast"):
         try:
             spell = message.content.split(" ", 1)[1]
