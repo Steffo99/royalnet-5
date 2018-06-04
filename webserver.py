@@ -34,7 +34,8 @@ def page_profile(name: str):
         return
     osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
     rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
-    return render_template("profile.html", royal=user, osu=osu, rl=rl)
+    dota = db_session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
+    return render_template("profile.html", royal=user, osu=osu, rl=rl, dota=dota)
 
 
 @app.route("/login")

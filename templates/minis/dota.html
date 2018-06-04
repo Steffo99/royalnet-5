@@ -1,0 +1,28 @@
+<div class="game-panel">
+    <div class="game-grid dota">
+        <div class="player">
+            <a href="http://steamcommunity.com/profiles/{{ dota.steam.steam_id }}">
+                <img src="{{ dota.steam.avatar_url() }}" class="player-image">
+                <span class="player-name">{{ dota.steam.persona_name }}</span>
+            </a>
+        </div>
+        <div class="title wins">
+            Vittorie
+        </div>
+        <div class="number wins">
+            {{ dota.wins }}
+        </div>
+        <div class="rank">
+            {% if dota.rank_tier is none %}
+                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
+                Non classificato
+            {% elif dota.rank_tier < 10 %}
+                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
+                {{ dota.rank_tier }} piazzamenti completati
+            {% else %}
+                <img class="medal" src="{{ dota.get_rank_icon_url() }}">{% if dota.get_rank_stars_url() %}<img class="stars" src="{{ dota.get_rank_stars_url() }}">{% endif %}
+                {{ dota.get_rank_name() }}[{{ dota.get_rank_number() }}]
+            {% endif %}
+        </div>
+    </div>
+</div>

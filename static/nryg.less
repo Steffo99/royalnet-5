@@ -197,3 +197,71 @@ input[type="text"], input[type="password"] {
     }
 
 }
+
+.dota {
+    padding: 18px;
+    grid-row-gap: 5px;
+    grid-template-columns: 20% 80%;
+    background-image: linear-gradient(to bottom, #801717, #a11d21);
+    color: #ffffff;
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 3;
+        font-size: large;
+
+        a {
+            text-decoration: none;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            vertical-align: middle;
+        }
+
+        .player-name {
+            color: #ffffff;
+        }
+    }
+
+    .title {
+        grid-row: 2;
+        font-size: x-small;
+    }
+
+    .number {
+        grid-row: 3;
+        font-size: x-large;
+    }
+
+    .wins {
+        grid-column: 1;
+        text-align: center;
+    }
+
+    .rank {
+        grid-column: 2;
+        grid-row-start: 2;
+        grid-row-end: 4;
+        margin-top: auto;
+        margin-bottom: auto;
+
+        img {
+            vertical-align: middle;
+        }
+
+        img.stars {
+            position: relative;
+            height: 44px;
+            left: -44px;
+            margin-right: -44px;
+            z-index: 1;
+        }
+
+        img.medal {
+            height: 44px;
+        }
+    }
+}
