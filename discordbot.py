@@ -433,7 +433,7 @@ async def cmd_shuffle(channel: discord.Channel, author: discord.Member, params: 
         await client.send_message(channel, "⚠ Non ci sono video in coda!")
         return
     random.shuffle(voice_queue)
-    await client.send_message("♠️ ♦️ ♣️ ♥️ Shuffle completo!")
+    await client.send_message(channel, "♠️ ♦️ ♣️ ♥️ Shuffle completo!")
 
 
 async def queue_predownload_videos():

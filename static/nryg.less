@@ -199,10 +199,11 @@ input[type="text"], input[type="password"] {
 }
 
 .dota {
-    padding: 18px;
+    padding: 15px;
+    border: 3px solid #000000;
     grid-row-gap: 5px;
     grid-template-columns: 20% 80%;
-    background-image: linear-gradient(to bottom, #801717, #a11d21);
+    background-image: linear-gradient(to bottom, #440b0b, #631013);
     color: #ffffff;
 
     .player {
@@ -239,6 +240,10 @@ input[type="text"], input[type="password"] {
     .wins {
         grid-column: 1;
         text-align: center;
+    }
+
+    .wins.number {
+        color: #ffb600;
     }
 
     .rank {

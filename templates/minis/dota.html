@@ -10,18 +10,18 @@
             Vittorie
         </div>
         <div class="number wins">
-            {{ dota.wins }}
+            <span>{{ dota.wins }}</span>
         </div>
         <div class="rank">
             {% if dota.rank_tier is none %}
                 <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
-                Non classificato
+                <span class="text">Non classificato</span>
             {% elif dota.rank_tier < 10 %}
                 <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
-                {{ dota.rank_tier }} piazzamenti completati
+                <span class="text">{{ dota.rank_tier }} piazzamenti completati</span>
             {% else %}
                 <img class="medal" src="{{ dota.get_rank_icon_url() }}">{% if dota.get_rank_stars_url() %}<img class="stars" src="{{ dota.get_rank_stars_url() }}">{% endif %}
-                {{ dota.get_rank_name() }}[{{ dota.get_rank_number() }}]
+                <span class="text">{{ dota.get_rank_name() }}[{{ dota.get_rank_number() }}]</span>
             {% endif %}
         </div>
     </div>
