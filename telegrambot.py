@@ -399,8 +399,8 @@ def cmd_profile(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠ Non sei connesso a Royalnet!\n"
                                                  "Per registrarti, utilizza il comando /register.")
         return
-    bot.send_message(update.message.chat.id, f"👤 [Profilo di {user.royals.username}]"
-                                             f"(https://ryg.steffo.eu/profile/{user.royals.username})",
+    bot.send_message(update.message.chat.id, f"👤 [Profilo di {user.royal.username}]"
+                                             f"(https://ryg.steffo.eu/profile/{user.royal.username})",
                      parse_mode="Markdown")
 
 
