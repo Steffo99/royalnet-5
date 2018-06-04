@@ -42,7 +42,8 @@ input[type="text"], input[type="password"] {
     max-width: 400px;
     position: relative;
     border-radius: 10px;
-    height: 80px;
+    height: 100px;
+    margin: 4px;
 }
 
 .osu {
@@ -91,7 +92,6 @@ input[type="text"], input[type="password"] {
         }
 
         .player-name {
-            vertical-align: middle;
             color: #ffffff;
         }
     }
@@ -155,17 +155,25 @@ input[type="text"], input[type="password"] {
 
         .player-name {
             vertical-align: middle;
+            color: #ffffff;
         }
     }
 
     .game-title {
         grid-row: 2;
         font-size: smaller;
-        font-style: normal;
+        text-align: center;
+        color: #41abfa;
     }
 
     .game-score {
         grid-row: 3;
+
+        img {
+            height: 36px;
+            display: block;
+            margin: auto;
+        }
     }
 
     .duel {
