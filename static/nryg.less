@@ -81,6 +81,7 @@ input[type="text"], input[type="password"] {
     color: #ffffff;
     padding: 10px;
     grid-row-gap: 5px;
+    grid-template-columns: 25% 25% 25% 25%;
 
     .background-image {
         position: absolute;
@@ -148,6 +149,7 @@ input[type="text"], input[type="password"] {
 .rl {
     background-image: linear-gradient(to bottom,rgba(35,91,139,.5),rgba(16,54,84,.5)),
                       linear-gradient(to right,rgba(35,91,139,.7),rgba(16,54,84,.7));
+    grid-template-columns: 25% 25% 25% 25%;
     padding: 18px;
     grid-row-gap: 5px;
 
@@ -158,12 +160,14 @@ input[type="text"], input[type="password"] {
 
         .player-name {
             color: #ffffff;
+            text-shadow: 2px 2px 8px #359ef2, -2px 2px 8px #359ef2, 2px -2px 8px #359ef2, -2px -2px 8px #359ef2;
         }
     }
 
     .game-title {
         text-align: center;
         color: #41abfa;
+        text-shadow: 2px 2px 8px #235b8b, -2px 2px 8px #235b8b, 2px -2px 8px #235b8b, -2px -2px 8px #235b8b;
     }
 
     .game-score img {
@@ -195,6 +199,7 @@ input[type="text"], input[type="password"] {
     border: 3px solid #000000;
     grid-row-gap: 5px;
     grid-template-columns: 25% 75%;
+    font-family: "Radiance", sans-serif;
     background-image: linear-gradient(to bottom, #440b0b, #631013);
     color: #ffffff;
 
@@ -230,14 +235,14 @@ input[type="text"], input[type="password"] {
 
         img.stars {
             position: relative;
-            height: 44px;
-            left: -44px;
-            margin-right: -44px;
+            height: 60px;
+            left: -60px;
+            margin-right: -60px;
             z-index: 1;
         }
 
         img.medal {
-            height: 44px;
+            height: 60px;
         }
     }
 }
@@ -249,6 +254,7 @@ input[type="text"], input[type="password"] {
     border: 3px solid #463714;
     background-color: #010a13;
     grid-row-gap: 5px;
+    grid-template-columns: 40% 20% 20% 20%;
 
     .player {
         grid-row: 1;
