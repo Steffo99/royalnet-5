@@ -21,9 +21,9 @@
         </div>
         <div class="game-score soloq">
             {% if lol.solo_division is none %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" game-title="Non classificato" class="rank">
+                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.solo_division.name|lower + "_" + lol.solo_rank.name|lower + ".png") }}" class="rank" game-title="{{ lol.solo_division.name|capitalize }} {{ lol.solo_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.solo_division.name|lower + "_" + lol.solo_rank.name|lower + ".png") }}" class="rank" title="{{ lol.solo_division.name|capitalize }} {{ lol.solo_rank.name }}">
             {% endif %}
         </div>
         <div class="game-title flexq">
@@ -31,9 +31,9 @@
         </div>
         <div class="game-score flexq">
             {% if lol.flex_division is none %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" game-title="Non classificato" class="rank">
+                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.flex_division.name|lower + "_" + lol.flex_rank.name|lower + ".png") }}" class="rank" game-title="{{ lol.flex_division.name|capitalize }} {{ lol.flex_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.flex_division.name|lower + "_" + lol.flex_rank.name|lower + ".png") }}" class="rank" title="{{ lol.flex_division.name|capitalize }} {{ lol.flex_rank.name }}">
             {% endif %}
         </div>
         <div class="game-title twtrq">
@@ -41,9 +41,9 @@
         </div>
         <div class="game-score twtrq">
             {% if lol.twtr_division is none %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" game-title="Non classificato" class="rank">
+                <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.twtr_division.name|lower + "_" + lol.twtr_rank.name|lower + ".png") }}" class="rank" game-title="{{ lol.twtr_division.name|capitalize }} {{ lol.twtr_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + lol.twtr_division.name|lower + "_" + lol.twtr_rank.name|lower + ".png") }}" class="rank" title="{{ lol.twtr_division.name|capitalize }} {{ lol.twtr_rank.name }}">
             {% endif %}
         </div>
     </div>

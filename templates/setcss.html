@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    CSS
+{% endblock %}
+
+{% block body %}
+    <h1>
+        CSS
+    </h1>
+    <form action="{{ url_for('page_setcss') }}" method="POST">
+        <textarea name="css" placeholder="Incolla il CSS per il tuo profilo qui...">{{ css }}</textarea>
+        <input type="submit" value="Invia">
+    </form>
+{% endblock %}

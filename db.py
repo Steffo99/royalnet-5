@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -793,6 +793,15 @@ class AprilFoolsBan(Base):
     from_user_id = Column(BigInteger, nullable=False)
     to_user_id = Column(BigInteger, nullable=False)
     datetime = Column(DateTime, nullable=False)
+
+
+class CustomCSS(Base):
+    __tablename__ = "customcss"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", lazy="joined")
+
+    css = Column(Text, nullable=False)
 
 
 # If run as script, create all the tables in the db

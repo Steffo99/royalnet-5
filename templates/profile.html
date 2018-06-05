@@ -4,9 +4,17 @@
     Royal Games
 {% endblock %}
 
+{% block posthead %}
+    {% if css %}
+        <style>
+            {{ css.css }}
+        </style>
+    {% endif %}
+{% endblock %}
+
 {% block body %}
     <h1>
-        Profilo di {{ royal.username }}
+        Profilo di {{ royal.username }} {% if session.get('user_id', '') == royal.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
     </h1>
     {% if steam %}
         {% include "minis/steam.html" %}
