@@ -4,18 +4,29 @@
     {{ royal.username }}
 {% endblock %}
 
+{% block posthead %}
+    {% if css %}
+        <style>
+            {{ css.css }}
+        </style>
+    {% endif %}
+{% endblock %}
+
 {% block body %}
     <h1>
-        Profilo di {{ royal.username }}
+        Profilo di {{ royal.username }} {% if session.get('user_id', '') == royal.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
     </h1>
-    {% if osu %}
-        {% include "minis/osu.html" %}
+    {% if steam %}
+        {% include "minis/steam.html" %}
     {% endif %}
     {% if rl %}
         {% include "minis/rl.html" %}
     {% endif %}
     {% if dota %}
         {% include "minis/dota.html" %}
+    {% endif %}
+    {% if osu %}
+        {% include "minis/osu.html" %}
     {% endif %}
     {% if lol %}
         {% include "minis/lol.html" %}

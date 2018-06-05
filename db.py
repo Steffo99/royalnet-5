@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -92,9 +92,10 @@ class Steam(Base):
     royal = relationship("Royal", lazy="joined")
 
     steam_id = Column(String, primary_key=True)
-    persona_name = Column(String, nullable=False)
-    avatar_hex = Column(String, nullable=False)
+    persona_name = Column(String)
+    avatar_hex = Column(String)
     trade_token = Column(String)
+    most_played_game_id = Column(BigInteger)
 
     def __repr__(self):
         return f"<Steam {self.steam_id}>"
@@ -104,6 +105,9 @@ class Steam(Base):
             return self.persona_name
         else:
             return self.steam_id
+
+    def most_played_game_url(self):
+        return f"https://steamcdn-a.akamaihd.net/steam/apps/{self.most_played_game_id}/header.jpg"
 
     def avatar_url(self):
         return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/{self.avatar_hex}.jpg"
@@ -151,7 +155,15 @@ class Steam(Base):
         j = r.json()
         self.persona_name = j["response"]["players"][0]["personaname"]
         self.avatar_hex = re.search(r"https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
-
+        r = requests.get(f"http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key={config['Steam']['api_key']}&steamid={self.steam_id}&format=json")
+        if r.status_code != 200:
+            raise RequestError(f"Steam returned {r.status_code}")
+        j = r.json()
+        if "response" not in j \
+            or "games" not in j["response"] \
+            or len(j["response"]["games"]) < 1:
+            raise RequestError(f"Game data is private")
+        self.most_played_game_id = j["response"]["games"][0]["appid"]
 
 class RocketLeague(Base):
     __tablename__ = "rocketleague"
@@ -781,6 +793,15 @@ class AprilFoolsBan(Base):
     from_user_id = Column(BigInteger, nullable=False)
     to_user_id = Column(BigInteger, nullable=False)
     datetime = Column(DateTime, nullable=False)
+
+
+class CustomCSS(Base):
+    __tablename__ = "customcss"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", lazy="joined")
+
+    css = Column(Text, nullable=False)
 
 
 # If run as script, create all the tables in the db

@@ -12,6 +12,11 @@
         Benvenuto al sito web della Royal Games! E' ancora un po' triste e spoglio, ma spero che collaboriate a migliorarlo!
     </p>
     <p>
-        Attualmente, sto sviluppando i <b>profili RYG</b>! Clicca <a href="/profile/{{ session['username'] }}">qui</a> per vedere il tuo.
+        Attualmente, sto sviluppando i <b>profili RYG</b>!
     </p>
+    <ul>
+        {% for user in royals %}
+            <li><a href="/profile/{{ user.username }}">{{ user.username }}</a></li>
+        {% endfor %}
+    </ul>
 {% endblock %}

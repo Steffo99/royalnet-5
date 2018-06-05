@@ -1,15 +1,23 @@
+<style>
+@font-face {
+    font-family: "Radiance";
+    src: url("http://cdn.dota2.com/apps/dota2/fonts/radiance.eot?#iefix") format("embedded-opentype"), url("http://cdn.dota2.com/apps/dota2/fonts/radiance.woff") format("woff"), url("http://cdn.dota2.com/apps/dota2/fonts/radiance.ttf") format("truetype"), url("http://cdn.dota2.com/apps/dota2/fonts/radiance.svg#ywftsvg") format("svg");
+    font-style: normal;
+    font-weight: normal;
+}
+</style>
 <div class="game-panel">
     <div class="game-grid dota">
         <div class="player">
-            <a href="http://steamcommunity.com/profiles/{{ dota.steam.steam_id }}">
+            <a href="https://www.opendota.com/players/{{ dota.steam.to_steam_id_3(dota.steam.steam_id) }}">
                 <img src="{{ dota.steam.avatar_url() }}" class="player-image">
                 <span class="player-name">{{ dota.steam.persona_name }}</span>
             </a>
         </div>
-        <div class="title wins">
+        <div class="game-title wins">
             Vittorie
         </div>
-        <div class="number wins">
+        <div class="game-score wins">
             <span>{{ dota.wins }}</span>
         </div>
         <div class="rank">
