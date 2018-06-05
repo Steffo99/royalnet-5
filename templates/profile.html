@@ -8,14 +8,17 @@
     <h1>
         Profilo di {{ royal.username }}
     </h1>
-    {% if osu %}
-        {% include "minis/osu.html" %}
+    {% if steam %}
+        {% include "minis/steam.html" %}
     {% endif %}
     {% if rl %}
         {% include "minis/rl.html" %}
     {% endif %}
     {% if dota %}
         {% include "minis/dota.html" %}
+    {% endif %}
+    {% if osu %}
+        {% include "minis/osu.html" %}
     {% endif %}
     {% if lol %}
         {% include "minis/lol.html" %}

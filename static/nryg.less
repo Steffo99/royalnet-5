@@ -48,6 +48,30 @@ input[type="text"], input[type="password"] {
     border-radius: 10px;
     margin: 4px;
     position: relative;
+
+    .game-title {
+        grid-row: 2;
+        font-size: smaller;
+    }
+
+    .game-score {
+        grid-row: 3;
+    }
+
+    .player {
+        grid-row: 1;
+        font-size: large;
+
+        a {
+            text-decoration: none;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            vertical-align: middle;
+        }
+    }
 }
 
 .osu {
@@ -82,17 +106,9 @@ input[type="text"], input[type="password"] {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 4;
-        font-size: large;
-
-        a {
-            text-decoration: none;
-        }
 
         .player-image {
-            width: 32px;
-            height: 32px;
             border-radius: 16px;
-            vertical-align: middle;
         }
 
         .player-name {
@@ -101,13 +117,7 @@ input[type="text"], input[type="password"] {
     }
 
     .game-title {
-        grid-row: 2;
-        font-size: smaller;
         font-style: normal;
-    }
-
-    .game-score {
-        grid-row: 3;
     }
 
     .standard {
@@ -145,39 +155,21 @@ input[type="text"], input[type="password"] {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 4;
-        font-size: large;
-
-        a {
-            text-decoration: none;
-        }
-
-        .player-image {
-            width: 32px;
-            height: 32px;
-            vertical-align: middle;
-        }
 
         .player-name {
-            vertical-align: middle;
             color: #ffffff;
         }
     }
 
     .game-title {
-        grid-row: 2;
-        font-size: smaller;
         text-align: center;
         color: #41abfa;
     }
 
-    .game-score {
-        grid-row: 3;
-
-        img {
-            height: 36px;
-            display: block;
-            margin: auto;
-        }
+    .game-score img {
+        height: 36px;
+        display: block;
+        margin: auto;
     }
 
     .duel {
@@ -210,40 +202,19 @@ input[type="text"], input[type="password"] {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 3;
-        font-size: large;
-
-        a {
-            text-decoration: none;
-        }
-
-        .player-image {
-            width: 32px;
-            height: 32px;
-            vertical-align: middle;
-        }
 
         .player-name {
             color: #ffffff;
         }
     }
 
-    .title {
-        grid-row: 2;
-        font-size: x-small;
-    }
-
-    .number {
-        grid-row: 3;
+    .game-score.wins {
         font-size: x-large;
     }
 
     .wins {
         grid-column: 1;
         text-align: center;
-    }
-
-    .wins.number {
-        color: #ffb600;
     }
 
     .rank {
@@ -283,22 +254,17 @@ input[type="text"], input[type="password"] {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 4;
-        font-size: large;
-
-        a {
-            text-decoration: none;
-        }
 
         .player-image {
-            width: 32px;
-            height: 32px;
-            vertical-align: middle;
             border-radius: 16px;
         }
     }
 
     .level {
         grid-column: 1;
+    }
+
+    .game-score.level {
         font-size: x-large;
     }
 
@@ -314,19 +280,67 @@ input[type="text"], input[type="password"] {
         grid-column: 4;
     }
 
-    .title {
-        grid-row: 2;
-        font-size: x-small;
+    .game-title {
         text-align: center;
     }
 
-    .value {
-        grid-row: 3;
+    .game-score {
         text-align: center;
         margin: auto;
     }
 
     .rank {
         height: 40px;
+    }
+}
+
+.steam {
+    font-family: "Motiva Sans", sans-serif;
+    padding: 18px;
+    background: url("https://steamstore-a.akamaihd.net/public/images/v6/colored_body_top2.png?v=2") center;
+
+    .player .player-name {
+        grid-row: 1;
+        grid-column: 1;
+        color: #ffffff;
+    }
+
+    .buttons {
+        grid-row: 2;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+
+    .game-banner {
+        grid-row: 1;
+        grid-column: 2;
+        text-align: right;
+
+        img {
+            height: 58px;
+            border-radius: 4px;
+        }
+    }
+
+    a {
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .button {
+        background-color: rgba(0,0,0,0.4);
+        color: #9e9d9b;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .button:hover, .button:active {
+        background-color: rgba(102,192,244,0.4);
+        color: #ffffff;
     }
 }

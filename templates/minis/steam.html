@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+<style>
+    @font-face { font-family: "Motiva Sans"; src: url("https://steamcommunity-a.akamaihd.net/public/shared/fonts/MotivaSans-Regular.ttf") format("truetype"); font-style: normal; font-weight: normal; }
+</style>
+<div class="game-panel">
+    <div class="game-grid steam">
+        <div class="player">
+            <a href="http://steamcommunity.com/profiles/{{ steam.steam_id }}">
+                <img src="{{ steam.avatar_url() }}" class="player-image">
+                <span class="player-name">{{ steam.persona_name }}</span>
+            </a>
+        </div>
+        <div class="buttons">
+            <a href="steam://friends/add/{{ steam.steam_id }}">
+                <div class="button add-friend-button">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+            </a>
+            <a href="steam://friends/message/{{ steam.steam_id }}">
+                <div class="button message-button">
+                    <i class="fas fa-comment-alt"></i>
+                </div>
+            </a>
+            <a href="https://steamdb.info/calculator/{{ steam.steam_id }}" target="_blank">
+                <div class="button calculator-button">
+                    <i class="fas fa-calculator"></i>
+                </div>
+            </a>
+            {% if steam.trade_token %}
+                <a href="{{ steam.trade_token }}" target="_blank">
+                    <div class="button trade-button">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+        {% if steam.most_played_game_id %}
+            <a href="https://store.steampowered.com/app/{{ steam.most_played_game_id }}/">
+                <div class="game-banner">
+                    <img src="https://steamcdn-a.akamaihd.net/steam/apps/{{ steam.most_played_game_id }}/header.jpg">
+                </div>
+            </a>
+        {% endif %}
+    </div>
+</div>
