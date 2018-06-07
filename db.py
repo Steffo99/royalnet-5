@@ -639,6 +639,23 @@ class Overwatch(Base):
         self.level = j["prestige"] * 100 + j["level"]
         self.rank = j["comprank"]
 
+    def rank_url(self):
+        if self.rank < 1500:
+            n = 1
+        elif self.rank < 2000:
+            n = 2
+        elif self.rank < 2500:
+            n = 3
+        elif self.rank < 3000:
+            n = 4
+        elif self.rank < 3500:
+            n = 5
+        elif self.rank < 4000:
+            n = 6
+        else:
+            n = 7
+        return f"https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/season-2/rank-{n}.png"
+
 
 class Diario(Base):
     __tablename__ = "diario"

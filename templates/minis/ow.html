@@ -1,0 +1,33 @@
+<style>
+@font-face {
+  font-family: Big Noodle Too;
+  src: url("https://d3hmvhl7ru3t12.cloudfront.net/fonts/big-noodle-too-oblique-0762bcfb7ce452ecfa21830ab40ee34f9bf2e6fbcecb649c8995bd59fdf93a74a8345855c3890ec3901ac7ca442040112f37f387c98a57ced5af61d92ee8e06c.woff") format("woff");
+  font-style: italic;
+  font-weight: 400;
+}
+</style>
+<div class="game-panel">
+    <div class="game-grid ow">
+        <div class="player">
+            <a href="https://playoverwatch.com/en-us/career/pc/eu/{{ ow.__str__(separator='-') }}">
+                <img src="{{ ow.icon_url() }}" class="player-image">
+                <span class="player-name">{{ ow }}</span>
+            </a>
+        </div>
+        <div class="game-title level">
+            Livello
+        </div>
+        <div class="game-score level">
+            <span>{{ ow.level }}</span>
+        </div>
+        <div class="rank">
+            {% if ow.rank is none %}
+                <div class="icon"></div>
+                <span class="text">Non classificato</span>
+            {% else %}
+                <img class="icon" src="{{ ow.rank_url() }}">
+                <span class="text">{{ ow.rank }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -351,6 +351,53 @@ input[type="text"], input[type="password"] {
     }
 }
 
+.ow {
+    padding: 15px;
+    font-family: "Big Noodle Too", sans-serif;
+    font-style: italic;
+    background-color: #ffffff;
+    border: 2px solid #ff9c00;
+    grid-row-gap: 5px;
+    grid-template-columns: 25% 75%;
+    color: #ff9c00;
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 3;
+
+        .player-name {
+            font-size: x-large;
+            color: #ff9c00;
+        }
+    }
+
+    .game-score.level {
+        font-size: x-large;
+    }
+
+    .level {
+        grid-column: 1;
+        text-align: center;
+    }
+
+    .rank {
+        grid-column: 2;
+        grid-row-start: 2;
+        grid-row-end: 4;
+        margin-top: auto;
+        margin-bottom: auto;
+
+        img {
+            vertical-align: middle;
+        }
+
+        img.icon {
+            height: 60px;
+        }
+    }
+}
+
 #edit-css {
     font-size: medium;
 }
