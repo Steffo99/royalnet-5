@@ -108,8 +108,12 @@ def page_setcss():
         if user_id is None:
             abort(403)
             return
+        css = request.form.get("css", "")
+        if "<style" in css:
+            abort(400)
+            return
         if ccss is None:
-            ccss = db.CustomCSS(royal_id=user_id, css=request.form.get("css", ""))
+            ccss = db.CustomCSS(royal_id=user_id, css=css)
             db_session.add(ccss)
         else:
             ccss.css = request.form.get("css", "")

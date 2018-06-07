@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
 
 {% block pagetitle %}
-    Royal Games
+    {{ royal.username }}
 {% endblock %}
 
 {% block posthead %}
     {% if css %}
         <style>
-            {{ css.css }}
+            {% autoescape false %}
+                {{ css.css }}
+            {% endautoescape %}
         </style>
     {% endif %}
 {% endblock %}
