@@ -109,7 +109,7 @@ def page_setcss():
             abort(403)
             return
         css = request.form.get("css", "")
-        if "<style" in css:
+        if "</style" in css:
             abort(400)
             return
         if ccss is None:
