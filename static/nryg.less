@@ -353,23 +353,31 @@ input[type="text"], input[type="password"] {
 
 .ow {
     padding: 15px;
-    font-family: "Big Noodle Too", sans-serif;
-    font-style: italic;
-    background-color: #ffffff;
+    font-family: "FuturaNo2D", sans-serif;
+    background-color: #371b00;
     border: 2px solid #ff9c00;
     grid-row-gap: 5px;
     grid-template-columns: 25% 75%;
-    color: #ff9c00;
+    color: #ffffff;
+    text-transform: uppercase;
 
     .player {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 3;
 
-        .player-name {
-            font-size: x-large;
-            color: #ff9c00;
+        .player-image {
+            border-radius: 2px;
+            vertical-align: middle;
         }
+
+        .player-name {
+            color: #ffffff;
+        }
+    }
+
+    .game-title {
+        color: #ff9c00;
     }
 
     .game-score.level {
@@ -388,12 +396,18 @@ input[type="text"], input[type="password"] {
         margin-top: auto;
         margin-bottom: auto;
 
-        img {
+        .icon {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            height: 60px;
+            width: 60px;
+            display: inline-block;
             vertical-align: middle;
+            margin-right: 8px;
         }
 
-        img.icon {
-            height: 60px;
+        .ranked.text {
+            font-size: x-large;
         }
     }
 }

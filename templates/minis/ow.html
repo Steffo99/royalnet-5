@@ -1,9 +1,9 @@
 <style>
 @font-face {
-  font-family: Big Noodle Too;
-  src: url("https://d3hmvhl7ru3t12.cloudfront.net/fonts/big-noodle-too-oblique-0762bcfb7ce452ecfa21830ab40ee34f9bf2e6fbcecb649c8995bd59fdf93a74a8345855c3890ec3901ac7ca442040112f37f387c98a57ced5af61d92ee8e06c.woff") format("woff");
-  font-style: italic;
-  font-weight: 400;
+  font-family: FuturaNo2D;
+  src: url("https://d3hmvhl7ru3t12.cloudfront.net/fonts/FuturaNo2D-DemiBold-6bcaf79a95daaac7cb0a86449fa6c6f0d6dd222878eef52c61f7ed10037631c8b6ca8442408276e82b04d1a4bf6db3e18bca760ac182a81d08cbf7924e1dfb4b.woff") format("woff");
+  font-style: normal;
+  font-weight: 600;
 }
 </style>
 <div class="game-panel">
@@ -22,11 +22,11 @@
         </div>
         <div class="rank">
             {% if ow.rank is none %}
-                <div class="icon"></div>
-                <span class="text">Non classificato</span>
+                <div class="icon unranked"></div>
+                <span class="text unranked">Non classificato</span>
             {% else %}
-                <img class="icon" src="{{ ow.rank_url() }}">
-                <span class="text">{{ ow.rank }}</span>
+                <img class="icon ranked" src="{{ ow.rank_url() }}">
+                <span class="text ranked">{{ ow.rank }}</span>
             {% endif %}
         </div>
     </div>
