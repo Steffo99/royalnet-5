@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -28,7 +28,7 @@ class Royal(Base):
     password = Column(LargeBinary)
     role = Column(String)
     fiorygi = Column(Integer, default=0)
-    member_since = Column(DateTime)
+    member_since = Column(Date)
 
     @staticmethod
     def create(session: Session, username: str):
