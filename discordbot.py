@@ -436,6 +436,17 @@ async def cmd_shuffle(channel: discord.Channel, author: discord.Member, params: 
     await client.send_message(channel, "♠️ ♦️ ♣️ ♥️ Shuffle completo!")
 
 
+@command
+@requires_cv
+async def cmd_clear(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    global voice_queue
+    if len(voice_queue) == 0:
+        await client.send_message(channel, "⚠ Non ci sono video in coda!")
+        return
+    voice_queue = []
+    await client.send_message(channel, "❌ Tutti i video in coda rimossi.")
+
+
 async def queue_predownload_videos():
     while True:
         for index, video in enumerate(voice_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
