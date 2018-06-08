@@ -1,0 +1,16 @@
+<div class="game-panel">
+    <div class="game-grid ryg">
+        <div class="player">
+            <span class="player-name">{{ royal.username }}</span>
+        </div>
+        <div class="member-status">
+            <span class="role">{{ royal.role }}</span> dal <span class="member-since">{% if royal.member_since %}{{ royal.member_since }}{% else %}????-??-??{% endif %}</span>
+        </div>
+        <div class="game-title fiorygi">
+            Fiorygi
+        </div>
+        <div class="game-score fiorygi">
+            {{ royal.fiorygi }}
+        </div>
+    </div>
+</div>

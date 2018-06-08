@@ -18,6 +18,7 @@
     <h1>
         Profilo di {{ royal.username }} {% if session.get('user_id', '') == royal.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
     </h1>
+    {% include "minis/ryg.html" %}
     {% if steam %}
         {% include "minis/steam.html" %}
     {% endif %}

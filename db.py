@@ -26,7 +26,9 @@ class Royal(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(LargeBinary)
+    role = Column(String)
     fiorygi = Column(Integer, default=0)
+    member_since = Column(DateTime)
 
     @staticmethod
     def create(session: Session, username: str):

@@ -412,6 +412,36 @@ input[type="text"], input[type="password"] {
     }
 }
 
+.ryg {
+    background-color: rgba(red(@accent-color), green(@accent-color), blue(@accent-color), 0.1);
+    padding: 18px;
+    grid-template-columns: 80% 20%;
+
+    .player {
+        grid-row: 1;
+        grid-column-start: 1;
+        grid-column-end: 3;
+        font-weight: bold;
+    }
+
+    .member-status {
+        grid-column: 1;
+        grid-row-start: 2;
+        grid-row-end: 4;
+        font-size: x-large;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    .fiorygi {
+        grid-column: 2;
+    }
+
+    .fiorygi.game-score {
+        font-size: x-large;
+    }
+}
+
 #edit-css {
     font-size: medium;
 }
