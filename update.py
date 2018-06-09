@@ -2,7 +2,7 @@ import db
 import errors
 import time
 
-session = None
+session: db.Session
 # Stop updating if Ctrl-C is pressed
 try:
     while True:
@@ -110,6 +110,10 @@ try:
         print("Closing...\n\n")
         session.close()
         print("OK")
+        print("Waiting 1800s...\t\t")
+        for i in range(0, 20):
+            time.sleep(90)
+            print("█")
 except KeyboardInterrupt:
     pass
 finally:
