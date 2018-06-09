@@ -6,7 +6,6 @@ session = None
 # Stop updating if Ctrl-C is pressed
 try:
     while True:
-        global session
         session = db.Session()
         # Update Steam
         print("STEAM")
