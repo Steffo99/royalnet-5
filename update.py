@@ -2,7 +2,7 @@ import db
 import errors
 import time
 
-session: db.Session
+session = None
 # Stop updating if Ctrl-C is pressed
 try:
     while True:
