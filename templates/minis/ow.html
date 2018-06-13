@@ -9,24 +9,24 @@
 <div class="game-panel">
     <div class="game-grid ow">
         <div class="player">
-            <a href="https://playoverwatch.com/en-us/career/pc/eu/{{ ow.__str__(separator='-') }}">
-                <img src="{{ ow.icon_url() }}" class="player-image">
-                <span class="player-name">{{ ow }}</span>
+            <a href="https://playoverwatch.com/en-us/career/pc/eu/{{ record.__str__(separator='-') }}">
+                <img src="{{ record.icon_url() }}" class="player-image">
+                <span class="player-name">{{ record }}</span>
             </a>
         </div>
         <div class="game-title level">
             Livello
         </div>
         <div class="game-score level">
-            <span>{{ ow.level }}</span>
+            <span>{{ record.level }}</span>
         </div>
         <div class="rank">
-            {% if ow.rank is none %}
+            {% if record.rank is none %}
                 <div class="icon unranked"></div>
                 <span class="text unranked">Non classificato</span>
             {% else %}
-                <img class="icon ranked" src="{{ ow.rank_url() }}">
-                <span class="text ranked">{{ ow.rank }}</span>
+                <img class="icon ranked" src="{{ record.rank_url() }}">
+                <span class="text ranked">{{ record.rank }}</span>
             {% endif %}
         </div>
     </div>

@@ -9,27 +9,27 @@
 <div class="game-panel">
     <div class="game-grid dota">
         <div class="player">
-            <a href="https://www.opendota.com/players/{{ dota.steam.to_steam_id_3(dota.steam.steam_id) }}">
-                <img src="{{ dota.steam.avatar_url() }}" class="player-image">
-                <span class="player-name">{{ dota.steam.persona_name }}</span>
+            <a href="https://www.opendota.com/players/{{ record.steam.to_steam_id_3(record.steam.steam_id) }}">
+                <img src="{{ record.steam.avatar_url() }}" class="player-image">
+                <span class="player-name">{{ record.steam.persona_name }}</span>
             </a>
         </div>
         <div class="game-title wins">
             Vittorie
         </div>
         <div class="game-score wins">
-            <span>{{ dota.wins }}</span>
+            <span>{{ record.wins }}</span>
         </div>
         <div class="rank">
-            {% if dota.rank_tier is none %}
+            {% if record.rank_tier is none %}
                 <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
                 <span class="text">Non classificato</span>
-            {% elif dota.rank_tier < 10 %}
+            {% elif record.rank_tier < 10 %}
                 <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
-                <span class="text">{{ dota.rank_tier }} piazzamenti completati</span>
+                <span class="text">{{ record.rank_tier }} piazzamenti completati</span>
             {% else %}
-                <img class="medal" src="{{ dota.get_rank_icon_url() }}">{% if dota.get_rank_stars_url() %}<img class="stars" src="{{ dota.get_rank_stars_url() }}">{% endif %}
-                <span class="text">{{ dota.get_rank_name() }}[{{ dota.get_rank_number() }}]</span>
+                <img class="medal" src="{{ record.get_rank_icon_url() }}">{% if record.get_rank_stars_url() %}<img class="stars" src="{{ record.get_rank_stars_url() }}">{% endif %}
+                <span class="text">{{ record.get_rank_name() }}[{{ record.get_rank_number() }}]</span>
             {% endif %}
         </div>
     </div>

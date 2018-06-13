@@ -5,39 +5,39 @@
 <div class="game-panel">
     <div class="game-grid steam">
         <div class="player">
-            <a href="http://steamcommunity.com/profiles/{{ steam.steam_id }}">
-                <img src="{{ steam.avatar_url() }}" class="player-image">
-                <span class="player-name">{{ steam.persona_name }}</span>
+            <a href="http://steamcommunity.com/profiles/{{ record.steam_id }}">
+                <img src="{{ record.avatar_url() }}" class="player-image">
+                <span class="player-name">{{ record.persona_name }}</span>
             </a>
         </div>
         <div class="buttons">
-            <a href="steam://friends/add/{{ steam.steam_id }}">
+            <a href="steam://friends/add/{{ record.steam_id }}">
                 <div class="button add-friend-button">
                     <i class="fas fa-user-plus"></i>
                 </div>
             </a>
-            <a href="steam://friends/message/{{ steam.steam_id }}">
+            <a href="steam://friends/message/{{ record.steam_id }}">
                 <div class="button message-button">
                     <i class="fas fa-comment-alt"></i>
                 </div>
             </a>
-            <a href="https://steamdb.info/calculator/{{ steam.steam_id }}" target="_blank">
+            <a href="https://steamdb.info/calculator/{{ record.steam_id }}" target="_blank">
                 <div class="button calculator-button">
                     <i class="fas fa-calculator"></i>
                 </div>
             </a>
-            {% if steam.trade_token %}
-                <a href="{{ steam.trade_token }}" target="_blank">
+            {% if record.trade_token %}
+                <a href="{{ record.trade_token }}" target="_blank">
                     <div class="button trade-button">
                         <i class="fas fa-handshake"></i>
                     </div>
                 </a>
             {% endif %}
         </div>
-        {% if steam.most_played_game_id %}
-            <a href="https://store.steampowered.com/app/{{ steam.most_played_game_id }}/">
+        {% if record.most_played_game_id %}
+            <a href="https://store.steampowered.com/app/{{ record.most_played_game_id }}/">
                 <div class="game-banner">
-                    <img src="https://steamcdn-a.akamaihd.net/steam/apps/{{ steam.most_played_game_id }}/header.jpg">
+                    <img src="https://steamcdn-a.akamaihd.net/steam/apps/{{ record.most_played_game_id }}/header.jpg">
                 </div>
             </a>
         {% endif %}

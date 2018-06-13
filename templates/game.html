@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    {{ game_name }}
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Royal Games su {{ game_name }}
+    </h1>
+    {% for mini in minis %}
+        {% with record = mini %}
+            {% include "minis/" + game_short_name + ".html" %}
+        {% endwith %}
+    {% endfor %}
+{% endblock %}

@@ -20,21 +20,33 @@
     </h1>
     {% include "minis/ryg.html" %}
     {% if steam %}
-        {% include "minis/steam.html" %}
+        {% with record = steam %}
+            {% include "minis/steam.html" %}
+        {% endwith %}
     {% endif %}
     {% if rl %}
-        {% include "minis/rl.html" %}
+        {% with record = rl %}
+            {% include "minis/rl.html" %}
+        {% endwith %}
     {% endif %}
     {% if dota %}
-        {% include "minis/dota.html" %}
+        {% with record = dota %}
+            {% include "minis/dota.html" %}
+        {% endwith %}
     {% endif %}
     {% if osu %}
-        {% include "minis/osu.html" %}
+        {% with record = osu %}
+            {% include "minis/osu.html" %}
+        {% endwith %}
     {% endif %}
     {% if lol %}
-        {% include "minis/lol.html" %}
+        {% with record = lol %}
+            {% include "minis/lol.html" %}
+        {% endwith %}
     {% endif %}
     {% if ow %}
-        {% include "minis/ow.html" %}
+        {% with record = ow %}
+            {% include "minis/ow.html" %}
+        {% endwith %}
     {% endif %}
 {% endblock %}

@@ -167,6 +167,7 @@ class Steam(Base):
             raise RequestError(f"Game data is private")
         self.most_played_game_id = j["response"]["games"][0]["appid"]
 
+
 class RocketLeague(Base):
     __tablename__ = "rocketleague"
 
@@ -637,7 +638,10 @@ class Overwatch(Base):
             j = r.json()["eu"]["stats"]["quickplay"]["overall_stats"]
         except TypeError:
             raise RequestError("Something went wrong when retrieving the stats.")
-        self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
+        try:
+            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
+        except AttributeError:
+            pass
         self.level = j["prestige"] * 100 + j["level"]
         self.rank = j["comprank"]
 

@@ -123,6 +123,33 @@ def page_setcss():
         return redirect(url_for("page_profile", name=royal.username))
 
 
+@app.route("/game/<name>")
+def page_game(name: str):
+    db_session = db.Session()
+    if name == "rl":
+        game_name = "Rocket League"
+        query = db_session.query(db.RocketLeague).join(db.Steam).all()
+    elif name == "dota":
+        game_name = "Dota 2"
+        query = db_session.query(db.Dota).join(db.Steam).all()
+    elif name == "lol":
+        game_name = "League of Legends"
+        query = db_session.query(db.LeagueOfLegends).all()
+    elif name == "osu":
+        game_name = "osu!"
+        query = db_session.query(db.Osu).all()
+    elif name == "ow":
+        game_name = "Overwatch"
+        query = db_session.query(db.Overwatch).all()
+    elif name == "steam":
+        game_name = "Steam"
+        query = db_session.query(db.Steam).all()
+    elif name == "ryg":
+        game_name = "Royalnet"
+        query = db_session.query(db.Royal).all()
+    db_session.close()
+    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name)
+
 if __name__ == "__main__":
     try:
         app.run(host="0.0.0.0", port=1234, debug=__debug__)
