@@ -64,12 +64,12 @@ def cmd_register(bot: Bot, update: Update):
 
 def cmd_discord(bot: Bot, update: Update):
     if discord_connection is None:
-        bot.send_message(update.message.chat.id, "⚠ Il bot non è sincronizzato con Discord al momento.")
+        bot.send_message(update.message.chat.id, "⚠ Il bot non è collegato a Discord al momento.")
         return
-    discord_connection.send("/cv")
+    discord_connection.send("get cv")
     server_members = discord_connection.recv()
-    channels = {0:None}
-    members_in_channels = {0:[]}
+    channels = {0: None}
+    members_in_channels = {0: []}
     message = ""
     # Find all the channels
     for member in server_members:
@@ -404,6 +404,20 @@ def cmd_profile(bot: Bot, update: Update):
                      parse_mode="Markdown")
 
 
+def cmd_bridge(bot: Bot, update: Update):
+    try:
+        data = update.message.text.split(" ", 1)[1]
+    except IndexError:
+        bot.send_message(update.message.chat.id, "⚠ Non hai specificato un comando!\n"
+                                                 "Sintassi corretta: `/bridge <comando> <argomenti>`")
+    discord_connection.send(f"!{data}")
+    result = discord_connection.recv()
+    if result == "error":
+        bot.send_message(update.message.chat.id, "⚠ Esecuzione del comando fallita.")
+    if result == "success":
+        bot.send_message(update.message.chat.id, "⏩ Comando eseguito su Discord.")
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -425,6 +439,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
     u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
+    u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"

@@ -243,18 +243,32 @@ async def update_users_pipe(users_connection):
     await client.wait_until_ready()
     while True:
         msg = await loop.run_in_executor(executor, users_connection.recv)
-        if msg == "/cv":
+        if msg == "get cv":
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
+        elif msg.startswith("!"):
+            data = msg.split(" ")
+            if data[0] not in commands:
+                users_connection.send("error")
+                continue
+            await commands[data[0]](channel=client.get_channel(config["Discord"]["main_channel"]),
+                                    author=None,
+                                    params=data[1:] if len(data) > 1 else [])
+            users_connection.send("success")
 
 
 def command(func):
     """Decorator. Runs the function as a Discord command."""
     async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
-        sentry.user_context({
-            "discord_id": author.id,
-            "username": f"{author.name}#{author.discriminator}"
-        })
+        if author is not None:
+            sentry.user_context({
+                "discord_id": author.id,
+                "username": f"{author.name}#{author.discriminator}"
+            })
+        else:
+            sentry.user_context({
+                "source": "Telegram"
+            })
         try:
             result = await func(channel=channel, author=author, params=params, *args, **kwargs)
         except Exception:
@@ -313,6 +327,8 @@ async def cmd_ping(channel: discord.Channel, author: discord.Member, params: typ
 
 @command
 async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if author is None:
+        await client.send_message(channel, "⚠ Questo comando richiede un autore.")
     if author.voice.voice_channel is None:
         await client.send_message(channel, "⚠ Non sei in nessun canale!")
         return
@@ -508,6 +524,21 @@ async def queue_play_next_video():
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
         del voice_queue[0]
+
+
+commands = {
+    "!ping": cmd_ping,
+    "!cv": cmd_cv,
+    "!play": cmd_play,
+    "!p": cmd_play,
+    "!skip": cmd_skip,
+    "!s": cmd_skip,
+    "!remove": cmd_remove,
+    "!queue": cmd_queue,
+    "!q": cmd_queue,
+    "!shuffle": cmd_shuffle,
+    "!clear": cmd_clear
+}
 
 
 def process(users_connection=None):
