@@ -194,49 +194,14 @@ async def on_message(message: discord.Message):
             "discriminator": message.author.discriminator
         }
     })
-    if message.content.startswith("!ping"):
-        await cmd_ping(channel=message.channel,
-                       author=message.author,
-                       params=["/ping"])
-    elif message.content.startswith("!cv"):
-        await cmd_cv(channel=message.channel,
-                     author=message.author,
-                     params=message.content.split(" "))
-    elif message.content.startswith("!play"):
-        await cmd_play(channel=message.channel,
-                       author=message.author,
-                       params=message.content.split(" "))
-    elif message.content.startswith("!skip"):
-        await cmd_skip(channel=message.channel,
-                       author=message.author,
-                       params=message.content.split(" "))
-    elif message.content.startswith("!remove"):
-        await cmd_remove(channel=message.channel,
-                         author=message.author,
-                         params=message.content.split(" "))
-    elif message.content.startswith("!queue"):
-        await cmd_queue(channel=message.channel,
-                        author=message.author,
-                        params=message.content.split(" "))
-    elif message.content.startswith("!shuffle"):
-        await cmd_shuffle(channel=message.channel,
-                          author=message.author,
-                          params=message.content.split(" "))
-    elif message.content.startswith("!cast"):
-        try:
-            spell = message.content.split(" ", 1)[1]
-        except IndexError:
-            await client.send_message(message.channel, "⚠️ Non hai specificato nessun incantesimo!\n"
-                                                       "Sintassi corretta: `!cast <nome_incantesimo>`")
+    if message.content.startswith("!"):
+        data = message.content.split(" ")
+        if data[0] not in commands:
+            await client.send_message(message.channel, ":warning: Comando non riconosciuto.")
             return
-        target: discord.Member = random.sample(list(message.server.members), 1)[0]
-        await client.send_message(message.channel, cast.cast(spell_name=spell, target_name=target.name,
-                                                             platform="discord"))
-    elif message.content.startswith("!smecds"):
-        ds = random.sample(stagismo.listona, 1)[0]
-        await client.send_message(message.channel, f"Secondo me, è colpa {ds}.", tts=True)
-    elif __debug__ and message.content.startswith("!exception"):
-        raise Exception("!exception was called")
+        await commands[data[0]](channel=client.get_channel(config["Discord"]["main_channel"]),
+                                author=message.author,
+                                params=data)
 
 
 async def update_users_pipe(users_connection):
@@ -253,7 +218,7 @@ async def update_users_pipe(users_connection):
                 continue
             await commands[data[0]](channel=client.get_channel(config["Discord"]["main_channel"]),
                                     author=None,
-                                    params=data[1:] if len(data) > 1 else [])
+                                    params=data)
             users_connection.send("success")
 
 
@@ -411,21 +376,51 @@ async def cmd_remove(channel: discord.Channel, author: discord.Member, params: t
     if len(voice_queue) == 0:
         await client.send_message(channel, "⚠ Non c'è nessun video in coda.")
         return
-    if len(params) < 2:
+    if len(params) == 1:
         index = len(voice_queue) - 1
-    else:
+    elif len(params) == 2:
         try:
             index = int(params[1]) - 1
         except ValueError:
             await client.send_message(channel, "⚠ Il numero inserito non è valido.\n"
-                                      "Sintassi: `!remove [numerovideo]`")
+                                      "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
-    if abs(index) >= len(voice_queue):
-        await client.send_message(channel, "⚠ Il numero inserito non corrisponde a nessun video nella playlist.\n"
-                                  "Sintassi: `!remove [numerovideo]`")
+    if len(params) < 3:
+        if abs(index) >= len(voice_queue):
+            await client.send_message(channel, "⚠ Il numero inserito non corrisponde a nessun video nella playlist.\n"
+                                      "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+            return
+        del voice_queue[index]
+        await client.send_message(channel, f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
         return
-    video = voice_queue.pop(index)
-    await client.send_message(channel, f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
+    try:
+        start = int(params[1]) - 1
+    except ValueError:
+        await client.send_message(channel, "⚠ Il numero iniziale inserito non è valido.\n"
+                                  "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+        return
+    if start >= len(voice_queue):
+        await client.send_message(channel, "⚠ Il numero iniziale inserito non corrisponde a nessun video nella"
+                                           " playlist.\n"
+                                  "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+        return
+    try:
+        end = int(params[2]) - 2
+    except ValueError:
+        await client.send_message(channel, "⚠ Il numero finale inserito non è valido.\n"
+                                  "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+        return
+    if end >= len(voice_queue):
+        await client.send_message(channel, "⚠ Il numero finale inserito non corrisponde a nessun video nella"
+                                           " playlist.\n"
+                                  "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+        return
+    if start > end:
+        await client.send_message(channel, "⚠ Il numero iniziale è maggiore del numero finale.\n"
+                                  "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
+        return
+    del voice_queue[start:end]
+    await client.send_message(channel, f":regional_indicator_x: {end - start} video rimossi dalla coda.")
 
 
 @command
@@ -460,7 +455,7 @@ async def cmd_clear(channel: discord.Channel, author: discord.Member, params: ty
         await client.send_message(channel, "⚠ Non ci sono video in coda!")
         return
     voice_queue = []
-    await client.send_message(channel, "❌ Tutti i video in coda rimossi.")
+    await client.send_message(channel, ":regional_indicator_x: Tutti i video in coda rimossi.")
 
 
 async def queue_predownload_videos():
@@ -534,6 +529,7 @@ commands = {
     "!skip": cmd_skip,
     "!s": cmd_skip,
     "!remove": cmd_remove,
+    "!cancel": cmd_remove,
     "!queue": cmd_queue,
     "!q": cmd_queue,
     "!shuffle": cmd_shuffle,
