@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block pagetitle %}
-    {{ royal.username }}
+    {{ ryg.username }}
 {% endblock %}
 
 {% block posthead %}
@@ -16,7 +16,7 @@
 
 {% block body %}
     <h1>
-        Profilo di {{ royal.username }} {% if session.get('user_id', '') == royal.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
+        Profilo di {{ ryg.username }} {% if session.get('user_id', '') == ryg.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
     </h1>
     {% with record = ryg %}
         {% include "minis/ryg.html" %}
