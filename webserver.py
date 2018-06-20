@@ -41,7 +41,7 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     db_session.close()
-    return render_template("profile.html", royal=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow)
+    return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow)
 
 
 @app.route("/login")
