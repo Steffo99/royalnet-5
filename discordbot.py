@@ -185,7 +185,7 @@ async def on_ready():
 async def on_message(message: discord.Message):
     global voice_client
     global voice_player
-    if message.channel != client.get_channel(config["Discord"]["main_channel"]):
+    if message.channel != client.get_channel(config["Discord"]["main_channel"]) or message.author.bot:
         return
     sentry.user_context({
         "discord": {
@@ -194,7 +194,7 @@ async def on_message(message: discord.Message):
             "discriminator": message.author.discriminator
         }
     })
-    if not message.content.startswith("!") and not message.author.bot:
+    if not message.content.startswith("!"):
         client.send_message(message.channel,
                             ":warning: In questa chat sono consentiti solo comandi per il bot.\n"
                             "Riinvia il tuo messaggio in <#425780562805129226>!")
