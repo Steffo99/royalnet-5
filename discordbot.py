@@ -185,7 +185,7 @@ async def on_ready():
 async def on_message(message: discord.Message):
     global voice_client
     global voice_player
-    if not message.content.startswith("!"):
+    if message.channel != client.get_channel(config["Discord"]["main_channel"]):
         return
     sentry.user_context({
         "discord": {
@@ -194,14 +194,19 @@ async def on_message(message: discord.Message):
             "discriminator": message.author.discriminator
         }
     })
-    if message.content.startswith("!"):
-        data = message.content.split(" ")
-        if data[0] not in commands:
-            await client.send_message(message.channel, ":warning: Comando non riconosciuto.")
-            return
-        await commands[data[0]](channel=client.get_channel(config["Discord"]["main_channel"]),
-                                author=message.author,
-                                params=data)
+    if not message.content.startswith("!") and not message.author.bot:
+        client.send_message(message.channel,
+                            ":warning: In questa chat sono consentiti solo comandi per il bot.\n"
+                            "Riinvia il tuo messaggio in <#425780562805129226>!")
+        client.delete_message(message)
+        return
+    data = message.content.split(" ")
+    if data[0] not in commands:
+        await client.send_message(message.channel, ":warning: Comando non riconosciuto.")
+        return
+    await commands[data[0]](channel=client.get_channel(config["Discord"]["main_channel"]),
+                            author=message.author,
+                            params=data)
 
 
 async def update_users_pipe(users_connection):
@@ -526,6 +531,8 @@ commands = {
     "!cv": cmd_cv,
     "!play": cmd_play,
     "!p": cmd_play,
+    "!search": cmd_play,
+    "!file": cmd_play,
     "!skip": cmd_skip,
     "!s": cmd_skip,
     "!remove": cmd_remove,
