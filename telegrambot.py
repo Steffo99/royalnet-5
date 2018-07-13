@@ -434,7 +434,7 @@ def cmd_wheel(bot: Bot, update: Update):
         session.close()
         return
     user.royal.fiorygi -= 1
-    r = random.randrange(10)
+    r = random.randrange(20)
     if r == 9:
         bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su x8!\n"
                                                  "Hai ottenuto 8 fiorygi!")
