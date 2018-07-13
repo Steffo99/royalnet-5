@@ -419,6 +419,39 @@ def cmd_bridge(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⏩ Comando eseguito su Discord.")
 
 
+def cmd_wheel(bot: Bot, update: Update):
+    """Perchè il gioco d'azzardo è bello e salutare."""
+    session = db.Session()
+    user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
+    if user is None:
+        bot.send_message(update.message.chat.id, "⚠ Non sei connesso a Royalnet!\n"
+                                                 "Per registrarti, utilizza il comando /register.")
+        session.close()
+        return
+    if user.royal.fiorygi < 1:
+        bot.send_message(update.message.chat.id, "⚠ Non hai abbastanza fiorygi per girare la ruota!\n"
+                                                 "Costa 1 fioryg.")
+        session.close()
+        return
+    user.royal.fiorygi -= 1
+    r = random.randrange(10)
+    if r == 9:
+        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su x8!\n"
+                                                 "Hai ottenuto 8 fiorygi!")
+        user.royal.fiorygi += 8
+    elif r == 8 or r == 7:
+        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su x4!\n"
+                                                 "Hai ottenuto 4 fiorygi!")
+        user.royal.fiorygi += 4
+    else:
+        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su un segno strano.\n"
+                                                 "| ||\n"
+                                                 "|| |_")
+    session.commit()
+    session.close()
+
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -441,6 +474,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
     u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
     u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
+    u.dispatcher.add_handler(CommandHandler("wheel", cmd_wheel))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
