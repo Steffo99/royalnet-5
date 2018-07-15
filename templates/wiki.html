@@ -18,8 +18,8 @@
             </div>
         {% endif %}
         {% if session.get('user_id', '') %}
-            <h4>Modifica</h4>
             <div class="wiki-edit">
+                <h4>Modifica</h4>
                 <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
                     <textarea class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
                     <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
