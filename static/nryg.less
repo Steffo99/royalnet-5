@@ -49,7 +49,7 @@ textarea {
     height: 300px;
 }
 
-button, input[type="submit"], .button {
+button, input[type="submit"], .btn {
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
     border-radius: 0;
     border: 1px solid @text-color;
@@ -64,12 +64,12 @@ button, input[type="submit"], .button {
     cursor: default;
 }
 
-button:hover, input[type="submit"]:hover, .button:hover {
+button:hover, input[type="submit"]:hover, .btn:hover {
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.3);
     border: 1px solid @accent-color;
 }
 
-button:active, input[type="submit"]:active, .button:active {
+button:active, input[type="submit"]:active, .btn:active {
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.5);
     color: @accent-color !important;
     border: 1px solid @accent-color;
