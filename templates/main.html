@@ -14,23 +14,23 @@
     <h2>Profili</h2>
     <ul>
         {% for user in royals %}
-            <li><a href="profile/{{ user.username }}">{{ user.username }}</a></li>
+            <li><a href="/profile/{{ user.username }}">{{ user.username }}</a></li>
         {% endfor %}
     </ul>
     <h2>Giochi</h2>
     <ul>
-        <li><a href="game/ryg">Royal Games</a></li>
-        <li><a href="game/steam">Steam</a></li>
-        <li><a href="game/dota">Dota 2</a></li>
-        <li><a href="game/rl">Rocket League</a></li>
-        <li><a href="game/lol">League of Legends</a></li>
-        <li><a href="game/ow">Overwatch</a></li>
-        <li><a href="game/osu">osu!</a></li>
+        <li><a href="/game/ryg">Royal Games</a></li>
+        <li><a href="/game/steam">Steam</a></li>
+        <li><a href="/game/dota">Dota 2</a></li>
+        <li><a href="/game/rl">Rocket League</a></li>
+        <li><a href="/game/lol">League of Legends</a></li>
+        <li><a href="/game/ow">Overwatch</a></li>
+        <li><a href="/game/osu">osu!</a></li>
     </ul>
     <h2>Wiki</h2>
     <ul>
         {% for page in wiki_pages %}
-            <li><a href="wiki/{{ page.key }}">{{ page.key }}</a></li>
+            <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
         {% endfor %}
     </ul>
 {% endblock %}
