@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, abort, redirect, url_for
+from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape
 from flask import session as fl_session
 import db
 import bcrypt
 import configparser
+import markdown
+import datetime
+import telegram
 
 app = Flask(__name__)
 
@@ -14,6 +17,7 @@ config.read("config.ini")
 
 app.secret_key = config["Flask"]["secret_key"]
 
+telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
 
 @app.route("/")
 def page_main():
@@ -57,7 +61,7 @@ def page_loggedin():
     user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
     db_session.close()
     if user is None:
-        abort(403)
+        abort(401)
         return
     if user.password is None:
         fl_session["user_id"] = user.id
@@ -66,7 +70,7 @@ def page_loggedin():
         fl_session["user_id"] = user.id
         return redirect(url_for("page_main"))
     else:
-        abort(403)
+        abort(401)
         return
 
 
@@ -75,7 +79,7 @@ def page_password():
     user_id = fl_session.get("user_id")
     if request.method == "GET":
         if user_id is None:
-            abort(403)
+            abort(401)
             return
         return render_template("password.html")
     elif request.method == "POST":
@@ -89,7 +93,7 @@ def page_password():
             return redirect(url_for("page_main"))
         else:
             db_session.close()
-            abort(403)
+            abort(401)
             return
 
 
@@ -101,12 +105,12 @@ def page_setcss():
     if request.method == "GET":
         db_session.close()
         if user_id is None:
-            abort(403)
+            abort(401)
             return
         return render_template("setcss.html", css=ccss.css)
     elif request.method == "POST":
         if user_id is None:
-            abort(403)
+            abort(401)
             return
         css = request.form.get("css", "")
         if "</style" in css:
@@ -150,8 +154,48 @@ def page_game(name: str):
     db_session.close()
     return render_template("game.html", minis=query, game_name=game_name, game_short_name=name)
 
+
+@app.route("/wiki/<key>", methods=["GET", "POST"])
+def page_wiki(key: str):
+    db_session = db.Session()
+    wiki_page = db_session.query(db.WikiEntry).filter_by(key=key).one_or_none()
+    if request.method == "GET":
+        wiki_latest_edit = db_session.query(db.WikiLog).filter_by(edited_key=key) \
+                               .order_by(db.WikiLog.timestamp.desc()).first()
+        db_session.close()
+        if wiki_page is None:
+            return render_template("wiki.html", key=key)
+        converted_md = Markup(markdown.markdown(escape(wiki_page.content)))
+        return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
+                               wiki_log=wiki_latest_edit)
+    elif request.method == "POST":
+        user_id = fl_session.get('user_id')
+        user = db_session.query(db.Royal).filter_by(id=user_id).one()
+        if user_id is None:
+            db_session.close()
+            abort(401)
+            return
+        if wiki_page is None:
+            wiki_page = db.WikiEntry(key=key, content=request.form.get("content"))
+            db_session.add(wiki_page)
+            db_session.flush()
+        else:
+            wiki_page.content = request.form.get("content")
+        edit_reason = request.form.get("reason")
+        new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
+        db_session.add(new_log)
+        db_session.commit()
+        telegram_bot.send_message(config["Telegram"]["main_group"],
+                                  f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata'
+                                  f' modificata da'
+                                  f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
+                                  f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}',
+                                  parse_mode="HTML")
+        return redirect(url_for("page_wiki", key=key))
+
+
 if __name__ == "__main__":
     try:
-        app.run(host="0.0.0.0", port=1234, debug=__debug__)
+        app.run(host="0.0.0.0", port=1235, debug=__debug__)
     except KeyboardInterrupt:
         pass

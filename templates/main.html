@@ -9,14 +9,28 @@
         Royal Games
     </h1>
     <p>
-        Benvenuto al sito web della Royal Games! E' ancora un po' triste e spoglio, ma spero che collaboriate a migliorarlo!
+        Benvenuto al sito web della Royal Games! Sta lentamente migliorando, ma spero che comunque collaboriate a migliorarlo!
     </p>
-    <p>
-        Attualmente, sto sviluppando i <b>profili RYG</b>!
-    </p>
+    <h2>Profili</h2>
     <ul>
         {% for user in royals %}
-            <li><a href="/profile/{{ user.username }}">{{ user.username }}</a></li>
+            <li><a href="profile/{{ user.username }}">{{ user.username }}</a></li>
+        {% endfor %}
+    </ul>
+    <h2>Giochi</h2>
+    <ul>
+        <li><a href="game/ryg">Royal Games</a></li>
+        <li><a href="game/steam">Steam</a></li>
+        <li><a href="game/dota">Dota 2</a></li>
+        <li><a href="game/rl">Rocket League</a></li>
+        <li><a href="game/lol">League of Legends</a></li>
+        <li><a href="game/ow">Overwatch</a></li>
+        <li><a href="game/osu">osu!</a></li>
+    </ul>
+    <h2>Wiki</h2>
+    <ul>
+        {% for key in wiki_pages %}
+            <li><a href="wiki/{{ key }}">{{ key }}</a></li>
         {% endfor %}
     </ul>
 {% endblock %}

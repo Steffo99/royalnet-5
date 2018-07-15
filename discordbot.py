@@ -260,7 +260,7 @@ def command(func):
     return new_func
 
 
-def requires_cv(func):
+def requires_voice_client(func):
     "Decorator. Ensures the voice client is connected before running the command."
     async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
         global voice_client
@@ -331,7 +331,7 @@ async def add_video_from_file(file):
 
 
 @command
-@requires_cv
+@requires_voice_client
 async def cmd_play(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     if len(params) < 2:
         await client.send_message(channel, "⚠ Non hai specificato una canzone da riprodurre!\n"
@@ -365,7 +365,7 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
 
 
 @command
-@requires_cv
+@requires_voice_client
 async def cmd_skip(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     global voice_player
     if voice_player is None:
@@ -376,7 +376,7 @@ async def cmd_skip(channel: discord.Channel, author: discord.Member, params: typ
 
 
 @command
-@requires_cv
+@requires_voice_client
 async def cmd_remove(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     if len(voice_queue) == 0:
         await client.send_message(channel, "⚠ Non c'è nessun video in coda.")
@@ -443,7 +443,7 @@ async def cmd_queue(channel: discord.Channel, author: discord.Member, params: ty
 
 
 @command
-@requires_cv
+@requires_voice_client
 async def cmd_shuffle(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     if len(voice_queue) == 0:
         await client.send_message(channel, "⚠ Non ci sono video in coda!")
@@ -453,7 +453,7 @@ async def cmd_shuffle(channel: discord.Channel, author: discord.Member, params: 
 
 
 @command
-@requires_cv
+@requires_voice_client
 async def cmd_clear(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     global voice_queue
     if len(voice_queue) == 0:
@@ -461,6 +461,15 @@ async def cmd_clear(channel: discord.Channel, author: discord.Member, params: ty
         return
     voice_queue = []
     await client.send_message(channel, ":regional_indicator_x: Tutti i video in coda rimossi.")
+
+
+@command
+@requires_voice_client
+async def cmd_dump_voice_player_error(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    global voice_player
+    if voice_player is None:
+        return
+    await client.send_message(channel, f"```\n{str(voice_player.error)}\n```")
 
 
 async def queue_predownload_videos():
@@ -522,7 +531,8 @@ async def queue_play_next_video():
         voice_player = await now_playing.create_player()
         voice_player.start()
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
-        await client.send_message(client.get_channel(config["Discord"]["main_channel"]), f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                  f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
         del voice_queue[0]
 
 
@@ -540,7 +550,8 @@ commands = {
     "!queue": cmd_queue,
     "!q": cmd_queue,
     "!shuffle": cmd_shuffle,
-    "!clear": cmd_clear
+    "!clear": cmd_clear,
+    "!dump_vp": cmd_dump_voice_player_error
 }
 
 

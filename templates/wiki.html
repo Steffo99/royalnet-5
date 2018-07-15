@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    {{ key }}
+{% endblock %}
+
+{% block body %}
+    <div class="wiki">
+        <h1>
+            {{ key }}
+        </h1>
+        {% if wiki_page %}
+            <div class="wiki-content">
+                {{ converted_md }}
+            </div>
+            <div class="wiki-log">
+                Ultima modifica di <span class="last-author"><a href="/profile/{{ wiki_log.editor.username }}">{{ wiki_log.editor.username }}</a></span> alle <span class="last-timestamp">{{ wiki_log.timestamp.isoformat() }}</span>{% if wiki_log.reason %}, motivo: <span class="last-reason">{{ wiki_log.reason }}</span>{% endif %}
+            </div>
+        {% endif %}
+        {% if session.get('user_id', '') %}
+            <h4>Modifica</h4>
+            <div class="wiki-edit">
+                <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
+                    <textarea class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
+                    <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
+                    <input class="submit" type="submit" value="Invia">
+                </form>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

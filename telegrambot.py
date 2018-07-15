@@ -451,7 +451,6 @@ def cmd_wheel(bot: Bot, update: Update):
     session.close()
 
 
-
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:

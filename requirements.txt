@@ -9,3 +9,4 @@ PyNaCl
 async_timeout
 raven
 bcrypt
+markdown

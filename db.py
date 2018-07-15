@@ -45,7 +45,7 @@ class Telegram(Base):
     __tablename__ = "telegram"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="telegram", lazy="joined")
 
     telegram_id = Column(BigInteger, primary_key=True)
     first_name = Column(String, nullable=False)
@@ -91,7 +91,7 @@ class Steam(Base):
     __tablename__ = "steam"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="steam", lazy="joined")
 
     steam_id = Column(String, primary_key=True)
     persona_name = Column(String)
@@ -172,7 +172,7 @@ class RocketLeague(Base):
     __tablename__ = "rocketleague"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
-    steam = relationship("Steam", lazy="joined")
+    steam = relationship("Steam", backref="rl", lazy="joined")
 
     season = Column(Integer)
 
@@ -299,7 +299,7 @@ class Dota(Base):
     __tablename__ = "dota"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
-    steam = relationship("Steam", lazy="joined")
+    steam = relationship("Steam", backref="dota", lazy="joined")
 
     rank_tier = Column(Integer)
 
@@ -398,7 +398,7 @@ class LeagueOfLegends(Base):
     __tablename__ = "leagueoflegends"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="lol", lazy="joined")
 
     summoner_id = Column(BigInteger, primary_key=True)
     summoner_name = Column(String, nullable=False)
@@ -482,7 +482,7 @@ class Osu(Base):
     __tablename__ = "osu"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="osu", lazy="joined")
 
     osu_id = Column(Integer, primary_key=True)
     osu_name = Column(String, nullable=False)
@@ -540,7 +540,7 @@ class Discord(Base):
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="discord", lazy="joined")
 
     discord_id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
@@ -584,7 +584,7 @@ class Overwatch(Base):
     __tablename__ = "overwatch"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="overwatch", lazy="joined")
 
     battletag = Column(String, primary_key=True)
     discriminator = Column(Integer, primary_key=True)
@@ -669,9 +669,9 @@ class Diario(Base):
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, nullable=False)
     saver_id = Column(Integer, ForeignKey("telegram.telegram_id"))
-    saver = relationship("Telegram", foreign_keys=saver_id, lazy="joined")
+    saver = relationship("Telegram", foreign_keys=saver_id, backref="diario_saves", lazy="joined")
     author_id = Column(Integer, ForeignKey("telegram.telegram_id"))
-    author = relationship("Telegram", foreign_keys=author_id, lazy="joined")
+    author = relationship("Telegram", foreign_keys=author_id, backref="diario_authored", lazy="joined")
     text = Column(String)
 
     def __repr__(self):
@@ -725,7 +725,7 @@ class BaluRage(Base):
 
     id = Column(Integer, primary_key=True)
     royal_id = Column(Integer, ForeignKey("royals.id"))
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="times_raged", lazy="joined")
     reason = Column(String)
 
     def __repr__(self):
@@ -737,7 +737,7 @@ class PlayedMusic(Base):
 
     id = Column(Integer, primary_key=True)
     enqueuer_id = Column(BigInteger, ForeignKey("discord.discord_id"))
-    enqueuer = relationship("Discord", lazy="joined")
+    enqueuer = relationship("Discord", backref="music_played", lazy="joined")
     filename = Column(String)
 
     def __repr__(self):
@@ -798,9 +798,9 @@ class VoteAnswer(Base):
     __tablename__ = "voteanswer"
 
     question_id = Column(Integer, ForeignKey("votequestion.id"))
-    question = relationship("VoteQuestion")
+    question = relationship("VoteQuestion", backref="answers", lazy="joined")
     user_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
-    user = relationship("Telegram")
+    user = relationship("Telegram", backref="votes_cast", lazy="joined")
     choice = Column(Enum(VoteChoices), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint("question_id", "user_id"),)
@@ -825,6 +825,25 @@ class CustomCSS(Base):
     royal = relationship("Royal", lazy="joined")
 
     css = Column(Text, nullable=False)
+
+
+class WikiEntry(Base):
+    __tablename__ = "wikientries"
+
+    key = Column(String, primary_key=True)
+    content = Column(Text, nullable=False)
+
+
+class WikiLog(Base):
+    __tablename__ = "wikilog"
+
+    edit_id = Column(Integer, primary_key=True)
+    editor_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    editor = relationship("Royal", backref="wiki_edits", lazy="joined")
+    edited_key = Column(String, ForeignKey("wikientries.key"), nullable=False)
+    edited = relationship("WikiEntry", backref="edit_logs", lazy="joined")
+    timestamp = Column(DateTime, nullable=False)
+    reason = Column(Text)
 
 
 # If run as script, create all the tables in the db

@@ -23,6 +23,36 @@ input[type="text"], input[type="password"] {
     font-family: sans-serif;
 }
 
+textarea {
+    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
+    color: @text-color;
+    font-size: small;
+    font-family: "Consolas", "Source Code Pro", monospace;
+    padding: 2px;
+    margin: 1px;
+    border: 1px dotted @text-color;
+    width: 100%;
+}
+
+button, input[type="submit"] {
+    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
+    border-radius: 0;
+    border: 1px solid @text-color;
+    color: @text-color;
+    padding: 2px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 1px;
+    font-size: medium;
+    font-family: sans-serif;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.3);
+    color: @accent-color;
+    border: 1px solid @accent-color;
+}
+
 .input-grid {
     display: grid;
 
@@ -439,6 +469,16 @@ input[type="text"], input[type="password"] {
 
     .fiorygi.game-score {
         font-size: x-large;
+    }
+}
+
+.wiki {
+    .wiki-log {
+        font-family: "Consolas", "Source Code Pro", monospace;
+
+        .last-reason {
+            font-style: italic;
+        }
     }
 }
 
