@@ -1,6 +1,8 @@
 @background-color: #0d193b;
 @text-color: #a0ccff;
 @accent-color: white;
+@link-color: #00aaff;
+@visited-color: #aa66ff;
 
 body {
     font-family: sans-serif;
@@ -10,6 +12,18 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     color: @accent-color;
+}
+
+a {
+    color: @link-color;
+}
+
+a:active {
+    color: @link-color;
+}
+
+a:visited {
+    color: @visited-color;
 }
 
 input[type="text"], input[type="password"] {
@@ -32,6 +46,7 @@ textarea {
     margin: 1px;
     border: 1px dotted @text-color;
     width: 100%;
+    height: 300px;
 }
 
 button, input[type="submit"] {

@@ -166,7 +166,7 @@ def page_wiki(key: str):
         db_session.close()
         if wiki_page is None:
             return render_template("wiki.html", key=key)
-        converted_md = Markup(markdown.markdown(escape(wiki_page.content)))
+        converted_md = Markup(markdown.markdown(escape(wiki_page.content), output_format="html5"))
         return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
                                wiki_log=wiki_latest_edit)
     elif request.method == "POST":
@@ -186,12 +186,15 @@ def page_wiki(key: str):
         new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
         db_session.add(new_log)
         db_session.commit()
-        telegram_bot.send_message(config["Telegram"]["main_group"],
-                                  f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata'
-                                  f' modificata da'
-                                  f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
-                                  f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}',
-                                  parse_mode="HTML")
+        try:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata'
+                                      f' modificata da'
+                                      f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
+                                      f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}\n',
+                                      parse_mode="HTML")
+        except:
+            pass
         return redirect(url_for("page_wiki", key=key))
 
 
