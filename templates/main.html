@@ -29,8 +29,8 @@
     </ul>
     <h2>Wiki</h2>
     <ul>
-        {% for key in wiki_pages %}
-            <li><a href="wiki/{{ key }}">{{ key }}</a></li>
+        {% for page in wiki_pages %}
+            <li><a href="wiki/{{ page.key }}">{{ page.key }}</a></li>
         {% endfor %}
     </ul>
 {% endblock %}

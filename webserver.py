@@ -24,8 +24,9 @@ def page_main():
     if fl_session.get("user_id"):
         db_session = db.Session()
         royals = db_session.query(db.Royal).all()
+        wiki_pages = db_session.query(db.WikiEntry).all()
         db_session.close()
-        return render_template("main.html", royals=royals)
+        return render_template("main.html", royals=royals, wiki_pages=wiki_pages)
     return redirect(url_for("page_login"))
 
 
