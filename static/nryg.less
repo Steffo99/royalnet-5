@@ -515,15 +515,22 @@ nav {
 
 .wiki {
     .wiki-content {
-        border-bottom: 1px solid rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
     }
 
     .wiki-log {
         font-family: "Consolas", "Source Code Pro", monospace;
-        border-bottom: 1px solid rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
 
         .last-reason {
             font-style: italic;
+        }
+    }
+
+    .wiki-edit {
+        border-top: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
+
+        h4 {
+            padding: 0;
+            margin-top: 8px;
         }
     }
 }
