@@ -10,6 +10,22 @@
         {% block posthead %}{% endblock %}
     </head>
     <body>
+        <nav>
+            <div class="left">
+                <b>Royalnet</b>
+                <a href="/">Home</a>
+            </div>
+            <div class="right">
+                <span class="login-status">
+                    {% if session.get('username') is not none %}
+                        <a href="/profile/{{ session.get('username') }}">{{ session.get('username') }}</a>
+                        <a class="button" href="/logout">Logout</a>
+                    {% else %}
+                        <a class="button" href="/login">Login</a>
+                    {% endif %}
+                </span>
+            </div>
+        </nav>
         {% block body %}{% endblock %}
     </body>
 </html>

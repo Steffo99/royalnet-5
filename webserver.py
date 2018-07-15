@@ -66,13 +66,23 @@ def page_loggedin():
         return
     if user.password is None:
         fl_session["user_id"] = user.id
+        fl_session["username"] = username
         return redirect(url_for("page_password"))
     if bcrypt.checkpw(bytes(password, encoding="utf8"), user.password):
         fl_session["user_id"] = user.id
+        fl_session["username"] = username
         return redirect(url_for("page_main"))
     else:
         abort(401)
         return
+
+
+@app.route("/logout")
+def page_logout():
+    if "user_id" in fl_session:
+        del fl_session["user_id"]
+        del fl_session["username"]
+    return redirect(url_for("page_main"))
 
 
 @app.route("/password", methods=["GET", "POST"])
