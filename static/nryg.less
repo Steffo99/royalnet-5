@@ -1,5 +1,7 @@
 @background-color: #0d193b;
 @text-color: #a0ccff;
+@quote-color: #a0ffcc;
+@spoiler-color: #ffa0cc;
 @accent-color: white;
 @link-color: #00aaff;
 @visited-color: #aa66ff;
@@ -24,6 +26,27 @@ a:active {
 
 a:visited {
     color: @visited-color;
+}
+
+blockquote {
+    border-left: 3px solid @quote-color;
+    color: @quote-color;
+    background-color: rgba(red(@quote-color), green(@quote-color), blue(@quote-color), 0.1);
+    padding: 4px 8px;
+}
+
+blockquote p {
+    padding: 2px;
+}
+
+blockquote.spoiler {
+  border-color: @spoiler-color;
+  color: transparent;
+  background-color: rgba(red(@spoiler-color), green(@spoiler-color), blue(@spoiler-color), 0.1);
+}
+
+blockquote.spoiler:hover {
+  color: @spoiler-color;
 }
 
 input[type="text"], input[type="password"] {
