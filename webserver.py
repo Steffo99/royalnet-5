@@ -19,6 +19,22 @@ app.secret_key = config["Flask"]["secret_key"]
 
 telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
 
+
+@app.errorhandler(400)
+def error_400():
+    return render_template("errors/400.html", config=config)
+
+
+@app.errorhandler(403)
+def error_400():
+    return render_template("errors/403.html", config=config)
+
+
+@app.errorhandler(500)
+def error_400():
+    return render_template("errors/500.html", config=config)
+
+
 @app.route("/")
 def page_main():
     if fl_session.get("user_id"):
@@ -26,7 +42,7 @@ def page_main():
         royals = db_session.query(db.Royal).all()
         wiki_pages = db_session.query(db.WikiEntry).all()
         db_session.close()
-        return render_template("main.html", royals=royals, wiki_pages=wiki_pages)
+        return render_template("main.html", royals=royals, wiki_pages=wiki_pages, config=config)
     return redirect(url_for("page_login"))
 
 
@@ -46,12 +62,13 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     db_session.close()
-    return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow)
+    return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
+                           config=config)
 
 
 @app.route("/login")
 def page_login():
-    return render_template("login.html")
+    return render_template("login.html", config=config)
 
 
 @app.route("/loggedin", methods=["POST"])
@@ -62,7 +79,7 @@ def page_loggedin():
     user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
     db_session.close()
     if user is None:
-        abort(401)
+        abort(403)
         return
     if user.password is None:
         fl_session["user_id"] = user.id
@@ -73,7 +90,7 @@ def page_loggedin():
         fl_session["username"] = username
         return redirect(url_for("page_main"))
     else:
-        abort(401)
+        abort(403)
         return
 
 
@@ -90,9 +107,8 @@ def page_password():
     user_id = fl_session.get("user_id")
     if request.method == "GET":
         if user_id is None:
-            abort(401)
-            return
-        return render_template("password.html")
+            return redirect(url_for("page_login"))
+        return render_template("password.html", config=config)
     elif request.method == "POST":
         new_password = request.form.get("new", "")
         db_session = db.Session()
@@ -104,8 +120,7 @@ def page_password():
             return redirect(url_for("page_main"))
         else:
             db_session.close()
-            abort(401)
-            return
+            return redirect(url_for("page_login"))
 
 
 @app.route("/setcss", methods=["GET", "POST"])
@@ -116,13 +131,11 @@ def page_setcss():
     if request.method == "GET":
         db_session.close()
         if user_id is None:
-            abort(401)
-            return
-        return render_template("setcss.html", css=ccss.css)
+            return redirect(url_for("page_login"))
+        return render_template("setcss.html", css=ccss.css, config=config)
     elif request.method == "POST":
         if user_id is None:
-            abort(401)
-            return
+            return redirect(url_for("page_login"))
         css = request.form.get("css", "")
         if "</style" in css:
             abort(400)
@@ -163,7 +176,7 @@ def page_game(name: str):
         game_name = "Royalnet"
         query = db_session.query(db.Royal).all()
     db_session.close()
-    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name)
+    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, config=config)
 
 
 @app.route("/wiki/<key>", methods=["GET", "POST"])
@@ -175,18 +188,17 @@ def page_wiki(key: str):
                                .order_by(db.WikiLog.timestamp.desc()).first()
         db_session.close()
         if wiki_page is None:
-            return render_template("wiki.html", key=key)
+            return render_template("wiki.html", key=key, config=config)
         converted_md = Markup(markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                               extras=["spoiler", "tables"]))
         return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
-                               wiki_log=wiki_latest_edit)
+                               wiki_log=wiki_latest_edit, config=config)
     elif request.method == "POST":
         user_id = fl_session.get('user_id')
         user = db_session.query(db.Royal).filter_by(id=user_id).one()
         if user_id is None:
             db_session.close()
-            abort(401)
-            return
+            return redirect(url_for("page_login"))
         if wiki_page is None:
             wiki_page = db.WikiEntry(key=key, content=request.form.get("content"))
             db_session.add(wiki_page)
@@ -204,7 +216,7 @@ def page_wiki(key: str):
                                       f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
                                       f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}\n',
                                       parse_mode="HTML")
-        except:
+        except Exception:
             pass
         return redirect(url_for("page_wiki", key=key))
 
