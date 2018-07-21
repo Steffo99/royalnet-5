@@ -176,7 +176,7 @@ def page_wiki(key: str):
         db_session.close()
         if wiki_page is None:
             return render_template("wiki.html", key=key)
-        converted_md = Markup(markdown2.markdown(escape(wiki_page.content), output_format="html5"),
+        converted_md = Markup(markdown2.markdown(escape(wiki_page.content)),
                               extras=["spoiler", "tables"])
         return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
                                wiki_log=wiki_latest_edit)
