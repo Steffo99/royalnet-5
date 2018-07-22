@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block prehead %}
+    <meta name="author" content="{{ wiki_log.editor.username }}">
+    <meta name="description" content="{{ wiki_page.content[:97] }}...">
+{% endblock %}
+
 {% block pagetitle %}
     {{ key }}
 {% endblock %}

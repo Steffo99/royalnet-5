@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block prehead %}
+    <meta name="description" content="Profilo Royalnet di {{ ryg.username }}">
+{% endblock %}
+
 {% block pagetitle %}
     {{ ryg.username }}
 {% endblock %}

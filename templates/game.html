@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block prehead %}
+    <meta name="description" content="La Royal Games su {{ game_name }}">
+{% endblock %}
+
 {% block pagetitle %}
     {{ game_name }}
 {% endblock %}
