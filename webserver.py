@@ -236,6 +236,14 @@ def page_wiki(key: str):
         return redirect(url_for("page_wiki", key=key))
 
 
+@app.route("/diario")
+def page_diario():
+    db_session = db.Session()
+    diario_entries = db_session.query(db.Diario).all()
+    db_session.close()
+    return render_template("diario.html", config=config, entries=diario_entries)
+
+
 if __name__ == "__main__":
     try:
         app.run(host="0.0.0.0", port=1235, debug=__debug__)

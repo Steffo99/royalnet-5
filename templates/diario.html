@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    Diario
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Diario
+    </h1>
+    <div class="diario">
+        {% for entry in entries %}
+            {% include "components/diarioentry.html" %}
+        {% endfor %}
+    </div>
+{% endblock %}

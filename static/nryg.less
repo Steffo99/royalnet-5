@@ -18,10 +18,12 @@ h1, h2, h3, h4, h5, h6 {
 
 a {
     color: @link-color;
+    text-decoration: none;
 }
 
-a:active {
+a:hover, a:active {
     color: @link-color;
+    text-decoration: underline;
 }
 
 a:visited {
@@ -32,14 +34,13 @@ blockquote {
     border-left: 3px solid @quote-color;
     color: @quote-color;
     background-color: rgba(red(@quote-color), green(@quote-color), blue(@quote-color), 0.1);
-    padding-left: 8px;
+    padding: 2px 4px 2px 8px;
     margin-left: 8px;
 }
 
 blockquote p {
-    padding-top: 4px;
-    padding-bottom: 2px;
-    margin: 6px 0;
+    padding-top: 2px;
+    margin: 4px 0;
 }
 
 blockquote.spoiler {
@@ -171,13 +172,13 @@ nav {
 }
 
 @media (min-width:600px) {
-    .desktop-only {
+    .mobile-only {
         display: none;
     }
 }
 
 @media (max-width:600px) {
-    .mobile-only {
+    .desktop-only {
         display: none;
     }
 }
@@ -567,6 +568,28 @@ nav {
         h4 {
             padding: 0;
         }
+    }
+}
+
+.diario blockquote {
+    display: grid;
+
+    .left {
+        grid-column: 1;
+    }
+
+    .right {
+        grid-column: 2;
+        text-align: right;
+        margin-top: auto;
+    }
+
+    cite {
+        font-size: smaller;
+    }
+
+    .entry-id {
+        text-align: right;
     }
 }
 

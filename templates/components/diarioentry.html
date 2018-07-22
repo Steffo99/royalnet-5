@@ -1,0 +1,13 @@
+<blockquote id="entry-{{ entry.id }}" class="entry">
+    <div class="left">
+    <p>
+        <span class="text">{{ entry.text }}</span>
+    </p>
+    <p>
+        <cite>— {% if entry.author is not none %}<a class="author" href="/profile/{{ entry.author.royal.username }}">{{ entry.author.royal.username }}</a>{% else %}<span class="author anonymous">Anonimo</span>{% endif %}, <span class="timestamp">{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</span> {% if entry.saver is not none and entry.saver != entry.author %}<span class="saver">(salvato da <a href="/profile/{{ entry.saver.royal.username }}">{{ entry.saver.royal.username }}</a>)</span>{% endif %}</cite>
+    </p>
+    </div>
+    <div class="right">
+        <a class="entry-id" href="#{{ entry.id }}">#{{ entry.id }}</a>
+    </div>
+</blockquote>
