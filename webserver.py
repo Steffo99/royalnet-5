@@ -54,8 +54,8 @@ def page_500():
 def page_main():
     if fl_session.get("user_id"):
         db_session = db.Session()
-        royals = db_session.query(db.Royal).all()
-        wiki_pages = db_session.query(db.WikiEntry).all()
+        royals = db_session.query(db.Royal).order_by(db.Royal.username).all()
+        wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
         db_session.close()
         return render_template("main.html", royals=royals, wiki_pages=wiki_pages, config=config)
     return redirect(url_for("page_login"))
