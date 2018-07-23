@@ -1,6 +1,7 @@
 import datetime
 import random
 import math
+import typing
 import db
 import errors
 import stagismo
@@ -445,10 +446,98 @@ def cmd_wheel(bot: Bot, update: Update):
         user.royal.fiorygi += 4
     else:
         bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su un segno strano.\n"
-                                                 "| ||\n"
+                                                 "|  ||\n"
                                                  "|| |_")
     session.commit()
     session.close()
+
+
+def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, datetime.datetime]:
+    # Unix time
+    try:
+        unix_timestamp = float(timestring)
+        return datetime.datetime.fromtimestamp(unix_timestamp)
+    except ValueError:
+        pass
+    # Dashed time
+    try:
+        split_date = timestring.split("-")
+        now = datetime.datetime.now()
+        if len(split_date) == 5:
+            # yyyy-mm-dd-hh-mm
+            return datetime.datetime(*split_date)
+        elif len(split_date) == 4:
+            return now.replace(month=int(split_date[0]),
+                               day=int(split_date[1]),
+                               hour=int(split_date[2]),
+                               minute=int(split_date[3]))
+        elif len(split_date) == 3:
+            return now.replace(day=int(split_date[0]),
+                               hour=int(split_date[1]),
+                               minute=int(split_date[2]))
+        elif len(split_date) == 2:
+            return now.replace(hour=int(split_date[0]),
+                               minute=int(split_date[1]))
+    except (IndexError, ValueError):
+        pass
+    # Simple time from now
+    try:
+        if timestring.endswith("w"):
+            return datetime.timedelta(weeks=float(timestring[:-1]))
+        elif timestring.endswith("d"):
+            return datetime.timedelta(days=float(timestring[:-1]))
+        elif timestring.endswith("h"):
+            return datetime.timedelta(hours=float(timestring[:-1]))
+        elif timestring.endswith("m"):
+            return datetime.timedelta(minutes=float(timestring[:-1]))
+    except Exception:
+        pass
+    # Nothing found
+    raise ValueError("Nothing was found.")
+
+
+def cmd_newevent(bot: Bot, update: Update):
+    try:
+        _, timestring, name_desc = update.message.text.split(" ", 2)
+    except IndexError:
+        bot.send_message(update.message.chat.id, "⚠️ Sintassi del comando non valida.\n"
+                                                 "Sintassi corretta:\n"
+                                                 "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
+                                                 "|{numero}{w|d|h|m}> <nome>\n"
+                                                 "[descrizione]```")
+        return
+    try:
+        name, description = name_desc.split("\n", 2)
+    except IndexError:
+        name = name_desc
+        description = None
+    # Parse the timestring
+    try:
+        parsed_time = parse_timestring(timestring)
+    except ValueError:
+        bot.send_message(update.message.chat.id, "⚠ Non è stato possibile leggere la data.\n"
+                                                 "Sintassi corretta:\n"
+                                                 "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
+                                                 "|{numero}{w|d|h|m}> <nome>\n"
+                                                 "[descrizione]```")
+        return
+    # Create the event
+    session = db.Session()
+    telegram_user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
+    event = db.Event(author=telegram_user.royal,
+                     name=name,
+                     description=description,
+                     time=datetime.datetime.fromtimestamp(0))
+    # Set the time
+    if isinstance(parsed_time, datetime.datetime):
+        event.time = parsed_time
+    else:
+        event.time_left = parsed_time
+    # Save the event
+    session.add(event)
+    session.commit()
+    session.close()
+    bot.send_message(update.message.chat.id, "✅ Evento aggiunto al Calendario Royal Games!")
 
 
 def process(arg_discord_connection):
@@ -474,6 +563,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
     u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
     u.dispatcher.add_handler(CommandHandler("wheel", cmd_wheel))
+    u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
