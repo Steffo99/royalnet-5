@@ -1,6 +1,7 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
@@ -844,6 +845,27 @@ class WikiLog(Base):
     edited = relationship("WikiEntry", backref="edit_logs", lazy="joined")
     timestamp = Column(DateTime, nullable=False)
     reason = Column(Text)
+
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    author = relationship("Royal")
+    name = Column(String, nullable=False)
+    description = Column(Text)
+    time = Column(DateTime, nullable=False)
+
+    @hybrid_property
+    def time_left(self) -> datetime.timedelta:
+        return self.time - datetime.datetime.now()
+
+    @time_left.setter
+    def time_left(self, value):
+        if not isinstance(value, datetime.timedelta):
+            raise TypeError("time_left should be a datetime.timedelta")
+        self.time = datetime.datetime.now() + value
 
 
 # If run as script, create all the tables in the db
