@@ -673,6 +673,7 @@ class Diario(Base):
     saver = relationship("Telegram", foreign_keys=saver_id, backref="diario_saves", lazy="joined")
     author_id = Column(Integer, ForeignKey("telegram.telegram_id"))
     author = relationship("Telegram", foreign_keys=author_id, backref="diario_authored", lazy="joined")
+    spoiler = Column(Boolean, default=False)
     text = Column(String)
 
     def __repr__(self):
