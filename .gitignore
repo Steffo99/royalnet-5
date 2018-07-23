@@ -5,3 +5,4 @@ diario.json
 libopus-0.dll
 music.opus
 opusfiles/
+ignored/*
