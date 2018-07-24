@@ -237,7 +237,8 @@ def cmd_vote(bot: Bot, update: Update):
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
             bot.send_message(update.message.chat.id,
-                             "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+                             "⚠ Il tuo account Telegram non è registrato al RYGdb!"
+                             " Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
             return
         try:
             _, mode, question = update.message.text.split(" ", 2)
@@ -540,6 +541,22 @@ def cmd_newevent(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, "✅ Evento aggiunto al Calendario Royal Games!")
 
 
+def cmd_calendar(bot: Bot, update: Update):
+    session = db.Session()
+    next_events = session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
+    session.close()
+    msg = "📆 Prossimi eventi\n"
+    for event in next_events:
+        if event.time_left.days >= 1:
+            msg += event.time.strftime('%Y-%m-%d %H:%M')
+        else:
+            msg += f"{int(event.time_left.total_seconds() // 3600)}h" \
+                   f" {int((event.time_left.total_seconds() % 3600) // 60)}m"
+        msg += f" <b>{event.name}</b>\n"
+    msg += '\nPer ulteriori dettagli, visita <a href="https://ryg.steffo.eu">Royalnet</a>'
+    bot.send_message(update.message.chat.id, msg, parse_mode="HTML", disable_web_page_preview=True)
+
+
 def process(arg_discord_connection):
     print("Telegrambot starting...")
     if arg_discord_connection is not None:
@@ -564,11 +581,12 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
     u.dispatcher.add_handler(CommandHandler("wheel", cmd_wheel))
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
+    u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
                        f"Ultimo aggiornamento: `{version}: {commit_msg}`",
-                       parse_mode="Markdown")
+                       parse_mode="Markdown", disable_notification=True)
     while True:
         try:
             u.start_polling()

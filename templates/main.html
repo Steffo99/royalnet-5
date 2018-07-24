@@ -8,9 +8,27 @@
     <h1>
         Royal Games
     </h1>
-    <p>
-        Benvenuto al sito web della Royal Games! Sta lentamente migliorando, ma spero che comunque collaboriate a migliorarlo!
-    </p>
+    <div class="main-page">
+        <div class="left">
+            <div class="box upper-box">
+                Prossimi eventi
+            </div>
+            <div class="box lower-box">
+                {% for event in next_events %}
+                    {% include "/components/event.html" %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="right">
+            <div class="box upper-box">
+                Sassi
+            </div>
+            <div class="box lower-box">
+                CIAOOOOOO
+            </div>
+        </div>
+    </div>
+    <!--
     <h2>Profili</h2>
     <ul>
         {% for user in royals %}
@@ -37,4 +55,6 @@
     <ul>
         <a href="/diario">Nuovo</a>
     </ul>
+    </div>
+    -->
 {% endblock %}

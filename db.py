@@ -2,7 +2,7 @@ import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date, func
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -853,7 +853,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True)
     author_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    author = relationship("Royal")
+    author = relationship("Royal", lazy="joined")
     name = Column(String, nullable=False)
     description = Column(Text)
     time = Column(DateTime, nullable=False)
