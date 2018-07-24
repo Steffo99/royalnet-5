@@ -124,9 +124,11 @@ nav {
     border-radius: 4px;
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
     padding: 4px;
-    margin: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
 
     &.upper-box {
+        margin-top: 2px;
         border-radius: 4px 4px 0 0;
         background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.2);
         color: @accent-color;
@@ -135,6 +137,7 @@ nav {
     }
 
     &.lower-box {
+        margin-bottom: 2px;
         border-radius: 0 0 4px 4px;
     }
 }
