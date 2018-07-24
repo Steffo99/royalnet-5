@@ -508,7 +508,7 @@ def cmd_newevent(bot: Bot, update: Update):
                                                  "[descrizione]```")
         return
     try:
-        name, description = name_desc.split("\n", 2)
+        name, description = name_desc.split("\n", 1)
     except IndexError:
         name = name_desc
         description = None
