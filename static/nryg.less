@@ -2,6 +2,7 @@
 @text-color: #a0ccff;
 @quote-color: #a0ffcc;
 @spoiler-color: #ffa0cc;
+@highlight-color: #ffcca0;
 @accent-color: white;
 @link-color: #00aaff;
 @visited-color: #aa66ff;
@@ -31,26 +32,32 @@ a:visited {
 }
 
 blockquote {
-    border-left: 3px solid @quote-color;
     color: @quote-color;
+    border-left: 3px solid @quote-color;
     background-color: rgba(red(@quote-color), green(@quote-color), blue(@quote-color), 0.1);
     padding: 2px 4px 2px 8px;
     margin-left: 8px;
-}
 
-blockquote p {
-    padding-top: 2px;
-    margin: 4px 0;
-}
+    p {
+        padding-top: 2px;
+        margin: 4px 0;
+    }
 
-blockquote.spoiler {
-  border-color: @spoiler-color;
-  color: transparent;
-  background-color: rgba(red(@spoiler-color), green(@spoiler-color), blue(@spoiler-color), 0.1);
-}
+    .spoiler {
+        color: transparent;
+        border-color: @spoiler-color;
+        background-color: rgba(red(@spoiler-color), green(@spoiler-color), blue(@spoiler-color), 0.1);
 
-blockquote.spoiler:hover {
-  color: @spoiler-color;
+        &:hover {
+            color: @spoiler-color;
+        }
+    }
+
+    &:target {
+        color: @highlight-color;
+        border-color: @highlight-color;
+        background-color: rgba(red(@highlight-color), green(@highlight-color), blue(@highlight-color), 0.1);
+    }
 }
 
 input[type="text"], input[type="password"] {
@@ -88,18 +95,17 @@ button, input[type="submit"], .btn {
     font-family: sans-serif;
     text-decoration: none;
     cursor: default;
-}
 
-button:hover, input[type="submit"]:hover, .btn:hover {
-    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.3);
-    border: 1px solid @accent-color;
-}
+    &:hover {
+        background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.3);
+        border: 1px solid @accent-color;
+    }
 
-button:active, input[type="submit"]:active, .btn:active {
-    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.5);
-    color: @accent-color !important;
-    border: 1px solid @accent-color;
-
+    &:active {
+        background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.5);
+        color: @accent-color !important;
+        border: 1px solid @accent-color;
+    }
 }
 
 nav {
