@@ -466,7 +466,11 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
         now = datetime.datetime.now()
         if len(split_date) == 5:
             # yyyy-mm-dd-hh-mm
-            return datetime.datetime(*split_date)
+            return datetime.datetime(year=int(split_date[0]),
+                                     month=int(split_date[1]),
+                                     day=int(split_date[2]),
+                                     hour=int(split_date[3]),
+                                     minute=int(split_date[4]))
         elif len(split_date) == 4:
             return now.replace(month=int(split_date[0]),
                                day=int(split_date[1]),
