@@ -60,7 +60,7 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
     db_session.close()
-    return render_template("main.html", royals=royals, wiki_pages=wiki_pages, diario=random_diario,
+    return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
                            next_events=next_events, config=config, escape=escape)
 
 

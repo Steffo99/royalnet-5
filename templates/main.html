@@ -18,13 +18,48 @@
                     {% include "/components/event.html" %}
                 {% endfor %}
             </div>
+            <div class="box upper-box">
+                Pagine Wiki
+            </div>
+            <div class="box lower-box">
+                <ul>
+                    {% for page in wiki_pages %}
+                        <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
         <div class="right">
             <div class="box upper-box">
-                Sassi
+                Membri
             </div>
             <div class="box lower-box">
-                CIAOOOOOO
+                <ul>
+                    {% for royal in royals %}
+                        <li><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="box upper-box">
+                Resoconti
+            </div>
+            <div class="box lower-box">
+                <ul>
+                    <li><a href="/game/ryg">Royal Games</a></li>
+                    <li><a href="/game/steam">Steam</a></li>
+                    <li><a href="/game/dota">Dota 2</a></li>
+                    <li><a href="/game/rl">Rocket League</a></li>
+                    <li><a href="/game/lol">League of Legends</a></li>
+                    <li><a href="/game/ow">Overwatch</a></li>
+                    <li><a href="/game/osu">osu!</a></li>
+                </ul>
+            </div>
+            <div class="box upper-box">
+                Diario
+            </div>
+            <div class="box lower-box">
+                {% include "components/diarioentry.html" %}
+                <a href="/diario">Visualizza tutto</a>
             </div>
         </div>
     </div>
