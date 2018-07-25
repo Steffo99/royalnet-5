@@ -20,15 +20,15 @@ h1, h2, h3, h4, h5, h6 {
 a {
     color: @link-color;
     text-decoration: none;
-}
 
-a:hover, a:active {
-    color: @link-color;
-    text-decoration: underline;
-}
+    &:hover, &:active {
+        color: @link-color;
+        text-decoration: underline;
+    }
 
-a:visited {
-    color: @visited-color;
+    &:visited {
+        color: @visited-color;
+    }
 }
 
 blockquote {
@@ -162,8 +162,31 @@ nav {
     }
 }
 
+@media (min-width:601px) {
+    .mobile-only {
+        display: none;
+    }
+}
+
+@media (max-width:600px) {
+    .desktop-only {
+        display: none;
+    }
+}
+
+//Dirtiest hack ever
+.game-panels {
+    font-size: 0;
+
+    .game-panel {
+        font-size: medium;
+    }
+}
+
 .game-panel {
     display: inline-block;
+    margin: 4px;
+    vertical-align: top;
 }
 
 .game-grid {
@@ -171,7 +194,6 @@ nav {
     width: 360px;
     height: 100px;
     border-radius: 10px;
-    margin: 4px;
     position: relative;
 
     .game-title {
@@ -196,18 +218,6 @@ nav {
             height: 32px;
             vertical-align: middle;
         }
-    }
-}
-
-@media (min-width:601px) {
-    .mobile-only {
-        display: none;
-    }
-}
-
-@media (max-width:600px) {
-    .desktop-only {
-        display: none;
     }
 }
 
@@ -489,7 +499,7 @@ nav {
 }
 
 .ow {
-    padding: 15px;
+    padding: 16px;
     font-family: "FuturaNo2D", sans-serif;
     background-color: #371b00;
     border: 2px solid #ff9c00;
@@ -576,6 +586,16 @@ nav {
 
     .fiorygi.game-score {
         font-size: x-large;
+    }
+}
+
+.telegram {
+    background-color: #32afed;
+    color: white !important;
+    padding: 18px;
+
+    .useless-stuff {
+        grid-column: 1;
     }
 }
 

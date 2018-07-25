@@ -8,7 +8,6 @@ import sys
 import db
 import youtube_dl
 import concurrent.futures
-import stagismo
 import platform
 import typing
 import os
@@ -17,8 +16,8 @@ import configparser
 import subprocess
 import async_timeout
 import raven
-import cast
 import logging
+import errors
 
 logging.basicConfig()
 
@@ -472,6 +471,27 @@ async def cmd_dump_voice_player_error(channel: discord.Channel, author: discord.
     await client.send_message(channel, f"```\n{str(voice_player.error)}\n```")
 
 
+@command
+async def cmd_register(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    session = await loop.run_in_executor(executor, db.Session())
+    if len(params) < 1:
+        await client.send_message(channel, "⚠️ Non hai specificato un username!\n"
+                                                   "Sintassi corretta: `!register <username_ryg>`")
+        return
+    try:
+        d = db.Discord.create(session,
+                              royal_username=params[0],
+                              discord_user=author)
+    except errors.AlreadyExistingError:
+        await client.send_message(channel,
+                                  "⚠ Il tuo account Discord è già collegato a un account RYG "
+                                  "o l'account RYG che hai specificato è già collegato a un account Discord.")
+        return
+    session.add(d)
+    session.commit()
+    session.close()
+    await client.send_message(channel, "✅ Sincronizzazione completata!")
+
 async def queue_predownload_videos():
     while True:
         for index, video in enumerate(voice_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
@@ -551,7 +571,8 @@ commands = {
     "!q": cmd_queue,
     "!shuffle": cmd_shuffle,
     "!clear": cmd_clear,
-    "!dump_vp": cmd_dump_voice_player_error
+    "!dump_vp": cmd_dump_voice_player_error,
+    "!register": cmd_register
 }
 
 

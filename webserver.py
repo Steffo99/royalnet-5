@@ -79,9 +79,10 @@ def page_profile(name: str):
     dota = db_session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
+    tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
     db_session.close()
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
-                           config=config)
+                           tg=tg, config=config)
 
 
 @app.route("/login")

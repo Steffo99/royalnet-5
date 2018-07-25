@@ -1,0 +1,12 @@
+<div class="game-panel">
+    <div class="game-grid telegram">
+        <div class="player">
+            {% if record.username is none %}
+                <span class="player-name">{{ record.first_name }}</span>
+            {% else %}
+                <a href="https://t.me/{{ record.username }}" class="player-name">@{{ record.username }}</a>
+            {% endif %}
+        </div>
+        <div class="game-score useless-stuff">è su Telegram!</div>
+    </div>
+</div>
