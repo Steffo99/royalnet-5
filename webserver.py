@@ -80,9 +80,10 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
+    discord = db_session.query(db.Discord).filter_by(royal=user).one_or_none()
     db_session.close()
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, config=config)
+                           tg=tg, discord=discord, config=config)
 
 
 @app.route("/login")
@@ -194,6 +195,16 @@ def page_game(name: str):
     elif name == "ryg":
         game_name = "Royalnet"
         query = db_session.query(db.Royal).all()
+    elif name == "tg":
+        game_name = "Telegram"
+        query = db_session.query(db.Telegram).all()
+    elif name == "discord":
+        game_name = "Discord"
+        # noinspection PyComparisonWithNone
+        query = db_session.query(db.Discord).filter(db.Discord.royal_id != None).all()
+    else:
+        abort(404)
+        return
     db_session.close()
     return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, config=config)
 

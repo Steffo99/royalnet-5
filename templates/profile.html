@@ -26,19 +26,29 @@
         {% with record = ryg %}
             {% include "minis/ryg.html" %}
         {% endwith %}
+        {% if tg %}
+            {% with record = tg %}
+                {% include "minis/tg.html" %}
+            {% endwith %}
+        {% endif %}
+        {% if discord %}
+            {% with record = discord %}
+                {% include "minis/discord.html" %}
+            {% endwith %}
+        {% endif %}
         {% if steam %}
             {% with record = steam %}
                 {% include "minis/steam.html" %}
             {% endwith %}
         {% endif %}
-        {% if rl %}
-            {% with record = rl %}
-                {% include "minis/rl.html" %}
-            {% endwith %}
-        {% endif %}
         {% if dota %}
             {% with record = dota %}
                 {% include "minis/dota.html" %}
+            {% endwith %}
+        {% endif %}
+        {% if rl %}
+            {% with record = rl %}
+                {% include "minis/rl.html" %}
             {% endwith %}
         {% endif %}
         {% if osu %}
@@ -54,11 +64,6 @@
         {% if ow %}
             {% with record = ow %}
                 {% include "minis/ow.html" %}
-            {% endwith %}
-        {% endif %}
-        {% if tg %}
-            {% with record = tg %}
-                {% include "minis/telegram.html" %}
             {% endwith %}
         {% endif %}
     </div>

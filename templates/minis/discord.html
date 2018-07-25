@@ -1,0 +1,15 @@
+<style>
+    @font-face {
+        font-family: "Whitney";
+        src: url("{{ url_for('static', filename='whitney.woff') }}") format('woff');
+    }
+</style>
+<div class="game-panel">
+    <div class="game-grid discord">
+        <div class="player">
+            <img src="{{ record.avatar_url(size=64) }}" class="player-image">
+            <span class="player-name">{{ record }}</span>
+        </div>
+        <div class="game-score useless-stuff">è su Discord!</div>
+    </div>
+</div>
