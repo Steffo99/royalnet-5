@@ -58,7 +58,7 @@ class AlreadyDownloadedError(Exception):
 
 
 class Video:
-    def __init__(self, url: str=None, file: str=None, info: dict=None):
+    def __init__(self, url: str=None, file: str=None, info: dict=None, enqueuer: discord.Member=None):
         self.url = url
         if file is None and info is None:
             self.file = str(hash(url)) + ".opus"
@@ -68,6 +68,7 @@ class Video:
             self.file = file
         self.downloaded = False if file is None else True
         self.info = info
+        self.enqueuer = enqueuer
 
     def __str__(self):
         if self.info is None or "title" not in self.info:
@@ -280,11 +281,11 @@ def requires_rygdb(func, optional=False):
                                             .filter_by(discord_id=author.id)
                                             .join(db.Royal)
                                             .first)
+        await loop.run_in_executor(executor, session.close)
         if not optional and dbuser is None:
             await client.send_message(channel,
                                       "⚠️ Devi essere registrato su Royalnet per poter utilizzare questo comando.")
             return
-        await loop.run_in_executor(executor, session.close)
         return await func(channel=channel, author=author, params=params, dbuser=dbuser, *args, **kwargs)
     return new_func
 
@@ -309,7 +310,7 @@ async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typin
     await client.send_message(channel, f"✅ Mi sono connesso in <#{author.voice.voice_channel.id}>.")
 
 
-async def add_video_from_url(url):
+async def add_video_from_url(url, enqueuer: discord.Member=None):
     # Retrieve info
     with youtube_dl.YoutubeDL({"quiet": True,
                                "ignoreerrors": True,
@@ -319,14 +320,14 @@ async def add_video_from_url(url):
     if "entries" in info:
         # This is a playlist
         for entry in info["entries"]:
-            voice_queue.append(Video(url=entry["webpage_url"], info=entry))
+            voice_queue.append(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
         return
     # This is a single video
-    voice_queue.append(Video(url=url, info=info))
+    voice_queue.append(Video(url=url, info=info, enqueuer=enqueuer))
 
 
-async def add_video_from_file(file):
-    voice_queue.append(Video(file=file))
+async def add_video_from_file(file, enqueuer: discord.Member=None):
+    voice_queue.append(Video(file=file, enqueuer=enqueuer))
 
 
 @command
@@ -340,26 +341,26 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
     url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
     if url is not None:
         # This is a url
-        await add_video_from_url(url.group(0))
+        await add_video_from_url(url.group(0), enqueuer=author)
         await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     # Parse the parameter as file
     file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
     if os.path.exists(file_path):
         # This is a file
-        await add_video_from_file(file=file_path)
+        await add_video_from_file(file=file_path, enqueuer=author)
         await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     file_path += ".opus"
     if os.path.exists(file_path):
         # This is a file
-        await add_video_from_file(file=file_path)
+        await add_video_from_file(file=file_path, enqueuer=author)
         await client.send_message(channel, f"✅ Video aggiunto alla coda.")
         return
     # Search the parameter on youtube
     search = " ".join(params[1:])
     # This is a search
-    await add_video_from_url(url=f"ytsearch:{search}")
+    await add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
     await client.send_message(channel, f"✅ Video aggiunto alla coda.")
 
 
@@ -476,7 +477,7 @@ async def cmd_register(channel: discord.Channel, author: discord.Member, params:
     session = await loop.run_in_executor(executor, db.Session())
     if len(params) < 1:
         await client.send_message(channel, "⚠️ Non hai specificato un username!\n"
-                                                   "Sintassi corretta: `!register <username_ryg>`")
+                                           "Sintassi corretta: `!register <username_ryg>`")
         return
     try:
         d = db.Discord.create(session,
@@ -491,6 +492,7 @@ async def cmd_register(channel: discord.Channel, author: discord.Member, params:
     session.commit()
     session.close()
     await client.send_message(channel, "✅ Sincronizzazione completata!")
+
 
 async def queue_predownload_videos():
     while True:
@@ -550,6 +552,13 @@ async def queue_play_next_video():
             continue
         voice_player = await now_playing.create_player()
         voice_player.start()
+        if now_playing.enqueuer is not None:
+            session = await loop.run_in_executor(executor, db.Session)
+            played_music = db.PlayedMusic(enqueuer=now_playing.enqueuer,
+                                          filename=str(now_playing))
+            session.add(played_music)
+            await loop.run_in_executor(executor, session.commit)
+            await loop.run_in_executor(executor, session.close)
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
         await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                   f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
