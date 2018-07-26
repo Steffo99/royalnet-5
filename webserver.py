@@ -58,7 +58,8 @@ def page_main():
     royals = db_session.query(db.Royal).order_by(db.Royal.username).all()
     wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
-    next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
+    next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
+        db.Event.time).all()
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
                            next_events=next_events, config=config, escape=escape)
@@ -80,7 +81,15 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
-    discord = db_session.query(db.Discord).filter_by(royal=user).one_or_none()
+    fav_song = db_session.query(db.PlayedMusic.enqueuer_id, db.PlayedMusic.filename, db.func.count("*").label("plays")) \
+        .group_by(db.PlayedMusic.filename, db.PlayedMusic.enqueuer_id) \
+        .order_by(db.desc("plays")) \
+        .subquery()
+    discord = db_session.query(db.Discord, db.PlayedMusic.filename) \
+        .options(db.joinedload(db.Discord.music_played)) \
+        .filter_by(royal=user) \
+        .outerjoin(fav_song) \
+        .first()
     db_session.close()
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
                            tg=tg, discord=discord, config=config)
@@ -174,6 +183,8 @@ def page_setcss():
 @app.route("/game/<name>")
 def page_game(name: str):
     db_session = db.Session()
+    fav_song = None
+    last_song = None
     if name == "rl":
         game_name = "Rocket League"
         query = db_session.query(db.RocketLeague).join(db.Steam).all()
@@ -200,8 +211,10 @@ def page_game(name: str):
         query = db_session.query(db.Telegram).all()
     elif name == "discord":
         game_name = "Discord"
-        # noinspection PyComparisonWithNone
-        query = db_session.query(db.Discord).filter(db.Discord.royal_id != None).all()
+        partial_query = db_session.query(db.Discord) \
+            .options(db.joinedload(db.Discord.music_played)) \
+            .all()
+        query = [[discord] for discord in partial_query]
     else:
         abort(404)
         return
@@ -215,12 +228,12 @@ def page_wiki(key: str):
     wiki_page = db_session.query(db.WikiEntry).filter_by(key=key).one_or_none()
     if request.method == "GET":
         wiki_latest_edit = db_session.query(db.WikiLog).filter_by(edited_key=key) \
-                               .order_by(db.WikiLog.timestamp.desc()).first()
+            .order_by(db.WikiLog.timestamp.desc()).first()
         db_session.close()
         if wiki_page is None:
             return render_template("wiki.html", key=key, config=config)
         converted_md = Markup(markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
-                              extras=["spoiler", "tables"]))
+                                                 extras=["spoiler", "tables"]))
         return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
                                wiki_log=wiki_latest_edit, config=config)
     elif request.method == "POST":

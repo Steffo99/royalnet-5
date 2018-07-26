@@ -7,9 +7,26 @@
 <div class="game-panel">
     <div class="game-grid discord">
         <div class="player">
-            <img src="{{ record.avatar_url(size=64) }}" class="player-image">
-            <span class="player-name">{{ record }}</span>
+            <img src="{{ record[0].avatar_url(size=64) }}" class="player-image">
+            <span class="player-name">{{ record[0] }}</span>
         </div>
-        <div class="game-score useless-stuff">è su Discord!</div>
+        {% if record[0].music_played %}
+            <div class="game-title last-video">Ultima canzone</div>
+            <div class="game-score last-video">
+                {{ (record[0].music_played|sort(attribute='timestamp'))[-1].filename }}
+            </div>
+        {% else %}
+            <div class="game-title last-video none">Ultima canzone</div>
+            <div class="game-score last-video none">
+                Nessuna
+            </div>
+        {% endif %}
+        {% if record|length > 1 %}
+            <div class="game-title fav-video">Canzone preferita</div>
+            <div class="game-score fav-video">{{ record[1] }}</div>
+        {% else %}
+            <div class="game-title fav-video none">Canzone preferita</div>
+            <div class="game-score fav-video none"><a href="/profile/{{ record[0].royal.username }}">Non caricata</a></div>
+        {% endif %}
     </div>
 </div>

@@ -1,8 +1,8 @@
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, joinedload
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date, func
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date, func, desc
 import requests
 from errors import RequestError, NotFoundError, AlreadyExistingError
 import re
@@ -741,6 +741,7 @@ class PlayedMusic(Base):
     enqueuer_id = Column(BigInteger, ForeignKey("discord.discord_id"))
     enqueuer = relationship("Discord", backref="music_played", lazy="joined")
     filename = Column(String)
+    timestamp = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f"<PlayedMusic {self.filename}>"

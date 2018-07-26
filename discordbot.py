@@ -18,6 +18,7 @@ import async_timeout
 import raven
 import logging
 import errors
+import datetime
 
 logging.basicConfig()
 
@@ -555,7 +556,8 @@ async def queue_play_next_video():
         if now_playing.enqueuer is not None:
             session = await loop.run_in_executor(executor, db.Session)
             played_music = db.PlayedMusic(enqueuer=now_playing.enqueuer,
-                                          filename=str(now_playing))
+                                          filename=str(now_playing),
+                                          timestamp=datetime.datetime.now())
             session.add(played_music)
             await loop.run_in_executor(executor, session.commit)
             await loop.run_in_executor(executor, session.close)
