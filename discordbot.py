@@ -505,6 +505,7 @@ async def cmd_register(channel: discord.Channel, author: discord.Member, params:
 
 
 @command
+@requires_voice_client
 async def cmd_forceplay(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     if voice_player is not None:
         voice_player.stop()
