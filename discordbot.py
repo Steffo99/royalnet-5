@@ -311,7 +311,7 @@ async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typin
     await client.send_message(channel, f"✅ Mi sono connesso in <#{author.voice.voice_channel.id}>.")
 
 
-async def add_video_from_url(url, enqueuer: discord.Member=None):
+async def add_video_from_url(url, index: typing.Optional[int]=None, enqueuer: discord.Member=None):
     # Retrieve info
     with youtube_dl.YoutubeDL({"quiet": True,
                                "ignoreerrors": True,
@@ -321,14 +321,23 @@ async def add_video_from_url(url, enqueuer: discord.Member=None):
     if "entries" in info:
         # This is a playlist
         for entry in info["entries"]:
-            voice_queue.append(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
+            if index is not None:
+                voice_queue.insert(index, Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
+            else:
+                voice_queue.append(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
         return
     # This is a single video
-    voice_queue.append(Video(url=url, info=info, enqueuer=enqueuer))
+    if index is not None:
+        voice_queue.insert(index, Video(url=url, info=info, enqueuer=enqueuer))
+    else:
+        voice_queue.append(Video(url=url, info=info, enqueuer=enqueuer))
 
 
-async def add_video_from_file(file, enqueuer: discord.Member=None):
-    voice_queue.append(Video(file=file, enqueuer=enqueuer))
+async def add_video_from_file(file, index: typing.Optional[int]=None, enqueuer: discord.Member=None):
+    if index is not None:
+        voice_queue.insert(index, Video(file=file, enqueuer=enqueuer))
+    else:
+        voice_queue.append(Video(file=file, enqueuer=enqueuer))
 
 
 @command
@@ -384,7 +393,7 @@ async def cmd_remove(channel: discord.Channel, author: discord.Member, params: t
         return
     if len(params) == 1:
         index = len(voice_queue) - 1
-    elif len(params) == 2:
+    else:
         try:
             index = int(params[1]) - 1
         except ValueError:
@@ -396,7 +405,7 @@ async def cmd_remove(channel: discord.Channel, author: discord.Member, params: t
             await client.send_message(channel, "⚠ Il numero inserito non corrisponde a nessun video nella playlist.\n"
                                       "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
-        del voice_queue[index]
+        video = voice_queue.pop(index)
         await client.send_message(channel, f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
         return
     try:
@@ -495,6 +504,41 @@ async def cmd_register(channel: discord.Channel, author: discord.Member, params:
     await client.send_message(channel, "✅ Sincronizzazione completata!")
 
 
+@command
+async def cmd_forceplay(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    if voice_player is not None:
+        voice_player.stop()
+    if len(params) < 2:
+        await client.send_message(channel, "⚠ Non hai specificato una canzone da riprodurre!\n"
+                                           "Sintassi: `!instaplay <url|ricercayoutube|nomefile>`")
+        return
+    # Parse the parameter as URL
+    url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
+    if url is not None:
+        # This is a url
+        await add_video_from_url(url.group(0), enqueuer=author, index=0)
+        await client.send_message(channel, f"✅ Riproduzione del video forzata.")
+        return
+    # Parse the parameter as file
+    file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
+    if os.path.exists(file_path):
+        # This is a file
+        await add_video_from_file(file=file_path, enqueuer=author, index=0)
+        await client.send_message(channel, f"✅ Riproduzione del video forzata.")
+        return
+    file_path += ".opus"
+    if os.path.exists(file_path):
+        # This is a file
+        await add_video_from_file(file=file_path, enqueuer=author, index=0)
+        await client.send_message(channel, f"✅ Riproduzione del video forzata.")
+        return
+    # Search the parameter on youtube
+    search = " ".join(params[1:])
+    # This is a search
+    await add_video_from_url(url=f"ytsearch:{search}", enqueuer=author, index=0)
+    await client.send_message(channel, f"✅ Riproduzione del video forzata.")
+
+
 async def queue_predownload_videos():
     while True:
         for index, video in enumerate(voice_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
@@ -562,14 +606,22 @@ async def queue_play_next_video():
             await loop.run_in_executor(executor, session.commit)
             await loop.run_in_executor(executor, session.close)
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
-        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                  f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
+        if "despacito" in now_playing.filename.lower():
+            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                      f":arrow_forward: this is so sad. alexa play {str(now_playing)}")
+        elif "faded" in now_playing.filename.lower():
+            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                      f":arrow_forward: Basta Garf, lasciami ascoltare {str(now_playing)}")
+        else:
+            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                      f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
         del voice_queue[0]
 
 
 commands = {
     "!ping": cmd_ping,
     "!cv": cmd_cv,
+    "!summon": cmd_cv,
     "!play": cmd_play,
     "!p": cmd_play,
     "!search": cmd_play,
@@ -583,7 +635,9 @@ commands = {
     "!shuffle": cmd_shuffle,
     "!clear": cmd_clear,
     "!dump_vp": cmd_dump_voice_player_error,
-    "!register": cmd_register
+    "!register": cmd_register,
+    "!forceplay": cmd_forceplay,
+    "!fp": cmd_forceplay
 }
 
 
