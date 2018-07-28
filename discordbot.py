@@ -599,7 +599,7 @@ async def queue_play_next_video():
         voice_player = await now_playing.create_player()
         voice_player.start()
         if now_playing.enqueuer is not None:
-            session = await loop.run_in_executor(executor, db.Session)
+            session = await loop.run_in_executor(executor, db.Session.__init__)
             enqueuer = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=now_playing.enqueuer.id).one_or_none)
             played_music = db.PlayedMusic(enqueuer=enqueuer,
                                           filename=now_playing.file,
