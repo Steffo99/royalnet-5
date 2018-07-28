@@ -117,4 +117,4 @@ LEFT JOIN
       GROUP BY playedmusic.enqueuer_id
   ) last_play_times ON playedmusic.timestamp = last_play_times.last_play_time
 ) last_songs ON last_songs.discord_id = discord.discord_id
-WHERE discord.royal_id = ?;"""
+WHERE discord.royal_id = :royal;"""
