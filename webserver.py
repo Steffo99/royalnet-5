@@ -6,6 +6,7 @@ import configparser
 import markdown2
 import datetime
 import telegram
+import query_discord_music
 
 app = Flask(__name__)
 
@@ -81,15 +82,7 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
-    fav_song = db_session.query(db.PlayedMusic.enqueuer_id, db.PlayedMusic.filename, db.func.count("*").label("plays")) \
-        .group_by(db.PlayedMusic.filename, db.PlayedMusic.enqueuer_id) \
-        .order_by(db.desc("plays")) \
-        .subquery()
-    discord = db_session.query(db.Discord, db.PlayedMusic.filename) \
-        .options(db.joinedload(db.Discord.music_played)) \
-        .filter_by(royal=user) \
-        .outerjoin(fav_song) \
-        .first()
+    discord = [dict(row) for row in db_session.execute(query_discord_music.one_query, user.id)]
     db_session.close()
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
                            tg=tg, discord=discord, config=config)
@@ -183,8 +176,6 @@ def page_setcss():
 @app.route("/game/<name>")
 def page_game(name: str):
     db_session = db.Session()
-    fav_song = None
-    last_song = None
     if name == "rl":
         game_name = "Rocket League"
         query = db_session.query(db.RocketLeague).join(db.Steam).all()
@@ -211,10 +202,7 @@ def page_game(name: str):
         query = db_session.query(db.Telegram).all()
     elif name == "discord":
         game_name = "Discord"
-        partial_query = db_session.query(db.Discord) \
-            .options(db.joinedload(db.Discord.music_played)) \
-            .all()
-        query = [[discord] for discord in partial_query]
+        query = [dict(row) for row in db_session.execute(query_discord_music.all_query)]
     else:
         abort(404)
         return
