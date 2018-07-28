@@ -82,7 +82,7 @@ def page_profile(name: str):
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
-    discord = db_session.execute(query_discord_music.one_query, royal=user.id).fetchone()
+    discord = db_session.execute(query_discord_music.one_query, {royal=user.id}).fetchone()
     db_session.close()
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
                            tg=tg, discord=discord, config=config)
