@@ -15,7 +15,7 @@
             <div class="game-score last-video" title="{{ record["last_song"] }}">
                 {{ record["last_song"] }}
             </div>
-            <div class="game-extra last-video">{{ record["last_play_time"] }}</div>
+            <div class="game-extra last-video">{{ record["last_play_time"].strftime('%Y-%m-%d %H:%M:%S %Z') }}</div>
         {% else %}
             <div class="game-title last-video none">Ultima canzone</div>
             <div class="game-score last-video none">
