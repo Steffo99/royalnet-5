@@ -255,7 +255,7 @@ def page_wiki(key: str):
 @app.route("/diario")
 def page_diario():
     db_session = db.Session()
-    diario_entries = db_session.query(db.Diario).all()
+    diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
     return render_template("diario.html", config=config, entries=diario_entries)
 
