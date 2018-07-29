@@ -28,6 +28,13 @@
                     {% endfor %}
                 </ul>
             </div>
+            <div class="box upper-box">
+                Citazione casuale dal diario
+            </div>
+            <div class="box lower-box">
+                {% include "components/diarioentry.html" %}
+                <a href="/diario">Visualizza tutto</a>
+            </div>
         </div>
         <div class="right">
             <div class="box upper-box">
@@ -55,13 +62,6 @@
                     <li><a href="/game/ow">Overwatch</a></li>
                     <li><a href="/game/osu">osu!</a></li>
                 </ul>
-            </div>
-            <div class="box upper-box">
-                Citazione casuale dal diario
-            </div>
-            <div class="box lower-box">
-                {% include "components/diarioentry.html" %}
-                <a href="/diario">Visualizza tutto</a>
             </div>
         </div>
     </div>
