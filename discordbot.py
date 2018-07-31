@@ -279,7 +279,7 @@ def requires_voice_client(func):
 
 def requires_rygdb(func, optional=False):
     async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
-        session = await loop.run_in_executor(executor, db.Session.__init__)
+        session = db.Session()
         dbuser = await loop.run_in_executor(executor,
                                             session.query(db.Discord)
                                             .filter_by(discord_id=author.id)
@@ -492,7 +492,7 @@ async def cmd_dump_voice_player_error(channel: discord.Channel, author: discord.
 
 @command
 async def cmd_register(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
-    session = await loop.run_in_executor(executor, db.Session())
+    session = db.Session()
     if len(params) < 1:
         await client.send_message(channel, "⚠️ Non hai specificato un username!\n"
                                            "Sintassi corretta: `!register <username_ryg>`")
@@ -607,7 +607,7 @@ async def queue_play_next_video():
         voice_player = await now_playing.create_player()
         voice_player.start()
         if now_playing.enqueuer is not None:
-            session = await loop.run_in_executor(executor, db.Session.__init__)
+            session = db.Session()
             enqueuer = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=now_playing.enqueuer.id).one_or_none)
             played_music = db.PlayedMusic(enqueuer=enqueuer,
                                           filename=now_playing.file,
