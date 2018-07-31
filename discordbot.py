@@ -610,7 +610,7 @@ async def queue_play_next_video():
             session = db.Session()
             enqueuer = await loop.run_in_executor(executor, session.query(db.Discord).filter_by(discord_id=now_playing.enqueuer.id).one_or_none)
             played_music = db.PlayedMusic(enqueuer=enqueuer,
-                                          filename=now_playing.file,
+                                          filename=now_playing.plain_text(),
                                           timestamp=datetime.datetime.now())
             session.add(played_music)
             await loop.run_in_executor(executor, session.commit)
