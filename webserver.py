@@ -178,28 +178,28 @@ def page_game(name: str):
     db_session = db.Session()
     if name == "rl":
         game_name = "Rocket League"
-        query = db_session.query(db.RocketLeague).join(db.Steam).all()
+        query = db_session.query(db.RocketLeague).join(db.Steam).order_by(db.RocketLeague.solo_std_rank).all()
     elif name == "dota":
         game_name = "Dota 2"
-        query = db_session.query(db.Dota).join(db.Steam).all()
+        query = db_session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc()).all()
     elif name == "lol":
         game_name = "League of Legends"
-        query = db_session.query(db.LeagueOfLegends).all()
+        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc()).all()
     elif name == "osu":
         game_name = "osu!"
-        query = db_session.query(db.Osu).all()
+        query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc()).all()
     elif name == "ow":
         game_name = "Overwatch"
-        query = db_session.query(db.Overwatch).all()
+        query = db_session.query(db.Overwatch).order_by(db.Overwatch.rank.desc()).all()
     elif name == "steam":
         game_name = "Steam"
-        query = db_session.query(db.Steam).all()
+        query = db_session.query(db.Steam).order_by(db.Steam.persona_name).all()
     elif name == "ryg":
         game_name = "Royalnet"
-        query = db_session.query(db.Royal).all()
+        query = db_session.query(db.Royal).order_by(db.Royal.username).all()
     elif name == "tg":
         game_name = "Telegram"
-        query = db_session.query(db.Telegram).all()
+        query = db_session.query(db.Telegram).order_by(db.Telegram.telegram_id).all()
     elif name == "discord":
         game_name = "Discord"
         query = [dict(row) for row in db_session.execute(query_discord_music.all_query)]
