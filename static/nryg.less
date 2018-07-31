@@ -180,15 +180,6 @@ nav {
     }
 }
 
-//Dirtiest hack ever
-.game-panels {
-    font-size: 0;
-
-    .game-panel {
-        font-size: medium;
-    }
-}
-
 .game-panel {
     display: inline-block;
     margin: 4px;
@@ -232,423 +223,432 @@ nav {
     }
 }
 
-.osu {
-    font-family: 'Exo 2', 'Helvetica Neue', 'Arial', sans-serif;
-    font-style: italic;
-    border: 8px solid #ffffff;
-    color: #ffffff;
-    padding: 10px;
-    grid-row-gap: 5px;
-    grid-template-columns: 25% 25% 25% 25%;
+//Dirtiest hack ever
+.game-panels {
+    font-size: 0;
 
-    .background-image {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        background-image: url("https://osu.ppy.sh/images/layout/nav-backgrounds/triangles-combined.png");
-        z-index: -2;
+    .game-panel {
+        font-size: medium;
     }
 
-    .background-color {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        background-color: rgba(187, 17, 119, 0.9);
-        z-index: -1;
-    }
-
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 4;
-
-        .player-image {
-            border-radius: 16px;
-        }
-
-        .player-name {
-            color: #ffffff;
-        }
-    }
-
-    .game-title {
-        font-style: normal;
-    }
-
-    .standard {
-        grid-column: 1;
-    }
-
-    .taiko {
-        grid-column: 2;
-    }
-
-    .catch {
-        grid-column: 3;
-    }
-
-    .mania {
-        grid-column: 4;
-    }
-
-    .number {
-        font-size: large;
-    }
-
-    .pp {
-        font-size: x-small;
-    }
-}
-
-.rl {
-    background-image: linear-gradient(to bottom,rgba(35,91,139,.5),rgba(16,54,84,.5)),
-                      linear-gradient(to right,rgba(35,91,139,.7),rgba(16,54,84,.7));
-    grid-template-columns: 25% 25% 25% 25%;
-    padding: 18px;
-    grid-row-gap: 5px;
-
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 4;
-
-        .player-name {
-            color: #ffffff;
-            text-shadow: 2px 2px 8px #359ef2, -2px 2px 8px #359ef2, 2px -2px 8px #359ef2, -2px -2px 8px #359ef2;
-        }
-    }
-
-    .game-title {
-        text-align: center;
-        color: #41abfa;
-        text-shadow: 2px 2px 8px #235b8b, -2px 2px 8px #235b8b, 2px -2px 8px #235b8b, -2px -2px 8px #235b8b;
-    }
-
-    .game-score img {
-        height: 36px;
-        display: block;
-        margin: auto;
-    }
-
-    .duel {
-        grid-column: 1;
-    }
-
-    .doubles {
-        grid-column: 2;
-    }
-
-    .standard {
-        grid-column: 3;
-    }
-
-    .solostd {
-        grid-column: 4;
-    }
-
-}
-
-.dota {
-    padding: 15px;
-    border: 3px solid #000000;
-    grid-row-gap: 5px;
-    grid-template-columns: 25% 75%;
-    font-family: "Radiance", sans-serif;
-    background-image: linear-gradient(to bottom, #440b0b, #631013);
-    color: #ffffff;
-
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 3;
-
-        .player-name {
-            color: #ffffff;
-        }
-    }
-
-    .game-score.wins {
-        font-size: x-large;
-    }
-
-    .wins {
-        grid-column: 1;
-        text-align: center;
-    }
-
-    .rank {
-        grid-column: 2;
-        grid-row-start: 2;
-        grid-row-end: 4;
-        margin-top: auto;
-        margin-bottom: auto;
-
-        img {
-            vertical-align: middle;
-        }
-
-        img.stars {
-            position: relative;
-            height: 60px;
-            left: -60px;
-            margin-right: -60px;
-            z-index: 1;
-        }
-
-        img.medal {
-            height: 60px;
-        }
-    }
-}
-
-.lol {
-    font-family: "BeaufortLoL", "Times New Roman", serif;
-    padding: 15px;
-    color: #c9aa71;
-    border: 3px solid #463714;
-    background-color: #010a13;
-    grid-row-gap: 5px;
-    grid-template-columns: 40% 20% 20% 20%;
-
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 4;
-
-        .player-image {
-            border-radius: 16px;
-        }
-    }
-
-    .level {
-        grid-column: 1;
-    }
-
-    .game-score.level {
-        font-size: x-large;
-    }
-
-    .soloq {
-        grid-column: 2;
-    }
-
-    .flexq {
-        grid-column: 3;
-    }
-
-    .twtrq {
-        grid-column: 4;
-    }
-
-    .game-title {
-        text-align: center;
-    }
-
-    .game-score {
-        text-align: center;
-        margin: auto;
-    }
-
-    .rank {
-        height: 40px;
-    }
-}
-
-.steam {
-    font-family: "Motiva Sans", sans-serif;
-    padding: 18px;
-    background: url("https://steamstore-a.akamaihd.net/public/images/v6/colored_body_top2.png?v=2") center;
-
-    .player .player-name {
-        grid-row: 1;
-        grid-column: 1;
+    .osu {
+        font-family: 'Exo 2', 'Helvetica Neue', 'Arial', sans-serif;
+        font-style: italic;
+        border: 8px solid #ffffff;
         color: #ffffff;
-    }
+        padding: 10px;
+        grid-row-gap: 5px;
+        grid-template-columns: 25% 25% 25% 25%;
 
-    .buttons {
-        grid-row: 2;
-        grid-column-start: 1;
-        grid-column-end: 3;
-    }
+        .background-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background-image: url("https://osu.ppy.sh/images/layout/nav-backgrounds/triangles-combined.png");
+            z-index: -2;
+        }
 
-    .game-banner {
-        grid-row: 1;
-        grid-column: 2;
-        text-align: right;
+        .background-color {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background-color: rgba(187, 17, 119, 0.9);
+            z-index: -1;
+        }
 
-        img {
-            height: 58px;
-            border-radius: 4px;
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 4;
+
+            .player-image {
+                border-radius: 16px;
+            }
+
+            .player-name {
+                color: #ffffff;
+            }
+        }
+
+        .game-title {
+            font-style: normal;
+        }
+
+        .standard {
+            grid-column: 1;
+        }
+
+        .taiko {
+            grid-column: 2;
+        }
+
+        .catch {
+            grid-column: 3;
+        }
+
+        .mania {
+            grid-column: 4;
+        }
+
+        .number {
+            font-size: large;
+        }
+
+        .pp {
+            font-size: x-small;
         }
     }
 
-    a {
-        text-decoration: none;
-        display: inline-block;
+    .rl {
+        background-image: linear-gradient(to bottom, rgba(35, 91, 139, .5), rgba(16, 54, 84, .5)),
+        linear-gradient(to right, rgba(35, 91, 139, .7), rgba(16, 54, 84, .7));
+        grid-template-columns: 25% 25% 25% 25%;
+        padding: 18px;
+        grid-row-gap: 5px;
+
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 4;
+
+            .player-name {
+                color: #ffffff;
+                text-shadow: 2px 2px 8px #359ef2, -2px 2px 8px #359ef2, 2px -2px 8px #359ef2, -2px -2px 8px #359ef2;
+            }
+        }
+
+        .game-title {
+            text-align: center;
+            color: #41abfa;
+            text-shadow: 2px 2px 8px #235b8b, -2px 2px 8px #235b8b, 2px -2px 8px #235b8b, -2px -2px 8px #235b8b;
+        }
+
+        .game-score img {
+            height: 36px;
+            display: block;
+            margin: auto;
+        }
+
+        .duel {
+            grid-column: 1;
+        }
+
+        .doubles {
+            grid-column: 2;
+        }
+
+        .standard {
+            grid-column: 3;
+        }
+
+        .solostd {
+            grid-column: 4;
+        }
+
     }
 
-    .button {
-        background-color: rgba(0,0,0,0.4);
-        color: #9e9d9b;
-        width: 32px;
-        height: 32px;
-        border-radius: 4px;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .button:hover, .button:active {
-        background-color: rgba(102,192,244,0.4);
+    .dota {
+        padding: 15px;
+        border: 3px solid #000000;
+        grid-row-gap: 5px;
+        grid-template-columns: 25% 75%;
+        font-family: "Radiance", sans-serif;
+        background-image: linear-gradient(to bottom, #440b0b, #631013);
         color: #ffffff;
-    }
-}
 
-.ow {
-    padding: 16px;
-    font-family: "FuturaNo2D", sans-serif;
-    background-color: #371b00;
-    border: 2px solid #ff9c00;
-    grid-row-gap: 5px;
-    grid-template-columns: 25% 75%;
-    color: #ffffff;
-    text-transform: uppercase;
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 3;
 
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 3;
-
-        .player-image {
-            border-radius: 2px;
-            vertical-align: middle;
+            .player-name {
+                color: #ffffff;
+            }
         }
 
-        .player-name {
+        .game-score.wins {
+            font-size: x-large;
+        }
+
+        .wins {
+            grid-column: 1;
+            text-align: center;
+        }
+
+        .rank {
+            grid-column: 2;
+            grid-row-start: 2;
+            grid-row-end: 4;
+            margin-top: auto;
+            margin-bottom: auto;
+
+            img {
+                vertical-align: middle;
+            }
+
+            img.stars {
+                position: relative;
+                height: 60px;
+                left: -60px;
+                margin-right: -60px;
+                z-index: 1;
+            }
+
+            img.medal {
+                height: 60px;
+            }
+        }
+    }
+
+    .lol {
+        font-family: "BeaufortLoL", "Times New Roman", serif;
+        padding: 15px;
+        color: #c9aa71;
+        border: 3px solid #463714;
+        background-color: #010a13;
+        grid-row-gap: 5px;
+        grid-template-columns: 40% 20% 20% 20%;
+
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 4;
+
+            .player-image {
+                border-radius: 16px;
+            }
+        }
+
+        .level {
+            grid-column: 1;
+        }
+
+        .game-score.level {
+            font-size: x-large;
+        }
+
+        .soloq {
+            grid-column: 2;
+        }
+
+        .flexq {
+            grid-column: 3;
+        }
+
+        .twtrq {
+            grid-column: 4;
+        }
+
+        .game-title {
+            text-align: center;
+        }
+
+        .game-score {
+            text-align: center;
+            margin: auto;
+        }
+
+        .rank {
+            height: 40px;
+        }
+    }
+
+    .steam {
+        font-family: "Motiva Sans", sans-serif;
+        padding: 18px;
+        background: url("https://steamstore-a.akamaihd.net/public/images/v6/colored_body_top2.png?v=2") center;
+
+        .player .player-name {
+            grid-row: 1;
+            grid-column: 1;
             color: #ffffff;
         }
-    }
 
-    .game-title {
-        color: #ff9c00;
-    }
+        .buttons {
+            grid-row: 2;
+            grid-column-start: 1;
+            grid-column-end: 3;
+        }
 
-    .game-score.level {
-        font-size: x-large;
-    }
+        .game-banner {
+            grid-row: 1;
+            grid-column: 2;
+            text-align: right;
 
-    .level {
-        grid-column: 1;
-        text-align: center;
-    }
+            img {
+                height: 58px;
+                border-radius: 4px;
+            }
+        }
 
-    .rank {
-        grid-column: 2;
-        grid-row-start: 2;
-        grid-row-end: 4;
-        margin-top: auto;
-        margin-bottom: auto;
-
-        .icon {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            height: 60px;
-            width: 60px;
+        a {
+            text-decoration: none;
             display: inline-block;
-            vertical-align: middle;
-            margin-right: 8px;
         }
 
-        .ranked.text {
+        .button {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #9e9d9b;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .button:hover, .button:active {
+            background-color: rgba(102, 192, 244, 0.4);
+            color: #ffffff;
+        }
+    }
+
+    .ow {
+        padding: 16px;
+        font-family: "FuturaNo2D", sans-serif;
+        background-color: #371b00;
+        border: 2px solid #ff9c00;
+        grid-row-gap: 5px;
+        grid-template-columns: 25% 75%;
+        color: #ffffff;
+        text-transform: uppercase;
+
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 3;
+
+            .player-image {
+                border-radius: 2px;
+                vertical-align: middle;
+            }
+
+            .player-name {
+                color: #ffffff;
+            }
+        }
+
+        .game-title {
+            color: #ff9c00;
+        }
+
+        .game-score.level {
+            font-size: x-large;
+        }
+
+        .level {
+            grid-column: 1;
+            text-align: center;
+        }
+
+        .rank {
+            grid-column: 2;
+            grid-row-start: 2;
+            grid-row-end: 4;
+            margin-top: auto;
+            margin-bottom: auto;
+
+            .icon {
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                height: 60px;
+                width: 60px;
+                display: inline-block;
+                vertical-align: middle;
+                margin-right: 8px;
+            }
+
+            .ranked.text {
+                font-size: x-large;
+            }
+        }
+    }
+
+    .ryg {
+        background-color: rgba(red(@accent-color), green(@accent-color), blue(@accent-color), 0.1);
+        padding: 18px;
+        grid-template-columns: 80% 20%;
+
+        .player {
+            grid-row: 1;
+            grid-column-start: 1;
+            grid-column-end: 3;
+            font-weight: bold;
+        }
+
+        .member-status {
+            grid-column: 1;
+            grid-row-start: 2;
+            grid-row-end: 4;
+            font-size: x-large;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .fiorygi {
+            grid-column: 2;
+        }
+
+        .fiorygi.game-score {
             font-size: x-large;
         }
     }
-}
 
-.ryg {
-    background-color: rgba(red(@accent-color), green(@accent-color), blue(@accent-color), 0.1);
-    padding: 18px;
-    grid-template-columns: 80% 20%;
-
-    .player {
-        grid-row: 1;
-        grid-column-start: 1;
-        grid-column-end: 3;
-        font-weight: bold;
-    }
-
-    .member-status {
-        grid-column: 1;
-        grid-row-start: 2;
-        grid-row-end: 4;
-        font-size: x-large;
-        margin-top: auto;
-        margin-bottom: auto;
-    }
-
-    .fiorygi {
-        grid-column: 2;
-    }
-
-    .fiorygi.game-score {
-        font-size: x-large;
-    }
-}
-
-.telegram {
-    font-family: "Lucida Sans Unicode", sans-serif;
-    background-color: #32afed;
-    border: 6px solid white;
-    padding: 12px;
-    color: black;
-
-    a, a:hover, a:active, a:visited {
+    .telegram {
+        font-family: "Lucida Sans Unicode", sans-serif;
+        background-color: #32afed;
+        border: 6px solid white;
+        padding: 12px;
         color: black;
+
+        a, a:hover, a:active, a:visited {
+            color: black;
+        }
+
+        .player {
+            font-weight: bold;
+        }
+
+        .useless-stuff {
+            grid-column: 1;
+        }
     }
 
-    .player {
-        font-weight: bold;
-    }
-
-    .useless-stuff {
-        grid-column: 1;
-    }
-}
-
-.discord {
-    background-color: #7289da;
-    padding: 18px;
-    color: white;
-    font-family: "Whitney", sans-serif;
-    grid-template-columns: 50% 50%;
-
-    a, a:hover, a:active, a:visited {
+    .discord {
+        background-color: #7289da;
+        padding: 18px;
         color: white;
-    }
+        font-family: "Whitney", sans-serif;
+        grid-template-columns: 50% 50%;
 
-    .player-image {
-        border-radius: 16px;
-    }
+        a, a:hover, a:active, a:visited {
+            color: white;
+        }
 
-    .game-score {
-        overflow: hidden;
-    }
+        .player-image {
+            border-radius: 16px;
+        }
 
-    .last-video {
-        grid-column: 1
-    }
+        .game-score {
+            overflow: hidden;
+        }
 
-    .fav-video {
-        grid-column: 2;
-    }
+        .last-video {
+            grid-column: 1
+        }
 
-    .none {
-        color: rgba(255, 255, 255, 0.3);
+        .fav-video {
+            grid-column: 2;
+        }
+
+        .none {
+            color: rgba(255, 255, 255, 0.3);
+        }
     }
 }
 
@@ -668,6 +668,20 @@ nav {
 
         h4 {
             padding: 0;
+        }
+    }
+
+    //Text generated by the Markdown extension
+    .codehilite {
+        border-radius: 4px;
+        padding: 4px;
+
+        pre {
+            margin: 0;
+        }
+
+        code {
+            font-family: "Consolas", "Source Code Pro", monospace;
         }
     }
 }

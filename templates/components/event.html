@@ -15,6 +15,6 @@
         di <a href="/profile/{{ event.author.username }}">{{ event.author.username }}</a>
     </div>
     <div class="description">
-            {{ (escape(event.description)).replace("\n", "<br>"|safe) }}
+        {{ (escape(event.description)).replace("\n", "<br>"|safe) }}
     </div>
 </div>

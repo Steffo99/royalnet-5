@@ -221,7 +221,7 @@ def page_wiki(key: str):
         if wiki_page is None:
             return render_template("wiki.html", key=key, config=config)
         converted_md = Markup(markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
-                                                 extras=["spoiler", "tables"]))
+                                                 extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
         return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
                                wiki_log=wiki_latest_edit, config=config)
     elif request.method == "POST":
