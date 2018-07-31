@@ -217,6 +217,9 @@ async def update_users_pipe(users_connection):
         if msg == "get cv":
             discord_members = list(client.get_server(config["Discord"]["server_id"]).members)
             users_connection.send(discord_members)
+        elif msg == "stop":
+            await client.logout()
+            exit(0)
         elif msg.startswith("!"):
             data = msg.split(" ")
             if data[0] not in commands:
@@ -657,7 +660,6 @@ def process(users_connection=None):
     client.on_error = on_error
     loop.run_until_complete(client.login(config["Discord"]["bot_token"], bot=True))
     loop.run_until_complete(client.connect())
-    loop.run_until_complete(client.logout())
 
 
 if __name__ == "__main__":

@@ -28,3 +28,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         if platform.system() == "Linux":
             os.system("reset")
+        discord_telegram_pipe[0].send("stop")
