@@ -181,16 +181,16 @@ def page_game(name: str):
         query = db_session.query(db.RocketLeague).join(db.Steam).order_by(db.RocketLeague.solo_std_rank).all()
     elif name == "dota":
         game_name = "Dota 2"
-        query = db_session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc()).all()
+        query = db_session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc().nullslast()).all()
     elif name == "lol":
         game_name = "League of Legends"
-        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc()).all()
+        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast()).all()
     elif name == "osu":
         game_name = "osu!"
-        query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc()).all()
+        query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()
     elif name == "ow":
         game_name = "Overwatch"
-        query = db_session.query(db.Overwatch).order_by(db.Overwatch.rank.desc()).all()
+        query = db_session.query(db.Overwatch).order_by(db.Overwatch.rank.desc().nullslast()).all()
     elif name == "steam":
         game_name = "Steam"
         query = db_session.query(db.Steam).order_by(db.Steam.persona_name).all()
