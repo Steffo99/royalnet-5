@@ -622,6 +622,9 @@ async def queue_play_next_video():
         elif "faded" in now_playing.file.lower():
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: Basta Garf, lasciami ascoltare {str(now_playing)}")
+        elif "ligma" in now_playing.file.lower():
+            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                      f":arrow_forward: What is ligma? Ligma {str(now_playing)}!")
         else:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
