@@ -43,7 +43,7 @@ blockquote {
         margin: 4px 0;
     }
 
-    .spoiler {
+    &.spoiler {
         color: transparent;
         border-color: @spoiler-color;
         background-color: rgba(red(@spoiler-color), green(@spoiler-color), blue(@spoiler-color), 0.1);
@@ -58,6 +58,14 @@ blockquote {
         border-color: @highlight-color;
         background-color: rgba(red(@highlight-color), green(@highlight-color), blue(@highlight-color), 0.1);
     }
+}
+
+pre {
+    margin: 0;
+}
+
+code {
+    font-family: "Consolas", "Source Code Pro", monospace;
 }
 
 input[type="text"], input[type="password"] {
@@ -675,14 +683,6 @@ nav {
     .codehilite {
         border-radius: 4px;
         padding: 4px;
-
-        pre {
-            margin: 0;
-        }
-
-        code {
-            font-family: "Consolas", "Source Code Pro", monospace;
-        }
     }
 }
 
