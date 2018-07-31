@@ -279,7 +279,7 @@ def requires_voice_client(func):
 
 def requires_rygdb(func, optional=False):
     async def new_func(channel: discord.Channel, author: discord.Member, params: typing.List[str], *args, **kwargs):
-        session = await loop.run_in_executor(executor, db.Session)
+        session = await loop.run_in_executor(executor, db.Session.__init__)
         dbuser = await loop.run_in_executor(executor,
                                             session.query(db.Discord)
                                             .filter_by(discord_id=author.id)
