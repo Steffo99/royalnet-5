@@ -300,7 +300,7 @@ async def cmd_ping(channel: discord.Channel, author: discord.Member, params: typ
 async def cmd_cv(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
     if author is None:
         await client.send_message(channel, "⚠ Questo comando richiede un autore.")
-    if author.voice.voice_channel is None:
+    if author.voice is None or author.voice.voice_channel is None:
         await client.send_message(channel, "⚠ Non sei in nessun canale!")
         return
     global voice_client
