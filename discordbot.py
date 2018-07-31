@@ -318,6 +318,11 @@ async def add_video_from_url(url, index: typing.Optional[int]=None, enqueuer: di
                                "simulate": True}) as ytdl:
         info = await loop.run_in_executor(executor,
                                           functools.partial(ytdl.extract_info, url=url, download=False))
+    if info is None:
+        await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                  f"⚠ Non è stato trovato nessun video all'URL `{url}`,"
+                                  f" pertanto non è stato aggiunto alla coda.")
+        return
     if "entries" in info:
         # This is a playlist
         for entry in info["entries"]:
