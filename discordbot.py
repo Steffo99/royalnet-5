@@ -616,10 +616,10 @@ async def queue_play_next_video():
             await loop.run_in_executor(executor, session.commit)
             await loop.run_in_executor(executor, session.close)
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
-        if "despacito" in now_playing.filename.lower():
+        if "despacito" in now_playing.file.lower():
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: this is so sad. alexa play {str(now_playing)}")
-        elif "faded" in now_playing.filename.lower():
+        elif "faded" in now_playing.file.lower():
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: Basta Garf, lasciami ascoltare {str(now_playing)}")
         else:
