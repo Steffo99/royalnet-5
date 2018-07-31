@@ -135,7 +135,7 @@ nav {
 .box {
     border-radius: 4px;
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
-    padding: 4px;
+    padding: 8px;
     margin-left: 4px;
     margin-right: 4px;
 
@@ -728,25 +728,26 @@ nav {
 
 .event {
     display: grid;
-    grid-template-columns: 25% 55% 20%;
     padding-top: 4px;
     padding-bottom: 4px;
+    grid-template-columns: 28% 50% 22%;
 
     .time {
         grid-column: 1;
         grid-row: 1;
-        font-weight: bold;
     }
 
     .name {
         grid-column: 2;
         grid-row: 1;
         font-weight: bold;
+        color: @accent-color;
     }
 
     .author {
         grid-column: 3;
         grid-row: 1;
+        text-align: right;
     }
 
     .description {
