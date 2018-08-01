@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 
 {% block pagetitle %}
-    CSS
+    Modifica profilo
 {% endblock %}
 
 {% block body %}
     <h1>
-        CSS
+        Modifica profilo
     </h1>
-    <form action="{{ url_for('page_setcss') }}" method="POST">
-        <textarea name="css" placeholder="Incolla il CSS per il tuo profilo qui...">{{ css }}</textarea>
+    <form action="{{ url_for('page_editprofile') }}" method="POST">
+        <textarea name="bio" placeholder="Scrivi la tua bio qui...">{{ data.bio }}</textarea>
+        <textarea name="css" placeholder="Incolla il CSS per il tuo profilo qui...">{{ data.css }}</textarea>
         <input type="submit" value="Salva">
     </form>
 {% endblock %}

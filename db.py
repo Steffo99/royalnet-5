@@ -821,13 +821,14 @@ class AprilFoolsBan(Base):
     datetime = Column(DateTime, nullable=False)
 
 
-class CustomCSS(Base):
-    __tablename__ = "customcss"
+class ProfileData(Base):
+    __tablename__ = "profiledata"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
-    royal = relationship("Royal", lazy="joined")
+    royal = relationship("Royal", backref="profile_data", uselist=False, lazy="joined")
 
-    css = Column(Text, nullable=False)
+    css = Column(Text)
+    bio = Column(Text)
 
 
 class WikiEntry(Base):

@@ -74,7 +74,7 @@ def page_profile(name: str):
         db_session.close()
         abort(404)
         return
-    css = db_session.query(db.CustomCSS).filter_by(royal=user).one_or_none()
+    css = db_session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     steam = db_session.query(db.Steam).filter_by(royal=user).one_or_none()
     osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
     rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
@@ -145,28 +145,30 @@ def page_password():
             return redirect(url_for("page_login"))
 
 
-@app.route("/setcss", methods=["GET", "POST"])
-def page_setcss():
+@app.route("/editprofile", methods=["GET", "POST"])
+def page_editprofile():
     user_id = fl_session.get("user_id")
     db_session = db.Session()
-    ccss = db_session.query(db.CustomCSS).filter_by(royal_id=user_id).one_or_none()
+    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).one_or_none()
     if request.method == "GET":
         db_session.close()
         if user_id is None:
             return redirect(url_for("page_login"))
-        return render_template("setcss.html", css=ccss.css, config=config)
+        return render_template("setcss.html", data=profile_data, config=config)
     elif request.method == "POST":
         if user_id is None:
             return redirect(url_for("page_login"))
         css = request.form.get("css", "")
+        bio = request.form.get("bio", "")
         if "</style" in css:
             abort(400)
             return
-        if ccss is None:
-            ccss = db.CustomCSS(royal_id=user_id, css=css)
-            db_session.add(ccss)
+        if profile_data is None:
+            profile_data = db.ProfileData(royal_id=user_id, css=css, bio=bio)
+            db_session.add(profile_data)
         else:
-            ccss.css = request.form.get("css", "")
+            profile_data.css = css
+            profile_data.bio = bio
         db_session.commit()
         royal = db_session.query(db.Royal).filter_by(id=user_id).one()
         db_session.close()
