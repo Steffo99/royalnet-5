@@ -20,7 +20,7 @@
 
 {% block body %}
     <h1>
-        Profilo di {{ ryg.username }} {% if session.get('user_id', '') == ryg.id %}<a href="/setcss" id="edit-css">Modifica</a>{% endif %}
+        Profilo di {{ ryg.username }} {% if session.get('user_id', '') == ryg.id %}<a href="{{ url_for('page_editprofile') }}" id="edit-css">Modifica</a>{% endif %}
     </h1>
     {% if css.bio %}
         <div class="box upper-box">
