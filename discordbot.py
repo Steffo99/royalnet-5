@@ -582,6 +582,42 @@ async def queue_predownload_videos():
         await asyncio.sleep(1)
 
 
+song_special_messages = {
+    "despacito": ":arrow_forward: this is so sad. alexa play {song}",
+    "faded": ":arrow_forward: Basta Garf, lasciami ascoltare {song}",
+    "ligma": ":arrow_forward: What is ligma? {song}!",
+    "sugma": ":arrow_forward: What is sugma? {song}!",
+    "sugondese": ":arrow_forward: What is sugondese? {song}!",
+    "bofa": ":arrow_forward: What is bofa? {song}!",
+    "updog": ":arrow_forward: What is updog? {song}!",
+    "sayo-nara": ":arrow_forward: I gently open the door. {song} awaits me inside.",
+    "monika": ":arrow_forward: Just Monika. Just Monika. Just {song}.",
+    "take me home": ":arrow_forward: Take me home, to {song}, the place I belong!",
+    "never gonna give you up": ":arrow_forward: Rickrolling in 2018. Enjoy {song}!",
+    "september": ":arrow_forward: Do you remember? {song}.",
+    "homestuck": ":arrow_forward: > Enter song name. {song}",
+    "undertale": ":arrow_forward: Howdy! I'm Flowey! Listen to this friendly song: {song}",
+    "pumped up kicks": ":arrow_forward: Non metterti mica in testa strane idee ascoltando {song}...",
+    "jesus": ":arrow_forward: Respawn in 3 giorni. Intanto, ascolta {song}.",
+    "through The fire And flames": ":arrow_forward: Fai {song} su osu!, se ne sei capace!",
+    "slow clap": ":arrow_forward: :clap: :clap: :clap: {song} :clap: :clap: :clap:",
+    "pub scrubs": ":arrow_forward: MAV COME BACK WE MISS {song}!",
+    "alleluia": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+    "wah": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+    "waluigi": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+    "nyan cat": ":arrow_forward: Meow! :3 {song}",
+    "dragonborn": ":arrow_forward: FUS RO {song}!",
+    "dovahkiin": ":arrow_forward: FUS RO {song}!",
+    "initial d": ":arrow_forward: Guarda mamma sto driftando sul balcone di Balu grazie a {song}!",
+    "persona": ":arrow_forward: You'll never see {song} comiiiiing!",
+    "flamingo": ":arrow_forward: How many {song} do you have to eat?",
+    "linkin park": ":arrow_forward: Crawling in my {song}!",
+    "magicite": "⚠️ Warning: {song} contiene numerosi bug.",
+    "papers please": ":arrow_forward: Glory to Arstotzka! {song}!",
+    "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}"
+}
+
+
 async def queue_play_next_video():
     await client.wait_until_ready()
     global voice_client
@@ -616,15 +652,10 @@ async def queue_play_next_video():
             await loop.run_in_executor(executor, session.commit)
             await loop.run_in_executor(executor, session.close)
         await client.change_presence(game=discord.Game(name=now_playing.plain_text(), type=2))
-        if "despacito" in now_playing.file.lower():
-            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                      f":arrow_forward: this is so sad. alexa play {str(now_playing)}")
-        elif "faded" in now_playing.file.lower():
-            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                      f":arrow_forward: Basta Garf, lasciami ascoltare {str(now_playing)}")
-        elif "ligma" in now_playing.file.lower():
-            await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
-                                      f":arrow_forward: What is ligma? Ligma {str(now_playing)}!")
+        for key in song_special_messages:
+            if key in now_playing.file.lower():
+                await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
+                                          song_special_messages[key].format(song=str(now_playing)))
         else:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
