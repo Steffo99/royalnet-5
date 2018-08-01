@@ -656,6 +656,7 @@ async def queue_play_next_video():
             if key in now_playing.file.lower():
                 await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                           song_special_messages[key].format(song=str(now_playing)))
+                break
         else:
             await client.send_message(client.get_channel(config["Discord"]["main_channel"]),
                                       f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
