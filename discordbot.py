@@ -44,7 +44,7 @@ config.read("config.ini")
 # Radio messages
 radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk&feature=youtu.be"]
 radio_messages_enabled = False
-radio_message_in = config["Discord"]["radio_messages_every"]
+radio_message_in = int(config["Discord"]["radio_messages_every"])
 
 
 class DurationError(Exception):
@@ -367,7 +367,7 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
         radio_message_in -= 1
         if radio_message_in <= 0:
             radio_message = random.sample(radio_messages, 1)[0]
-            radio_message_in = config["Discord"]["radio_messages_every"]
+            radio_message_in = int(config["Discord"]["radio_messages_every"])
             await add_video_from_url(radio_message)
             await client.send_message(channel, f"✅ Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
     # Parse the parameter as URL
