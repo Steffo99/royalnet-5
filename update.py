@@ -88,21 +88,21 @@ try:
                 sleep_time = 1 - time.clock() + t
                 time.sleep(sleep_time if sleep_time > 0 else 0)
         # Update Overwatch
-        # print("OVERWATCH")
-        # for user in session.query(db.Overwatch).all():
-        #     t = time.clock()
-        #     print(f"Updating {user.royal.username}", end="\t\t", flush=True)
-        #     try:
-        #         user.update()
-        #     except errors.RequestError:
-        #         print("Request Error")
-        #     except errors.NotFoundError:
-        #         print("Not Found Error (?)")
-        #     else:
-        #         print("OK")
-        #     finally:
-        #         sleep_time = 1 - time.clock() + t
-        #         time.sleep(sleep_time if sleep_time > 0 else 0)
+        print("OVERWATCH")
+        for user in session.query(db.Overwatch).all():
+            t = time.clock()
+            print(f"Updating {user.royal.username}", end="\t\t", flush=True)
+            try:
+                user.update()
+            except errors.RequestError:
+                print("Request Error")
+            except errors.NotFoundError:
+                print("Not Found Error (?)")
+            else:
+                print("OK")
+            finally:
+                sleep_time = 1 - time.clock() + t
+                time.sleep(sleep_time if sleep_time > 0 else 0)
         print("Committing...\t\t")
         session.commit()
         print("OK")

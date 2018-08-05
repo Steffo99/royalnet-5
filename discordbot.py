@@ -614,7 +614,8 @@ song_special_messages = {
     "linkin park": ":arrow_forward: Crawling in my {song}!",
     "magicite": "⚠️ Warning: {song} contiene numerosi bug.",
     "papers please": ":arrow_forward: Glory to Arstotzka! {song}!",
-    "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}"
+    "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}",
+    "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?"
 }
 
 
