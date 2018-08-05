@@ -41,6 +41,11 @@ loop = asyncio.get_event_loop()
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+# Radio messages
+radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk&feature=youtu.be"]
+radio_messages_enabled = False
+radio_message_in = config["Discord"]["radio_messages_every"]
+
 
 class DurationError(Exception):
     pass
@@ -355,6 +360,16 @@ async def cmd_play(channel: discord.Channel, author: discord.Member, params: typ
         await client.send_message(channel, "⚠ Non hai specificato una canzone da riprodurre!\n"
                                            "Sintassi: `!play <url|ricercayoutube|nomefile>`")
         return
+    # If the radio messages are enabled...
+    global radio_messages_enabled
+    if radio_messages_enabled:
+        global radio_message_in
+        radio_message_in -= 1
+        if radio_message_in <= 0:
+            radio_message = random.sample(radio_messages, 1)[0]
+            radio_message_in = config["Discord"]["radio_messages_every"]
+            await add_video_from_url(radio_message)
+            await client.send_message(channel, f"✅ Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
     # Parse the parameter as URL
     url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
     if url is not None:
@@ -519,7 +534,7 @@ async def cmd_forceplay(channel: discord.Channel, author: discord.Member, params
         voice_player.stop()
     if len(params) < 2:
         await client.send_message(channel, "⚠ Non hai specificato una canzone da riprodurre!\n"
-                                           "Sintassi: `!instaplay <url|ricercayoutube|nomefile>`")
+                                           "Sintassi: `!forceplay <url|ricercayoutube|nomefile>`")
         return
     # Parse the parameter as URL
     url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
@@ -546,6 +561,24 @@ async def cmd_forceplay(channel: discord.Channel, author: discord.Member, params
     # This is a search
     await add_video_from_url(url=f"ytsearch:{search}", enqueuer=author, index=0)
     await client.send_message(channel, f"✅ Riproduzione del video forzata.")
+
+
+@command
+async def cmd_radiomessages(channel: discord.Channel, author: discord.Member, params: typing.List[str]):
+    global radio_messages_enabled
+    if len(params) < 2:
+        radio_messages_enabled = not radio_messages_enabled
+    else:
+        if params[1].lower() == "on":
+            radio_messages_enabled = True
+        elif params[1].lower() == "off":
+            radio_messages_enabled = False
+        else:
+            await client.send_message(channel, "⚠ Sintassi del comando non valida.\n"
+                                               "Sintassi: `!radiomessages [on|off]`")
+            return
+    await client.send_message(channel,
+                              f"📻 Messaggi radio **{'attivati' if radio_messages_enabled else 'disattivati'}**.")
 
 
 async def queue_predownload_videos():
@@ -683,7 +716,8 @@ commands = {
     "!dump_vp": cmd_dump_voice_player_error,
     "!register": cmd_register,
     "!forceplay": cmd_forceplay,
-    "!fp": cmd_forceplay
+    "!fp": cmd_forceplay,
+    "!radiomessages": cmd_radiomessages
 }
 
 
