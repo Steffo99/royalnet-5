@@ -871,6 +871,43 @@ class Event(Base):
         self.time = datetime.datetime.now() + value
 
 
+class GameProgress(enum.Enum):
+    NOT_STARTED = 0
+    IN_PROGRESS = 1
+    BEATEN = 2
+    COMPLETED = 3
+    MASTERED = 4
+
+
+class GameOrigins(enum.Enum):
+    DIGITAL = 0
+    PHYSICAL = 1
+    SOLD = 2
+    BORROWED = 3
+    RENTED = 4
+    MYSTERIOUS = 5  # yarr
+
+
+class LibraryGame(Base):
+    __tablename__ = "librarygames"
+
+    owner_id = Column(Integer, ForeignKey("royals_id"), nullable=False)
+    owner = relationship("Royal", lazy="joined")
+    name = Column(String)
+    platform = Column(String)
+    steam_game_id = Column(BigInteger)
+    progress = Column(Enum(GameProgress), default=GameProgress.NOT_STARTED)
+    progress_notes = Column(Text)
+    time_played = Column(Float)
+    rating = Column(Integer)
+    review = Column(Text)
+    origin = Column(Enum(GameOrigins))
+    physical = Column(Boolean, default=False)
+    current_achievements = Column(Integer)
+    maximum_achievements = Column(Integer)
+    extra_notes = Column(Text)
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

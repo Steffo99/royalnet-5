@@ -23,11 +23,13 @@
         Profilo di {{ ryg.username }} {% if session.get('user_id', '') == ryg.id %}<a href="{{ url_for('page_editprofile') }}" id="edit-css">Modifica</a>{% endif %}
     </h1>
     {% if css.bio %}
-        <div class="box upper-box">
-            Bio
-        </div>
-        <div class="box lower-box">
-            {{ css.bio }}
+        <div class="box">
+            <div class="upper-box">
+                Bio
+            </div>
+            <div class="lower-box">
+                {{ css.bio }}
+            </div>
         </div>
     {% endif %}
     <div class="game-panels">
