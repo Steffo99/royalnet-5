@@ -11,3 +11,4 @@ raven
 bcrypt
 markdown2
 pygments
+markovify

@@ -1,6 +1,5 @@
 import datetime
 import random
-import math
 import typing
 import db
 import errors
@@ -14,9 +13,20 @@ import os
 import time
 import cast
 import re
+import logging
+import configparser
+import markovify
+
+# Markov model
+try:
+    with open("markovmodel.json") as file:
+        model = markovify.Text.from_json(file.read())
+except Exception:
+    model = None
+
+logging.getLogger().setLevel(level=20)
 
 # Init the config reader
-import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
@@ -561,8 +571,30 @@ def cmd_calendar(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 
+def cmd_markov(bot: Bot, update: Update):
+    if model is None:
+        bot.send_message(update.message.chat.id, "⚠️ Il modello Markov non è disponibile.")
+        return
+    try:
+        _, first_word = update.message.text.split(" ", 1)
+    except IndexError:
+        sentence = model.make_sentence(tries=1000)
+        if sentence is None:
+            bot.send_message(update.message.chat.id, "⚠ Complimenti! Hai vinto la lotteria di Markov!\n"
+                                                     "O forse l'hai persa.\n"
+                                                     "Non sono riuscito a generare una frase, riprova.")
+            return
+        bot.send_message(update.message.chat.id, sentence)
+    else:
+        sentence = model.make_sentence_with_start(first_word, tries=1000)
+        if sentence is None:
+            bot.send_message(update.message.chat.id, "⚠ Non è stato possibile generare frasi partendo da questa"
+                                                     " parola.")
+            return
+        bot.send_message(update.message.chat.id, sentence)
+
+
 def process(arg_discord_connection):
-    print("Telegrambot starting...")
     if arg_discord_connection is not None:
         global discord_connection
         discord_connection = arg_discord_connection
@@ -586,7 +618,9 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("wheel", cmd_wheel))
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
+    u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
+    logging.info("Handlers registered.")
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
                        f"Ultimo aggiornamento: `{version}: {commit_msg}`",
@@ -594,11 +628,12 @@ def process(arg_discord_connection):
     while True:
         try:
             u.start_polling()
+            logging.info("Polling started.")
             u.idle()
         except telegram.error.TimedOut:
-            print("Telegrambot timed out.")
+            logging.warning("Timed out, restarting in 1 minute.")
             time.sleep(60)
-            print("Telegrambot restarting...")
+            logging.info("Now restarting...")
 
 
 if __name__ == "__main__":

@@ -891,7 +891,8 @@ class GameOrigins(enum.Enum):
 class LibraryGame(Base):
     __tablename__ = "librarygames"
 
-    owner_id = Column(Integer, ForeignKey("royals_id"), nullable=False)
+    id = Column(BigInteger, primary_key=True)
+    owner_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     owner = relationship("Royal", lazy="joined")
     name = Column(String)
     platform = Column(String)

@@ -84,8 +84,10 @@ def page_profile(name: str):
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
     discord = db_session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
     db_session.close()
+    converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
+                           extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
     return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, config=config)
+                           tg=tg, discord=discord, config=config, bio=converted_bio)
 
 
 @app.route("/login")
@@ -248,7 +250,7 @@ def page_wiki(key: str):
                                       f' modificata da'
                                       f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
                                       f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}\n',
-                                      parse_mode="HTML")
+                                      parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
             pass
         return redirect(url_for("page_wiki", key=key))
