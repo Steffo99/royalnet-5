@@ -1,4 +1,4 @@
-discord.py[voice]
+discord.py==1.0.0a1504+gf06563c
 python-telegram-bot
 flask
 sqlalchemy
