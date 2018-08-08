@@ -18,8 +18,9 @@ import raven
 import logging
 import errors
 import datetime
+import sqlalchemy.exc
 
-logging.basicConfig()
+logging.getLogger().setLevel(level=20)
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -419,16 +420,19 @@ class RoyalDiscordBot(discord.Client):
                                             type=discord.ActivityType.playing)
                 await self.change_presence(status=discord.Status.online, activity=activity)
                 if now_playing.enqueuer is not None:
-                    session = db.Session()
-                    enqueuer = await loop.run_in_executor(executor, session.query(db.Discord)
-                                                          .filter_by(discord_id=now_playing.enqueuer.id)
-                                                          .one_or_none)
-                    played_music = db.PlayedMusic(enqueuer=enqueuer,
-                                                  filename=now_playing.plain_text(),
-                                                  timestamp=datetime.datetime.now())
-                    session.add(played_music)
-                    await loop.run_in_executor(executor, session.commit)
-                    await loop.run_in_executor(executor, session.close)
+                    try:
+                        session = db.Session()
+                        enqueuer = await loop.run_in_executor(executor, session.query(db.Discord)
+                                                              .filter_by(discord_id=now_playing.enqueuer.id)
+                                                              .one_or_none)
+                        played_music = db.PlayedMusic(enqueuer=enqueuer,
+                                                      filename=now_playing.plain_text(),
+                                                      timestamp=datetime.datetime.now())
+                        session.add(played_music)
+                        await loop.run_in_executor(executor, session.commit)
+                        await loop.run_in_executor(executor, session.close)
+                    except sqlalchemy.exc.OperationalError:
+                        pass
                 for key in song_special_messages:
                     if key in now_playing.file.lower():
                         await self.main_channel.send(song_special_messages[key].format(song=str(now_playing)))
@@ -717,14 +721,14 @@ class RoyalDiscordBot(discord.Client):
 
 
 def process(users_connection=None):
-    print("[Discord] Preparing...")
+    logging.info("Initializing the bot...")
     bot = RoyalDiscordBot()
     if users_connection is not None:
+        logging.info("Initializing Telegram-Discord connection...")
         asyncio.ensure_future(bot.feed_pipe(users_connection))
-    # asyncio.ensure_future(queue_predownload_videos())
-    # asyncio.ensure_future(queue_play_next_video())
+    logging.info("Logging in...")
     loop.run_until_complete(bot.login(config["Discord"]["bot_token"], bot=True))
-    print("[Discord] Logged in successfully!")
+    logging.info("Connecting...")
     loop.run_until_complete(bot.connect())
 
 
