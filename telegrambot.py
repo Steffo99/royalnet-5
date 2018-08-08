@@ -577,7 +577,7 @@ def cmd_markov(bot: Bot, update: Update):
         return
     try:
         _, first_word = update.message.text.split(" ", 1)
-    except IndexError:
+    except ValueError:
         sentence = model.make_sentence(tries=1000)
         if sentence is None:
             bot.send_message(update.message.chat.id, "⚠ Complimenti! Hai vinto la lotteria di Markov!\n"
