@@ -141,12 +141,6 @@ nav {
 }
 
 .box {
-    border-radius: 4px;
-    background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
-    padding: 8px;
-    margin-left: 4px;
-    margin-right: 4px;
-
     .upper-box {
         margin-top: 4px;
         border-radius: 4px 4px 0 0;
@@ -154,11 +148,18 @@ nav {
         color: @accent-color;
         font-size: small;
         font-weight: bold;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 8px;
     }
 
     .lower-box {
+        background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
         margin-bottom: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
         border-radius: 0 0 4px 4px;
+        padding: 8px;
     }
 }
 
