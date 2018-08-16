@@ -42,7 +42,7 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 # Radio messages
-radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk"]
+radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk", "https://youtu.be/YcR7du_A1Vc"]
 
 song_special_messages = {
     "despacito": ":arrow_forward: this is so sad. alexa play {song}",
