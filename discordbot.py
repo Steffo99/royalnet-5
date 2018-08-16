@@ -356,9 +356,6 @@ class RoyalDiscordBot(discord.Client):
             if msg == "get cv":
                 discord_members = list(self.main_guild.members)
                 connection.send(discord_members)
-            elif msg == "stop":
-                await self.logout()
-                exit(0)
             elif msg.startswith("!"):
                 data = msg.split(" ")
                 if data[0] not in self.commands:
@@ -740,7 +737,12 @@ def process(users_connection=None):
     logging.info("Logging in...")
     loop.run_until_complete(bot.login(config["Discord"]["bot_token"], bot=True))
     logging.info("Connecting...")
-    loop.run_until_complete(bot.connect())
+    try:
+        loop.run_until_complete(bot.connect())
+    except KeyboardInterrupt:
+        logging.info("Now stopping...")
+        loop.run_until_complete(self.logout())
+        exit(0)
 
 
 if __name__ == "__main__":

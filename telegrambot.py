@@ -635,6 +635,9 @@ def process(arg_discord_connection):
             logging.warning("Timed out, restarting in 1 minute.")
             time.sleep(60)
             logging.info("Now restarting...")
+        except KeyboardInterrupt:
+            logging.info("Now stopping...")
+            break
 
 
 if __name__ == "__main__":
