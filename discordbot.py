@@ -24,7 +24,8 @@ import datetime
 import sqlalchemy.exc
 
 logging.getLogger().setLevel(level=logging.ERROR)
-logging.getLogger(__name__).setLevel(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG)
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -109,7 +110,7 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 # Init the Sentry client
 sentry = raven.Client(config["Sentry"]["token"],
                       release=version,
-                      install_logging_hook=False,
+                      install_logger_hook=False,
                       hook_libraries=[])
 
 
@@ -332,7 +333,7 @@ class RoyalDiscordBot(discord.Client):
 
     async def on_error(self, event_method, *args, **kwargs):
         ei = sys.exc_info()
-        logging.error(f"Critical error: {repr(ei[1])}")
+        logger.error(f"Critical error: {repr(ei[1])}")
         try:
             await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`\n"
                                          f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
@@ -344,7 +345,7 @@ class RoyalDiscordBot(discord.Client):
             await self.change_presence(status=discord.Status.invisible)
             await self.close()
         except Exception as e:
-            logging.error("Double critical error: {repr(sys.exc_info())}")
+            logger.error("Double critical error: {repr(sys.exc_info())}")
         loop.stop()
         sentry.captureException(exc_info=ei)
         exit(1)
@@ -727,21 +728,20 @@ class RoyalDiscordBot(discord.Client):
         pass
 
 
-
 def process(users_connection=None):
-    logging.info("Initializing the bot...")
+    logger.info("Initializing the bot...")
     bot = RoyalDiscordBot()
     if users_connection is not None:
-        logging.info("Initializing Telegram-Discord connection...")
+        logger.info("Initializing Telegram-Discord connection...")
         asyncio.ensure_future(bot.feed_pipe(users_connection))
-    logging.info("Logging in...")
+    logger.info("Logging in...")
     loop.run_until_complete(bot.login(config["Discord"]["bot_token"], bot=True))
-    logging.info("Connecting...")
+    logger.info("Connecting...")
     try:
         loop.run_until_complete(bot.connect())
     except KeyboardInterrupt:
-        logging.info("Now stopping...")
-        loop.run_until_complete(self.logout())
+        logger.info("Now stopping...")
+        loop.run_until_complete(bot.logout())
         exit(0)
 
 

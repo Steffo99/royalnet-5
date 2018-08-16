@@ -25,7 +25,8 @@ except Exception:
     model = None
 
 logging.getLogger().setLevel(level=logging.ERROR)
-logging.getLogger(__name__).setLevel(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG)
 
 # Init the config reader
 config = configparser.ConfigParser()
@@ -621,7 +622,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
-    logging.info("Handlers registered.")
+    logger.info("Handlers registered.")
     u.bot.send_message(config["Telegram"]["main_group"],
                        f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
                        f"Ultimo aggiornamento: `{version}: {commit_msg}`",
@@ -629,14 +630,14 @@ def process(arg_discord_connection):
     while True:
         try:
             u.start_polling()
-            logging.info("Polling started.")
+            logger.info("Polling started.")
             u.idle()
         except telegram.error.TimedOut:
-            logging.warning("Timed out, restarting in 1 minute.")
+            logger.warning("Timed out, restarting in 1 minute.")
             time.sleep(60)
-            logging.info("Now restarting...")
+            logger.info("Now restarting...")
         except KeyboardInterrupt:
-            logging.info("Now stopping...")
+            logger.info("Now stopping...")
             break
 
 
