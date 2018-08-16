@@ -727,6 +727,7 @@ class RoyalDiscordBot(discord.Client):
     @command
     @requires_connected_voice_client
     async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        pass
 
 
 
