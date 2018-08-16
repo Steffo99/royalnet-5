@@ -1,7 +1,10 @@
 import random
 import re
+# noinspection PyPackageRequirements
 import discord
+# noinspection PyPackageRequirements
 import discord.opus
+# noinspection PyPackageRequirements
 import discord.voice_client
 import functools
 import sys
@@ -20,7 +23,8 @@ import errors
 import datetime
 import sqlalchemy.exc
 
-logging.getLogger().setLevel(level=20)
+logging.getLogger().setLevel(level=logging.ERROR)
+logging.getLogger(__name__).setLevel(level=logging.DEBUG)
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -51,7 +55,7 @@ song_special_messages = {
     "sugma": ":arrow_forward: What is sugma? {song}!",
     "sugondese": ":arrow_forward: What is sugondese? {song}!",
     "bofa": ":arrow_forward: What is bofa? {song}!",
-    "updog": ":arrow_forward: What is updog? {song}!",
+    "updog": ":arrow_forward: What's up, dog? {song}!",
     "sayo-nara": ":arrow_forward: I gently open the door. {song} awaits me inside.",
     "monika": ":arrow_forward: Just Monika. Just Monika. Just {song}.",
     "take me home": ":arrow_forward: Take me home, to {song}, the place I belong!",
@@ -169,7 +173,8 @@ class Video:
                                    "format": "best",
                                    "postprocessors": [{
                                        "key": 'FFmpegExtractAudio',
-                                       "preferredcodec": 'opus'
+                                       "preferredcodec": 'opus',
+                                       "postprocessor_args": '--quiet'
                                    }],
                                    "outtmpl": f"./opusfiles/{self.file}",
                                    "progress_hooks": progress_hooks,
@@ -327,7 +332,7 @@ class RoyalDiscordBot(discord.Client):
 
     async def on_error(self, event_method, *args, **kwargs):
         ei = sys.exc_info()
-        print("ERRORE CRITICO:\n" + repr(ei[1]) + "\n\n" + repr(ei))
+        logging.error(f"Critical error: {repr(ei[1])}")
         try:
             await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`\n"
                                          f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
@@ -339,7 +344,7 @@ class RoyalDiscordBot(discord.Client):
             await self.change_presence(status=discord.Status.invisible)
             await self.close()
         except Exception as e:
-            print("ERRORE CRITICO PIU' CRITICO:\n" + repr(e) + "\n\n" + repr(sys.exc_info()))
+            logging.error("Double critical error: {repr(sys.exc_info())}")
         loop.stop()
         sentry.captureException(exc_info=ei)
         exit(1)
@@ -718,6 +723,11 @@ class RoyalDiscordBot(discord.Client):
                                    "Sintassi: `!radiomessages [on|off]`")
                 return
         await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages else 'disattivati'}**.")
+
+    @command
+    @requires_connected_voice_client
+    async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+
 
 
 def process(users_connection=None):

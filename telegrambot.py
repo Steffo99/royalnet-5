@@ -24,7 +24,8 @@ try:
 except Exception:
     model = None
 
-logging.getLogger().setLevel(level=20)
+logging.getLogger().setLevel(level=logging.ERROR)
+logging.getLogger(__name__).setLevel(level=logging.DEBUG)
 
 # Init the config reader
 config = configparser.ConfigParser()
