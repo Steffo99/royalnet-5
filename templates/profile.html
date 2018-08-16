@@ -56,11 +56,11 @@
                 {% include "minis/dota.html" %}
             {% endwith %}
         {% endif %}
-        {% if rl %}
+        {# if rl %}
             {% with record = rl %}
                 {% include "minis/rl.html" %}
             {% endwith %}
-        {% endif %}
+        {% endif #}
         {% if osu %}
             {% with record = osu %}
                 {% include "minis/osu.html" %}

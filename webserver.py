@@ -77,7 +77,7 @@ def page_profile(name: str):
     css = db_session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     steam = db_session.query(db.Steam).filter_by(royal=user).one_or_none()
     osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
-    rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
+    # rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
     dota = db_session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
@@ -86,7 +86,7 @@ def page_profile(name: str):
     db_session.close()
     converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
                            extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
-    return render_template("profile.html", ryg=user, css=css, osu=osu, rl=rl, dota=dota, lol=lol, steam=steam, ow=ow,
+    return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
                            tg=tg, discord=discord, config=config, bio=converted_bio)
 
 

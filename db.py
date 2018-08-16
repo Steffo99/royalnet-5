@@ -198,74 +198,74 @@ class RocketLeague(Base):
     def __repr__(self):
         return f"<RocketLeague {self.steam_id}>"
 
-    @staticmethod
-    def create(session: Session, steam_id: str):
-        rl = session.query(RocketLeague).get(steam_id)
-        if rl is not None:
-            raise AlreadyExistingError(repr(rl))
-        r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={str(steam_id)}&platform_id=1")
-        if r.status_code == 404:
-            raise NotFoundError("The specified user has never played Rocket League")
-        elif r.status_code != 200:
-            raise RequestError("Rocket League Stats returned {r.status_code}")
-        new_record = RocketLeague(steam_id=steam_id)
-        new_record.update(data=r.json())
-        return new_record
+    # @staticmethod
+    # def create(session: Session, steam_id: str):
+    #     rl = session.query(RocketLeague).get(steam_id)
+    #     if rl is not None:
+    #         raise AlreadyExistingError(repr(rl))
+    #     r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={str(steam_id)}&platform_id=1")
+    #     if r.status_code == 404:
+    #         raise NotFoundError("The specified user has never played Rocket League")
+    #     elif r.status_code != 200:
+    #         raise RequestError("Rocket League Stats returned {r.status_code}")
+    #     new_record = RocketLeague(steam_id=steam_id)
+    #     new_record.update(data=r.json())
+    #     return new_record
 
-    def update(self, data=None):
-        if data is None:
-            r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={self.steam_id}&platform_id=1")
-            if r.status_code != 200:
-                raise RequestError(f"Rocket League Stats returned {r.status_code}")
-            data = r.json()
-        # Get current season
-        current_season = 0
-        for season in data["rankedSeasons"]:
-            if int(season) > current_season:
-                current_season = int(season)
-        if current_season == 0:
-            return
-        self.season = current_season
-        current_season = str(current_season)
-        # Get wins
-        self.wins = data["stats"]["wins"]
-        # Get ranked data
-        # Single 1v1
-        if "10" in data["rankedSeasons"][current_season]:
-            self.single_mmr = data["rankedSeasons"][current_season]["10"]["rankPoints"]
-            if data["rankedSeasons"][current_season]["10"]["matchesPlayed"] >= 10:
-                self.single_rank = data["rankedSeasons"][current_season]["10"]["tier"]
-                self.single_div = data["rankedSeasons"][current_season]["10"]["division"]
-            else:
-                self.single_rank = None
-                self.single_div = None
-        # Doubles 2v2
-        if "11" in data["rankedSeasons"][current_season]:
-            self.doubles_mmr = data["rankedSeasons"][current_season]["11"]["rankPoints"]
-            if data["rankedSeasons"][current_season]["11"]["matchesPlayed"] >= 10:
-                self.doubles_rank = data["rankedSeasons"][current_season]["11"]["tier"]
-                self.doubles_div = data["rankedSeasons"][current_season]["11"]["division"]
-            else:
-                self.doubles_rank = None
-                self.doubles_div = None
-        # Standard 3v3
-        if "13" in data["rankedSeasons"][current_season]:
-            self.standard_mmr = data["rankedSeasons"][current_season]["13"]["rankPoints"]
-            if data["rankedSeasons"][current_season]["13"]["matchesPlayed"] >= 10:
-                self.standard_rank = data["rankedSeasons"][current_season]["13"]["tier"]
-                self.standard_div = data["rankedSeasons"][current_season]["13"]["division"]
-            else:
-                self.standard_rank = None
-                self.standard_div = None
-        # Solo Standard 3v3
-        if "12" in data["rankedSeasons"][current_season]:
-            self.solo_std_mmr = data["rankedSeasons"][current_season]["12"]["rankPoints"]
-            if data["rankedSeasons"][current_season]["12"]["matchesPlayed"] >= 10:
-                self.solo_std_rank = data["rankedSeasons"][current_season]["12"]["tier"]
-                self.solo_std_div = data["rankedSeasons"][current_season]["12"]["division"]
-            else:
-                self.solo_std_rank = None
-                self.solo_std_div = None
+    # def update(self, data=None):
+    #     if data is None:
+    #         r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={self.steam_id}&platform_id=1")
+    #         if r.status_code != 200:
+    #             raise RequestError(f"Rocket League Stats returned {r.status_code}")
+    #         data = r.json()
+    #     # Get current season
+    #     current_season = 0
+    #     for season in data["rankedSeasons"]:
+    #         if int(season) > current_season:
+    #             current_season = int(season)
+    #     if current_season == 0:
+    #         return
+    #     self.season = current_season
+    #     current_season = str(current_season)
+    #     # Get wins
+    #     self.wins = data["stats"]["wins"]
+    #     # Get ranked data
+    #     # Single 1v1
+    #     if "10" in data["rankedSeasons"][current_season]:
+    #         self.single_mmr = data["rankedSeasons"][current_season]["10"]["rankPoints"]
+    #         if data["rankedSeasons"][current_season]["10"]["matchesPlayed"] >= 10:
+    #             self.single_rank = data["rankedSeasons"][current_season]["10"]["tier"]
+    #             self.single_div = data["rankedSeasons"][current_season]["10"]["division"]
+    #         else:
+    #             self.single_rank = None
+    #             self.single_div = None
+    #     # Doubles 2v2
+    #     if "11" in data["rankedSeasons"][current_season]:
+    #         self.doubles_mmr = data["rankedSeasons"][current_season]["11"]["rankPoints"]
+    #         if data["rankedSeasons"][current_season]["11"]["matchesPlayed"] >= 10:
+    #             self.doubles_rank = data["rankedSeasons"][current_season]["11"]["tier"]
+    #             self.doubles_div = data["rankedSeasons"][current_season]["11"]["division"]
+    #         else:
+    #             self.doubles_rank = None
+    #             self.doubles_div = None
+    #     # Standard 3v3
+    #     if "13" in data["rankedSeasons"][current_season]:
+    #         self.standard_mmr = data["rankedSeasons"][current_season]["13"]["rankPoints"]
+    #         if data["rankedSeasons"][current_season]["13"]["matchesPlayed"] >= 10:
+    #             self.standard_rank = data["rankedSeasons"][current_season]["13"]["tier"]
+    #             self.standard_div = data["rankedSeasons"][current_season]["13"]["division"]
+    #         else:
+    #             self.standard_rank = None
+    #             self.standard_div = None
+    #     # Solo Standard 3v3
+    #     if "12" in data["rankedSeasons"][current_season]:
+    #         self.solo_std_mmr = data["rankedSeasons"][current_season]["12"]["rankPoints"]
+    #         if data["rankedSeasons"][current_season]["12"]["matchesPlayed"] >= 10:
+    #             self.solo_std_rank = data["rankedSeasons"][current_season]["12"]["tier"]
+    #             self.solo_std_div = data["rankedSeasons"][current_season]["12"]["division"]
+    #         else:
+    #             self.solo_std_rank = None
+    #             self.solo_std_div = None
 
     def solo_rank_image(self):
         if self.single_rank is None:
