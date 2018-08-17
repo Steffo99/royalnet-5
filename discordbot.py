@@ -288,7 +288,9 @@ class RoyalDiscordBot(discord.Client):
             "!fp": self.cmd_forceplay,
             "!radiomessages": self.cmd_radiomessages,
             "!yes": self.null,
-            "!no": self.null
+            "!no": self.null,
+            "!pause": self.cmd_pause,
+            "!resume": self.cmd_resume
         }
         self.video_queue: typing.List[Video] = []
         self.now_playing = None
@@ -727,7 +729,19 @@ class RoyalDiscordBot(discord.Client):
     @command
     @requires_connected_voice_client
     async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        pass
+        for voice_client in self.voice_clients:
+            if voice_client.is_playing():
+                voice_client.pause()
+                await channel.send(f"⏸ Riproduzione messa in pausa.\n"
+                                   f"Riprendi con `!resume`.")
+
+    @command
+    @requires_connected_voice_client
+    async def cmd_resume(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        for voice_client in self.voice_clients:
+            if voice_client.is_playing():
+                voice_client.resume()
+                await channel.send(f"⏯ Riproduzione ripresa.")
 
 
 def process(users_connection=None):
