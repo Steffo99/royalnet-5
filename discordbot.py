@@ -176,8 +176,7 @@ class Video:
                                    "format": "best",
                                    "postprocessors": [{
                                        "key": 'FFmpegExtractAudio',
-                                       "preferredcodec": 'opus',
-                                       "postprocessor_args": '--quiet'
+                                       "preferredcodec": 'opus'
                                    }],
                                    "outtmpl": f"./opusfiles/{self.file}",
                                    "progress_hooks": progress_hooks,
