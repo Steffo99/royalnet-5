@@ -103,19 +103,22 @@ try:
             finally:
                 sleep_time = 1 - time.clock() + t
                 time.sleep(sleep_time if sleep_time > 0 else 0)
-        print("Committing...\t\t")
+        print("Committing...", end="\t\t")
         session.commit()
         print("OK")
-        print("Closing...\n\n")
+        print("Closing...", end="\n\n")
         session.close()
         print("OK")
-        print("Waiting 1800s...\t\t")
+        print("Waiting 1800s...", end="\t\t")
         for i in range(0, 20):
             time.sleep(90)
-            print("█")
+            print("█", end="")
 except KeyboardInterrupt:
     pass
 finally:
+    print("Committing...", end="\t\t")
+    session.commit()
+    print("OK")
     print("Closing...")
     try:
         session.close()

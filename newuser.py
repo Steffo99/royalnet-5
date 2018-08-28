@@ -19,12 +19,6 @@ else:
         print(e)
     else:
         session.add(dota)
-    try:
-        rl = db.RocketLeague.create(session, steam.steam_id)
-    except Exception as e:
-        print(e)
-    else:
-        session.add(rl)
 try:
     osu = db.Osu.create(session, user.id, input("Osu! username: "))
 except Exception as e:

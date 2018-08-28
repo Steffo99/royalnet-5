@@ -45,11 +45,11 @@ class Royal(Base):
 class Telegram(Base):
     __tablename__ = "telegram"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="telegram", lazy="joined")
 
     telegram_id = Column(BigInteger, primary_key=True)
-    first_name = Column(String, nullable=False)
+    first_name = Column(String)
     last_name = Column(String)
     username = Column(String)
 
@@ -91,7 +91,7 @@ class Telegram(Base):
 class Steam(Base):
     __tablename__ = "steam"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="steam", lazy="joined")
 
     steam_id = Column(String, primary_key=True)
@@ -198,74 +198,8 @@ class RocketLeague(Base):
     def __repr__(self):
         return f"<RocketLeague {self.steam_id}>"
 
-    # @staticmethod
-    # def create(session: Session, steam_id: str):
-    #     rl = session.query(RocketLeague).get(steam_id)
-    #     if rl is not None:
-    #         raise AlreadyExistingError(repr(rl))
-    #     r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={str(steam_id)}&platform_id=1")
-    #     if r.status_code == 404:
-    #         raise NotFoundError("The specified user has never played Rocket League")
-    #     elif r.status_code != 200:
-    #         raise RequestError("Rocket League Stats returned {r.status_code}")
-    #     new_record = RocketLeague(steam_id=steam_id)
-    #     new_record.update(data=r.json())
-    #     return new_record
-
-    # def update(self, data=None):
-    #     if data is None:
-    #         r = requests.get(f"https://api.rocketleaguestats.com/v1/player?apikey={config['Rocket League']['rlstats_api_key']}&unique_id={self.steam_id}&platform_id=1")
-    #         if r.status_code != 200:
-    #             raise RequestError(f"Rocket League Stats returned {r.status_code}")
-    #         data = r.json()
-    #     # Get current season
-    #     current_season = 0
-    #     for season in data["rankedSeasons"]:
-    #         if int(season) > current_season:
-    #             current_season = int(season)
-    #     if current_season == 0:
-    #         return
-    #     self.season = current_season
-    #     current_season = str(current_season)
-    #     # Get wins
-    #     self.wins = data["stats"]["wins"]
-    #     # Get ranked data
-    #     # Single 1v1
-    #     if "10" in data["rankedSeasons"][current_season]:
-    #         self.single_mmr = data["rankedSeasons"][current_season]["10"]["rankPoints"]
-    #         if data["rankedSeasons"][current_season]["10"]["matchesPlayed"] >= 10:
-    #             self.single_rank = data["rankedSeasons"][current_season]["10"]["tier"]
-    #             self.single_div = data["rankedSeasons"][current_season]["10"]["division"]
-    #         else:
-    #             self.single_rank = None
-    #             self.single_div = None
-    #     # Doubles 2v2
-    #     if "11" in data["rankedSeasons"][current_season]:
-    #         self.doubles_mmr = data["rankedSeasons"][current_season]["11"]["rankPoints"]
-    #         if data["rankedSeasons"][current_season]["11"]["matchesPlayed"] >= 10:
-    #             self.doubles_rank = data["rankedSeasons"][current_season]["11"]["tier"]
-    #             self.doubles_div = data["rankedSeasons"][current_season]["11"]["division"]
-    #         else:
-    #             self.doubles_rank = None
-    #             self.doubles_div = None
-    #     # Standard 3v3
-    #     if "13" in data["rankedSeasons"][current_season]:
-    #         self.standard_mmr = data["rankedSeasons"][current_season]["13"]["rankPoints"]
-    #         if data["rankedSeasons"][current_season]["13"]["matchesPlayed"] >= 10:
-    #             self.standard_rank = data["rankedSeasons"][current_season]["13"]["tier"]
-    #             self.standard_div = data["rankedSeasons"][current_season]["13"]["division"]
-    #         else:
-    #             self.standard_rank = None
-    #             self.standard_div = None
-    #     # Solo Standard 3v3
-    #     if "12" in data["rankedSeasons"][current_season]:
-    #         self.solo_std_mmr = data["rankedSeasons"][current_season]["12"]["rankPoints"]
-    #         if data["rankedSeasons"][current_season]["12"]["matchesPlayed"] >= 10:
-    #             self.solo_std_rank = data["rankedSeasons"][current_season]["12"]["tier"]
-    #             self.solo_std_div = data["rankedSeasons"][current_season]["12"]["division"]
-    #         else:
-    #             self.solo_std_rank = None
-    #             self.solo_std_div = None
+    def update(self, data=None):
+        raise NotImplementedError("rlstats API is no longer available.")
 
     def solo_rank_image(self):
         if self.single_rank is None:
@@ -304,8 +238,10 @@ class Dota(Base):
 
     rank_tier = Column(Integer)
 
-    wins = Column(Integer, nullable=False)
-    losses = Column(Integer, nullable=False)
+    wins = Column(Integer)
+    losses = Column(Integer)
+
+    most_played_hero = Column(Integer)
 
     def get_rank_icon_url(self):
         # Rank icon is determined by the first digit of the rank tier
@@ -343,7 +279,7 @@ class Dota(Base):
         return str(self.rank_tier)[1]
 
     @staticmethod
-    def create(session: Session, steam_id: int):
+    def create(session: Session, steam_id: int) -> "Dota":
         d = session.query(Dota).get(steam_id)
         if d is not None:
             raise AlreadyExistingError(repr(d))
@@ -353,28 +289,27 @@ class Dota(Base):
         data = r.json()
         if "profile" not in data:
             raise NotFoundError("The specified user has never played Dota or has a private match history")
-        r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(steam_id)}/wl")
-        if r.status_code != 200:
-            raise RequestError("OpenDota returned {r.status_code}")
-        wl = r.json()
-        new_record = Dota(steam_id=str(steam_id),
-                          rank_tier=data["rank_tier"],
-                          wins=wl["win"],
-                          losses=wl["lose"])
+        new_record = Dota(steam_id=str(steam_id))
+        new_record.update()
         return new_record
 
-    def update(self):
+    def update(self) -> None:
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}")
         if r.status_code != 200:
-            raise RequestError("OpenDota returned {r.status_code}")
+            raise RequestError("OpenDota / returned {r.status_code}")
         data = r.json()
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}/wl")
         if r.status_code != 200:
-            raise RequestError("OpenDota returned {r.status_code}")
+            raise RequestError("OpenDota /wl returned {r.status_code}")
         wl = r.json()
+        r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}/heroes")
+        if r.status_code != 200:
+            raise RequestError("OpenDota /heroes returned {r.status_code}")
+        heroes = r.json()
         self.rank_tier = data["rank_tier"]
         self.wins = wl["win"]
         self.losses = wl["lose"]
+        self.most_played_hero = heroes[0]
 
 
 class LeagueOfLegendsRanks(enum.Enum):
@@ -398,19 +333,21 @@ class RomanNumerals(enum.Enum):
 class LeagueOfLegends(Base):
     __tablename__ = "leagueoflegends"
 
-    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="lol", lazy="joined")
 
     summoner_id = Column(BigInteger, primary_key=True)
-    summoner_name = Column(String, nullable=False)
+    summoner_name = Column(String)
 
-    level = Column(Integer, nullable=False)
+    level = Column(Integer)
     solo_division = Column(Enum(LeagueOfLegendsRanks))
     solo_rank = Column(Enum(RomanNumerals))
     flex_division = Column(Enum(LeagueOfLegendsRanks))
     flex_rank = Column(Enum(RomanNumerals))
     twtr_division = Column(Enum(LeagueOfLegendsRanks))
     twtr_rank = Column(Enum(RomanNumerals))
+
+    highest_mastery_champ = Column(Integer)
 
     @staticmethod
     def create(session: Session, royal_id, summoner_name=None, summoner_id=None):
@@ -419,7 +356,7 @@ class LeagueOfLegends(Base):
         elif summoner_id:
             lol = session.query(LeagueOfLegends).get(summoner_id)
         else:
-            raise SyntaxError("Neither summoner_name or summoner_id are specified")
+            raise SyntaxError("Neither summoner_name or summoner_id were specified.")
         if lol is not None:
             raise AlreadyExistingError(repr(lol))
         # Get the summoner_id
@@ -440,12 +377,16 @@ class LeagueOfLegends(Base):
     def update(self):
         r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
-            return RequestError(f"League of Legends API returned {r.status_code}")
+            return RequestError(f"League of Legends API /summoner returned {r.status_code}")
         data = r.json()
         r = requests.get(f"https://euw1.api.riotgames.com/lol/league/v3/positions/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
-            return RequestError(f"League of Legends API returned {r.status_code}")
+            return RequestError(f"League of Legends API /league returned {r.status_code}")
         rank = r.json()
+        r = requests.get(f"https://euw1.api.riotgames.com/lol/champion-mastery/v3/champion-masteries/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
+        if r.status_code != 200:
+            return RequestError(f"League of Legends API /champion-mastery returned {r.status_code}")
+        mastery = r.json()
         solo_rank = None
         flex_rank = None
         twtr_rank = None
@@ -477,6 +418,7 @@ class LeagueOfLegends(Base):
         else:
             self.twtr_division = None
             self.twtr_rank = None
+        self.highest_mastery_champ = mastery[0]["championId"]
 
 
 class Osu(Base):
@@ -486,7 +428,7 @@ class Osu(Base):
     royal = relationship("Royal", backref="osu", lazy="joined")
 
     osu_id = Column(Integer, primary_key=True)
-    osu_name = Column(String, nullable=False)
+    osu_name = Column(String)
 
     std_pp = Column(Float)
     taiko_pp = Column(Float)
@@ -540,12 +482,12 @@ class Discord(Base):
     __tablename__ = "discord"
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
 
-    royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
+    royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="discord", lazy="joined")
 
     discord_id = Column(BigInteger, primary_key=True)
-    name = Column(String, nullable=False)
-    discriminator = Column(Integer, nullable=False)
+    name = Column(String)
+    discriminator = Column(Integer)
     avatar_hex = Column(String)
 
     def __str__(self):
@@ -556,6 +498,8 @@ class Discord(Base):
 
     @staticmethod
     def create(session: Session, royal_username, discord_user: DiscordUser):
+        # TODO: remove this
+        print("Discord.create is deprecated and should be removed soon.")
         d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
         if d is not None:
             raise AlreadyExistingError(repr(d))
@@ -589,9 +533,9 @@ class Overwatch(Base):
 
     battletag = Column(String, primary_key=True)
     discriminator = Column(Integer, primary_key=True)
-    icon = Column(String, nullable=False)
+    icon = Column(String)
 
-    level = Column(Integer, nullable=False)
+    level = Column(Integer)
     rank = Column(Integer)
 
     def __str__(self, separator="#"):
@@ -607,22 +551,10 @@ class Overwatch(Base):
         o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
         if o is not None:
             raise AlreadyExistingError(repr(o))
-        r = requests.get(f"https://owapi.net/api/v3/u/{battletag}-{discriminator}/stats", headers={
-            "User-Agent": "Royal-Bot/4.0",
-            "From": "ste.pigozzi@gmail.com"
-        })
-        if r.status_code != 200:
-            raise RequestError(f"OWAPI.net returned {r.status_code}")
-        try:
-            j = r.json()["eu"]["stats"]["quickplay"]["overall_stats"]
-        except TypeError:
-            raise RequestError("Something went wrong when retrieving the stats.")
         o = Overwatch(royal_id=royal_id,
                       battletag=battletag,
-                      discriminator=discriminator,
-                      icon=re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1),
-                      level=j["prestige"] * 100 + j["level"],
-                      rank=j["comprank"])
+                      discriminator=discriminator)
+        o.update()
         return o
 
     def icon_url(self):
@@ -630,13 +562,13 @@ class Overwatch(Base):
 
     def update(self):
         r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
-            "User-Agent": "Royal-Bot/4.0",
+            "User-Agent": "Royal-Bot/4.1",
             "From": "ste.pigozzi@gmail.com"
         })
         if r.status_code != 200:
             raise RequestError(f"OWAPI.net returned {r.status_code}")
         try:
-            j = r.json()["eu"]["stats"]["quickplay"]["overall_stats"]
+            j = r.json()["eu"]["stats"]["competitive"]["overall_stats"]
         except TypeError:
             raise RequestError("Something went wrong when retrieving the stats.")
         try:
@@ -812,15 +744,6 @@ class VoteAnswer(Base):
         return f"<VoteAnswer {self.question_id} {self.user} {self.choice}>"
 
 
-class AprilFoolsBan(Base):
-    __tablename__ = "aprilfoolsban"
-
-    id = Column(Integer, primary_key=True)
-    from_user_id = Column(BigInteger, nullable=False)
-    to_user_id = Column(BigInteger, nullable=False)
-    datetime = Column(DateTime, nullable=False)
-
-
 class ProfileData(Base):
     __tablename__ = "profiledata"
 
@@ -869,44 +792,6 @@ class Event(Base):
         if not isinstance(value, datetime.timedelta):
             raise TypeError("time_left should be a datetime.timedelta")
         self.time = datetime.datetime.now() + value
-
-
-class GameProgress(enum.Enum):
-    NOT_STARTED = 0
-    IN_PROGRESS = 1
-    BEATEN = 2
-    COMPLETED = 3
-    MASTERED = 4
-
-
-class GameOrigins(enum.Enum):
-    DIGITAL = 0
-    PHYSICAL = 1
-    SOLD = 2
-    BORROWED = 3
-    RENTED = 4
-    MYSTERIOUS = 5  # yarr
-
-
-class LibraryGame(Base):
-    __tablename__ = "librarygames"
-
-    id = Column(BigInteger, primary_key=True)
-    owner_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
-    owner = relationship("Royal", lazy="joined")
-    name = Column(String)
-    platform = Column(String)
-    steam_game_id = Column(BigInteger)
-    progress = Column(Enum(GameProgress), default=GameProgress.NOT_STARTED)
-    progress_notes = Column(Text)
-    time_played = Column(Float)
-    rating = Column(Integer)
-    review = Column(Text)
-    origin = Column(Enum(GameOrigins))
-    physical = Column(Boolean, default=False)
-    current_achievements = Column(Integer)
-    maximum_achievements = Column(Integer)
-    extra_notes = Column(Text)
 
 
 # If run as script, create all the tables in the db
