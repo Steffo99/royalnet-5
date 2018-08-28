@@ -309,7 +309,7 @@ class Dota(Base):
         self.rank_tier = data["rank_tier"]
         self.wins = wl["win"]
         self.losses = wl["lose"]
-        self.most_played_hero = heroes[0]
+        self.most_played_hero = heroes[0]["hero_id"]
 
 
 class LeagueOfLegendsRanks(enum.Enum):
