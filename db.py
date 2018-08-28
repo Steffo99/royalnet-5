@@ -571,11 +571,13 @@ class Overwatch(Base):
             j = r.json()["eu"]["stats"].get("competitive")
             if j is None:
                 raise RequestError("Something went wrong when retrieving the stats.")
+            if not j["game_stats"]:
+                raise RequestError("Something went wrong when retrieving the stats.")
             j = j["overall_stats"]
         except TypeError:
             raise RequestError("Something went wrong when retrieving the stats.")
         try:
-            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j.get("avatar", "")).group(1)
+            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
         except AttributeError:
             pass
         self.level = j["prestige"] * 100 + j["level"]
