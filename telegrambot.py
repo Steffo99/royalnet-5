@@ -80,68 +80,7 @@ def cmd_discord(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠ Il bot non è collegato a Discord al momento.")
         return
     discord_connection.send("get cv")
-    server_members = discord_connection.recv()
-    channels = {0: None}
-    members_in_channels = {0: []}
-    message = ""
-    # Find all the channels
-    for member in server_members:
-        if member.voice.voice_channel is not None:
-            channel = members_in_channels.get(member.voice.voice_channel.id)
-            if channel is None:
-                members_in_channels[member.voice.voice_channel.id] = list()
-                channel = members_in_channels[member.voice.voice_channel.id]
-                channels[member.voice.voice_channel.id] = member.voice.voice_channel
-            channel.append(member)
-        else:
-            members_in_channels[0].append(member)
-    # Edit the message, sorted by channel
-    for channel in channels:
-        members_in_channels[channel].sort(key=lambda x: x.nick if x.nick is not None else x.name)
-        if channel == 0:
-            message += "Non in chat vocale:\n"
-        else:
-            message += f"In #{channels[channel].name}:\n"
-        for member in members_in_channels[channel]:
-            if member.status == DiscordStatus.offline and member.voice.voice_channel is None:
-                continue
-            # Online status emoji
-            if member.bot:
-                message += "🤖 "
-            elif member.status == DiscordStatus.online:
-                message += "🔵 "
-            elif member.status == DiscordStatus.idle:
-                message += "⚫️ "
-            elif member.status == DiscordStatus.dnd:
-                message += "🔴 "
-            elif member.status == DiscordStatus.offline:
-                message += "⚪️ "
-            # Voice
-            if channel != 0:
-                # Voice status
-                if member.voice.self_deaf:
-                    message += f"🔇 "
-                elif member.voice.self_mute:
-                    message += f"🔈 "
-                else:
-                    message += f"🔊 "
-            # Nickname
-            if member.nick is not None:
-                message += member.nick
-            else:
-                message += member.name
-            # Game or stream
-            if member.game is not None:
-                if member.game.type == 0:
-                    message += f" | 🎮 {member.game.name}"
-                elif member.game.type == 1:
-                    message += f" | 📡 [{member.game.name}]({member.game.url})"
-                elif member.game.type == 2:
-                    message += f" | 🎧 {member.game.name}"
-                elif member.game.type == 3:
-                    message += f" | 📺 {member.game.name}"
-            message += "\n"
-        message += "\n"
+    message = discord_connection.recv()
     bot.send_message(update.message.chat.id, message, disable_web_page_preview=True)
 
 
@@ -428,41 +367,9 @@ def cmd_bridge(bot: Bot, update: Update):
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
     if result == "error":
-        bot.send_message(update.message.chat.id, "⚠ Esecuzione del comando fallita.")
+        bot.send_message(update.message.chat.id, "⚠ Il comando specificato non esiste.")
     if result == "success":
         bot.send_message(update.message.chat.id, "⏩ Comando eseguito su Discord.")
-
-
-def cmd_wheel(bot: Bot, update: Update):
-    """Perchè il gioco d'azzardo è bello e salutare."""
-    session = db.Session()
-    user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
-    if user is None:
-        bot.send_message(update.message.chat.id, "⚠ Non sei connesso a Royalnet!\n"
-                                                 "Per registrarti, utilizza il comando /register.")
-        session.close()
-        return
-    if user.royal.fiorygi < 1:
-        bot.send_message(update.message.chat.id, "⚠ Non hai abbastanza fiorygi per girare la ruota!\n"
-                                                 "Costa 1 fioryg.")
-        session.close()
-        return
-    user.royal.fiorygi -= 1
-    r = random.randrange(20)
-    if r == 9:
-        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su x8!\n"
-                                                 "Hai ottenuto 8 fiorygi!")
-        user.royal.fiorygi += 8
-    elif r == 8 or r == 7:
-        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su x4!\n"
-                                                 "Hai ottenuto 4 fiorygi!")
-        user.royal.fiorygi += 4
-    else:
-        bot.send_message(update.message.chat.id, "☸️  La ruota della fortuna gira, e si ferma su un segno strano.\n"
-                                                 "|  ||\n"
-                                                 "|| |_")
-    session.commit()
-    session.close()
 
 
 def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, datetime.datetime]:
@@ -617,7 +524,6 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
     u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
     u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
-    u.dispatcher.add_handler(CommandHandler("wheel", cmd_wheel))
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))

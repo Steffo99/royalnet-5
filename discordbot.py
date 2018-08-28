@@ -172,6 +172,7 @@ class Video:
         if self.info is not None and self.duration.total_seconds() > int(config["YouTube"]["max_duration"]):
             raise DurationError()
         # Download the file
+        logger.info(f"Now downloading {repr(self)}")
         with youtube_dl.YoutubeDL({"noplaylist": True,
                                    "format": "best",
                                    "postprocessors": [{
@@ -357,9 +358,71 @@ class RoyalDiscordBot(discord.Client):
         await self.wait_until_ready()
         while True:
             msg = await loop.run_in_executor(executor, connection.recv)
+            logger.info(f"Received \"{msg}\" from the Telegram-Discord pipe.")
             if msg == "get cv":
                 discord_members = list(self.main_guild.members)
-                connection.send(discord_members)
+                channels = {0: None}
+                members_in_channels = {0: []}
+                message = ""
+                # Find all the channels
+                for member in discord_members:
+                    if member.voice.channel is not None:
+                        channel = members_in_channels.get(member.voice.channel.id)
+                        if channel is None:
+                            members_in_channels[member.voice.channel.id] = list()
+                            channel = members_in_channels[member.voice.channel.id]
+                            channels[member.voice.channel.id] = member.voice.channel
+                        channel.append(member)
+                    else:
+                        members_in_channels[0].append(member)
+                # Edit the message, sorted by channel
+                for channel in channels:
+                    members_in_channels[channel].sort(key=lambda x: x.nick if x.nick is not None else x.name)
+                    if channel == 0:
+                        message += "Non in chat vocale:\n"
+                    else:
+                        message += f"In #{channels[channel].name}:\n"
+                    for member in members_in_channels[channel]:
+                        if member.status == discord.Status.offline and member.voice.channel is None:
+                            continue
+                        # Online status emoji
+                        if member.bot:
+                            message += "🤖 "
+                        elif member.status == discord.Status.online:
+                            message += "🔵 "
+                        elif member.status == discord.Status.idle:
+                            message += "⚫️ "
+                        elif member.status == discord.Status.dnd:
+                            message += "🔴 "
+                        elif member.status == discord.Status.offline:
+                            message += "⚪️ "
+                        # Voice
+                        if channel != 0:
+                            # Voice status
+                            if member.voice.self_deaf:
+                                message += f"🔇 "
+                            elif member.voice.self_mute:
+                                message += f"🔈 "
+                            else:
+                                message += f"🔊 "
+                        # Nickname
+                        if member.nick is not None:
+                            message += member.nick
+                        else:
+                            message += member.name
+                        # Game or stream
+                        if member.activity is not None:
+                            if member.activity == discord.ActivityType.playing:
+                                message += f" | 🎮 {member.activity.name}"
+                            elif member.activity == discord.ActivityType.streaming:
+                                message += f" | 📡 [{member.activity.name}]({member.activity.url})"
+                            elif member.activity == discord.ActivityType.listening:
+                                message += f" | 🎧 {member.activity.name}"
+                            elif member.activity.type == discord.ActivityType.watching:
+                                message += f" | 📺 {member.activity.name}"
+                        message += "\n"
+                    message += "\n"
+                connection.send(message)
             elif msg.startswith("!"):
                 data = msg.split(" ")
                 if data[0] not in self.commands:
@@ -420,6 +483,7 @@ class RoyalDiscordBot(discord.Client):
                     audio_source = now_playing.create_audio_source()
                 except FileNotDownloadedError:
                     continue
+                logger.info(f"Started playing {repr(now_playing)}")
                 voice_client.play(audio_source)
                 del self.video_queue[0]
                 activity = discord.Activity(name=now_playing.plain_text(),
