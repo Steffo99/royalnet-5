@@ -575,7 +575,7 @@ class Overwatch(Base):
         except TypeError:
             raise RequestError("Something went wrong when retrieving the stats.")
         try:
-            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
+            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j.get("avatar", "")).group(1)
         except AttributeError:
             pass
         self.level = j["prestige"] * 100 + j["level"]
