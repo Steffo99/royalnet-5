@@ -568,7 +568,10 @@ class Overwatch(Base):
         if r.status_code != 200:
             raise RequestError(f"OWAPI.net returned {r.status_code}")
         try:
-            j = r.json()["eu"]["stats"]["competitive"]["overall_stats"]
+            j = r.json()["eu"]["stats"].get("competitive")
+            if j is None:
+                raise RequestError("Something went wrong when retrieving the stats.")
+            j = j["overall_stats"]
         except TypeError:
             raise RequestError("Something went wrong when retrieving the stats.")
         try:
