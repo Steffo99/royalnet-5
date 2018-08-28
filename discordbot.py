@@ -383,7 +383,7 @@ class RoyalDiscordBot(discord.Client):
                     else:
                         message += f"In #{channels[channel].name}:\n"
                     for member in members_in_channels[channel]:
-                        if member.status == discord.Status.offline and member.voice.channel is None:
+                        if member.status == discord.Status.offline and member.voice is None:
                             continue
                         # Online status emoji
                         if member.bot:
