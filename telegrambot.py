@@ -510,7 +510,7 @@ def process(arg_discord_connection):
     u = Updater(config["Telegram"]["bot_token"])
     u.dispatcher.add_handler(CommandHandler("register", cmd_register))
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
-    # u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
+    u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
     u.dispatcher.add_handler(CommandHandler("color", cmd_color))
     u.dispatcher.add_handler(CommandHandler("smecds", cmd_smecds))

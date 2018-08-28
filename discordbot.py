@@ -366,7 +366,7 @@ class RoyalDiscordBot(discord.Client):
                 message = ""
                 # Find all the channels
                 for member in discord_members:
-                    if member.voice.channel is not None:
+                    if member.voice is not None:
                         channel = members_in_channels.get(member.voice.channel.id)
                         if channel is None:
                             members_in_channels[member.voice.channel.id] = list()
