@@ -267,7 +267,7 @@ def page_wiki(key: str):
                                       f' modificata da'
                                       f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>'
                                       f' {"(" + edit_reason + ")" if edit_reason else ""}'
-                                      f' [{"+" if difference > 0}{difference}]\n'
+                                      f' [{"+" if difference > 0 else ""}{difference}]\n'
                                       f' {"<b>" + user.username + " è stato premiato con 1 fioryg!</b>" if fioryg_roll > fioryg_chance else ""}',
                                       parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
