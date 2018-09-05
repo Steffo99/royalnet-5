@@ -799,6 +799,13 @@ class Event(Base):
         self.time = datetime.datetime.now() + value
 
 
+class ParsedRedditPost(Base):
+    __tablename__ = "parsedredditposts"
+
+    id = Column(String, primary_key=True)
+
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

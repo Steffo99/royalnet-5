@@ -1,4 +1,4 @@
-discord.py==1.0.0a1504+gf06563c
+discord.py[rewrite]
 python-telegram-bot
 flask
 sqlalchemy
@@ -12,3 +12,4 @@ bcrypt
 markdown2
 pygments
 markovify
+praw

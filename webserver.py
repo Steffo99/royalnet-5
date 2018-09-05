@@ -7,6 +7,8 @@ import markdown2
 import datetime
 import telegram
 import query_discord_music
+import random
+import difflib
 
 app = Flask(__name__)
 
@@ -139,6 +141,7 @@ def page_password():
         user = db_session.query(db.Royal).filter_by(id=user_id).one()
         if user.password is None:
             user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
+            user.fiorygi += 1
             db_session.commit()
             db_session.close()
             return redirect(url_for("page_main"))
@@ -234,12 +237,26 @@ def page_wiki(key: str):
         if user_id is None:
             db_session.close()
             return redirect(url_for("page_login"))
+        new_content = request.form.get("content")
+        # Create new page
         if wiki_page is None:
-            wiki_page = db.WikiEntry(key=key, content=request.form.get("content"))
+            difference = len(new_content)
+            wiki_page = db.WikiEntry(key=key, content=new_content)
             db_session.add(wiki_page)
             db_session.flush()
+        # Edit existing page
         else:
-            wiki_page.content = request.form.get("content")
+            difference = len(new_content) - len(wiki_page.content)
+            wiki_page.content = new_content
+        # Award fiorygi
+        if difference > 50:
+            fioryg_chance = -(5000/difference) + 100
+            fioryg_roll = random.randrange(0, 100)
+            if fioryg_roll > fioryg_chance:
+                user.fiorygi += 1
+        else:
+            fioryg_chance = -1
+            fioryg_roll = -2
         edit_reason = request.form.get("reason")
         new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
         db_session.add(new_log)
@@ -248,8 +265,10 @@ def page_wiki(key: str):
             telegram_bot.send_message(config["Telegram"]["main_group"],
                                       f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata'
                                       f' modificata da'
-                                      f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>:'
-                                      f' {"<i>Nessun motivo specificato.</i>" if not edit_reason else edit_reason}\n',
+                                      f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>'
+                                      f' {"(" + edit_reason + ")" if edit_reason else ""}'
+                                      f' [{"+" if difference > 0}{difference}]\n'
+                                      f' {"<b>" + user.username + " è stato premiato con 1 fioryg!</b>" if fioryg_roll > fioryg_chance else ""}',
                                       parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
             pass

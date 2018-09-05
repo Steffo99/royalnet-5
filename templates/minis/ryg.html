@@ -1,7 +1,7 @@
 <div class="game-panel">
     <div class="game-grid ryg">
         <div class="player">
-            <span class="player-name">{{ record.username }}</span>
+            <span class="player-name"><a href="https://ryg.steffo.eu/profile/{{ record.username }}">{{ record.username }}</a></span>
         </div>
         <div class="member-status">
             <span class="role">{{ record.role }}</span> dal <span class="member-since">{% if record.member_since %}{{ record.member_since }}{% else %}????-??-??{% endif %}</span>

@@ -89,8 +89,8 @@ song_special_messages = {
 
 # noinspection PyUnreachableCode
 if __debug__:
-    version = "discord-py-rewrite"
-    commit_msg = "_Aggiornamento di Discordbot all'APIv6_"
+    version = "Dev"
+    commit_msg = "_in sviluppo_"
 else:
     # Find the latest git tag
     old_wd = os.getcwd()
@@ -331,6 +331,10 @@ class RoyalDiscordBot(discord.Client):
         if data[0] not in self.commands:
             await message.channel.send(":warning: Comando non riconosciuto.")
             return
+        sentry.extra_context({
+            "command": data[0],
+            "message": message
+        })
         await self.commands[data[0]](channel=message.channel,
                                      author=message.author,
                                      params=data)
@@ -430,7 +434,7 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 await self.main_channel.send(f"{msg}\n"
                                              f"_(da Telegram)_")
-                await self.commands[data[0]](channel=self.get_channel(config["Discord"]["main_channel"]),
+                await self.commands[data[0]](channel=self.main_channel,
                                              author=None,
                                              params=data)
                 connection.send("success")

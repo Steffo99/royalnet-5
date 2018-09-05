@@ -10,6 +10,12 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
     dmg_dice = random.randrange(1, 11)
     dmg_max = random.sample([4, 6, 8, 10, 12, 20, 100], 1)[0]
     dmg_mod = random.randrange(math.floor(-dmg_max / 5), math.ceil(dmg_max / 5) + 1)
+    dmg_type = random.sample(["da fuoco", "da freddo", "elettrici", "sonici", "necrotici", "magici",
+                              "da acido", "divini", "nucleari", "psichici", "fisici", "puri", "da taglio",
+                              "da perforazione", "da impatto", "da caduta", "gelato", "onnipotenti", "oscuri",
+                              "di luce", "da velocità", "da cactus", "meta", "dannosi", "da radiazione",
+                              "tuamammici", "da maledizione", "pesanti", "leggeri", "immaginari", "da laser",
+                              "da neutrini", "galattici", "cerebrali", "ritardati", "ritardanti"], 1)[0]
     # Reseed the rng with a random value
     # so that the dice roll always deals a different damage
     random.seed()
@@ -39,7 +45,7 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
                f"<i>{target_name}</i> subisce {dmg_dice}d{dmg_max}" \
                f"{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}" \
                f"{'×' + str(crit) if crit > 1 else ''}" \
-               f"=<b>{total if total > 0 else 0}</b> danni!"
+               f"=<b>{total if total > 0 else 0}</b> danni {dmg_type}!"
     elif platform == "discord":
         return f"❇️ Ho lanciato **{spell}** su " \
                f"_{target_name}_.\n" \
@@ -47,4 +53,4 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
                f"_{target_name}_ subisce {dmg_dice}d{dmg_max}" \
                f"{'+' if dmg_mod > 0 else ''}{str(dmg_mod) if dmg_mod != 0 else ''}" \
                f"{'×' + str(crit) if crit > 1 else ''}" \
-               f"=**{total if total > 0 else 0}** danni!"
+               f"=**{total if total > 0 else 0}** danni {dmg_type}!"
