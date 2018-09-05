@@ -19,6 +19,8 @@ if __name__ == "__main__":
     discord.start()
     logging.info("Starting Telegram process...")
     telegram.start()
+    logging.info("Starting Reddit process...")
+    reddit.start()
     try:
         while True:
             if discord.exitcode is not None:
