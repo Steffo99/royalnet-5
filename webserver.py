@@ -9,6 +9,7 @@ import telegram
 import query_discord_music
 import random
 import difflib
+import re
 
 app = Flask(__name__)
 
@@ -227,9 +228,15 @@ def page_wiki(key: str):
         db_session.close()
         if wiki_page is None:
             return render_template("wiki.html", key=key, config=config)
-        converted_md = Markup(markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
-                                                 extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
-        return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=converted_md,
+        # Embed YouTube videos
+        converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
+                                          extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
+        converted_md = re.sub(r"{https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?.*?&?v=|youtu.be\/)([0-9A-Za-z-]+).*?}",
+               r'<div class="youtube-embed">'
+               r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0" frameborder="0"'
+               r' allow="autoplay; encrypted-media" allowfullscreen width="640px" height="320px"></iframe>'
+               r'</div>', converted_md)
+        return render_template("wiki.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
                                wiki_log=wiki_latest_edit, config=config)
     elif request.method == "POST":
         user_id = fl_session.get('user_id')
