@@ -175,6 +175,13 @@ def page_editprofile():
         if profile_data is None:
             profile_data = db.ProfileData(royal_id=user_id, css=css, bio=bio)
             db_session.add(profile_data)
+            profile_data.royal.fiorygi += 1
+            try:
+                telegram_bot.send_message(config["Telegram"]["main_group"],
+                                          f'⭐️ {profile_data.royal.username} ha configurato la sua bio su Royalnet e ha ottenuto un fioryg!',
+                                          parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+            except Exception:
+                pass
         else:
             profile_data.css = css
             profile_data.bio = bio
