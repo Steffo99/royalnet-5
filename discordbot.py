@@ -294,7 +294,7 @@ class RoyalDiscordBot(discord.Client):
         }
         self.video_queue: typing.List[Video] = []
         self.now_playing = None
-        self.radio_messages = False
+        self.radio_messages = True
         self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
