@@ -228,6 +228,14 @@ def page_game(name: str):
     return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, config=config)
 
 
+@app.route("/wiki")
+def page_wikihome():
+    db_session = db.Session()
+    wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
+    db_session.close()
+    return render_template("wikihome.html", wiki_pages=wiki_pages, config=config)
+
+
 @app.route("/wiki/<key>", methods=["GET", "POST"])
 def page_wiki(key: str):
     db_session = db.Session()

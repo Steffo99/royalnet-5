@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    Elenco delle Wiki
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Royal Wiki
+    </h1>
+    <div class="wiki-home">
+        <div class="box">
+            <div class="upper-box">
+                Pagine Wiki
+            </div>
+            <div class="lower-box">
+                <ul>
+                    {% for page in wiki_pages %}
+                        <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
