@@ -75,9 +75,9 @@ def process():
                 while True:
                     try:
                         telegram_bot.send_message(config["Telegram"]["main_group"],
-                                                  f'Nuovo post su r/RoyalGames:\n'
+                                                  f'ℹ️ Nuovo post su r/RoyalGames:\n'
                                                   f'<a href="https://reddit.com{submission.permalink}">{submission.title}</a>\n'
-                                                  f'da u/{submission.author}',
+                                                  f'da <b>u/{submission.author}</b>',
                                                   parse_mode="HTML", disable_notification=True)
                     except telegram.error.TimedOut:
                         time.sleep(1)
