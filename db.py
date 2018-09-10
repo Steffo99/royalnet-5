@@ -799,11 +799,36 @@ class Event(Base):
         self.time = datetime.datetime.now() + value
 
 
+class Reddit(Base):
+    __tablename__ = "reddit"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal", backref="reddit", lazy="joined")
+
+    username = Column(String)
+    karma = Column(BigInteger)
+
+
+class GameLog(Base):
+    __tablename__ = "gamelog"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal", backref="gamelog", lazy="joined")
+
+    username = Column(String)
+    owned_games = Column(Integer)
+    unfinished_games = Column(Integer)
+    beaten_games = Column(Integer)
+    completed_games = Column(Integer)
+    mastered_games = Column(Integer)
+
+
 class ParsedRedditPost(Base):
     __tablename__ = "parsedredditposts"
 
     id = Column(String, primary_key=True)
 
+    author_username = Column(String)
 
 
 # If run as script, create all the tables in the db
