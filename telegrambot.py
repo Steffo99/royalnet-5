@@ -7,7 +7,7 @@ import stagismo
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram.error
-from discord import Status as DiscordStatus
+import dice
 import subprocess
 import os
 import time
@@ -503,11 +503,23 @@ def cmd_markov(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, sentence)
 
 
+def cmd_roll(bot: Bot, update: Update):
+    dice_string = update.message.text.split(" ", 1)[1]
+    try:
+        result = dice.utilities.verbose_print(dice_string)
+    except dice.DiceBaseException:
+        bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
+        return
+    bot.send_message(update.message.chat.id, f"🎲 Tiro {int(dice_string)}: **{result}**", parse_mode="Markdown")
+
+
 def process(arg_discord_connection):
     if arg_discord_connection is not None:
         global discord_connection
         discord_connection = arg_discord_connection
+    logger.info("Creating updater...")
     u = Updater(config["Telegram"]["bot_token"])
+    logger.info("Registering handlers...")
     u.dispatcher.add_handler(CommandHandler("register", cmd_register))
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
@@ -527,6 +539,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
+    u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
+    u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.bot.send_message(config["Telegram"]["main_group"],

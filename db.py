@@ -805,7 +805,7 @@ class Reddit(Base):
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="reddit", lazy="joined")
 
-    username = Column(String)
+    username = Column(String, primary_key=True)
     karma = Column(BigInteger)
 
 
@@ -815,7 +815,7 @@ class GameLog(Base):
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="gamelog", lazy="joined")
 
-    username = Column(String)
+    username = Column(String, primary_key=True)
     owned_games = Column(Integer)
     unfinished_games = Column(Integer)
     beaten_games = Column(Integer)

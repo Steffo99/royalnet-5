@@ -1,5 +1,6 @@
 import random
 import math
+import dice
 
 
 def cast(spell_name: str, target_name: str, platform: str) -> str:
