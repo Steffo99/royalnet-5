@@ -8,8 +8,8 @@ import datetime
 import telegram
 import query_discord_music
 import random
-import difflib
 import re
+from raven.contrib.flask import Sentry
 
 app = Flask(__name__)
 
@@ -22,6 +22,8 @@ config.read("config.ini")
 app.secret_key = config["Flask"]["secret_key"]
 
 telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
+
+sentry = Sentry(app, dsn=config["Sentry"]["token"])
 
 
 @app.errorhandler(400)
@@ -158,7 +160,7 @@ def page_password():
 def page_editprofile():
     user_id = fl_session.get("user_id")
     db_session = db.Session()
-    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).one_or_none()
+    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
         db_session.close()
         if user_id is None:
@@ -175,6 +177,7 @@ def page_editprofile():
         if profile_data is None:
             profile_data = db.ProfileData(royal_id=user_id, css=css, bio=bio)
             db_session.add(profile_data)
+            db_session.flush()
             profile_data.royal.fiorygi += 1
             try:
                 telegram_bot.send_message(config["Telegram"]["main_group"],
