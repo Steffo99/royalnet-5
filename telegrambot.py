@@ -506,10 +506,14 @@ def cmd_markov(bot: Bot, update: Update):
 def cmd_roll(bot: Bot, update: Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
-        result = dice.utilities.verbose_print(dice_string)
+        result = dice.roll(dice_string)
     except dice.DiceBaseException:
         bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
         return
+    if isinstance(result, list):
+        result = "\n".join([str(r) for r in result])
+    elif isinstance(result, int):
+        result = str(result)
     bot.send_message(update.message.chat.id, f"🎲 {result}")
 
 

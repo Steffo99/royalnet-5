@@ -13,3 +13,4 @@ markdown2
 pygments
 markovify
 praw
+dice
