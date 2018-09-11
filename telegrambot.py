@@ -510,7 +510,7 @@ def cmd_roll(bot: Bot, update: Update):
     except dice.DiceBaseException:
         bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
         return
-    bot.send_message(update.message.chat.id, f"🎲 Tiro {int(dice_string)}: **{result}**", parse_mode="Markdown")
+    bot.send_message(update.message.chat.id, f"🎲 {result}")
 
 
 def process(arg_discord_connection):
