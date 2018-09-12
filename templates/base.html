@@ -19,14 +19,19 @@
                 <a href="/">Home</a>
                 <span class="desktop-only">
                 {% if session.get('username') is not none %}
-                    <a href="{{ config['Telegram']['invite_link'] }}">Telegram</a>
-                    <a href="{{ config['Discord']['invite_link'] }}">Discord</a>
+                    <a href="{{ rygconf['Telegram']['invite_link'] }}">Telegram</a>
+                    <a href="{{ rygconf['Discord']['invite_link'] }}">Discord</a>
                     <a href="https://steamcommunity.com/groups/royalgamescastle">Steam</a>
                     <a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a>
                 {% endif %}
                 </span>
             </div>
             <div class="right">
+                {% if config["DEBUG"] %}
+                    <span id="debug-mode">
+                        DEBUG
+                    </span>
+                {% endif %}
                 <span class="login-status">
                     {% if session.get('username') is not none %}
                         <a href="/profile/{{ session.get('username') }}">{{ session.get('username') }}</a>

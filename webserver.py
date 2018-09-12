@@ -28,7 +28,7 @@ sentry = Sentry(app, dsn=config["Sentry"]["token"])
 
 @app.errorhandler(400)
 def error_400(_=None):
-    return render_template("400.html", config=config)
+    return render_template("400.html", rygconf=config)
 
 
 @app.route("/400")
@@ -38,7 +38,7 @@ def page_400():
 
 @app.errorhandler(403)
 def error_403(_=None):
-    return render_template("403.html", config=config)
+    return render_template("403.html", rygconf=config)
 
 
 @app.route("/403")
@@ -48,7 +48,7 @@ def page_403():
 
 @app.errorhandler(500)
 def error_500(_=None):
-    return render_template("500.html", config=config)
+    return render_template("500.html", rygconf=config)
 
 
 @app.route("/500")
@@ -68,7 +68,7 @@ def page_main():
         db.Event.time).all()
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, config=config, escape=escape)
+                           next_events=next_events, rygconf=config, escape=escape)
 
 
 @app.route("/profile/<name>")
@@ -95,12 +95,12 @@ def page_profile(name: str):
     else:
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, config=config, bio=converted_bio)
+                           tg=tg, discord=discord, rygconf=config, bio=converted_bio)
 
 
 @app.route("/login")
 def page_login():
-    return render_template("login.html", config=config)
+    return render_template("login.html", rygconf=config)
 
 
 @app.route("/loggedin", methods=["POST"])
@@ -140,7 +140,7 @@ def page_password():
     if request.method == "GET":
         if user_id is None:
             return redirect(url_for("page_login"))
-        return render_template("password.html", config=config)
+        return render_template("password.html", rygconf=config)
     elif request.method == "POST":
         new_password = request.form.get("new", "")
         db_session = db.Session()
@@ -165,7 +165,7 @@ def page_editprofile():
         db_session.close()
         if user_id is None:
             return redirect(url_for("page_login"))
-        return render_template("profileedit.html", data=profile_data, config=config)
+        return render_template("profileedit.html", data=profile_data, rygconf=config)
     elif request.method == "POST":
         if user_id is None:
             return redirect(url_for("page_login"))
@@ -228,7 +228,7 @@ def page_game(name: str):
         abort(404)
         return
     db_session.close()
-    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, config=config)
+    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, rygconf=config)
 
 
 @app.route("/wiki")
@@ -236,7 +236,7 @@ def page_wikihome():
     db_session = db.Session()
     wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
     db_session.close()
-    return render_template("wikilist.html", wiki_pages=wiki_pages, config=config)
+    return render_template("wikilist.html", wiki_pages=wiki_pages, rygconf=config)
 
 
 @app.route("/wiki/<key>", methods=["GET", "POST"])
@@ -248,7 +248,7 @@ def page_wiki(key: str):
             .order_by(db.WikiLog.timestamp.desc()).first()
         db_session.close()
         if wiki_page is None:
-            return render_template("wikipage.html", key=key, config=config)
+            return render_template("wikipage.html", key=key, rygconf=config)
         # Embed YouTube videos
         converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                                           extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
@@ -258,7 +258,7 @@ def page_wiki(key: str):
                r' allow="autoplay; encrypted-media" allowfullscreen width="640px" height="320px"></iframe>'
                r'</div>', converted_md)
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
-                               wiki_log=wiki_latest_edit, config=config)
+                               wiki_log=wiki_latest_edit, rygconf=config)
     elif request.method == "POST":
         user_id = fl_session.get('user_id')
         user = db_session.query(db.Royal).filter_by(id=user_id).one()
@@ -308,7 +308,7 @@ def page_diario():
     db_session = db.Session()
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
-    return render_template("diario.html", config=config, entries=diario_entries)
+    return render_template("diario.html", rygconf=config, entries=diario_entries)
 
 
 if __name__ == "__main__":
