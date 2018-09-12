@@ -5,6 +5,17 @@
         <meta name="author" content="{{ wiki_log.editor.username }}">
         <meta name="description" content="{{ wiki_page.content[:97] }}...">
     {% endif %}
+    <script>
+        var edits = false;
+
+        function newEdit() {
+            edits = true;
+        }
+
+        window.onbeforeunload = function() {
+            return edits ? "Modifiche non salvate" : null;
+        }
+    </script>
 {% endblock %}
 
 {% block pagetitle %}
@@ -28,7 +39,7 @@
             <div class="wiki-edit">
                 <h4>Modifica</h4>
                 <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
-                    <textarea class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
+                    <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
                     <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
                     <input class="submit" type="submit" value="Invia">
                 </form>
