@@ -458,8 +458,7 @@ class RoyalDiscordBot(discord.Client):
         while True:
             # Fun things will happen with multiple voice clients!
             for voice_client in self.voice_clients:
-                if not voice_client.is_connected() \
-                        or voice_client.is_playing():
+                if not voice_client.is_connected() or not voice_client.is_done():
                     continue
                 if len(self.video_queue) == 0:
                     self.now_playing = None
