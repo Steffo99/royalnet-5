@@ -257,6 +257,11 @@ def page_wiki(key: str):
                r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0" frameborder="0"'
                r' allow="autoplay; encrypted-media" allowfullscreen width="640px" height="320px"></iframe>'
                r'</div>', converted_md)
+        converted_md = re.sub(r"{https?:\/\/clyp.it\/([a-z0-9]+)}",
+                              r'<div class="clyp-embed">'
+                              r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
+                              r'    </iframe>'
+                              r'</div>', converted_md)
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
                                wiki_log=wiki_latest_edit, rygconf=config)
     elif request.method == "POST":
