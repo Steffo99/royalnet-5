@@ -649,7 +649,7 @@ nav {
         }
 
         .last-video {
-            grid-column: 1
+            grid-column: 1;
         }
 
         .fav-video {
@@ -658,6 +658,26 @@ nav {
 
         .none {
             color: rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    .gamelog {
+        background-color: #00ffc8;
+        padding: 18px;
+        color: black;
+        font-family: "Arial", sans-serif;
+        grid-template-columns: 33.3% 33.4% 33.3%;
+
+        .games-owned {
+            grid-column: 1;
+        }
+
+        .games-beaten {
+            grid-column: 2;
+        }
+
+        .games-completed {
+            grid-column: 3;
         }
     }
 }
