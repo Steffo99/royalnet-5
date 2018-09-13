@@ -8,7 +8,7 @@ from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram.error
 import dice
-import subprocess
+import sys
 import os
 import time
 import cast
@@ -16,6 +16,7 @@ import re
 import logging
 import configparser
 import markovify
+import raven
 
 # Markov model
 try:
@@ -34,21 +35,44 @@ config.read("config.ini")
 
 discord_connection = None
 
-# Find the latest git tag
-if __debug__:
-    version = "Dev"
-    commit_msg = "_in sviluppo_"
-else:
-    # Find the latest git tag
-    old_wd = os.getcwd()
+# Init the Sentry client
+sentry = raven.Client(config["Sentry"]["token"],
+                      release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                      install_logging_hook=False,
+                      hook_libraries=[])
+
+
+def on_error(bot: Bot, update: Update, exc: Exception):
+    # noinspection PyBroadException
     try:
-        os.chdir(os.path.dirname(__file__))
-        version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
-        commit_msg = str(subprocess.check_output(["git", "log", "-1", "--pretty=%B"]), encoding="utf8").strip()
+        raise exc
     except Exception:
-        version = "❓"
-    finally:
-        os.chdir(old_wd)
+        logger.error(f"Critical error: {sys.exc_info()}")
+        # noinspection PyBroadException
+        try:
+            bot.send_message(int(config["Telegram"]["main_group"]),
+                             "☢ **ERRORE CRITICO:** \n"
+                             f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
+                             f"Una segnalazione di errore è stata automaticamente mandata a @Steffo.\n\n"
+                             f"Dettagli dell'errore:\n"
+                             f"```\n"
+                             f"{repr(ei[1])}\n"
+                             f"```", parse_mode="Markdown")
+        except Exception:
+            logger.error(f"Double critical error: {sys.exc_info()}")
+        if not __debug__:
+            sentry.user_context({
+                "id": update.effective_user.id,
+                "telegram": {
+                    "username": update.effective_user.username,
+                    "first_name": update.effective_user.first_name,
+                    "last_name": update.effective_user.last_name
+                }
+            })
+            sentry.extra_context({
+                "update": update.to_dict()
+            })
+            sentry.captureException()
 
 
 def cmd_register(bot: Bot, update: Update):
@@ -506,14 +530,10 @@ def cmd_markov(bot: Bot, update: Update):
 def cmd_roll(bot: Bot, update: Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
-        result = dice.roll(dice_string)
+        result = dice.roll(f"{dice_string}t")
     except dice.DiceBaseException:
         bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
         return
-    if isinstance(result, list):
-        result = "\n".join([str(r) for r in result])
-    elif isinstance(result, int):
-        result = str(result)
     bot.send_message(update.message.chat.id, f"🎲 {result}")
 
 
@@ -546,11 +566,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
+    u.dispatcher.add_error_handler(on_error)
     logger.info("Handlers registered.")
-    u.bot.send_message(config["Telegram"]["main_group"],
-                       f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
-                       f"Ultimo aggiornamento: `{version}: {commit_msg}`",
-                       parse_mode="Markdown", disable_notification=True)
     while True:
         try:
             u.start_polling()

@@ -17,25 +17,9 @@ logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG)
 
-# noinspection PyUnreachableCode
-if __debug__:
-    version = "Dev"
-    commit_msg = "_in sviluppo_"
-else:
-    # Find the latest git tag
-    old_wd = os.getcwd()
-    try:
-        os.chdir(os.path.dirname(__file__))
-        version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
-        commit_msg = str(subprocess.check_output(["git", "log", "-1", "--pretty=%B"]), encoding="utf8").strip()
-    except Exception:
-        version = "❓"
-    finally:
-        os.chdir(old_wd)
-
 sentry = raven.Client(config["Sentry"]["token"],
-                      release=version,
-                      install_logger_hook=False,
+                      release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                      install_logging_hook=False,
                       hook_libraries=[])
 
 

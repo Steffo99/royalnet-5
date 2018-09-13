@@ -87,22 +87,6 @@ song_special_messages = {
     "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?"
 }
 
-# noinspection PyUnreachableCode
-if __debug__:
-    version = "Dev"
-    commit_msg = "_in sviluppo_"
-else:
-    # Find the latest git tag
-    old_wd = os.getcwd()
-    try:
-        os.chdir(os.path.dirname(__file__))
-        version = str(subprocess.check_output(["git", "describe", "--tags"]), encoding="utf8").strip()
-        commit_msg = str(subprocess.check_output(["git", "log", "-1", "--pretty=%B"]), encoding="utf8").strip()
-    except Exception:
-        version = "❓"
-    finally:
-        os.chdir(old_wd)
-
 # FFmpeg settings
 ffmpeg_settings = {}
 
@@ -111,8 +95,8 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 # Init the Sentry client
 sentry = raven.Client(config["Sentry"]["token"],
-                      release=version,
-                      install_logger_hook=False,
+                      release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                      install_logging_hook=False,
                       hook_libraries=[])
 
 
@@ -308,8 +292,6 @@ class RoyalDiscordBot(discord.Client):
         self.main_guild = self.get_guild(int(config["Discord"]["server_id"]))
         if not isinstance(self.main_guild, discord.Guild):
             raise InvalidConfigError("The main guild does not exist!")
-        await self.main_channel.send(f"ℹ Royal Bot avviato e pronto a ricevere comandi!\n"
-                                     f"Ultimo aggiornamento: `{version}: {commit_msg}`")
         await self.change_presence(status=discord.Status.online, activity=None)
 
     async def on_message(self, message: discord.Message):
@@ -342,6 +324,7 @@ class RoyalDiscordBot(discord.Client):
     async def on_error(self, event_method, *args, **kwargs):
         ei = sys.exc_info()
         logger.error(f"Critical error: {repr(ei[1])}")
+        # noinspection PyBroadException
         try:
             await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`\n"
                                          f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
@@ -352,8 +335,8 @@ class RoyalDiscordBot(discord.Client):
                                          f"```")
             await self.change_presence(status=discord.Status.invisible)
             await self.close()
-        except Exception as e:
-            logger.error("Double critical error: {repr(sys.exc_info())}")
+        except Exception:
+            logger.error(f"Double critical error: {sys.exc_info()}")
         loop.stop()
         sentry.captureException(exc_info=ei)
         exit(1)
