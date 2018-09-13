@@ -9,17 +9,6 @@
         Royal Wiki
     </h1>
     <div class="wiki-home">
-        <div class="box">
-            <div class="upper-box">
-                Pagine Wiki
-            </div>
-            <div class="lower-box">
-                <ul>
-                    {% for page in wiki_pages %}
-                        <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        {% include "wikibox.html" %}
     </div>
 {% endblock %}

@@ -1,0 +1,12 @@
+<div class="box">
+    <div class="upper-box">
+        Pagine Wiki
+    </div>
+    <div class="lower-box">
+        <ul>
+            {% for page in wiki_pages %}
+                <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
