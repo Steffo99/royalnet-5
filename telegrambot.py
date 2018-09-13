@@ -52,8 +52,8 @@ def catch_and_report(func: "function"):
             # noinspection PyBroadException
             try:
                 bot.send_message(int(config["Telegram"]["main_group"]),
-                                 "☢ **ERRORE CRITICO:** \n"
-                                 f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
+                                 "☢ **ERRORE CRITICO!** \n"
+                                 f"Il bot ha ignorato il comando.\n"
                                  f"Una segnalazione di errore è stata automaticamente mandata a @Steffo.\n\n"
                                  f"Dettagli dell'errore:\n"
                                  f"```\n"
