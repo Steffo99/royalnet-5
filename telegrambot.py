@@ -42,39 +42,42 @@ sentry = raven.Client(config["Sentry"]["token"],
                       hook_libraries=[])
 
 
-def on_error(bot: Bot, update: Update, exc: Exception):
-    # noinspection PyBroadException
-    try:
-        raise exc
-    except Exception:
-        logger.error(f"Critical error: {sys.exc_info()}")
+def catch_and_report(func: "function"):
+    def new_func(bot: Bot, update: Update):
         # noinspection PyBroadException
         try:
-            bot.send_message(int(config["Telegram"]["main_group"]),
-                             "☢ **ERRORE CRITICO:** \n"
-                             f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
-                             f"Una segnalazione di errore è stata automaticamente mandata a @Steffo.\n\n"
-                             f"Dettagli dell'errore:\n"
-                             f"```\n"
-                             f"{repr(ei[1])}\n"
-                             f"```", parse_mode="Markdown")
+            return func(bot, update)
         except Exception:
-            logger.error(f"Double critical error: {sys.exc_info()}")
-        if not __debug__:
-            sentry.user_context({
-                "id": update.effective_user.id,
-                "telegram": {
-                    "username": update.effective_user.username,
-                    "first_name": update.effective_user.first_name,
-                    "last_name": update.effective_user.last_name
-                }
-            })
-            sentry.extra_context({
-                "update": update.to_dict()
-            })
-            sentry.captureException()
+            logger.error(f"Critical error: {sys.exc_info()}")
+            # noinspection PyBroadException
+            try:
+                bot.send_message(int(config["Telegram"]["main_group"]),
+                                 "☢ **ERRORE CRITICO:** \n"
+                                 f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
+                                 f"Una segnalazione di errore è stata automaticamente mandata a @Steffo.\n\n"
+                                 f"Dettagli dell'errore:\n"
+                                 f"```\n"
+                                 f"{sys.exc_info()}\n"
+                                 f"```", parse_mode="Markdown")
+            except Exception:
+                logger.error(f"Double critical error: {sys.exc_info()}")
+            if not __debug__:
+                sentry.user_context({
+                    "id": update.effective_user.id,
+                    "telegram": {
+                        "username": update.effective_user.username,
+                        "first_name": update.effective_user.first_name,
+                        "last_name": update.effective_user.last_name
+                    }
+                })
+                sentry.extra_context({
+                    "update": update.to_dict()
+                })
+                sentry.captureException()
+    return new_func
 
 
+@catch_and_report
 def cmd_register(bot: Bot, update: Update):
     session = db.Session()
     try:
@@ -99,6 +102,7 @@ def cmd_register(bot: Bot, update: Update):
     session.close()
 
 
+@catch_and_report
 def cmd_discord(bot: Bot, update: Update):
     if discord_connection is None:
         bot.send_message(update.message.chat.id, "⚠ Il bot non è collegato a Discord al momento.")
@@ -108,6 +112,7 @@ def cmd_discord(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, message, disable_web_page_preview=True)
 
 
+@catch_and_report
 def cmd_cast(bot: Bot, update: Update):
     try:
         spell: str = update.message.text.split(" ", 1)[1]
@@ -127,15 +132,18 @@ def cmd_cast(bot: Bot, update: Update):
                      parse_mode="HTML")
 
 
+@catch_and_report
 def cmd_color(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request, Admin were notified")
 
 
+@catch_and_report
 def cmd_smecds(bot: Bot, update: Update):
     ds = random.sample(stagismo.listona, 1)[0]
     bot.send_message(update.message.chat.id, f"Secondo me, è colpa {ds}.")
 
 
+@catch_and_report
 def cmd_ciaoruozi(bot: Bot, update: Update):
     if update.message.from_user.username.lstrip("@") == "MeStakes":
         bot.send_message(update.message.chat.id, "Ciao me!")
@@ -143,6 +151,7 @@ def cmd_ciaoruozi(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "Ciao Ruozi!")
 
 
+@catch_and_report
 def cmd_ahnonlosoio(bot: Bot, update: Update):
     if update.message.reply_to_message is not None and update.message.reply_to_message.text in ["/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!"]:
         bot.send_message(update.message.chat.id, "Ah, non lo so neppure io!")
@@ -150,6 +159,7 @@ def cmd_ahnonlosoio(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "Ah, non lo so io!")
 
 
+@catch_and_report
 def cmd_balurage(bot: Bot, update: Update):
     session = db.Session()
     try:
@@ -171,6 +181,7 @@ def cmd_balurage(bot: Bot, update: Update):
         session.close()
 
 
+@catch_and_report
 def cmd_diario(bot: Bot, update: Update):
     session = db.Session()
     try:
@@ -206,6 +217,7 @@ def cmd_diario(bot: Bot, update: Update):
         session.close()
 
 
+@catch_and_report
 def cmd_vote(bot: Bot, update: Update):
     session = db.Session()
     try:
@@ -246,6 +258,7 @@ def cmd_vote(bot: Bot, update: Update):
         session.close()
 
 
+@catch_and_report
 def on_callback_query(bot: Bot, update: Update):
     if update.callback_query.data == "vote_yes":
         choice = db.VoteChoices.YES
@@ -288,6 +301,7 @@ def on_callback_query(bot: Bot, update: Update):
             session.close()
 
 
+@catch_and_report
 def cmd_ban(bot: Bot, update: Update):
     if datetime.date.today() != datetime.date(2019, 4, 1):
         bot.send_message(update.message.chat.id, "⚠ Non è il giorno adatto per bannare persone!")
@@ -329,12 +343,13 @@ def cmd_ban(bot: Bot, update: Update):
         session.close()
 
 
+@catch_and_report
 def cmd_eat(bot: Bot, update: Update):
     try:
         food: str = update.message.text.split(" ", 1)[1].capitalize()
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
-                                                 "Sintassi corretta: `/food <cibo>`")
+                                                 "Sintassi corretta: `/eat <cibo>`")
         return
     if "tonnuooooooro" in food.lower():
         bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"
@@ -343,6 +358,7 @@ def cmd_eat(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, f"🍗 Hai mangiato {food}!")
 
 
+@catch_and_report
 def cmd_ship(bot: Bot, update: Update):
     try:
         _, name_one, name_two = update.message.text.split(" ", 2)
@@ -368,6 +384,7 @@ def cmd_ship(bot: Bot, update: Update):
                                              f" {mixed.capitalize()}")
 
 
+@catch_and_report
 def cmd_profile(bot: Bot, update: Update):
     session = db.Session()
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
@@ -382,6 +399,7 @@ def cmd_profile(bot: Bot, update: Update):
                      parse_mode="Markdown")
 
 
+@catch_and_report
 def cmd_bridge(bot: Bot, update: Update):
     try:
         data = update.message.text.split(" ", 1)[1]
@@ -444,10 +462,11 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
     raise ValueError("Nothing was found.")
 
 
+@catch_and_report
 def cmd_newevent(bot: Bot, update: Update):
     try:
         _, timestring, name_desc = update.message.text.split(" ", 2)
-    except IndexError:
+    except (ValueError, IndexError):
         bot.send_message(update.message.chat.id, "⚠️ Sintassi del comando non valida.\n"
                                                  "Sintassi corretta:\n"
                                                  "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
@@ -488,6 +507,7 @@ def cmd_newevent(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, "✅ Evento aggiunto al Calendario Royal Games!")
 
 
+@catch_and_report
 def cmd_calendar(bot: Bot, update: Update):
     session = db.Session()
     next_events = session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
@@ -504,6 +524,7 @@ def cmd_calendar(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 
+@catch_and_report
 def cmd_markov(bot: Bot, update: Update):
     if model is None:
         bot.send_message(update.message.chat.id, "⚠️ Il modello Markov non è disponibile.")
@@ -527,6 +548,7 @@ def cmd_markov(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, sentence)
 
 
+@catch_and_report
 def cmd_roll(bot: Bot, update: Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
@@ -535,6 +557,12 @@ def cmd_roll(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
         return
     bot.send_message(update.message.chat.id, f"🎲 {result}")
+
+
+@catch_and_report
+def cmd_exception(bot: Bot, update: Update):
+    if __debug__:
+        raise Exception("/exception was called")
 
 
 def process(arg_discord_connection):
@@ -565,8 +593,9 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
     u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
+    if __debug__:
+        u.dispatcher.add_handler(CommandHandler("exception", cmd_exception))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
-    u.dispatcher.add_error_handler(on_error)
     logger.info("Handlers registered.")
     while True:
         try:
