@@ -831,6 +831,16 @@ class ParsedRedditPost(Base):
     author_username = Column(String)
 
 
+class LoginToken(Base):
+    __tablename__ = "logintoken"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal", backref="tokens", lazy="joined")
+
+    token = Column(String, primary_key=True)
+    expiration = Column(DateTime, nullable=False)
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")
