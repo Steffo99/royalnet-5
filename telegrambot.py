@@ -118,7 +118,7 @@ def cmd_cast(bot: Bot, update: Update):
         spell: str = update.message.text.split(" ", 1)[1]
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato nessun incantesimo!\n"
-                                                 "Sintassi corretta: `/cast <nome_incantesimo>`")
+                                                 "Sintassi corretta: `/cast <nome_incantesimo>`", parse_mode="Markdown")
         return
     # Open a new db session
     session = db.Session()
@@ -165,7 +165,7 @@ def cmd_balurage(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
             return
         try:
             reason = update.message.text.split(" ", 1)[1]
@@ -187,7 +187,9 @@ def cmd_diario(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb!"
+                                                     " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                             parse_mode="Markdown")
             return
         try:
             text = update.message.text.split(" ", 1)[1]
@@ -196,7 +198,7 @@ def cmd_diario(bot: Bot, update: Update):
         except IndexError:
             if update.message.reply_to_message is None:
                 bot.send_message(update.message.chat.id, f"⚠ Non hai specificato cosa aggiungere al diario! Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario oppure scrivere `/diario@royalgamesbot <messaggio>` per aggiungere quel messaggio nel diario.\n"
-                                                         f"Se l'hai fatto, e continua a comparire questo errore, allora Telegram è stupido e non mi vuole far vedere il messaggio a cui hai risposto.")
+                                                         f"Se l'hai fatto, e continua a comparire questo errore, allora Telegram è stupido e non mi vuole far vedere il messaggio a cui hai risposto.", parse_mode="Markdown")
                 return
             text = update.message.reply_to_message.text
             author = session.query(db.Telegram).filter_by(telegram_id=update.message.reply_to_message.from_user.id).one_or_none()
@@ -225,14 +227,14 @@ def cmd_vote(bot: Bot, update: Update):
         if user is None:
             bot.send_message(update.message.chat.id,
                              "⚠ Il tuo account Telegram non è registrato al RYGdb!"
-                             " Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+                             " Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
             return
         try:
             _, mode, question = update.message.text.split(" ", 2)
         except IndexError:
             bot.send_message(update.message.chat.id,
                              "⚠ Non hai specificato tutti i parametri necessari!"
-                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`")
+                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`", parse_mode="Markdown")
             return
         if mode == "public":
             vote = db.VoteQuestion(question=question, anonymous=False)
@@ -241,7 +243,7 @@ def cmd_vote(bot: Bot, update: Update):
         else:
             bot.send_message(update.message.chat.id,
                              "⚠ Non hai specificato una modalità valida!"
-                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`")
+                             "Sintassi: `/vote@royalgamesbot <public|secret> <domanda>`", parse_mode="Markdown")
             return
         session.add(vote)
         session.flush()
@@ -278,7 +280,7 @@ def on_callback_query(bot: Bot, update: Update):
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
                                           text="⚠ Il tuo account Telegram non è registrato al RYGdb!"
-                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.")
+                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion).filter_by(message_id=update.callback_query.message.message_id).one()
             answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
@@ -349,7 +351,7 @@ def cmd_eat(bot: Bot, update: Update):
         food: str = update.message.text.split(" ", 1)[1].capitalize()
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
-                                                 "Sintassi corretta: `/eat <cibo>`")
+                                                 "Sintassi corretta: `/eat <cibo>`", parse_mode="Markdown")
         return
     if "tonnuooooooro" in food.lower():
         bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"
@@ -364,7 +366,7 @@ def cmd_ship(bot: Bot, update: Update):
         _, name_one, name_two = update.message.text.split(" ", 2)
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato correttamente i due nomi!\n"
-                                                 "Sintassi corretta: `/ship <nome> <nome>`")
+                                                 "Sintassi corretta: `/ship <nome> <nome>`", parse_mode="Markdown")
         return
     name_one = name_one.lower()
     name_two = name_two.lower()
@@ -405,7 +407,7 @@ def cmd_bridge(bot: Bot, update: Update):
         data = update.message.text.split(" ", 1)[1]
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠ Non hai specificato un comando!\n"
-                                                 "Sintassi corretta: `/bridge <comando> <argomenti>`")
+                                                 "Sintassi corretta: `/bridge <comando> <argomenti>`", parse_mode="Markdown")
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
     if result == "error":
@@ -471,7 +473,7 @@ def cmd_newevent(bot: Bot, update: Update):
                                                  "Sintassi corretta:\n"
                                                  "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
                                                  "|{numero}{w|d|h|m}> <nome>\n"
-                                                 "[descrizione]```")
+                                                 "[descrizione]```", parse_mode="Markdown")
         return
     try:
         name, description = name_desc.split("\n", 1)
@@ -486,7 +488,7 @@ def cmd_newevent(bot: Bot, update: Update):
                                                  "Sintassi corretta:\n"
                                                  "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
                                                  "|{numero}{w|d|h|m}> <nome>\n"
-                                                 "[descrizione]```")
+                                                 "[descrizione]```", parse_mode="Markdown")
         return
     # Create the event
     session = db.Session()
