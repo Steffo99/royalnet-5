@@ -12,6 +12,10 @@
             edits = true;
         }
 
+        function onSubmit() {
+            edits = false;
+        }
+
         window.onbeforeunload = function() {
             return edits ? "Modifiche non salvate" : null;
         }
@@ -41,7 +45,7 @@
                 <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
                     <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
                     <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
-                    <input class="submit" type="submit" value="Invia">
+                    <input class="submit" type="submit" onsubmit="onSubmit()" value="Invia">
                 </form>
             </div>
         {% endif %}
