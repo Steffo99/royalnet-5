@@ -141,6 +141,66 @@ nav {
     }
 }
 
+table {
+    border-collapse: collapse;
+
+    thead {
+        margin-top: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 8px;
+
+        th {
+            background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.2);
+            color: @accent-color;
+            padding-left: 4px;
+            padding-right: 4px;
+            text-align: left;
+            font-size: small;
+            font-weight: bold;
+        }
+
+        tr:first-child {
+            th:first-child {
+                border-radius: 4px 0 0 0;
+            }
+
+            th:last-child {
+                border-radius: 0 4px 0 0;
+            }
+        }
+    }
+
+    tbody {
+        margin-bottom: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 8px;
+
+        td {
+            background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+
+        tr {
+            border-bottom: 1px solid rgba(red(@text-color), green(@text-color), blue(@text-color), 0.2);;
+
+            &:last-child {
+                border-bottom: none;
+
+                td:first-child {
+                    border-radius: 0 0 0 4px;
+                }
+
+                td:last-child {
+                    border-radius: 0 0 4px 0;
+                }
+            }
+        }
+    }
+}
+
 .box {
     .upper-box {
         margin-top: 4px;
