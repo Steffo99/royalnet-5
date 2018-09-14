@@ -468,7 +468,7 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
 def cmd_newevent(bot: Bot, update: Update):
     try:
         _, timestring, name_desc = update.message.text.split(" ", 2)
-    except (ValueError, IndexError):
+    except ValueError:
         bot.send_message(update.message.chat.id, "⚠️ Sintassi del comando non valida.\n"
                                                  "Sintassi corretta:\n"
                                                  "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
@@ -477,7 +477,7 @@ def cmd_newevent(bot: Bot, update: Update):
         return
     try:
         name, description = name_desc.split("\n", 1)
-    except IndexError:
+    except ValueError:
         name = name_desc
         description = None
     # Parse the timestring
