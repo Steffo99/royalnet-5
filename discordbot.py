@@ -280,8 +280,10 @@ class RoyalDiscordBot(discord.Client):
         self.now_playing = None
         self.radio_messages = True
         self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
+        self.inactivity_timer = 0
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
+        asyncio.ensure_future(self.inactivity_timer())
 
     async def on_ready(self):
         # Get the main channel
@@ -317,6 +319,7 @@ class RoyalDiscordBot(discord.Client):
             "command": data[0],
             "message": message
         })
+        self.inactivity_timer = 3600
         await self.commands[data[0]](channel=message.channel,
                                      author=message.author,
                                      params=data)
@@ -326,7 +329,7 @@ class RoyalDiscordBot(discord.Client):
         logger.error(f"Critical error: {repr(ei[1])}")
         # noinspection PyBroadException
         try:
-            await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`\n"
+            await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`!\n"
                                          f"Il bot si è chiuso e si dovrebbe riavviare entro qualche minuto.\n"
                                          f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
                                          f"Dettagli dell'errore:\n"
@@ -496,6 +499,17 @@ class RoyalDiscordBot(discord.Client):
                 else:
                     await self.main_channel.send(f":arrow_forward: Ora in riproduzione: {str(now_playing)}")
             await asyncio.sleep(1)
+
+    async def inactivity_countdown(self):
+        while True:
+            await asyncio.sleep(1)
+            if self.inactivity_timer > 0:
+                self.inactivity_timer -= 1
+                continue
+            for voice_client in self.voice_clients:
+                if voice_client.is_connected():
+                    voice_client.disconnect()
+                    self.send_message(self.main_channel, "💤 Mi sono disconnesso dalla cv per inattività.")
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
