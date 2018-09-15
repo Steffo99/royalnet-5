@@ -283,7 +283,7 @@ class RoyalDiscordBot(discord.Client):
         self.inactivity_timer = 0
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
-        asyncio.ensure_future(self.inactivity_timer())
+        asyncio.ensure_future(self.inactivity_countdown())
 
     async def on_ready(self):
         # Get the main channel
