@@ -280,17 +280,23 @@ def on_callback_query(bot: Bot, update: Update):
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
                                           text="⚠ Il tuo account Telegram non è registrato al RYGdb!"
-                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
+                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                                          parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion).filter_by(message_id=update.callback_query.message.message_id).one()
             answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
             if answer is None:
                 answer = db.VoteAnswer(question=question, choice=choice, user=user)
                 session.add(answer)
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
+            elif answer.choice == choice:
+                session.delete(answer)
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai ritratto il tuo voto.", cache_time=1)
             else:
                 answer.choice = choice
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
+                                          cache_time=1)
             session.commit()
-            bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
             inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
                                                     [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
                                                     [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
