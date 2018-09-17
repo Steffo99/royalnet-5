@@ -20,7 +20,7 @@ import datetime
 import sqlalchemy.exc
 import coloredlogs
 
-logging.getLogger().disabled = True
+logging.lastResort = None
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 

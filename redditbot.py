@@ -13,7 +13,8 @@ import coloredlogs
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-logging.getLogger().disabled = True
+logging.lastResort = None
+ì
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 
