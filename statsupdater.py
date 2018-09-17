@@ -10,7 +10,6 @@ import sys
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
 logger.setLevel(level=logging.DEBUG)
 
 # Init the config reader
