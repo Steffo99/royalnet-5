@@ -2,4 +2,4 @@
 git pull
 sudo python3.6 -m pip install -r requirements.txt
 sudo service apache2 restart
-python3.6 -OO bots.py 2> /dev/null
+python3.6 -OO bots.py
