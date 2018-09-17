@@ -135,6 +135,9 @@ class Video:
             return f"`{self.file}`"
         return f"_{self.info['title']}_"
 
+    def __repr__(self):
+        return f"<discordbot.Video {str(self)}>"
+
     def plain_text(self):
         if self.info is None or "title" not in self.info:
             return self.file
@@ -152,7 +155,7 @@ class Video:
         if self.info is not None and self.duration.total_seconds() > int(config["YouTube"]["max_duration"]):
             raise DurationError()
         # Download the file
-        logger.info(f"Now downloading {repr(self)}")
+        logger.info(f"Now downloading {repr(self)}.")
         with youtube_dl.YoutubeDL({"noplaylist": True,
                                    "format": "best",
                                    "postprocessors": [{
@@ -163,7 +166,8 @@ class Video:
                                    "progress_hooks": progress_hooks,
                                    "quiet": True}) as ytdl:
             await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.url]))
-            self.downloaded = True
+        logger.info(f"Download of {repr(self)} complete.")
+        self.downloaded = True
 
     def create_audio_source(self) -> discord.PCMVolumeTransformer:
         # Check if the file has been downloaded
@@ -458,7 +462,7 @@ class RoyalDiscordBot(discord.Client):
         while True:
             # Fun things will happen with multiple voice clients!
             for voice_client in self.voice_clients:
-                if not voice_client.is_connected() or not voice_client.is_playing():
+                if not voice_client.is_connected() or voice_client.is_playing():
                     continue
                 if len(self.video_queue) == 0:
                     self.now_playing = None
