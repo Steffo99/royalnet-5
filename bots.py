@@ -5,9 +5,11 @@ import redditbot
 import statsupdater
 import time
 import logging
+import coloredlogs
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logging.getLogger(__name__).setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG")
 
 discord_telegram_pipe = multiprocessing.Pipe()
 discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],), daemon=True)

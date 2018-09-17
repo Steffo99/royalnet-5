@@ -18,10 +18,11 @@ import logging
 import errors
 import datetime
 import sqlalchemy.exc
+import coloredlogs
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG", logger=logger)
 
 # Queue emojis
 queue_emojis = [":one:",
@@ -349,7 +350,7 @@ class RoyalDiscordBot(discord.Client):
         await self.wait_until_ready()
         while True:
             msg = await loop.run_in_executor(executor, connection.recv)
-            logger.info(f"Received \"{msg}\" from the Telegram-Discord pipe.")
+            logger.debug(f"Received \"{msg}\" from the Telegram-Discord pipe.")
             if msg == "get cv":
                 discord_members = list(self.main_guild.members)
                 channels = {0: None}

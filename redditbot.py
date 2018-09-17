@@ -7,6 +7,7 @@ import time
 import raven
 import os
 import sys
+import coloredlogs
 
 # Init the config reader
 config = configparser.ConfigParser()
@@ -14,7 +15,7 @@ config.read("config.ini")
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG", logger=logger)
 
 sentry = raven.Client(config["Sentry"]["token"],
                       release=raven.fetch_git_sha(os.path.dirname(__file__)),

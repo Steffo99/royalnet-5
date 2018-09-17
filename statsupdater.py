@@ -7,10 +7,11 @@ import os
 import typing
 import telegram
 import sys
+import coloredlogs
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG", logger=logger)
 
 # Init the config reader
 config = configparser.ConfigParser()

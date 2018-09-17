@@ -6,17 +6,16 @@ import errors
 import stagismo
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
-import telegram.error
 import dice
 import sys
 import os
-import time
 import cast
 import re
 import logging
 import configparser
 import markovify
 import raven
+import coloredlogs
 
 # Markov model
 try:
@@ -27,7 +26,7 @@ except Exception:
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG", logger=logger)
 
 # Init the config reader
 config = configparser.ConfigParser()
