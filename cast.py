@@ -1,6 +1,5 @@
 import random
 import math
-import dice
 
 
 def cast(spell_name: str, target_name: str, platform: str) -> str:
@@ -40,6 +39,17 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
     else:
         crit_msg = ""
     if platform == "telegram":
+        if dmg_dice == 10 and dmg_max == 100 and dmg_mod == 20:
+            return f"❇️‼️ Ho lanciato <b>{spell}</b> su " \
+                   f"<i>{target_name}</i>.\n" \
+                   f"Una grande luce illumina il cielo, seguita poco dopo da un fungo di fumo nel luogo" \
+                   f" in cui si trovava <i>{target_name}</i>.\n" \
+                   f"Il fungo si espande a velocità smodata, finchè il fumo non ricopre la Terra intera e le tenebre" \
+                   f" cadono su di essa.\n" \
+                   f"Dopo qualche minuto, la temperatura ambiente raggiunge gli 0 °C, e continua a diminuire.\n" \
+                   f"L'Apocalisse Nucleare è giunta, e tutto per polverizzare <i>{target_name}</i>" \
+                   f" con <b>{spell}</b>.\n" \
+                   f"<i>{target_name}</i> subisce 10d100+20=<b>1020</b> danni apocalittici!"
         return f"❇️ Ho lanciato <b>{spell}</b> su " \
                f"<i>{target_name}</i>.\n" \
                f"{crit_msg}" \
@@ -48,6 +58,17 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
                f"{'×' + str(crit) if crit > 1 else ''}" \
                f"=<b>{total if total > 0 else 0}</b> danni {dmg_type}!"
     elif platform == "discord":
+        if dmg_dice == 10 and dmg_max == 100 and dmg_mod == 20:
+            return f"❇️‼️ Ho lanciato **{spell}** su " \
+                   f"_{target_name}_.\n" \
+                   f"Una grande luce illumina il cielo, seguita poco dopo da un fungo di fumo nel luogo" \
+                   f" in cui si trovava _{target_name}_.\n" \
+                   f"Il fungo si espande a velocità smodata, finchè il fumo non ricopre la Terra intera e le tenebre" \
+                   f" cadono su di essa.\n" \
+                   f"Dopo qualche minuto, la temperatura ambiente raggiunge gli 0 °C, e continua a diminuire.\n" \
+                   f"L'Apocalisse Nucleare è giunta, e tutto per polverizzare _{target_name}_" \
+                   f" con **{spell}**.\n" \
+                   f"_{target_name}_ subisce 10d100+20=**1020** danni apocalittici!"
         return f"❇️ Ho lanciato **{spell}** su " \
                f"_{target_name}_.\n" \
                f"{crit_msg}" \

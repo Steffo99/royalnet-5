@@ -42,4 +42,4 @@ listona = ["della secca", "del seccatore", "del secchiello", "del secchio", "del
            "della scatola", "del supercalifragilistichespiralidoso", "del sale", "del salame", "di (Town of) Salem",
            "di Stronghold", "di SOMA", "dei Saints", "di S.T.A.L.K.E.R.", "di Sanctum", "dei Sims", "di Sid",
            "delle Skullgirls", "di Sonic", "di Spiral (Knights)", "di Spore", "di Starbound", "di SimCity", "di Sensei",
-           "di Ssssssssssssss... Boom! E' esploso il dizionario", "della scala"]
+           "di Ssssssssssssss... Boom! E' esploso il dizionario", "della scala", "di Sakura"]

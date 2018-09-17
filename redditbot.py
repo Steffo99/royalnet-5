@@ -6,7 +6,6 @@ import telegram
 import time
 import raven
 import os
-import subprocess
 import sys
 
 # Init the config reader
@@ -15,6 +14,7 @@ config.read("config.ini")
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 logger.setLevel(level=logging.DEBUG)
 
 sentry = raven.Client(config["Sentry"]["token"],

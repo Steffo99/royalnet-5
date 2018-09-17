@@ -1,10 +1,7 @@
 import random
 import re
-# noinspection PyPackageRequirements
 import discord
-# noinspection PyPackageRequirements
 import discord.opus
-# noinspection PyPackageRequirements
 import discord.voice_client
 import functools
 import sys
@@ -15,7 +12,6 @@ import typing
 import os
 import asyncio
 import configparser
-import subprocess
 import async_timeout
 import raven
 import logging
@@ -25,6 +21,7 @@ import sqlalchemy.exc
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 logger.setLevel(level=logging.DEBUG)
 
 # Queue emojis
@@ -194,6 +191,7 @@ def command(func):
             result = await func(self, channel=channel, author=author, params=params, *args, **kwargs)
         except Exception:
             ei = sys.exc_info()
+            # noinspection PyBroadException
             try:
                 await channel.send(f"☢ **ERRORE DURANTE L'ESECUZIONE DEL COMANDO {params[0]}**\n"
                                    f"Il comando è stato ignorato.\n"
@@ -283,7 +281,7 @@ class RoyalDiscordBot(discord.Client):
         self.inactivity_timer = 0
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
-        asyncio.ensure_future(self.inactivity_timer())
+        asyncio.ensure_future(self.inactivity_countdown())
 
     async def on_ready(self):
         # Get the main channel
@@ -461,7 +459,7 @@ class RoyalDiscordBot(discord.Client):
         while True:
             # Fun things will happen with multiple voice clients!
             for voice_client in self.voice_clients:
-                if not voice_client.is_connected() or not voice_client.is_done():
+                if not voice_client.is_connected() or not voice_client.is_playing():
                     continue
                 if len(self.video_queue) == 0:
                     self.now_playing = None
@@ -508,8 +506,8 @@ class RoyalDiscordBot(discord.Client):
                 continue
             for voice_client in self.voice_clients:
                 if voice_client.is_connected():
-                    voice_client.disconnect()
-                    self.send_message(self.main_channel, "💤 Mi sono disconnesso dalla cv per inattività.")
+                    await voice_client.disconnect()
+                    await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
@@ -816,12 +814,9 @@ def process(users_connection=None):
     logger.info("Logging in...")
     loop.run_until_complete(bot.login(config["Discord"]["bot_token"], bot=True))
     logger.info("Connecting...")
-    try:
-        loop.run_until_complete(bot.connect())
-    except KeyboardInterrupt:
-        logger.info("Now stopping...")
-        loop.run_until_complete(bot.logout())
-        exit(0)
+    loop.run_until_complete(bot.connect())
+    logger.info("Now stopping...")
+    loop.run_until_complete(bot.logout())
 
 
 if __name__ == "__main__":

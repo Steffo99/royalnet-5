@@ -88,6 +88,7 @@ def page_profile(name: str):
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
     discord = db_session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
+    gamelog = db_session.query(db.GameLog).filter_by(royal=user).one_or_none()
     db_session.close()
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
@@ -95,7 +96,7 @@ def page_profile(name: str):
     else:
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, rygconf=config, bio=converted_bio)
+                           tg=tg, discord=discord, rygconf=config, bio=converted_bio, gamelog=gamelog)
 
 
 @app.route("/login")
@@ -205,7 +206,8 @@ def page_game(name: str):
         query = db_session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc().nullslast()).all()
     elif name == "lol":
         game_name = "League of Legends"
-        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast()).all()
+        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast(),
+                                                              db.LeagueOfLegends.solo_rank).all()
     elif name == "osu":
         game_name = "osu!"
         query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()

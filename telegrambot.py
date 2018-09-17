@@ -27,6 +27,7 @@ except Exception:
 
 logging.getLogger().setLevel(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 logger.setLevel(level=logging.DEBUG)
 
 # Init the config reader
@@ -605,18 +606,9 @@ def process(arg_discord_connection):
         u.dispatcher.add_handler(CommandHandler("exception", cmd_exception))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
-    while True:
-        try:
-            u.start_polling()
-            logger.info("Polling started.")
-            u.idle()
-        except telegram.error.TimedOut:
-            logger.warning("Timed out, restarting in 1 minute.")
-            time.sleep(60)
-            logger.info("Now restarting...")
-        except KeyboardInterrupt:
-            logger.info("Now stopping...")
-            break
+    u.start_polling()
+    logger.info("Polling started.")
+    u.idle()
 
 
 if __name__ == "__main__":

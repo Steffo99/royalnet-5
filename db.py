@@ -39,7 +39,7 @@ class Royal(Base):
         return Royal(username=username)
 
     def __repr__(self):
-        return f"<Royal {self.username}>"
+        return f"<db.Royal {self.username}>"
 
 
 class Telegram(Base):
@@ -71,7 +71,7 @@ class Telegram(Base):
                         username=telegram_user.username)
 
     def __repr__(self):
-        return f"<Telegram {self.telegram_id}>"
+        return f"<db.Telegram {self.telegram_id}>"
 
     def mention(self):
         if self.username is not None:
@@ -101,7 +101,9 @@ class Steam(Base):
     most_played_game_id = Column(BigInteger)
 
     def __repr__(self):
-        return f"<Steam {self.steam_id}>"
+        if not self.persona_name:
+            return f"<db.Steam {self.steam_id}>"
+        return f"<db.Steam {self.persona_name}>"
 
     def __str__(self):
         if self.persona_name is not None:
@@ -196,7 +198,7 @@ class RocketLeague(Base):
     wins = Column(Integer)
 
     def __repr__(self):
-        return f"<RocketLeague {self.steam_id}>"
+        return f"<db.RocketLeague {self.steam_id}>"
 
     def update(self, data=None):
         raise NotImplementedError("rlstats API is no longer available.")
@@ -242,6 +244,9 @@ class Dota(Base):
     losses = Column(Integer)
 
     most_played_hero = Column(Integer)
+
+    def __repr__(self):
+        return f"<db.Dota {self.steam_id}>"
 
     def get_rank_icon_url(self):
         # Rank icon is determined by the first digit of the rank tier
@@ -293,7 +298,7 @@ class Dota(Base):
         new_record.update()
         return new_record
 
-    def update(self) -> None:
+    def update(self) -> bool:
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}")
         if r.status_code != 200:
             raise RequestError("OpenDota / returned {r.status_code}")
@@ -306,10 +311,12 @@ class Dota(Base):
         if r.status_code != 200:
             raise RequestError("OpenDota /heroes returned {r.status_code}")
         heroes = r.json()
+        changed = self.rank_tier != data["rank_tier"]
         self.rank_tier = data["rank_tier"]
         self.wins = wl["win"]
         self.losses = wl["lose"]
         self.most_played_hero = heroes[0]["hero_id"]
+        return changed
 
 
 class LeagueOfLegendsRanks(enum.Enum):
@@ -349,6 +356,11 @@ class LeagueOfLegends(Base):
 
     highest_mastery_champ = Column(Integer)
 
+    def __repr__(self):
+        if not self.summoner_name:
+            return f"<LeagueOfLegends {self.summoner_id}>"
+        return f"<LeagueOfLegends {(''.join([x if x.isalnum else '' for x in self.summoner_name]))}>"
+
     @staticmethod
     def create(session: Session, royal_id, summoner_name=None, summoner_id=None):
         if summoner_name:
@@ -374,18 +386,18 @@ class LeagueOfLegends(Base):
         lol.update()
         return lol
 
-    def update(self):
+    def update(self) -> bool:
         r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
-            return RequestError(f"League of Legends API /summoner returned {r.status_code}")
+            raise RequestError(f"League of Legends API /summoner returned {r.status_code}")
         data = r.json()
         r = requests.get(f"https://euw1.api.riotgames.com/lol/league/v3/positions/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
-            return RequestError(f"League of Legends API /league returned {r.status_code}")
+            raise RequestError(f"League of Legends API /league returned {r.status_code}")
         rank = r.json()
         r = requests.get(f"https://euw1.api.riotgames.com/lol/champion-mastery/v3/champion-masteries/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
-            return RequestError(f"League of Legends API /champion-mastery returned {r.status_code}")
+            raise RequestError(f"League of Legends API /champion-mastery returned {r.status_code}")
         mastery = r.json()
         solo_rank = None
         flex_rank = None
@@ -477,6 +489,11 @@ class Osu(Base):
         self.catch_pp = j2["pp_raw"]
         self.mania_pp = j3["pp_raw"]
 
+    def __repr__(self):
+        if not self.osu_name:
+            return f"<db.Osu {self.osu_id}>"
+        return f"<db.Osu {self.osu_name}>"
+
 
 class Discord(Base):
     __tablename__ = "discord"
@@ -494,7 +511,7 @@ class Discord(Base):
         return f"{self.name}#{self.discriminator}"
 
     def __repr__(self):
-        return f"<Discord user {self.discord_id}>"
+        return f"<db.Discord {self.discord_id}>"
 
     @staticmethod
     def create(session: Session, royal_username, discord_user: DiscordUser):
@@ -542,7 +559,7 @@ class Overwatch(Base):
         return f"{self.battletag}{separator}{self.discriminator}"
 
     def __repr__(self):
-        return f"<Overwatch {self}>"
+        return f"<db.Overwatch {self}>"
 
     @staticmethod
     def create(session: Session, royal_id, battletag, discriminator=None):
@@ -614,7 +631,7 @@ class Diario(Base):
     text = Column(String)
 
     def __repr__(self):
-        return f"<Diario {self.id}>"
+        return f"<db.Diario {self.id}>"
 
     def __str__(self):
         return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
@@ -668,7 +685,7 @@ class BaluRage(Base):
     reason = Column(String)
 
     def __repr__(self):
-        return f"<BaluRage {self.id}>"
+        return f"<db.BaluRage {self.id}>"
 
 
 class PlayedMusic(Base):
@@ -681,7 +698,7 @@ class PlayedMusic(Base):
     timestamp = Column(DateTime, nullable=False)
 
     def __repr__(self):
-        return f"<PlayedMusic {self.filename}>"
+        return f"<db.PlayedMusic {self.filename}>"
 
 
 class VoteQuestion(Base):
@@ -694,7 +711,7 @@ class VoteQuestion(Base):
     open = Column(Boolean, default=True)
 
     def __repr__(self):
-        return f"<Vote {self.id}>"
+        return f"<db.Vote {self.id}>"
 
     def generate_text(self, session: Session):
         text = f"<b>{self.question}</b>\n\n"
@@ -746,7 +763,7 @@ class VoteAnswer(Base):
     __table_args__ = (PrimaryKeyConstraint("question_id", "user_id"),)
 
     def __repr__(self):
-        return f"<VoteAnswer {self.question_id} {self.user} {self.choice}>"
+        return f"<db.VoteAnswer {self.question_id} {self.user} {self.choice}>"
 
 
 class ProfileData(Base):
@@ -758,12 +775,18 @@ class ProfileData(Base):
     css = Column(Text)
     bio = Column(Text)
 
+    def __repr__(self):
+        return f"<ProfileData for {self.royal.username}>"
+
 
 class WikiEntry(Base):
     __tablename__ = "wikientries"
 
     key = Column(String, primary_key=True)
     content = Column(Text, nullable=False)
+
+    def __repr__(self):
+        return f"<WikiEntry {self.key}>"
 
 
 class WikiLog(Base):
@@ -776,6 +799,9 @@ class WikiLog(Base):
     edited = relationship("WikiEntry", backref="edit_logs", lazy="joined")
     timestamp = Column(DateTime, nullable=False)
     reason = Column(Text)
+
+    def __repr__(self):
+        return f"<WikiLog {self.edit_id}>"
 
 
 class Event(Base):
@@ -798,6 +824,9 @@ class Event(Base):
             raise TypeError("time_left should be a datetime.timedelta")
         self.time = datetime.datetime.now() + value
 
+    def __repr__(self):
+        return f"<Event {self.name}>"
+
 
 class Reddit(Base):
     __tablename__ = "reddit"
@@ -807,6 +836,9 @@ class Reddit(Base):
 
     username = Column(String, primary_key=True)
     karma = Column(BigInteger)
+
+    def __repr__(self):
+        return f"<Reddit u/{self.username}>"
 
 
 class GameLog(Base):
@@ -822,6 +854,9 @@ class GameLog(Base):
     completed_games = Column(Integer)
     mastered_games = Column(Integer)
 
+    def __repr__(self):
+        return f"<GameLog {self.username}>"
+
 
 class ParsedRedditPost(Base):
     __tablename__ = "parsedredditposts"
@@ -829,6 +864,9 @@ class ParsedRedditPost(Base):
     id = Column(String, primary_key=True)
 
     author_username = Column(String)
+
+    def __repr__(self):
+        return f"<ParsedRedditPost {self.id}>"
 
 
 class LoginToken(Base):
@@ -839,6 +877,9 @@ class LoginToken(Base):
 
     token = Column(String, primary_key=True)
     expiration = Column(DateTime, nullable=False)
+
+    def __repr__(self):
+        return f"<LoginToken for {self.royal.username}>"
 
 
 # If run as script, create all the tables in the db
