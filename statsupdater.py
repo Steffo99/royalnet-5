@@ -9,7 +9,7 @@ import telegram
 import sys
 import coloredlogs
 
-logging.getLogger().setLevel(level=logging.ERROR)
+logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 
