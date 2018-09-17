@@ -14,7 +14,6 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 logging.lastResort = None
-ì
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 
