@@ -8,8 +8,9 @@ import logging
 import coloredlogs
 
 logging.getLogger().setLevel(level=logging.ERROR)
-logging.getLogger(__name__).setLevel(level=logging.DEBUG)
-coloredlogs.install(level="DEBUG")
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG)
+coloredlogs.install(level="DEBUG", logger=logger)
 
 discord_telegram_pipe = multiprocessing.Pipe()
 discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],), daemon=True)
