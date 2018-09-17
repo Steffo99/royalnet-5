@@ -63,24 +63,24 @@ def new_lol_rank(item: db.LeagueOfLegends):
 
 def process():
     while True:
+        logger.info("Pausing for 30 minutes.")
+        time.sleep(1800)
         session = db.Session()
-        #logger.info("Now updating Steam data.")
-        #update_block(session.query(db.Steam).all())
-        #session.commit()
-        #logger.info("Now updating Dota data.")
-        #update_block(session.query(db.Dota).all(), delay=1, change_callback=new_dota_rank)
-        #session.commit()
-        #logger.info("Now updating League of Legends data.")
-        #update_block(session.query(db.LeagueOfLegends).all(), delay=0.3, change_callback=new_lol_rank)
-        #session.commit()
-        #logger.info("Now updating osu! data.")
-        #update_block(session.query(db.Osu).all(), delay=0.3)
-        #session.commit()
+        logger.info("Now updating Steam data.")
+        update_block(session.query(db.Steam).all())
+        session.commit()
+        logger.info("Now updating Dota data.")
+        update_block(session.query(db.Dota).all(), delay=1, change_callback=new_dota_rank)
+        session.commit()
+        logger.info("Now updating League of Legends data.")
+        update_block(session.query(db.LeagueOfLegends).all(), delay=0.3, change_callback=new_lol_rank)
+        session.commit()
+        logger.info("Now updating osu! data.")
+        update_block(session.query(db.Osu).all(), delay=0.3)
+        session.commit()
         logger.info("Now updating Overwatch data.")
         update_block(session.query(db.Overwatch).all(), delay=1)
         session.commit()
-        logger.info("Pausing for 30 minutes.")
-        time.sleep(1800)
 
 
 if __name__ == "__main__":
