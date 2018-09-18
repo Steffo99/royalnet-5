@@ -2,10 +2,13 @@ import multiprocessing
 import telegrambot
 import discordbot
 import redditbot
-import statsupdater
+import statsupdate
 import time
 import logging
 import coloredlogs
+import os
+
+os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -15,7 +18,7 @@ discord_telegram_pipe = multiprocessing.Pipe()
 discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],), daemon=True)
 telegram = multiprocessing.Process(target=telegrambot.process, args=(discord_telegram_pipe[1],), daemon=True)
 reddit = multiprocessing.Process(target=redditbot.process, daemon=True)
-stats = multiprocessing.Process(target=statsupdater.process, daemon=True)
+stats = multiprocessing.Process(target=statsupdate.process, daemon=True)
 
 if __name__ == "__main__":
     logger.info("Starting Discord Bot process...")
@@ -24,7 +27,7 @@ if __name__ == "__main__":
     telegram.start()
     logger.info("Starting Reddit Bot process...")
     reddit.start()
-    logger.info("Starting StatsUpdater process...")
+    logger.info("Starting StatsUpdate process...")
     stats.start()
     try:
         while True:
@@ -49,8 +52,8 @@ if __name__ == "__main__":
             if stats.exitcode is not None:
                 logger.warning(f"StatsUpdater exited with {stats.exitcode}")
                 del stats
-                stats = multiprocessing.Process(target=statsupdater.process, daemon=True)
-                logger.info("Restarting StatsUpdater process...")
+                stats = multiprocessing.Process(target=statsupdate.process, daemon=True)
+                logger.info("Restarting StatsUpdate process...")
                 stats.start()
             time.sleep(10)
     except KeyboardInterrupt:
@@ -63,5 +66,5 @@ if __name__ == "__main__":
         telegram.join()
         logger.info("Waiting for Reddit Bot process to stop...")
         reddit.join()
-        logger.info("Waiting for StatsUpdater process to stop...")
+        logger.info("Waiting for StatsUpdate process to stop...")
         stats.join()
