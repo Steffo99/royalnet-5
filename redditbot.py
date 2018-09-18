@@ -15,6 +15,7 @@ config.read("config.ini")
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
+os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
 coloredlogs.install(level="DEBUG", logger=logger)
 
 sentry = raven.Client(config["Sentry"]["token"],

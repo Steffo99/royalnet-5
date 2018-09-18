@@ -1,6 +1,7 @@
 import datetime
 import logging
-
+import os
+import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, joinedload
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -22,6 +23,10 @@ engine = create_engine(config["Database"]["database_uri"])
 Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
 
+logging.getLogger().disabled = True
+logger = logging.getLogger(__name__)
+os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
+coloredlogs.install(level="DEBUG", logger=logger)
 
 class Royal(Base):
     __tablename__ = "royals"
