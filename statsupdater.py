@@ -9,7 +9,7 @@ import telegram
 import sys
 import coloredlogs
 
-logging.lastResort = None
+logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 
@@ -71,16 +71,16 @@ def process():
         update_block(session.query(db.Steam).all())
         session.commit()
         logger.info("Now updating Dota data.")
-        update_block(session.query(db.Dota).all(), delay=1, change_callback=new_dota_rank)
+        update_block(session.query(db.Dota).all(), delay=5, change_callback=new_dota_rank)
         session.commit()
         logger.info("Now updating League of Legends data.")
-        update_block(session.query(db.LeagueOfLegends).all(), delay=0.3, change_callback=new_lol_rank)
+        update_block(session.query(db.LeagueOfLegends).all(), delay=5, change_callback=new_lol_rank)
         session.commit()
         logger.info("Now updating osu! data.")
-        update_block(session.query(db.Osu).all(), delay=0.3)
+        update_block(session.query(db.Osu).all(), delay=5)
         session.commit()
         logger.info("Now updating Overwatch data.")
-        update_block(session.query(db.Overwatch).all(), delay=1)
+        update_block(session.query(db.Overwatch).all(), delay=5)
         session.commit()
 
 

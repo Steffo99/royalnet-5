@@ -24,7 +24,7 @@ try:
 except Exception:
     model = None
 
-logging.lastResort = None
+logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", logger=logger)
 

@@ -1,4 +1,6 @@
 import datetime
+import logging
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, joinedload
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -587,16 +589,19 @@ class Overwatch(Base):
         try:
             j = r.json()["eu"]["stats"].get("competitive")
             if j is None:
-                raise RequestError("Something went wrong when retrieving the stats.")
+                logging.debug(f"No stats for {repr(self)}, skipping...")
+                return
             if not j["game_stats"]:
-                raise RequestError("Something went wrong when retrieving the stats.")
+                logging.debug(f"No stats for {repr(self)}, skipping...")
+                return
             j = j["overall_stats"]
         except TypeError:
-            raise RequestError("Something went wrong when retrieving the stats.")
+            logging.debug(f"No stats for {repr(self)}, skipping...")
+            return
         try:
             self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
         except AttributeError:
-            pass
+            logging.debug(f"No icon available for {repr(self)}.")
         self.level = j["prestige"] * 100 + j["level"]
         self.rank = j["comprank"]
 
