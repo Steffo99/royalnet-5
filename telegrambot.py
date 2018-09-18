@@ -109,7 +109,7 @@ def cmd_discord(bot: Bot, update: Update):
         return
     discord_connection.send("get cv")
     message = discord_connection.recv()
-    bot.send_message(update.message.chat.id, message, disable_web_page_preview=True)
+    bot.send_message(update.message.chat.id, message, disable_web_page_preview=True, parse_mode="HTML")
 
 
 @catch_and_report

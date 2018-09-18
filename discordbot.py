@@ -298,6 +298,7 @@ class RoyalDiscordBot(discord.Client):
         if not isinstance(self.main_guild, discord.Guild):
             raise InvalidConfigError("The main guild does not exist!")
         await self.change_presence(status=discord.Status.online, activity=None)
+        logger.info("Bot is ready!")
 
     async def on_message(self, message: discord.Message):
         if message.channel != self.main_channel or message.author.bot:
@@ -318,6 +319,7 @@ class RoyalDiscordBot(discord.Client):
         if data[0] not in self.commands:
             await message.channel.send(":warning: Comando non riconosciuto.")
             return
+        logger.debug(f"Received command: {message.content}")
         sentry.extra_context({
             "command": data[0],
             "message": message
@@ -351,7 +353,7 @@ class RoyalDiscordBot(discord.Client):
         await self.wait_until_ready()
         while True:
             msg = await loop.run_in_executor(executor, connection.recv)
-            logger.debug(f"Received \"{msg}\" from the Telegram-Discord pipe.")
+            logger.debug(f"Received from the Telegram-Discord pipe: {msg}")
             if msg == "get cv":
                 discord_members = list(self.main_guild.members)
                 channels = {0: None}
@@ -369,13 +371,17 @@ class RoyalDiscordBot(discord.Client):
                     else:
                         members_in_channels[0].append(member)
                 # Edit the message, sorted by channel
-                for channel in channels:
+                for channel in sorted(channels, key=lambda c: -c):
                     members_in_channels[channel].sort(key=lambda x: x.nick if x.nick is not None else x.name)
                     if channel == 0:
-                        message += "Non in chat vocale:\n"
+                        message += "<b>Non in chat vocale:</b>\n"
                     else:
-                        message += f"In #{channels[channel].name}:\n"
+                        message += f"<b>In #{channels[channel].name}:</b>\n"
                     for member in members_in_channels[channel]:
+                        # Ignore not-connected non-notable members
+                        if channel == 0 and len(member.roles) < 2:
+                            continue
+                        # Ignore offline members
                         if member.status == discord.Status.offline and member.voice is None:
                             continue
                         # Online status emoji
@@ -405,22 +411,29 @@ class RoyalDiscordBot(discord.Client):
                             message += member.name
                         # Game or stream
                         if member.activity is not None:
-                            if member.activity == discord.ActivityType.playing:
+                            if member.activity.type == discord.ActivityType.playing:
                                 message += f" | 🎮 {member.activity.name}"
-                            elif member.activity == discord.ActivityType.streaming:
+                                # Rich presence
+                                if member.activity.state:
+                                    message += f" ({member.activity.state})"
+                                elif member.activity.details:
+                                    message += f" ({member.activity.details})"
+                            elif member.activity.type == discord.ActivityType.streaming:
                                 message += f" | 📡 [{member.activity.name}]({member.activity.url})"
-                            elif member.activity == discord.ActivityType.listening:
+                            elif member.activity.type == discord.ActivityType.listening:
                                 message += f" | 🎧 {member.activity.name}"
                             elif member.activity.type == discord.ActivityType.watching:
                                 message += f" | 📺 {member.activity.name}"
                         message += "\n"
                     message += "\n"
                 connection.send(message)
+                logger.debug(f"Answered successfully cvlist request.")
             elif msg.startswith("!"):
                 data = msg.split(" ")
                 if data[0] not in self.commands:
                     connection.send("error")
                     continue
+                logger.debug(f"Received command: {msg}")
                 await self.main_channel.send(f"{msg}\n"
                                              f"_(da Telegram)_")
                 await self.commands[data[0]](channel=self.main_channel,
@@ -437,6 +450,8 @@ class RoyalDiscordBot(discord.Client):
                     with async_timeout.timeout(int(config["YouTube"]["download_timeout"])):
                         await video.download()
                 except asyncio.TimeoutError:
+                    logger.warning(f"Video download took more than {config['YouTube']['download_timeout']}s:"
+                                   f" {video.plain_text()}")
                     await self.main_channel.send(f"⚠️ Il download di {str(video)} ha richiesto più di"
                                                  f" {config['YouTube']['download_timeout']} secondi, pertanto è stato"
                                                  f" rimosso dalla coda.")
@@ -449,6 +464,18 @@ class RoyalDiscordBot(discord.Client):
                     del self.video_queue[index]
                     continue
                 except Exception as e:
+                    sentry.user_context({
+                        "discord": {
+                            "discord_id": video.enqueuer.id,
+                            "name": video.enqueuer.name,
+                            "discriminator": video.enqueuer.discriminator
+                        }
+                    })
+                    sentry.extra_context({
+                        "video": video.plain_text()
+                    })
+                    sentry.captureException()
+                    logger.error(f"Video download error: {str(e)}")
                     await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
                                                  f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
                                                  f"**Dettagli sull'errore:**\n"
@@ -468,18 +495,18 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 if len(self.video_queue) == 0:
                     self.now_playing = None
-                    await self.change_presence()
                     continue
                 now_playing = self.video_queue[0]
                 try:
                     audio_source = now_playing.create_audio_source()
                 except FileNotDownloadedError:
                     continue
-                logger.info(f"Started playing {repr(now_playing)}")
+                logger.info(f"Started playing {repr(now_playing)}.")
                 voice_client.play(audio_source)
                 del self.video_queue[0]
                 activity = discord.Activity(name=now_playing.plain_text(),
                                             type=discord.ActivityType.playing)
+                logger.debug(f"Updated bot presence to {now_playing.plain_text()}.")
                 await self.change_presence(status=discord.Status.online, activity=activity)
                 if now_playing.enqueuer is not None:
                     try:
@@ -511,29 +538,32 @@ class RoyalDiscordBot(discord.Client):
                 continue
             for voice_client in self.voice_clients:
                 if voice_client.is_connected():
+                    logger.info("Disconnecting due to inactivity.")
                     await voice_client.disconnect()
                     await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
+        logger.debug(f"Retrieving info for {url}.")
         with youtube_dl.YoutubeDL({"quiet": True,
                                    "ignoreerrors": True,
                                    "simulate": True}) as ytdl:
             info = await loop.run_in_executor(executor,
                                               functools.partial(ytdl.extract_info, url=url, download=False))
         if info is None:
+            logger.debug(f"No video found at {url}.")
             await self.main_channel.send(f"⚠ Non è stato trovato nessun video all'URL `{url}`,"
                                          f" pertanto non è stato aggiunto alla coda.")
             return
         if "entries" in info:
-            # This is a playlist
+            logger.debug(f"Playlist detected at {url}.")
             for entry in info["entries"]:
                 if index is not None:
                     self.video_queue.insert(index, Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
                 else:
                     self.video_queue.append(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer))
             return
-        # This is a single video
+        logger.debug(f"Single video detected at {url}.")
         if index is not None:
             self.video_queue.insert(index, Video(url=url, info=info, enqueuer=enqueuer))
         else:
@@ -598,10 +628,12 @@ class RoyalDiscordBot(discord.Client):
         # Check if there's already a connected client
         for voice_client in self.voice_clients:
             if voice_client.channel in self.main_guild.channels and voice_client.is_connected():
+                logger.info(f"Moving to {author.voice.channel.name}.")
                 await voice_client.move_to(author.voice.channel)
                 await channel.send(f"⤵️ Mi sono spostato in <#{author.voice.channel.id}>.")
                 break
         else:
+            logger.info(f"Connecting to {author.voice.channel.name}.")
             await author.voice.channel.connect()
             await channel.send(f"⤵️ Mi sono connesso in <#{author.voice.channel.id}>.")
 
@@ -621,12 +653,14 @@ class RoyalDiscordBot(discord.Client):
                 self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
                 await self.add_video_from_url(radio_message)
                 await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
+                logger.info(f"Radio message added to the queue.")
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
         if url is not None:
             # This is a url
             await self.add_video_from_url(url.group(0), enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Added {url} to the queue as URL.")
             return
         # Parse the parameter as file
         file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
@@ -634,18 +668,21 @@ class RoyalDiscordBot(discord.Client):
             # This is a file
             await self.add_video_from_file(file=file_path, enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Added {file_path} to the queue as file.")
             return
         file_path += ".opus"
         if os.path.exists(file_path):
             # This is a file
             await self.add_video_from_file(file=file_path, enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Added {file_path} to the queue as file.")
             return
         # Search the parameter on youtube
         search = " ".join(params[1:])
         # This is a search
         await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
         await channel.send(f"✅ Video aggiunto alla coda.")
+        logger.debug(f"Added ytsearch:{search} to the queue as YouTube search.")
 
     @command
     @requires_connected_voice_client
@@ -654,6 +691,7 @@ class RoyalDiscordBot(discord.Client):
             if voice_client.is_playing():
                 voice_client.stop()
                 await channel.send(f"⏩ Video saltato.")
+                logger.debug(f"A song was skipped.")
                 break
         else:
             await channel.send("⚠ Non c'è nessun video in riproduzione.")
@@ -680,6 +718,7 @@ class RoyalDiscordBot(discord.Client):
                 return
             video = self.video_queue.pop(index)
             await channel.send(f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
+            logger.debug(f"Removed from queue: {video.plain_text()}")
             return
         try:
             start = int(params[1]) - 1
@@ -709,6 +748,7 @@ class RoyalDiscordBot(discord.Client):
             return
         del self.video_queue[start:end]
         await channel.send(f":regional_indicator_x: {end - start} video rimossi dalla coda.")
+        logger.debug(f"Removed from queue {end - start} videos.")
 
     @command
     async def cmd_queue(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -730,6 +770,7 @@ class RoyalDiscordBot(discord.Client):
             await channel.send("⚠ Non ci sono video in coda!")
             return
         random.shuffle(self.video_queue)
+        logger.info(f"The queue was shuffled by {author.name}#{author.discriminator}.")
         await channel.send("♠️ ♦️ ♣️ ♥️ Shuffle completo!")
 
     @command
@@ -739,6 +780,7 @@ class RoyalDiscordBot(discord.Client):
             await channel.send("⚠ Non ci sono video in coda!")
             return
         self.video_queue = []
+        logger.info(f"The queue was cleared by {author.name}#{author.discriminator}.")
         await channel.send(":regional_indicator_x: Tutti i video in coda rimossi.")
 
     @command
@@ -751,31 +793,36 @@ class RoyalDiscordBot(discord.Client):
         for voice_client in self.voice_clients:
             if voice_client.is_playing():
                 voice_client.stop()
+        logger.info(f"Video play was forced by {author.name}#{author.discriminator}.")
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
         if url is not None:
             # This is a url
-            await self.add_video_from_url(url.group(0), enqueuer=author, index=0)
-            await channel.send(f"✅ Riproduzione del video forzata.")
+            await self.add_video_from_url(url.group(0), enqueuer=author)
+            await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Forced {url} as URL.")
             return
         # Parse the parameter as file
         file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
         if os.path.exists(file_path):
             # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author, index=0)
-            await channel.send(f"✅ Riproduzione del video forzata.")
+            await self.add_video_from_file(file=file_path, enqueuer=author)
+            await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Forced {file_path} as file.")
             return
         file_path += ".opus"
         if os.path.exists(file_path):
             # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author, index=0)
-            await channel.send(f"✅ Riproduzione del video forzata.")
+            await self.add_video_from_file(file=file_path, enqueuer=author)
+            await channel.send(f"✅ Video aggiunto alla coda.")
+            logger.debug(f"Forced {file_path} as file.")
             return
         # Search the parameter on youtube
         search = " ".join(params[1:])
         # This is a search
-        await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author, index=0)
-        await channel.send(f"✅ Riproduzione del video forzata.")
+        await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
+        await channel.send(f"✅ Video aggiunto alla coda.")
+        logger.debug(f"Forced ytsearch:{search} as YouTube search.")
 
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -790,6 +837,7 @@ class RoyalDiscordBot(discord.Client):
                 await channel.send("⚠ Sintassi del comando non valida.\n"
                                    "Sintassi: `!radiomessages [on|off]`")
                 return
+        logger.info(f"Radio messages status toggled to {self.radio_messages}.")
         await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages else 'disattivati'}**.")
 
     @command
@@ -798,6 +846,7 @@ class RoyalDiscordBot(discord.Client):
         for voice_client in self.voice_clients:
             if voice_client.is_playing():
                 voice_client.pause()
+                logger.debug(f"The audio stream was paused.")
                 await channel.send(f"⏸ Riproduzione messa in pausa.\n"
                                    f"Riprendi con `!resume`.")
 
@@ -807,6 +856,7 @@ class RoyalDiscordBot(discord.Client):
         for voice_client in self.voice_clients:
             if voice_client.is_playing():
                 voice_client.resume()
+                logger.debug(f"The audio stream was resumed.")
                 await channel.send(f"⏯ Riproduzione ripresa.")
 
 
