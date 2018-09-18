@@ -49,7 +49,7 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
                    f"Dopo qualche minuto, la temperatura ambiente raggiunge gli 0 °C, e continua a diminuire.\n" \
                    f"L'Apocalisse Nucleare è giunta, e tutto per polverizzare <i>{target_name}</i>" \
                    f" con <b>{spell}</b>.\n" \
-                   f"<i>{target_name}</i> subisce 10d100+20=<b>1020</b> danni apocalittici!"
+                   f"<i>{target_name}</i> subisce 10d100+20=<b>9999</b> danni apocalittici!"
         return f"❇️ Ho lanciato <b>{spell}</b> su " \
                f"<i>{target_name}</i>.\n" \
                f"{crit_msg}" \
@@ -68,7 +68,7 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
                    f"Dopo qualche minuto, la temperatura ambiente raggiunge gli 0 °C, e continua a diminuire.\n" \
                    f"L'Apocalisse Nucleare è giunta, e tutto per polverizzare _{target_name}_" \
                    f" con **{spell}**.\n" \
-                   f"_{target_name}_ subisce 10d100+20=**1020** danni apocalittici!"
+                   f"_{target_name}_ subisce 10d100+20=**9999** danni apocalittici!"
         return f"❇️ Ho lanciato **{spell}** su " \
                f"_{target_name}_.\n" \
                f"{crit_msg}" \
