@@ -414,10 +414,13 @@ class RoyalDiscordBot(discord.Client):
                             if member.activity.type == discord.ActivityType.playing:
                                 message += f" | 🎮 {member.activity.name}"
                                 # Rich presence
-                                if member.activity.state:
+                                try:
                                     message += f" ({member.activity.state})"
-                                elif member.activity.details:
-                                    message += f" ({member.activity.details})"
+                                except AttributeError:
+                                    try:
+                                        message += f" ({member.activity.details})"
+                                    except AttributeError:
+                                        pass
                             elif member.activity.type == discord.ActivityType.streaming:
                                 message += f" | 📡 [{member.activity.name}]({member.activity.url})"
                             elif member.activity.type == discord.ActivityType.listening:

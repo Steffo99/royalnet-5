@@ -8,7 +8,6 @@ import logging
 import coloredlogs
 import os
 
-
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
 os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
