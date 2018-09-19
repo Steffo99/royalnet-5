@@ -58,7 +58,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Now stopping...")
         logger.info("Asking Discord process to stop...")
-        discord_telegram_pipe[0].send("stop")
+        discord_telegram_pipe[1].send("stop")
         logger.info("Waiting for Discord Bot process to stop...")
         discord.join()
         logger.info("Waiting for Telegram Bot process to stop...")
