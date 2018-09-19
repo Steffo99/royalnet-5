@@ -14,10 +14,10 @@ os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(mes
 coloredlogs.install(level="DEBUG", logger=logger)
 
 discord_telegram_pipe = multiprocessing.Pipe()
-discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],), daemon=True)
-telegram = multiprocessing.Process(target=telegrambot.process, args=(discord_telegram_pipe[1],), daemon=True)
-reddit = multiprocessing.Process(target=redditbot.process, daemon=True)
-stats = multiprocessing.Process(target=statsupdate.process, daemon=True)
+discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],))
+telegram = multiprocessing.Process(target=telegrambot.process, args=(discord_telegram_pipe[1],))
+reddit = multiprocessing.Process(target=redditbot.process)
+stats = multiprocessing.Process(target=statsupdate.process)
 
 if __name__ == "__main__":
     logger.info("Starting Discord Bot process...")
@@ -34,24 +34,24 @@ if __name__ == "__main__":
                 logger.warning(f"Discord Bot exited with {discord.exitcode}")
                 del discord
                 logger.info("Restarting Discord Bot process...")
-                discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],), daemon=True)
+                discord = multiprocessing.Process(target=discordbot.process, args=(discord_telegram_pipe[0],))
                 discord.start()
             if telegram.exitcode is not None:
                 logger.warning(f"Telegram Bot exited with {telegram.exitcode}")
                 del telegram
-                telegram = multiprocessing.Process(target=telegrambot.process, args=(discord_telegram_pipe[1],), daemon=True)
+                telegram = multiprocessing.Process(target=telegrambot.process, args=(discord_telegram_pipe[1],))
                 logger.info("Restarting Telegram Bot process...")
                 telegram.start()
             if reddit.exitcode is not None:
                 logger.warning(f"Reddit Bot exited with {reddit.exitcode}")
                 del reddit
-                reddit = multiprocessing.Process(target=redditbot.process, daemon=True)
+                reddit = multiprocessing.Process(target=redditbot.process)
                 logger.info("Restarting Reddit Bot process...")
                 reddit.start()
             if stats.exitcode is not None:
                 logger.warning(f"StatsUpdater exited with {stats.exitcode}")
                 del stats
-                stats = multiprocessing.Process(target=statsupdate.process, daemon=True)
+                stats = multiprocessing.Process(target=statsupdate.process)
                 logger.info("Restarting StatsUpdate process...")
                 stats.start()
             time.sleep(10)
