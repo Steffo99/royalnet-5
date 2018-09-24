@@ -160,7 +160,7 @@ class Steam(Base):
         else:
             return f"{int(steam_id) - 76561197960265728}"
 
-    def update(self):
+    def update(self, raise_if_private: bool=False):
         r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={self.steam_id}")
         if r.status_code != 200:
             raise RequestError(f"Steam returned {r.status_code}")
@@ -174,7 +174,9 @@ class Steam(Base):
         if "response" not in j \
             or "games" not in j["response"] \
             or len(j["response"]["games"]) < 1:
-            raise RequestError(f"Game data is private")
+            if raise_if_private:
+                raise RequestError(f"Game data is private")
+            return
         self.most_played_game_id = j["response"]["games"][0]["appid"]
 
 
