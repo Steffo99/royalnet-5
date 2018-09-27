@@ -4,9 +4,25 @@
     Pagina principale
 {% endblock %}
 
+{% block posthead %}
+    <script>
+        var audio = new Audio("{{ url_for('static', filename='ee.ogg') }}");
+
+        function ee() {
+            fetch("/ee/r", {
+                method: "POST",
+                mode: "same-origin",
+                credentials: "same-origin"
+            });
+            document.getElementById("main-title").innerHTML = '<span class="eeclear" title="Soon, my pupil.">R</span>oyal Games';
+            audio.play();
+        }
+    </script>
+{% endblock %}
+
 {% block body %}
-    <h1>
-        Royal Games
+    <h1 id="main-title">
+        <span {% if triggerable_r %}class="ee" onclick="ee()" {% else %}class="eeclear" title="Soon, my pupil."{% endif %}>R</span>oyal Games
     </h1>
     <div class="main-page">
         <div class="left">

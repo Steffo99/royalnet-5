@@ -6,6 +6,7 @@
 @accent-color: white;
 @link-color: #00aaff;
 @visited-color: #aa66ff;
+@old-ryg-color: #ff7f00;
 
 body {
     font-family: sans-serif;
@@ -867,6 +868,24 @@ table {
     {
         width: 1164px;
     }
+}
+
+.ee {
+    color: @old-ryg-color;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline #ff7f00;
+    }
+
+    &:active {
+        text-decoration: underline white;
+    }
+}
+
+.eeclear {
+    opacity: 0.8;
+    cursor: help;
 }
 
 #debug-mode {

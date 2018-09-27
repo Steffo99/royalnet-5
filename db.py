@@ -894,6 +894,18 @@ class LoginToken(Base):
         return f"<LoginToken for {self.royal.username}>"
 
 
+class EETrigger(Base):
+    __tablename__ = "eetriggers"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="triggers", lazy="joined")
+
+    stage = Column(String, nullable=False)
+
+    def __repr__(self):
+        return f"<EETrigger of {self.royal.username}: {self.stage}>"
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")
