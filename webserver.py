@@ -66,9 +66,10 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
+    triggerable_r = not bool(db_session.query(db.EETrigger).filter_by(royal_id=fl_session["user_id"]).one_or_none())
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, rygconf=config, escape=escape)
+                           next_events=next_events, rygconf=config, escape=escape, triggerable_r=triggerable_r)
 
 
 @app.route("/profile/<name>")
@@ -316,6 +317,24 @@ def page_diario():
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
     return render_template("diario.html", rygconf=config, entries=diario_entries)
+
+
+@app.route("/ee/r", methods=["POST"])
+def ee_r():
+    if fl_session["user_id"] is None:
+        abort(403)
+        return
+    db_session = db.Session()
+    trigger = db_session.query(db.EETrigger).filter_by(royal_id=fl_session["user_id"]).one_or_none()
+    if trigger is None:
+        trigger = db.EETrigger(royal_id=fl_session["user_id"],
+                               stage="R")
+        user = db_session.query(db.Royal).filter_by(id=fl_session["user_id"]).one()
+        db_session.add(trigger)
+        user.fiorygi += 1
+        db_session.commit()
+    db_session.close()
+    return "R"
 
 
 if __name__ == "__main__":
