@@ -7,7 +7,11 @@
         {% block prehead %}{% endblock %}
         <title>{% block pagetitle %}{% endblock %} - Royal Games</title>
         <link href="{{ url_for('static', filename='pygments.css') }}" rel="stylesheet" type="text/css">
-        <link href="{{ url_for('static', filename='nryg.less') }}" rel="stylesheet/less" type="text/css">
+        {% if config["DEBUG"] %}
+            <link href="{{ url_for('static', filename='spoopy.less') }}" rel="stylesheet/less" type="text/css">
+        {% else %}
+            <link href="{{ url_for('static', filename='nryg.less') }}" rel="stylesheet/less" type="text/css">
+        {% endif %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.0.2/less.min.js"></script>
         {% block posthead %}{% endblock %}
     </head>

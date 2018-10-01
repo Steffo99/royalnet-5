@@ -967,6 +967,107 @@ class Halloween(Base):
         return (completed_a and completed_b and completed_c and completed_d and completed_e
                 and completed_f and completed_g and completed_h and completed_i and completed_j)
 
+    @staticmethod
+    def puzzle_piece_a_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_a is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_b_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_b is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_c_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_c is not None:
+                return True
+        return False
+
+
+    @staticmethod
+    def puzzle_piece_d_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_d is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_e_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_e is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_f_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_f is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_g_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_g is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_h_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_h is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_i_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_i is not None:
+                return True
+        return False
+
+    @staticmethod
+    def puzzle_piece_j_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        for halloween in halloweens:
+            if halloween.puzzle_piece_j is not None:
+                return True
+        return False
+
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
