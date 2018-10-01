@@ -66,10 +66,9 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
-    triggerable_r = not bool(db_session.query(db.EETrigger).filter_by(royal_id=fl_session["user_id"]).one_or_none())
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, rygconf=config, escape=escape, triggerable_r=triggerable_r)
+                           next_events=next_events, rygconf=config, escape=escape)
 
 
 @app.route("/profile/<name>")
@@ -208,7 +207,12 @@ def page_game(name: str):
     elif name == "lol":
         game_name = "League of Legends"
         query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast(),
-                                                              db.LeagueOfLegends.solo_rank).all()
+                                                              db.LeagueOfLegends.solo_rank,
+                                                              db.LeagueOfLegends.flex_division.desc().nullslast(),
+                                                              db.LeagueOfLegends.flex_rank,
+                                                              db.LeagueOfLegends.twtr_division.desc().nullslast(),
+                                                              db.LeagueOfLegends.twtr_rank,
+                                                              db.LeagueOfLegends.level).all()
     elif name == "osu":
         game_name = "osu!"
         query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()

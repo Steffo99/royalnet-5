@@ -12,6 +12,7 @@ import re
 import enum
 from discord import User as DiscordUser
 from telegram import User as TelegramUser
+import loldata
 
 # Init the config reader
 import configparser
@@ -353,6 +354,7 @@ class LeagueOfLegends(Base):
     royal = relationship("Royal", backref="lol", lazy="joined")
 
     summoner_id = Column(BigInteger, primary_key=True)
+    account_id = Column(BigInteger)
     summoner_name = Column(String)
 
     level = Column(Integer)
@@ -369,31 +371,6 @@ class LeagueOfLegends(Base):
         if not self.summoner_name:
             return f"<LeagueOfLegends {self.summoner_id}>"
         return f"<LeagueOfLegends {(''.join([x if x.isalnum else '' for x in self.summoner_name]))}>"
-
-    @staticmethod
-    def create(session: Session, royal_id, summoner_name=None, summoner_id=None):
-        if summoner_name:
-            lol = session.query(LeagueOfLegends).filter(LeagueOfLegends.summoner_name == summoner_name).first()
-        elif summoner_id:
-            lol = session.query(LeagueOfLegends).get(summoner_id)
-        else:
-            raise SyntaxError("Neither summoner_name or summoner_id were specified.")
-        if lol is not None:
-            raise AlreadyExistingError(repr(lol))
-        # Get the summoner_id
-        if summoner_name:
-            r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/by-name/{summoner_name}?api_key={config['League of Legends']['riot_api_key']}")
-        else:
-            r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/{summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
-        if r.status_code != 200:
-            return RequestError(f"League of Legends API returned {r.status_code}")
-        data = r.json()
-        lol = LeagueOfLegends(royal_id=royal_id,
-                              summoner_id=data["id"],
-                              summoner_name=data["name"],
-                              level=data["summonerLevel"])
-        lol.update()
-        return lol
 
     def update(self) -> bool:
         r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
@@ -420,6 +397,7 @@ class LeagueOfLegends(Base):
                 twtr_rank = league
         self.summoner_id = data["id"]
         self.summoner_name = data["name"]
+        self.account_id = data["accountId"]
         self.level = data["summonerLevel"]
         if solo_rank is not None:
             self.solo_division = LeagueOfLegendsRanks[solo_rank["tier"]]
@@ -440,6 +418,14 @@ class LeagueOfLegends(Base):
             self.twtr_division = None
             self.twtr_rank = None
         self.highest_mastery_champ = mastery[0]["championId"]
+
+    def highest_mastery_champ_name(self):
+        champ = loldata.get_champ_by_key(self.highest_mastery_champ)
+        return champ["name"]
+
+    def highest_mastery_champ_image(self):
+        champ = loldata.get_champ_by_key(self.highest_mastery_champ)
+        return loldata.get_champ_icon(champ["name"])
 
 
 class Osu(Base):
@@ -894,16 +880,92 @@ class LoginToken(Base):
         return f"<LoginToken for {self.royal.username}>"
 
 
-class EETrigger(Base):
-    __tablename__ = "eetriggers"
+class Halloween(Base):
+    """This is some nice spaghetti, don't you think?"""
+    __tablename__ = "halloween"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
-    royal = relationship("Royal", backref="triggers", lazy="joined")
+    royal = relationship("Royal", backref="halloween", lazy="joined")
 
-    stage = Column(String, nullable=False)
+    first_trigger = Column(DateTime)
 
-    def __repr__(self):
-        return f"<EETrigger of {self.royal.username}: {self.stage}>"
+    puzzle_piece_a = Column(DateTime)
+    puzzle_piece_b = Column(DateTime)
+    puzzle_piece_c = Column(DateTime)
+    puzzle_piece_d = Column(DateTime)
+    puzzle_piece_e = Column(DateTime)
+    puzzle_piece_f = Column(DateTime)
+    puzzle_piece_g = Column(DateTime)
+    puzzle_piece_h = Column(DateTime)
+    puzzle_piece_i = Column(DateTime)
+    puzzle_piece_j = Column(DateTime)
+
+    boss_battle = Column(DateTime)
+
+    def pieces_completed(self) -> int:
+        count = 0
+        if puzzle_piece_a is not None:
+            count += 1
+        if puzzle_piece_b is not None:
+            count += 1
+        if puzzle_piece_c is not None:
+            count += 1
+        if puzzle_piece_d is not None:
+            count += 1
+        if puzzle_piece_e is not None:
+            count += 1
+        if puzzle_piece_f is not None:
+            count += 1
+        if puzzle_piece_g is not None:
+            count += 1
+        if puzzle_piece_h is not None:
+            count += 1
+        if puzzle_piece_i is not None:
+            count += 1
+        if puzzle_piece_j is not None:
+            count += 1
+        return count
+
+    @staticmethod
+    def puzzle_is_complete() -> bool:
+        session = db.Session()
+        halloweens = session.query(Halloween).all()
+        session.close()
+        completed_a = False
+        completed_b = False
+        completed_c = False
+        completed_d = False
+        completed_e = False
+        completed_f = False
+        completed_g = False
+        completed_h = False
+        completed_i = False
+        completed_j = False
+        for halloween in halloweens:
+            if halloween.puzzle_piece_a is not None:
+                completed_a = True
+            if halloween.puzzle_piece_b is not None:
+                completed_b = True
+            if halloween.puzzle_piece_c is not None:
+                completed_c = True
+            if halloween.puzzle_piece_d is not None:
+                completed_d = True
+            if halloween.puzzle_piece_d is not None:
+                completed_d = True
+            if halloween.puzzle_piece_e is not None:
+                completed_e = True
+            if halloween.puzzle_piece_f is not None:
+                completed_f = True
+            if halloween.puzzle_piece_g is not None:
+                completed_g = True
+            if halloween.puzzle_piece_h is not None:
+                completed_h = True
+            if halloween.puzzle_piece_i is not None:
+                completed_i = True
+            if halloween.puzzle_piece_j is not None:
+                completed_j = True
+        return (completed_a and completed_b and completed_c and completed_d and completed_e
+                and completed_f and completed_g and completed_h and completed_i and completed_j)
 
 
 # If run as script, create all the tables in the db

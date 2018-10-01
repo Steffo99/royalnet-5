@@ -14,7 +14,7 @@
                 mode: "same-origin",
                 credentials: "same-origin"
             });
-            document.getElementById("main-title").innerHTML = '<span class="eeclear" title="Soon, my pupil.">R</span>oyal Games';
+            document.getElementById("main-title").innerHTML = '<span class="eetip" title="When there is something strange, in the neighbourhood, who you gonna call?">R</span>oyal Games';
             audio.play();
         }
     </script>
@@ -22,7 +22,7 @@
 
 {% block body %}
     <h1 id="main-title">
-        <span {% if triggerable_r %}class="ee" onclick="ee()" {% else %}class="eeclear" title="Soon, my pupil."{% endif %}>R</span>oyal Games
+        Royal Games
     </h1>
     <div class="main-page">
         <div class="left">

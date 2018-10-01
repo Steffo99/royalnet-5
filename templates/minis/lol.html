@@ -16,6 +16,12 @@
         <div class="game-score level">
             <span>{{ record.level }}</span>
         </div>
+        <div class="game-title mastery">
+            MAIN
+        </div>
+        <div class="game-score mastery">
+            <img src="{{ record.highest_mastery_champ_image() }}" title="{{ record.highest_mastery_champ_name() }}" class="rank">
+        </div>
         <div class="game-title soloq">
             SOLO/DUO
         </div>
