@@ -137,6 +137,8 @@ def page_logout():
 
 @app.route("/password", methods=["GET", "POST"])
 def page_password():
+    if not fl_session.get("user_id"):
+        return redirect(url_for("page_login"))
     user_id = fl_session.get("user_id")
     if request.method == "GET":
         if user_id is None:
@@ -160,16 +162,14 @@ def page_password():
 @app.route("/editprofile", methods=["GET", "POST"])
 def page_editprofile():
     user_id = fl_session.get("user_id")
+    if not user_id:
+        return redirect(url_for("page_login"))
     db_session = db.Session()
     profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
         db_session.close()
-        if user_id is None:
-            return redirect(url_for("page_login"))
         return render_template("profileedit.html", data=profile_data, rygconf=config)
     elif request.method == "POST":
-        if user_id is None:
-            return redirect(url_for("page_login"))
         css = request.form.get("css", "")
         bio = request.form.get("bio", "")
         if "</style" in css:
@@ -317,28 +317,13 @@ def page_wiki(key: str):
 
 @app.route("/diario")
 def page_diario():
+    user_id = fl_session.get("user_id")
+    if not user_id:
+        return redirect(url_for("page_login"))
     db_session = db.Session()
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
     return render_template("diario.html", rygconf=config, entries=diario_entries)
-
-
-@app.route("/ee/r", methods=["POST"])
-def ee_r():
-    if fl_session["user_id"] is None:
-        abort(403)
-        return
-    db_session = db.Session()
-    trigger = db_session.query(db.EETrigger).filter_by(royal_id=fl_session["user_id"]).one_or_none()
-    if trigger is None:
-        trigger = db.EETrigger(royal_id=fl_session["user_id"],
-                               stage="R")
-        user = db_session.query(db.Royal).filter_by(id=fl_session["user_id"]).one()
-        db_session.add(trigger)
-        user.fiorygi += 1
-        db_session.commit()
-    db_session.close()
-    return "R"
 
 
 if __name__ == "__main__":

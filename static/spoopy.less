@@ -1,11 +1,11 @@
-@background-color: #0d193b;
-@text-color: #a0ccff;
-@accent-color: white;
+@background-color: #1a0606;
+@text-color: #ffa1a1;
+@accent-color: #ffcccc;
 @quote-color: #a0ffcc;
 @spoiler-color: #ffa0cc;
 @highlight-color: #ffff95;
-@link-color: #00aaff;
-@visited-color: #aa66ff;
+@link-color: #66aacc;
+@visited-color: #9870cc;
 
 body {
     font-family: sans-serif;
@@ -875,6 +875,28 @@ ntry {
     @media (min-width: 1180px)
     {
         width: 1164px;
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translate(2px, 2px);
+    }
+
+    20%, 80% {
+        transform: translate(-2px, -2px);
+    }
+
+    40% {
+        transform: translate(2px, -2px);
+    }
+
+    60% {
+        transform: translate(-2px, 2px);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        transform: translate(0px, 0px);
     }
 }
 
