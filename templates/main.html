@@ -11,9 +11,9 @@
 {% block posthead %}
     <script>
     function timer() {
-        var now = new Date().getTime();
-        var to = new Date("Oct 31, 2018 15:30:00").getTime();
-        var result = to - now;
+        let now = new Date().getTime();
+        let to = new Date("Oct 31, 2018 15:30:00").getTime();
+        let result = to - now;
         document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
                                                        + Math.floor(String((result / 60000) % 60)) + "m "
                                                        + Math.floor(String((result / 1000) % 60)) + "s";

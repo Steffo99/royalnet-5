@@ -1,0 +1,15 @@
+<div class="game-panel">
+    <div class="game-grid halloweenmini">
+        <div class="player">
+            <span class="player-name">Rituale di Halloween</span>
+        </div>
+        <div class="game-title stars">
+            Lune ottenute
+        </div>
+        <div class="game-score stars">
+            {% for index in range(record.pieces_completed()) %}
+                <i class="fas fa-moon"></i>
+            {% endfor %}
+        </div>
+    </div>
+</div>
