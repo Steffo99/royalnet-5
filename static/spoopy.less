@@ -749,6 +749,21 @@ table {
             grid-column: 3;
         }
     }
+
+    .halloweenmini {
+        background-color: #311515;
+        padding: 18px;
+        grid-template-columns: 100%;
+
+        .stars {
+            grid-column: 1;
+
+            i {
+                color: yellow;
+                font-size: 30px;
+            }
+        }
+    }
 }
 
 .wiki {
@@ -814,6 +829,11 @@ ntry {
         .right {
             grid-column: 2;
         }
+
+        .halloween {
+            grid-column-start: 1;
+            grid-column-end: 3;
+        }
     }
 
     @media (max-width:600px) {
@@ -827,6 +847,38 @@ ntry {
 
         .right {
             grid-row: 2;
+        }
+
+        .halloween {
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+    }
+
+    .halloween {
+        .upper-box {
+            font-size: xx-large;
+        }
+
+        .lower-box {
+            text-align: center;
+
+            .stars a {
+                color: @link-color;
+                font-size: 64px;
+
+                &:hover {
+                    color: @highlight-color;
+                }
+
+                .fas {
+                    color: yellow;
+                }
+            }
+
+            .time-left {
+                font-size: 64px;
+            }
         }
     }
 }
@@ -875,28 +927,6 @@ ntry {
     @media (min-width: 1180px)
     {
         width: 1164px;
-    }
-}
-
-@keyframes shake {
-    0%, 100% {
-        transform: translate(2px, 2px);
-    }
-
-    20%, 80% {
-        transform: translate(-2px, -2px);
-    }
-
-    40% {
-        transform: translate(2px, -2px);
-    }
-
-    60% {
-        transform: translate(-2px, 2px);
-    }
-
-    10%, 30%, 50%, 70%, 90% {
-        transform: translate(0px, 0px);
     }
 }
 

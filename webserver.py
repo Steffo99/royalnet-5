@@ -66,9 +66,21 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
+    halloween = [
+        db.Halloween.puzzle_piece_a_complete(),
+        db.Halloween.puzzle_piece_b_complete(),
+        db.Halloween.puzzle_piece_c_complete(),
+        db.Halloween.puzzle_piece_d_complete(),
+        db.Halloween.puzzle_piece_e_complete(),
+        db.Halloween.puzzle_piece_f_complete(),
+        db.Halloween.puzzle_piece_g_complete(),
+        db.Halloween.puzzle_piece_h_complete(),
+        db.Halloween.puzzle_piece_i_complete(),
+        db.Halloween.puzzle_piece_j_complete()
+    ]
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, rygconf=config, escape=escape)
+                           next_events=next_events, rygconf=config, escape=escape, halloween=enumerate(halloween))
 
 
 @app.route("/profile/<name>")
@@ -89,6 +101,7 @@ def page_profile(name: str):
     tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
     discord = db_session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
     gamelog = db_session.query(db.GameLog).filter_by(royal=user).one_or_none()
+    halloween = db_session.query(db.Halloween).filter_by(royal=user).one_or_none()
     db_session.close()
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
@@ -96,7 +109,8 @@ def page_profile(name: str):
     else:
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, rygconf=config, bio=converted_bio, gamelog=gamelog)
+                           tg=tg, discord=discord, rygconf=config, bio=converted_bio, gamelog=gamelog,
+                           halloween=halloween)
 
 
 @app.route("/login")
@@ -231,6 +245,9 @@ def page_game(name: str):
     elif name == "discord":
         game_name = "Discord"
         query = [dict(row) for row in db_session.execute(query_discord_music.all_query)]
+    elif name == "halloween":
+        game_name = "Rituale di Halloween"
+        query = db_session.query(db.Halloween).all()
     else:
         abort(404)
         return

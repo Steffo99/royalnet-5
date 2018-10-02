@@ -265,6 +265,7 @@ class RoyalDiscordBot(discord.Client):
             "!skip": self.cmd_skip,
             "!s": self.cmd_skip,
             "!remove": self.cmd_remove,
+            "!r": self.cmd_remove,
             "!cancel": self.cmd_remove,
             "!queue": self.cmd_queue,
             "!q": self.cmd_queue,
@@ -494,7 +495,7 @@ class RoyalDiscordBot(discord.Client):
         while True:
             # Fun things will happen with multiple voice clients!
             for voice_client in self.voice_clients:
-                if not voice_client.is_connected() or voice_client.is_playing():
+                if not voice_client.is_connected() or voice_client.is_playing() or voice_client.is_paused():
                     continue
                 if len(self.video_queue) == 0:
                     self.now_playing = None

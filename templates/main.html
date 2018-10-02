@@ -4,19 +4,22 @@
     Pagina principale
 {% endblock %}
 
+{% block prehead %}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+{% endblock %}
+
 {% block posthead %}
     <script>
-        var audio = new Audio("{{ url_for('static', filename='ee.ogg') }}");
+    function timer() {
+        var now = new Date().getTime();
+        var to = new Date("Oct 31, 2018 15:30:00").getTime();
+        var result = to - now;
+        document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
+                                                       + Math.floor(String((result / 60000) % 60)) + "m "
+                                                       + Math.floor(String((result / 1000) % 60)) + "s";
+    }
 
-        function ee() {
-            fetch("/ee/r", {
-                method: "POST",
-                mode: "same-origin",
-                credentials: "same-origin"
-            });
-            document.getElementById("main-title").innerHTML = '<span class="eetip" title="When there is something strange, in the neighbourhood, who you gonna call?">R</span>oyal Games';
-            audio.play();
-        }
+    setInterval(timer, 100);
     </script>
 {% endblock %}
 
@@ -25,6 +28,32 @@
         Royal Games
     </h1>
     <div class="main-page">
+        {% if config["DEBUG"] %}
+            <div class="halloween">
+                <div class="box">
+                    <div class="upper-box">
+                        Rituale di Halloween!
+                    </div>
+                    <div class="lower-box">
+                        Lune raccolte:
+                        <div class="stars">
+                            {% for index, star in halloween %}
+                                {% if star %}
+                                    <a href="/ritual/{{ index + 1 }}" title="Passo {{ index + 1 }} completato!"><i class="fas fa-moon"></i></a>
+                                {% else %}
+                                    <a href="/ritual/{{ index + 1 }}" title="Passo {{ index + 1 }}"><i class="far fa-moon"></i></a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <br>
+                        Tempo rimanente:
+                        <div id="time-left" class="time-left">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
         <div class="left">
             <div class="box">
                 <div class="upper-box">
@@ -76,6 +105,7 @@
                         <li><a href="/game/lol">League of Legends</a></li>
                         <li><a href="/game/ow">Overwatch</a></li>
                         <li><a href="/game/osu">osu!</a></li>
+                        <!--li><a href="/game/halloween">Rituale di Halloween</a></li-->
                     </ul>
                 </div>
             </div>

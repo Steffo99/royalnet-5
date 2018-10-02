@@ -904,31 +904,31 @@ class Halloween(Base):
 
     def pieces_completed(self) -> int:
         count = 0
-        if puzzle_piece_a is not None:
+        if self.puzzle_piece_a is not None:
             count += 1
-        if puzzle_piece_b is not None:
+        if self.puzzle_piece_b is not None:
             count += 1
-        if puzzle_piece_c is not None:
+        if self.puzzle_piece_c is not None:
             count += 1
-        if puzzle_piece_d is not None:
+        if self.puzzle_piece_d is not None:
             count += 1
-        if puzzle_piece_e is not None:
+        if self.puzzle_piece_e is not None:
             count += 1
-        if puzzle_piece_f is not None:
+        if self.puzzle_piece_f is not None:
             count += 1
-        if puzzle_piece_g is not None:
+        if self.puzzle_piece_g is not None:
             count += 1
-        if puzzle_piece_h is not None:
+        if self.puzzle_piece_h is not None:
             count += 1
-        if puzzle_piece_i is not None:
+        if self.puzzle_piece_i is not None:
             count += 1
-        if puzzle_piece_j is not None:
+        if self.puzzle_piece_j is not None:
             count += 1
         return count
 
     @staticmethod
     def puzzle_is_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         completed_a = False
@@ -969,7 +969,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_a_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -979,7 +979,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_b_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -989,7 +989,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_c_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1000,7 +1000,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_d_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1010,7 +1010,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_e_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1020,7 +1020,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_f_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1030,7 +1030,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_g_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1040,7 +1040,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_h_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1050,7 +1050,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_i_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
@@ -1060,7 +1060,7 @@ class Halloween(Base):
 
     @staticmethod
     def puzzle_piece_j_complete() -> bool:
-        session = db.Session()
+        session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
         for halloween in halloweens:
