@@ -1,6 +1,8 @@
 import datetime
 import logging
 import os
+import typing
+
 import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, joinedload
@@ -902,172 +904,76 @@ class Halloween(Base):
 
     boss_battle = Column(DateTime)
 
+    def __getitem__(self, item):
+        if not isinstance(item, int):
+            raise TypeError("The index should be an int")
+        if item == 1:
+            return self.puzzle_piece_a
+        elif item == 2:
+            return self.puzzle_piece_b
+        elif item == 3:
+            return self.puzzle_piece_c
+        elif item == 4:
+            return self.puzzle_piece_d
+        elif item == 5:
+            return self.puzzle_piece_e
+        elif item == 6:
+            return self.puzzle_piece_f
+        elif item == 7:
+            return self.puzzle_piece_g
+        elif item == 8:
+            return self.puzzle_piece_h
+        elif item == 9:
+            return self.puzzle_piece_i
+        elif item == 10:
+            return self.puzzle_piece_j
+        else:
+            raise ValueError("No such puzzle piece")
+
+    def __setitem__(self, key, value):
+        if not isinstance(key, int):
+            raise TypeError("The index should be an int")
+        if key == 1:
+            self.puzzle_piece_a = value
+        elif key == 2:
+            self.puzzle_piece_b = value
+        elif key == 3:
+            self.puzzle_piece_c = value
+        elif key == 4:
+            self.puzzle_piece_d = value
+        elif key == 5:
+            self.puzzle_piece_e = value
+        elif key == 6:
+            self.puzzle_piece_f = value
+        elif key == 7:
+            self.puzzle_piece_g = value
+        elif key == 8:
+            self.puzzle_piece_h = value
+        elif key == 9:
+            self.puzzle_piece_i = value
+        elif key == 10:
+            self.puzzle_piece_j = value
+        else:
+            raise ValueError("No such puzzle piece")
+
     def pieces_completed(self) -> int:
         count = 0
-        if self.puzzle_piece_a is not None:
-            count += 1
-        if self.puzzle_piece_b is not None:
-            count += 1
-        if self.puzzle_piece_c is not None:
-            count += 1
-        if self.puzzle_piece_d is not None:
-            count += 1
-        if self.puzzle_piece_e is not None:
-            count += 1
-        if self.puzzle_piece_f is not None:
-            count += 1
-        if self.puzzle_piece_g is not None:
-            count += 1
-        if self.puzzle_piece_h is not None:
-            count += 1
-        if self.puzzle_piece_i is not None:
-            count += 1
-        if self.puzzle_piece_j is not None:
-            count += 1
+        for i in range(1, 11):
+            if self[i]:
+                count += 1
         return count
 
     @staticmethod
-    def puzzle_is_complete() -> bool:
+    def puzzle_status() -> typing.List[bool]:
         session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
-        completed_a = False
-        completed_b = False
-        completed_c = False
-        completed_d = False
-        completed_e = False
-        completed_f = False
-        completed_g = False
-        completed_h = False
-        completed_i = False
-        completed_j = False
-        for halloween in halloweens:
-            if halloween.puzzle_piece_a is not None:
-                completed_a = True
-            if halloween.puzzle_piece_b is not None:
-                completed_b = True
-            if halloween.puzzle_piece_c is not None:
-                completed_c = True
-            if halloween.puzzle_piece_d is not None:
-                completed_d = True
-            if halloween.puzzle_piece_d is not None:
-                completed_d = True
-            if halloween.puzzle_piece_e is not None:
-                completed_e = True
-            if halloween.puzzle_piece_f is not None:
-                completed_f = True
-            if halloween.puzzle_piece_g is not None:
-                completed_g = True
-            if halloween.puzzle_piece_h is not None:
-                completed_h = True
-            if halloween.puzzle_piece_i is not None:
-                completed_i = True
-            if halloween.puzzle_piece_j is not None:
-                completed_j = True
-        return (completed_a and completed_b and completed_c and completed_d and completed_e
-                and completed_f and completed_g and completed_h and completed_i and completed_j)
-
-    @staticmethod
-    def puzzle_piece_a_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_a is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_b_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_b is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_c_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_c is not None:
-                return True
-        return False
-
-
-    @staticmethod
-    def puzzle_piece_d_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_d is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_e_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_e is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_f_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_f is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_g_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_g is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_h_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_h is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_i_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_i is not None:
-                return True
-        return False
-
-    @staticmethod
-    def puzzle_piece_j_complete() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        session.close()
-        for halloween in halloweens:
-            if halloween.puzzle_piece_j is not None:
-                return True
-        return False
-
+        completed = [False for _ in range(10)]
+        for h in halloweens:
+            for i in range(10):
+                if h[i+1]:
+                    completed[i] = True
+        return completed
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":

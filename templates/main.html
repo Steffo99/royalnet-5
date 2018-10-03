@@ -36,12 +36,12 @@
                     </div>
                     <div class="lower-box">
                         Lune raccolte:
-                        <div class="stars">
+                        <div class="moons">
                             {% for index, star in halloween %}
                                 {% if star %}
-                                    <a href="/ritual/{{ index + 1 }}" title="Passo {{ index + 1 }} completato!"><i class="fas fa-moon"></i></a>
+                                    <a href="/ritual/{{ index }}" title="Luna {{ index }} ottenuta!"><i class="fas fa-moon"></i></a>
                                 {% else %}
-                                    <a href="/ritual/{{ index + 1 }}" title="Passo {{ index + 1 }}"><i class="far fa-moon"></i></a>
+                                    <a href="/ritual/{{ index }}" title="Rituale {{ index }}"><i class="far fa-moon"></i></a>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -97,6 +97,9 @@
                 <div class="lower-box">
                     <ul>
                         <li><a href="/game/ryg">Royal Games</a></li>
+                        {% if config["DEBUG"] %}
+                            <li><a href="/game/halloween">Rituale di Halloween</a></li>
+                        {% endif %}
                         <li><a href="/game/tg">Telegram</a></li>
                         <li><a href="/game/discord">Discord</a></li>
                         <li><a href="/game/steam">Steam</a></li>
@@ -105,7 +108,6 @@
                         <li><a href="/game/lol">League of Legends</a></li>
                         <li><a href="/game/ow">Overwatch</a></li>
                         <li><a href="/game/osu">osu!</a></li>
-                        <!--li><a href="/game/halloween">Rituale di Halloween</a></li-->
                     </ul>
                 </div>
             </div>

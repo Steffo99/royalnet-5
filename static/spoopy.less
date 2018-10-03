@@ -755,12 +755,11 @@ table {
         padding: 18px;
         grid-template-columns: 100%;
 
-        .stars {
-            grid-column: 1;
+        .moons.game-score {
+            font-size: 0;
 
             i {
-                color: yellow;
-                font-size: 30px;
+                font-size: 34px;
             }
         }
     }
@@ -863,20 +862,12 @@ ntry {
         .lower-box {
             text-align: center;
 
-            .stars a {
-                color: @text-color;
+            .time-left {
                 font-size: 64px;
-
-                &:hover {
-                    color: @highlight-color;
-                }
-
-                .fas {
-                    color: yellow;
-                }
+                font-family: monospace;
             }
 
-            .time-left {
+            .moons {
                 font-size: 64px;
             }
         }
@@ -927,6 +918,18 @@ ntry {
     @media (min-width: 1180px)
     {
         width: 1164px;
+    }
+}
+
+.moons a {
+    color: @text-color;
+
+    &:hover {
+        color: @highlight-color;
+    }
+
+    .fas {
+        color: yellow;
     }
 }
 

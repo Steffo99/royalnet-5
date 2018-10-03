@@ -66,18 +66,7 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
-    halloween = [
-        db.Halloween.puzzle_piece_a_complete(),
-        db.Halloween.puzzle_piece_b_complete(),
-        db.Halloween.puzzle_piece_c_complete(),
-        db.Halloween.puzzle_piece_d_complete(),
-        db.Halloween.puzzle_piece_e_complete(),
-        db.Halloween.puzzle_piece_f_complete(),
-        db.Halloween.puzzle_piece_g_complete(),
-        db.Halloween.puzzle_piece_h_complete(),
-        db.Halloween.puzzle_piece_i_complete(),
-        db.Halloween.puzzle_piece_j_complete()
-    ]
+    halloween = db.Halloween.puzzle_status()
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
                            next_events=next_events, rygconf=config, escape=escape, halloween=enumerate(halloween))
@@ -341,6 +330,37 @@ def page_diario():
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
     return render_template("diario.html", rygconf=config, entries=diario_entries)
+
+
+@app.route("/ritual/<int:n>", methods=["GET", "POST"])
+def page_ritual(n: int):
+    user_id = fl_session.get("user_id")
+    if not user_id:
+        return redirect(url_for("page_login"))
+    if request.method == "GET":
+        return render_template("ritual.html", rygconf=config, n=n)
+    elif request.method == "POST":
+        if n == 1:
+            pass
+        elif n == 2:
+            pass
+        elif n == 3:
+            pass
+        elif n == 4:
+            pass
+        elif n == 5:
+            pass
+        elif n == 6:
+            pass
+        elif n == 7:
+            pass
+        elif n == 8:
+            pass
+        elif n == 9:
+            pass
+        elif n == 10:
+            pass
+        return redirect(url_for("page_ritual", n=n))
 
 
 if __name__ == "__main__":
