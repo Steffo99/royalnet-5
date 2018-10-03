@@ -212,7 +212,9 @@ def cmd_diario(bot: Bot, update: Update):
                            text=text)
         session.add(diario)
         session.commit()
-        bot.send_message(update.message.chat.id, f"✅ Aggiunto al diario!")
+        bot.send_message(update.message.chat.id,
+                         f"✅ Riga [#{diario.id}](https://ryg.steffo.eu/diario#entry-{diario.id}) aggiunta al diario!",
+                         parse_mode="Markdown", disable_web_page_preview=True)
     except Exception:
         raise
     finally:

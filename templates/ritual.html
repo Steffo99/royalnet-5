@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+    Rituale {{ n }}
+{% endblock %}
+
+{% block body %}
+    <h1>
+        Rituale {{ n }}
+    </h1>
+    <div class="ritual-page">
+        <div class="ritual-description">
+            {% if n == 1 %}
+            {% elif n == 2 %}
+            {% elif n == 3 %}
+            {% elif n == 4 %}
+            {% elif n == 5 %}
+            {% elif n == 6 %}
+            {% elif n == 7 %}
+            {% elif n == 8 %}
+            {% elif n == 9 %}
+            {% elif n == 10 %}
+            {% endif %}
+        </div>
+        <form method="POST" action="/ritual/{{ n }}">
+            <input type="submit" value="Controlla">
+        </form>
+    </div>
+{% endblock %}
