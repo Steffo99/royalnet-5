@@ -28,7 +28,7 @@
         Royal Games
     </h1>
     <div class="main-page">
-        {% if config["DEBUG"] %}
+        {% if g["css"] == "spoopy.less" %}
             <div class="halloween">
                 <div class="box">
                     <div class="upper-box">
@@ -97,7 +97,7 @@
                 <div class="lower-box">
                     <ul>
                         <li><a href="/game/ryg">Royal Games</a></li>
-                        {% if config["DEBUG"] %}
+                        {% if rygconf["Events"]["halloween"] %}
                             <li><a href="/game/halloween">Rituale di Halloween</a></li>
                         {% endif %}
                         <li><a href="/game/tg">Telegram</a></li>

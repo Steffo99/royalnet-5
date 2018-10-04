@@ -858,7 +858,7 @@ class RoyalDiscordBot(discord.Client):
     @requires_connected_voice_client
     async def cmd_resume(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         for voice_client in self.voice_clients:
-            if voice_client.is_playing():
+            if voice_client.is_paused():
                 voice_client.resume()
                 logger.debug(f"The audio stream was resumed.")
                 await channel.send(f"⏯ Riproduzione ripresa.")

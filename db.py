@@ -964,6 +964,12 @@ class Halloween(Base):
         return count
 
     @staticmethod
+    def event_started() -> bool:
+        session = Session()
+        halloweens = session.query(Halloween).all()
+        return bool(halloweens)
+
+    @staticmethod
     def puzzle_status() -> typing.List[bool]:
         session = Session()
         halloweens = session.query(Halloween).all()

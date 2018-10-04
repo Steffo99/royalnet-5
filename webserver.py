@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape
 from flask import session as fl_session
+from flask import g as fl_g
 import db
 import bcrypt
 import configparser
@@ -28,7 +29,7 @@ sentry = Sentry(app, dsn=config["Sentry"]["token"])
 
 @app.errorhandler(400)
 def error_400(_=None):
-    return render_template("400.html", rygconf=config)
+    return render_template("400.html", g=fl_g)
 
 
 @app.route("/400")
@@ -38,7 +39,7 @@ def page_400():
 
 @app.errorhandler(403)
 def error_403(_=None):
-    return render_template("403.html", rygconf=config)
+    return render_template("403.html", g=fl_g)
 
 
 @app.route("/403")
@@ -48,7 +49,7 @@ def page_403():
 
 @app.errorhandler(500)
 def error_500(_=None):
-    return render_template("500.html", rygconf=config)
+    return render_template("500.html", g=fl_g)
 
 
 @app.route("/500")
@@ -69,7 +70,7 @@ def page_main():
     halloween = db.Halloween.puzzle_status()
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, rygconf=config, escape=escape, halloween=enumerate(halloween))
+                           next_events=next_events, g=fl_g, escape=escape, halloween=enumerate(halloween))
 
 
 @app.route("/profile/<name>")
@@ -98,13 +99,13 @@ def page_profile(name: str):
     else:
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, rygconf=config, bio=converted_bio, gamelog=gamelog,
+                           tg=tg, discord=discord, g=fl_g, bio=converted_bio, gamelog=gamelog,
                            halloween=halloween)
 
 
 @app.route("/login")
 def page_login():
-    return render_template("login.html", rygconf=config)
+    return render_template("login.html", g=fl_g)
 
 
 @app.route("/loggedin", methods=["POST"])
@@ -146,7 +147,7 @@ def page_password():
     if request.method == "GET":
         if user_id is None:
             return redirect(url_for("page_login"))
-        return render_template("password.html", rygconf=config)
+        return render_template("password.html", g=fl_g)
     elif request.method == "POST":
         new_password = request.form.get("new", "")
         db_session = db.Session()
@@ -171,7 +172,7 @@ def page_editprofile():
     profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
         db_session.close()
-        return render_template("profileedit.html", data=profile_data, rygconf=config)
+        return render_template("profileedit.html", data=profile_data, g=fl_g)
     elif request.method == "POST":
         css = request.form.get("css", "")
         bio = request.form.get("bio", "")
@@ -241,7 +242,7 @@ def page_game(name: str):
         abort(404)
         return
     db_session.close()
-    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, rygconf=config)
+    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, g=fl_g)
 
 
 @app.route("/wiki")
@@ -249,7 +250,7 @@ def page_wikihome():
     db_session = db.Session()
     wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
     db_session.close()
-    return render_template("wikilist.html", wiki_pages=wiki_pages, rygconf=config)
+    return render_template("wikilist.html", wiki_pages=wiki_pages, g=fl_g)
 
 
 @app.route("/wiki/<key>", methods=["GET", "POST"])
@@ -261,7 +262,7 @@ def page_wiki(key: str):
             .order_by(db.WikiLog.timestamp.desc()).first()
         db_session.close()
         if wiki_page is None:
-            return render_template("wikipage.html", key=key, rygconf=config)
+            return render_template("wikipage.html", key=key, g=fl_g)
         # Embed YouTube videos
         converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                                           extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
@@ -276,7 +277,7 @@ def page_wiki(key: str):
                               r'    </iframe>'
                               r'</div>', converted_md)
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
-                               wiki_log=wiki_latest_edit, rygconf=config)
+                               wiki_log=wiki_latest_edit, g=fl_g)
     elif request.method == "POST":
         user_id = fl_session.get('user_id')
         user = db_session.query(db.Royal).filter_by(id=user_id).one()
@@ -329,7 +330,22 @@ def page_diario():
     db_session = db.Session()
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
-    return render_template("diario.html", rygconf=config, entries=diario_entries)
+    return render_template("diario.html", g=fl_g, entries=diario_entries)
+
+
+@app.route("/spooky", methods=["POST"])
+def page_spooky():
+    if request.form.get("solution", "") != "1":
+        return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    user_id = fl_session.get("user_id")
+    if not user_id:
+        return redirect("https://www.youtube.com/watch?v=djV11Xbc914")
+    db_session = db.Session()
+    user = db_session.query(db.Royal).filter_by(id=user_id).one()
+    halloween = db.Halloween(royal=user, first_trigger=datetime.datetime.now())
+    db_session.add(halloween)
+    db_session.commit()
+    return redirect(url_for("page_main"))
 
 
 @app.route("/ritual/<int:n>", methods=["GET", "POST"])
@@ -338,7 +354,7 @@ def page_ritual(n: int):
     if not user_id:
         return redirect(url_for("page_login"))
     if request.method == "GET":
-        return render_template("ritual.html", rygconf=config, n=n)
+        return render_template("ritual.html", g=fl_g, n=n)
     elif request.method == "POST":
         if n == 1:
             pass
@@ -361,6 +377,12 @@ def page_ritual(n: int):
         elif n == 10:
             pass
         return redirect(url_for("page_ritual", n=n))
+
+
+@app.before_request
+def pre_request():
+    fl_g["css"] = "spoopy.less" if db.Halloween.event_started() else "nryg.less"
+    fl_g["rygconf"] = config
 
 
 if __name__ == "__main__":
