@@ -5,9 +5,13 @@
         <meta name="viewport" content="width=device-width">
         <meta name="keywords" content="Royal Games, halloween, arg">
         <title>a curse.</title>
+        <link href="{{ url_for('static', filename='owl.less') }}" rel="stylesheet/less" type="text/css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.0.2/less.min.js"></script>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
         <script>
+            var username;
+            var user_id;
+
             function timer() {
                 let now = new Date().getTime();
                 let to = new Date("Oct 31, 2018 15:30:00").getTime();
@@ -17,11 +21,30 @@
                                                                + Math.floor(String((result / 1000) % 60)) + "s";
             }
 
+            function ident() {
+                let r = fetch("https://ryg.steffo.eu/ses/identify", {
+                    method: "GET",
+                    mode: "cors",
+                    credentials: "include"
+                }).done((result) => {
+                    data = result.json();
+                    if(data["user_id"] === null) {
+                        document.getElementById("main").innerHTML = "i don't know you. " +
+                            "<a href='https://ryg.steffo.eu/login'>try logging in</a> first.";
+                        return;
+                        user_id = data["user_id"];
+                        username = data["username"];
+                    }
+
+                })
+            }
+
             setInterval(timer, 100);
+            window.onload = ident;
         </script>
     </head>
     <body>
-        <div class="container">
+        <div id="main" class="container">
             <h1>
                 a curse.
             </h1>
@@ -55,7 +78,7 @@
                             <h2>
                                 unleash the horsemen
                             </h2>
-                            <div>
+                            <div class="description">
                                 you'll need the help of the horsemen of the apocalypse to dispel the curse.<br>
                                 lead Chaos to victory in the battle of the ancients, or the War from the shadow isles to victory on the rift, and you'll gain their support.
                             </div>
@@ -64,7 +87,7 @@
                             <h2>
                                 carve the ritual pumpkin
                             </h2>
-                            <div>
+                            <div class="description">
                                 prepare a pumpkin, and empty its inside.<br>
                                 carve something on its exterior then put a light inside of it.<br>
                                 when dusk has come, take a picture, and <a href="/whatpumpkin">post it to the owl captain</a>.
@@ -74,7 +97,7 @@
                             <h2>
                                 circle the sound
                             </h2>
-                            <div>
+                            <div class="description">
                                 find the 2038th sound of halloween.<br>
                                 then, follow the circle pattern.<br>
                                 <br>
@@ -84,7 +107,7 @@
                             <h2>
                                 uproot the evil
                             </h2>
-                            <div>
+                            <div class="description">
                                 listen to the sounds in here.<br>
                                 do you hear the evil that stole your voice?<br>
                                 answer it.
@@ -97,7 +120,7 @@
                             <h2>
                                 remove the ghosts
                             </h2>
-                            <div>
+                            <div class="description">
                                 during the ritual something strange might happen.<br>
                                 in that case, the ghosts probably will be to blame.<br>
                                 to be safe, i would remove them...<br>
@@ -108,8 +131,8 @@
                             <h2>
                                 conquer the mansion
                             </h2>
-                            <div>
-                                a mansion has appeared.<br>
+                            <div class="description">
+                                <a href="{{ url_for('static', filename='snesfile.zip') }}">a mansion</a> has appeared.<br>
                                 prove yourself worthy, and find the words hidden deep inside.<br>
                                 only then i can trust you to completely perform the ritual.
                             </div>
@@ -121,28 +144,28 @@
                             <h2>
 
                             </h2>
-                            <div>
+                            <div class="description">
 
                             </div>
                         {% elif loop.index == 8 %}
                             <h2>
 
                             </h2>
-                            <div>
+                            <div class="description">
 
                             </div>
                         {% elif loop.index == 9 %}
                             <h2>
 
                             </h2>
-                            <div>
+                            <div class="description">
 
                             </div>
                         {% elif loop.index == 10 %}
                             <h2>
 
                             </h2>
-                            <div>
+                            <div class="description">
 
                             </div>
                         {% endif %}

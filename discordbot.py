@@ -522,6 +522,12 @@ class RoyalDiscordBot(discord.Client):
                                                       filename=now_playing.plain_text(),
                                                       timestamp=datetime.datetime.now())
                         session.add(played_music)
+                        # EASTER EGG, REMOVE LATER
+                        if "ghostbusters" in now_playing.plain_text().lower():
+                            halloween = await loop.run_in_executor(executor, session.query(db.Halloween)
+                                                                             .filter_by(royal=enqueuer).one_or_none)
+                            halloween[4] = True
+                        # END
                         await loop.run_in_executor(executor, session.commit)
                         await loop.run_in_executor(executor, session.close)
                     except sqlalchemy.exc.OperationalError:

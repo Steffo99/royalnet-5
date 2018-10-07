@@ -68,7 +68,7 @@ def page_main():
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
-    halloween = db.Halloween.puzzle_status()
+    halloween = db.Halloween.puzzle_status()[1]
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
                            next_events=next_events, g=fl_g, escape=escape, halloween=enumerate(halloween))
@@ -115,6 +115,7 @@ def page_loggedin():
     db_session = db.Session()
     user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
     db_session.close()
+    fl_session.permanent = True
     if user is None:
         abort(403)
         return
@@ -334,7 +335,7 @@ def page_diario():
 
 
 @app.route("/api/token")
-def page_token():
+def api_token():
     username = request.form.get("username", "")
     password = request.form.get("password", "")
     db_session = db.Session()
@@ -361,19 +362,15 @@ def page_token():
         return
 
 
-@app.route("/spooky", methods=["POST"])
-def page_spooky():
-    if request.form.get("solution", "") != "1":
-        return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    user_id = fl_session.get("user_id")
-    if not user_id:
-        return redirect("https://www.youtube.com/watch?v=djV11Xbc914")
-    db_session = db.Session()
-    user = db_session.query(db.Royal).filter_by(id=user_id).one()
-    halloween = db.Halloween(royal=user, first_trigger=datetime.datetime.now())
-    db_session.add(halloween)
-    db_session.commit()
-    return redirect(url_for("page_main"))
+@app.route("/ses/identify")
+def ses_identify():
+    response = jsonify({
+        "username": fl_session.get("username"),
+        "id": fl_session.get("user_id")
+    })
+    response.headers["Access-Control-Allow-Origin"] = "https://owlcaptain.tk"
+    return response
+
 
 
 @app.before_request
