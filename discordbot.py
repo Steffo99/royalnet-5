@@ -525,7 +525,7 @@ class RoyalDiscordBot(discord.Client):
                         # EASTER EGG, REMOVE LATER
                         if "ghostbusters" in now_playing.plain_text().lower():
                             halloween = await loop.run_in_executor(executor, session.query(db.Halloween)
-                                                                             .filter_by(royal=enqueuer).one_or_none)
+                                                                             .filter_by(royal=enqueuer.royal).one_or_none)
                             halloween[5] = datetime.datetime.now()
                         # END
                         await loop.run_in_executor(executor, session.commit)
