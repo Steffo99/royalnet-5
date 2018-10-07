@@ -957,8 +957,9 @@ class Halloween(Base):
         started = False
         for h in halloweens:
             for i in range(7):
-                if h[i+1]:
+                if h.first_trigger:
                     started = True
+                if h[i+1]:
                     completed[i] = True
         return started, completed
 
