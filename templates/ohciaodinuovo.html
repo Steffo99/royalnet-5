@@ -27,15 +27,18 @@
                     mode: "cors",
                     credentials: "include"
                 }).done((result) => {
-                    data = result.json();
-                    if(data["user_id"] === null) {
-                        document.getElementById("main").innerHTML = "i don't know you. " +
-                            "<a href='https://ryg.steffo.eu/login'>try logging in</a> first.";
-                        return;
-                        user_id = data["user_id"];
-                        username = data["username"];
-                    }
-
+                    result.json().done((result) => {
+                        if(result["id"] === null) {
+                            document.getElementById("main").innerHTML = "i don't know you. " +
+                                "<a href='https://ryg.steffo.eu/login'>try logging in</a> first.";
+                            return;
+                        }
+                        user_id = result["id"];
+                        username = result["username"];
+                        document.getElementsByName("user_id").forEach((item) => {
+                            item.setAttribute("value", user_id);
+                        })
+                    });
                 })
             }
 
@@ -114,6 +117,7 @@
                             </div>
                             <form action="/voiceofevil" method="POST">
                                 <input name="solution" type="text" placeholder="?">
+                                <input type="hidden" name="user_id">
                                 <input type="submit" value="this is my answer!">
                             </form>
                         {% elif loop.index == 5 %}
@@ -138,30 +142,10 @@
                             </div>
                             <form action="/mansion" method="POST">
                                 <input name="solution" type="text" placeholder="?">
+                                <input type="hidden" name="user_id">
                                 <input type="submit" value="this is my answer!">
                             </form>
                         {% elif loop.index == 7 %}
-                            <h2>
-
-                            </h2>
-                            <div class="description">
-
-                            </div>
-                        {% elif loop.index == 8 %}
-                            <h2>
-
-                            </h2>
-                            <div class="description">
-
-                            </div>
-                        {% elif loop.index == 9 %}
-                            <h2>
-
-                            </h2>
-                            <div class="description">
-
-                            </div>
-                        {% elif loop.index == 10 %}
                             <h2>
 
                             </h2>

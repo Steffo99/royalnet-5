@@ -898,9 +898,6 @@ class Halloween(Base):
     puzzle_piece_e = Column(DateTime)
     puzzle_piece_f = Column(DateTime)
     puzzle_piece_g = Column(DateTime)
-    puzzle_piece_h = Column(DateTime)
-    puzzle_piece_i = Column(DateTime)
-    puzzle_piece_j = Column(DateTime)
 
     boss_battle = Column(DateTime)
 
@@ -921,12 +918,6 @@ class Halloween(Base):
             return self.puzzle_piece_f
         elif item == 7:
             return self.puzzle_piece_g
-        elif item == 8:
-            return self.puzzle_piece_h
-        elif item == 9:
-            return self.puzzle_piece_i
-        elif item == 10:
-            return self.puzzle_piece_j
         else:
             raise ValueError("No such puzzle piece")
 
@@ -947,18 +938,12 @@ class Halloween(Base):
             self.puzzle_piece_f = value
         elif key == 7:
             self.puzzle_piece_g = value
-        elif key == 8:
-            self.puzzle_piece_h = value
-        elif key == 9:
-            self.puzzle_piece_i = value
-        elif key == 10:
-            self.puzzle_piece_j = value
         else:
             raise ValueError("No such puzzle piece")
 
     def pieces_completed(self) -> int:
         count = 0
-        for i in range(1, 11):
+        for i in range(1, 8):
             if self[i]:
                 count += 1
         return count
@@ -969,9 +954,9 @@ class Halloween(Base):
         halloweens = session.query(Halloween).all()
         session.close()
         started = bool(halloweens)
-        completed = [False for _ in range(10)]
+        completed = [False for _ in range(7)]
         for h in halloweens:
-            for i in range(10):
+            for i in range(7):
                 if h[i+1]:
                     completed[i] = True
         return started, completed

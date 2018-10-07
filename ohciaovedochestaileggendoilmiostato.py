@@ -47,12 +47,15 @@ def page_voiceofevil():
     if request.form.get("solution", "") != "1":
         abort(400)
         return
+    if "user_id" not in request.form:
+        abort(403)
+        return
     db_session = db.Session()
-    halloween = db_session.query(db.Halloween).filter_by(royal_id=fl_session["user_id"]).one_or_none()
+    halloween = db_session.query(db.Halloween).filter_by(royal_id=request.form["user_id"]).one_or_none()
     if halloween is None:
         abort(403)
         return
-    halloween[3] = True
+    halloween[4] = datetime.datetime.now()
     db_session.commit()
     return redirect(url_for("page_owlcaptain"))
 
@@ -63,11 +66,11 @@ def page_mansion():
         abort(400)
         return
     db_session = db.Session()
-    halloween = db_session.query(db.Halloween).filter_by(royal_id=fl_session["user_id"]).one_or_none()
+    halloween = db_session.query(db.Halloween).filter_by(royal_id=request.form["user_id"]).one_or_none()
     if halloween is None:
         abort(403)
         return
-    halloween[5] = True
+    halloween[6] = datetime.datetime.now()
     db_session.commit()
     return redirect(url_for("page_owlcaptain"))
 
