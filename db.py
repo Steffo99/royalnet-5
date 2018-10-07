@@ -953,11 +953,12 @@ class Halloween(Base):
         session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
-        started = bool(halloweens)
         completed = [False for _ in range(7)]
+        started = False
         for h in halloweens:
             for i in range(7):
                 if h[i+1]:
+                    started = True
                     completed[i] = True
         return started, completed
 

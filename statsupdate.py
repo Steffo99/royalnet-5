@@ -63,6 +63,10 @@ def new_lol_rank(item: db.LeagueOfLegends):
         logger.warning(f"Couldn't notify on Telegram: {item}")
 
 
+def halloween_checks(item: db.Halloween, session: db.Session):
+    # Dota last matches
+    session.query(db.Dota).join(db.Steam).filter_by(id=item.royal).one_or_none()
+
 def process():
     while True:
         logger.info("Pausing for 30 minutes.")
