@@ -7,7 +7,7 @@
         {% block prehead %}{% endblock %}
         <title>{% block pagetitle %}{% endblock %} - Royal Games</title>
         <link href="{{ url_for('static', filename='pygments.css') }}" rel="stylesheet" type="text/css">
-        <link href="{{ url_for('static', filename={{ g["css"] }}) }}" rel="stylesheet/less" type="text/css">
+        <link href="{{ url_for('static', filename=g.css) }}" rel="stylesheet/less" type="text/css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.0.2/less.min.js"></script>
         {% block posthead %}{% endblock %}
     </head>
@@ -19,8 +19,8 @@
                 <a href="/">Home</a>
                 <span class="desktop-only">
                 {% if session.get('username') is not none %}
-                    <a href="{{ g["rygconf"]['Telegram']['invite_link'] }}">Telegram</a>
-                    <a href="{{ g["rygconf"]['Discord']['invite_link'] }}">Discord</a>
+                    <a href="{{ g.rygconf['Telegram']['invite_link'] }}">Telegram</a>
+                    <a href="{{ g.rygconf['Discord']['invite_link'] }}">Discord</a>
                     <a href="https://steamcommunity.com/groups/royalgamescastle">Steam</a>
                     <a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a>
                 {% endif %}

@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape
+import secrets
+from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape, jsonify
 from flask import session as fl_session
 from flask import g as fl_g
 import db
@@ -84,7 +85,6 @@ def page_profile(name: str):
     css = db_session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     steam = db_session.query(db.Steam).filter_by(royal=user).one_or_none()
     osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
-    # rl = db_session.query(db.RocketLeague).join(db.Steam).filter_by(royal=user).one_or_none()
     dota = db_session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
     lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
     ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
@@ -333,6 +333,34 @@ def page_diario():
     return render_template("diario.html", g=fl_g, entries=diario_entries)
 
 
+@app.route("/api/token")
+def page_token():
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
+    db_session = db.Session()
+    user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
+    if user is None:
+        db_session.close()
+        abort(403)
+        return
+    if user.password is None:
+        db_session.close()
+        abort(403)
+    if bcrypt.checkpw(bytes(password, encoding="utf8"), user.password):
+        new_token = db.LoginToken(royal=user, token=secrets.token_urlsafe())
+        db_session.add(new_token)
+        db_session.commit()
+        db_session.close()
+        return jsonify({
+            "id": user.id,
+            "username": user.username,
+            "token": new_token.token
+        })
+    else:
+        abort(403)
+        return
+
+
 @app.route("/spooky", methods=["POST"])
 def page_spooky():
     if request.form.get("solution", "") != "1":
@@ -348,41 +376,13 @@ def page_spooky():
     return redirect(url_for("page_main"))
 
 
-@app.route("/ritual/<int:n>", methods=["GET", "POST"])
-def page_ritual(n: int):
-    user_id = fl_session.get("user_id")
-    if not user_id:
-        return redirect(url_for("page_login"))
-    if request.method == "GET":
-        return render_template("ritual.html", g=fl_g, n=n)
-    elif request.method == "POST":
-        if n == 1:
-            pass
-        elif n == 2:
-            pass
-        elif n == 3:
-            pass
-        elif n == 4:
-            pass
-        elif n == 5:
-            pass
-        elif n == 6:
-            pass
-        elif n == 7:
-            pass
-        elif n == 8:
-            pass
-        elif n == 9:
-            pass
-        elif n == 10:
-            pass
-        return redirect(url_for("page_ritual", n=n))
-
-
 @app.before_request
 def pre_request():
-    fl_g["css"] = "spoopy.less" if db.Halloween.event_started() else "nryg.less"
-    fl_g["rygconf"] = config
+    fl_g.event_started, fl_g.event_progress = db.Halloween.puzzle_status()
+    fl_g.time_left = datetime.datetime.fromtimestamp(1540999800) - datetime.datetime.now()
+    fl_g.display_on_main_site = (fl_g.time_left < datetime.timedelta(days=7)) or __debug__
+    fl_g.css = "spoopy.less" if (fl_g.event_started or __debug__) else "nryg.less"
+    fl_g.rygconf = config
 
 
 if __name__ == "__main__":

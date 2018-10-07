@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <meta name="keywords" content="Royal Games, halloween, arg">
+        <title>a curse.</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.0.2/less.min.js"></script>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+        <script>
+            function timer() {
+                let now = new Date().getTime();
+                let to = new Date("Oct 31, 2018 15:30:00").getTime();
+                let result = to - now;
+                document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
+                                                               + Math.floor(String((result / 60000) % 60)) + "m "
+                                                               + Math.floor(String((result / 1000) % 60)) + "s";
+            }
+
+            setInterval(timer, 100);
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>
+                a curse.
+            </h1>
+            <div class="timer">
+                <span id="time-left"></span>
+            </div>
+            <div class="curse">
+                a curse lies in waiting for the night of the dead.<br>
+                you and your friends are in danger.<br>
+                stop it before it activates.<br>
+                <br>
+                i'm willing to help you.<br>
+                you will have to perform a ritual.<br>
+                here are the steps.<br>
+                <br>
+                you can perform them in any order, except for the final step.<br>
+                i'll reveal that when all others are complete, just to be safe.
+            </div>
+            <div class="subquests">
+                {% for quest in g.event_progress %}
+                    <div class="quest {% if quest %}quest-clear{% endif %}" id="{{ loop.index }}">
+                        <div class="progress">
+                            {% if quest %}
+                                <i class="fas fa-moon done"></i>
+                            {% else %}
+                                <i class="far fa-moon todo"></i>
+                            {% endif %}
+                        </div>
+                        {% if loop.index == 1 %}
+                            {# hecarim o chaos knight #}
+                            <h2>
+                                unleash the horsemen
+                            </h2>
+                            <div>
+                                you'll need the help of the horsemen of the apocalypse to dispel the curse.<br>
+                                lead Chaos to victory in the battle of the ancients, or the War from the shadow isles to victory on the rift, and you'll gain their support.
+                            </div>
+                        {% elif loop.index == 2 %}
+                            {# la zucca di balu e max #}
+                            <h2>
+                                carve the ritual pumpkin
+                            </h2>
+                            <div>
+                                prepare a pumpkin, and empty its inside.<br>
+                                carve something on its exterior then put a light inside of it.<br>
+                                when dusk has come, take a picture, and <a href="/whatpumpkin">post it to the owl captain</a>.
+                            </div>
+                        {% elif loop.index == 3 %}
+                            {# https://osu.ppy.sh/beatmapsets/385#osu/2038 #}
+                            <h2>
+                                circle the sound
+                            </h2>
+                            <div>
+                                find the 2038th sound of halloween.<br>
+                                then, follow the circle pattern.<br>
+                                <br>
+                                it is rather dashing, isn't it?
+                            </div>
+                        {% elif loop.index == 4 %}
+                            <h2>
+                                uproot the evil
+                            </h2>
+                            <div>
+                                listen to the sounds in here.<br>
+                                do you hear the evil that stole your voice?<br>
+                                answer it.
+                            </div>
+                            <form action="/voiceofevil" method="POST">
+                                <input name="solution" type="text" placeholder="?">
+                                <input type="submit" value="this is my answer!">
+                            </form>
+                        {% elif loop.index == 5 %}
+                            <h2>
+                                remove the ghosts
+                            </h2>
+                            <div>
+                                during the ritual something strange might happen.<br>
+                                in that case, the ghosts probably will be to blame.<br>
+                                to be safe, i would remove them...<br>
+                                <br>
+                                who should you call?
+                            </div>
+                        {% elif loop.index == 6 %}
+                            <h2>
+                                conquer the mansion
+                            </h2>
+                            <div>
+                                a mansion has appeared.<br>
+                                prove yourself worthy, and find the words hidden deep inside.<br>
+                                only then i can trust you to completely perform the ritual.
+                            </div>
+                            <form action="/mansion" method="POST">
+                                <input name="solution" type="text" placeholder="?">
+                                <input type="submit" value="this is my answer!">
+                            </form>
+                        {% elif loop.index == 7 %}
+                            <h2>
+
+                            </h2>
+                            <div>
+
+                            </div>
+                        {% elif loop.index == 8 %}
+                            <h2>
+
+                            </h2>
+                            <div>
+
+                            </div>
+                        {% elif loop.index == 9 %}
+                            <h2>
+
+                            </h2>
+                            <div>
+
+                            </div>
+                        {% elif loop.index == 10 %}
+                            <h2>
+
+                            </h2>
+                            <div>
+
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>

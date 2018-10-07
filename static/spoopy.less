@@ -755,7 +755,7 @@ table {
         padding: 18px;
         grid-template-columns: 100%;
 
-        .moons.game-score {
+        .mysterystatus.game-score {
             font-size: 0;
 
             i {
@@ -791,7 +791,7 @@ table {
     }
 }
 
-ntry {
+.entry {
     display: grid;
 
     .left {
@@ -855,19 +855,15 @@ ntry {
     }
 
     .halloween {
-        .upper-box {
-            font-size: xx-large;
-        }
-
         .lower-box {
             text-align: center;
 
             .time-left {
                 font-size: 64px;
-                font-family: monospace;
+                font-family: "Consolas", "Source Code Pro", monospace;
             }
 
-            .moons {
+            .mysterystatus {
                 font-size: 64px;
             }
         }
@@ -921,15 +917,13 @@ ntry {
     }
 }
 
-.moons a {
-    color: @text-color;
-
-    &:hover {
-        color: @highlight-color;
+.mysterystatus i {
+    &.todo {
+        color: rgba(255, 255, 0, 0.2);
     }
 
-    .fas {
-        color: yellow;
+    &.done {
+        color: rgba(255, 255, 0, 1);
     }
 }
 

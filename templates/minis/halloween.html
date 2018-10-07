@@ -1,17 +1,17 @@
 <div class="game-panel">
     <div class="game-grid halloweenmini">
         <div class="player">
-            <span class="player-name">Rituale di Halloween</span>
+            <span class="player-name">{{ record.royal.username }}</span>
         </div>
-        <div class="game-title moons">
+        <div class="game-title mysterystatus">
             Lune ottenute
         </div>
-        <div class="game-score moons">
+        <div class="game-score mysterystatus">
             {% for index in range(10) %}
-                {% if halloween[index] %}
-                    <a href="/ritual/{{ index + 1 }}" title="Luna {{ index + 1 }} ottenuta!"><i class="fas fa-moon"></i></a>
+                {% if record[index + 1] %}
+                    <i class="fas fa-moon done"></i>
                 {% else %}
-                    <a href="/ritual/{{ index + 1 }}" title="Rituale {{ index + 1 }}"><i class="far fa-moon"></i></a>
+                    <i class="far fa-moon todo"></i>
                 {% endif %}
             {% endfor %}
         </div>

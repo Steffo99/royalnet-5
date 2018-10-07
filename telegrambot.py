@@ -134,7 +134,8 @@ def cmd_cast(bot: Bot, update: Update):
 
 @catch_and_report
 def cmd_color(bot: Bot, update: Update):
-    bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request, Admin were notified")
+    bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request,"
+                                             " Admin were notified")
 
 
 @catch_and_report

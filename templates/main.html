@@ -10,16 +10,16 @@
 
 {% block posthead %}
     <script>
-    function timer() {
-        let now = new Date().getTime();
-        let to = new Date("Oct 31, 2018 15:30:00").getTime();
-        let result = to - now;
-        document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
-                                                       + Math.floor(String((result / 60000) % 60)) + "m "
-                                                       + Math.floor(String((result / 1000) % 60)) + "s";
-    }
+        function timer() {
+            let now = new Date().getTime();
+            let to = new Date("Oct 31, 2018 15:30:00").getTime();
+            let result = to - now;
+            document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
+                                                           + Math.floor(String((result / 60000) % 60)) + "m "
+                                                           + Math.floor(String((result / 1000) % 60)) + "s";
+        }
 
-    setInterval(timer, 100);
+        setInterval(timer, 100);
     </script>
 {% endblock %}
 
@@ -28,20 +28,20 @@
         Royal Games
     </h1>
     <div class="main-page">
-        {% if g["css"] == "spoopy.less" %}
+        {% if g.time_left %}
             <div class="halloween">
                 <div class="box">
                     <div class="upper-box">
-                        Rituale di Halloween!
+                        owlcaptain.tk
                     </div>
                     <div class="lower-box">
                         Lune raccolte:
-                        <div class="moons">
+                        <div class="mysterystatus">
                             {% for index, star in halloween %}
                                 {% if star %}
-                                    <a href="/ritual/{{ index }}" title="Luna {{ index }} ottenuta!"><i class="fas fa-moon"></i></a>
+                                    <i class="fas fa-moon done"></i>
                                 {% else %}
-                                    <a href="/ritual/{{ index }}" title="Rituale {{ index }}"><i class="far fa-moon"></i></a>
+                                    <i class="far fa-moon todo"></i>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -97,8 +97,8 @@
                 <div class="lower-box">
                     <ul>
                         <li><a href="/game/ryg">Royal Games</a></li>
-                        {% if rygconf["Events"]["halloween"] %}
-                            <li><a href="/game/halloween">Rituale di Halloween</a></li>
+                        {% if g.css == "spoopy.less" %}
+                            <li><a href="/game/halloween">Halloween</a></li>
                         {% endif %}
                         <li><a href="/game/tg">Telegram</a></li>
                         <li><a href="/game/discord">Discord</a></li>

@@ -2,10 +2,9 @@ import datetime
 import logging
 import os
 import typing
-
 import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, joinedload
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date, func, desc
 import requests
@@ -30,6 +29,7 @@ logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
 os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
 coloredlogs.install(level="DEBUG", logger=logger)
+
 
 class Royal(Base):
     __tablename__ = "royals"
@@ -964,22 +964,17 @@ class Halloween(Base):
         return count
 
     @staticmethod
-    def event_started() -> bool:
-        session = Session()
-        halloweens = session.query(Halloween).all()
-        return bool(halloweens)
-
-    @staticmethod
-    def puzzle_status() -> typing.List[bool]:
+    def puzzle_status() -> typing.Tuple[bool, typing.List[bool]]:
         session = Session()
         halloweens = session.query(Halloween).all()
         session.close()
+        started = bool(halloweens)
         completed = [False for _ in range(10)]
         for h in halloweens:
             for i in range(10):
                 if h[i+1]:
                     completed[i] = True
-        return completed
+        return started, completed
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
