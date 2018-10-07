@@ -378,7 +378,7 @@ def pre_request():
     fl_g.event_started, fl_g.event_progress = db.Halloween.puzzle_status()
     fl_g.time_left = datetime.datetime.fromtimestamp(1540999800) - datetime.datetime.now()
     fl_g.display_on_main_site = (fl_g.time_left < datetime.timedelta(days=7)) or __debug__
-    fl_g.css = "spoopy.less" if (fl_g.event_started or __debug__) else "nryg.less"
+    fl_g.css = "spoopy.less" if (fl_g.event_started) else "nryg.less"
     fl_g.rygconf = config
 
 
