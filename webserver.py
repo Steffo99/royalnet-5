@@ -368,7 +368,7 @@ def ses_identify():
         "username": fl_session.get("username"),
         "id": fl_session.get("user_id")
     })
-    response.headers["Access-Control-Allow-Origin"] = "https://owlcaptain.tk"
+    response.headers["Access-Control-Allow-Origin"] = "https://owlcaptain.tk, http://localhost:1234"
     return response
 
 
