@@ -369,8 +369,8 @@ def ses_identify():
         "id": fl_session.get("user_id")
     })
     response.headers["Access-Control-Allow-Origin"] = "http://lvh.me:1234"
+    response.headers["Access-Control-Allow-Credentials"] = True
     return response
-
 
 
 @app.before_request
