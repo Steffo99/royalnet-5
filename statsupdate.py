@@ -1,3 +1,5 @@
+import requests
+import errors
 import db
 import time
 import logging
@@ -8,6 +10,7 @@ import typing
 import telegram
 import sys
 import coloredlogs
+import datetime
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -27,12 +30,12 @@ sentry = raven.Client(config["Sentry"]["token"],
 telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
 
 
-def update_block(block: list, delay: float=0, change_callback: typing.Callable=None):
+def update_block(session: db.Session, block: list, delay: float=0, change_callback: typing.Callable=None):
     for item in block:
         logger.debug(f"Updating {repr(item)}.")
         t = time.clock()
         try:
-            change = item.update()
+            change = item.update(session=session)
         except Exception as e:
             logger.error(f"Error {sys.exc_info()} while updating {repr(item)}.")
             sentry.extra_context({
@@ -63,29 +66,28 @@ def new_lol_rank(item: db.LeagueOfLegends):
         logger.warning(f"Couldn't notify on Telegram: {item}")
 
 
-def halloween_checks(item: db.Halloween, session: db.Session):
-    # Dota last matches
-    session.query(db.Dota).join(db.Steam).filter_by(id=item.royal).one_or_none()
-
 def process():
     while True:
-        logger.info("Pausing for 30 minutes.")
-        time.sleep(1800)
+        # logger.info("Pausing for 30 minutes.")
+        # time.sleep(1800)
         session = db.Session()
+        logger.info("Now updating Halloween data.")
+        update_block(session, session.query(db.Halloween).all())
+        session.commit()
         logger.info("Now updating Steam data.")
-        update_block(session.query(db.Steam).all())
+        update_block(session, session.query(db.Steam).all())
         session.commit()
         logger.info("Now updating Dota data.")
-        update_block(session.query(db.Dota).all(), delay=5, change_callback=new_dota_rank)
+        update_block(session, session.query(db.Dota).all(), delay=5, change_callback=new_dota_rank)
         session.commit()
         logger.info("Now updating League of Legends data.")
-        update_block(session.query(db.LeagueOfLegends).all(), delay=5, change_callback=new_lol_rank)
+        update_block(session, session.query(db.LeagueOfLegends).all(), delay=5, change_callback=new_lol_rank)
         session.commit()
         logger.info("Now updating osu! data.")
-        update_block(session.query(db.Osu).all(), delay=5)
+        update_block(session, session.query(db.Osu).all(), delay=5)
         session.commit()
         logger.info("Now updating Overwatch data.")
-        update_block(session.query(db.Overwatch).all(), delay=5)
+        update_block(session, session.query(db.Overwatch).all(), delay=5)
         session.commit()
 
 

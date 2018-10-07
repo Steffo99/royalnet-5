@@ -7,8 +7,10 @@
 <div class="game-panel">
     <div class="game-grid lol">
         <div class="player">
-            <img src="http://avatar.leagueoflegends.com/EUW1/{{ record.summoner_name }}.png" class="player-image">
-            <span class="player-name">{{ record.summoner_name }}</span>
+            <a href="https://matchhistory.euw.leagueoflegends.com/en/#match-history/EUW1/{{ record.account_id }}">
+                <img src="http://avatar.leagueoflegends.com/EUW1/{{ record.summoner_name }}.png" class="player-image">
+                <span class="player-name">{{ record.summoner_name }}</span>
+            </a>
         </div>
         <div class="game-title level">
             LIVELLO

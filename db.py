@@ -163,7 +163,7 @@ class Steam(Base):
         else:
             return f"{int(steam_id) - 76561197960265728}"
 
-    def update(self, raise_if_private: bool=False):
+    def update(self, session=None, raise_if_private: bool=False):
         r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={self.steam_id}")
         if r.status_code != 200:
             raise RequestError(f"Steam returned {r.status_code}")
@@ -212,7 +212,7 @@ class RocketLeague(Base):
     def __repr__(self):
         return f"<db.RocketLeague {self.steam_id}>"
 
-    def update(self, data=None):
+    def update(self, session=None, data=None):
         raise NotImplementedError("rlstats API is no longer available.")
 
     def solo_rank_image(self):
@@ -310,7 +310,7 @@ class Dota(Base):
         new_record.update()
         return new_record
 
-    def update(self) -> bool:
+    def update(self, session=None) -> bool:
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}")
         if r.status_code != 200:
             raise RequestError("OpenDota / returned {r.status_code}")
@@ -374,7 +374,7 @@ class LeagueOfLegends(Base):
             return f"<LeagueOfLegends {self.summoner_id}>"
         return f"<LeagueOfLegends {(''.join([x if x.isalnum else '' for x in self.summoner_name]))}>"
 
-    def update(self) -> bool:
+    def update(self, session=None) -> bool:
         r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v3/summoners/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         if r.status_code != 200:
             raise RequestError(f"League of Legends API /summoner returned {r.status_code}")
@@ -468,7 +468,7 @@ class Osu(Base):
                          mania_pp=j3["pp_raw"])
         return new_record
 
-    def update(self):
+    def update(self, session=None):
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=0")
         r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=1")
         r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=2")
@@ -574,7 +574,7 @@ class Overwatch(Base):
     def icon_url(self):
         return f"https://d1u1mce87gyfbn.cloudfront.net/game/unlocks/{self.icon}.png"
 
-    def update(self):
+    def update(self, session=None):
         r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
             "User-Agent": "Royal-Bot/4.1",
             "From": "ste.pigozzi@gmail.com"
@@ -962,6 +962,37 @@ class Halloween(Base):
                 if h[i+1]:
                     completed[i] = True
         return started, completed
+    
+    def update(self, session):
+        if self[1] is None:
+            # Dota last match
+            dota = session.query(Dota).join(Steam).join(Royal).filter_by(id=self.royal.id).one_or_none()
+            if dota is not None:
+                dota_id = Steam.to_steam_id_3(dota.steam_id)
+                r = requests.get(f"https://api.opendota.com/api/players/{dota_id}/recentMatches")
+                if r.status_code != 200:
+                    raise RequestError("Error in the Halloween Dota check.")
+                j = r.json()
+                match = j[0]
+                if match["hero_id"] == 81 and (match["radiant_win"] ^ match["player_slot"] // 128):
+                    logging.debug(f"{self.royal.username} has obtained Moon A via Dota.")
+                    self[1] = datetime.datetime.now()
+                else:
+                    logging.debug(f"{self.royal.username} hasn't passed the LoL challenge yet.")
+            # LoL last match
+            lol = session.query(LeagueOfLegends).join(Royal).filter_by(id=self.royal.id).one_or_none()
+            if lol is not None:
+                r = requests.get(f"https://euw1.api.riotgames.com/lol/match/v3/matchlists/by-account/207525171"
+                                 f"?api_key={config['League of Legends']['riot_api_key']}")
+                if r.status_code != 200:
+                    raise RequestError("Error in the Halloween LoL check.")
+                j = r.json()
+                match = j["matches"][0]
+                if match["champion"] == 120:
+                    self[1] = datetime.datetime.now()
+                    logging.debug(f"{self.royal.username} has obtained Moon A via LoL.")
+                else:
+                    logging.debug(f"{self.royal.username} hasn't passed the LoL challenge yet.")
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
