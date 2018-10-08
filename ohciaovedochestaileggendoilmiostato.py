@@ -1,16 +1,9 @@
-import secrets
-from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape, jsonify
-from flask import session as fl_session
+from flask import Flask, render_template, request, abort, redirect, url_for
 from flask import g as fl_g
 import db
-import bcrypt
 import configparser
-import markdown2
 import datetime
 import telegram
-import query_discord_music
-import random
-import re
 from raven.contrib.flask import Sentry
 
 app = Flask(__name__)

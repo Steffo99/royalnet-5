@@ -124,12 +124,28 @@ def cmd_cast(bot: Bot, update: Update):
     session = db.Session()
     # Find a target for the spell
     target = random.sample(session.query(db.Telegram).all(), 1)[0]
+    # HALLOWEEN
+    caster = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
+
+    def callback():
+        if caster is None:
+            return
+        nsession = db.Session()
+        halloween = nsession.query(db.Halloween).filter_by(royal=caster.royal).one_or_none()
+        if halloween is not None:
+            halloween[7] = datetime.datetime.now()
+            nsession.commit()
+        nsession.close()
     # Close the session
     session.close()
-    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell,
+    # END
+    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell, halloween_callback=callback,
                                                        target_name=target.username if target.username is not None
                                                        else target.first_name, platform="telegram"),
                      parse_mode="HTML")
+
+
+
 
 
 @catch_and_report

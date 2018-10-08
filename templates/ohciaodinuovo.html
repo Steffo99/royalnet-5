@@ -11,6 +11,7 @@
         <script>
             var username;
             var user_id;
+            var sound = new Audio("{{ url_for('static', filename='endgame.ogg') }}");
 
             function timer() {
                 let now = new Date().getTime();
@@ -38,6 +39,8 @@
                         document.getElementsByName("user_id").forEach((item) => {
                             item.setAttribute("value", user_id);
                         })
+                        sound.loop = true;
+                        sound.play();
                     });
                 })
             }
@@ -107,6 +110,7 @@
                                 it is rather dashing, isn't it?
                             </div>
                         {% elif loop.index == 4 %}
+                            {# 1 #}
                             <h2>
                                 uproot the evil
                             </h2>
@@ -121,6 +125,7 @@
                                 <input type="submit" value="this is my answer!">
                             </form>
                         {% elif loop.index == 5 %}
+                            {# ghostbusters #}
                             <h2>
                                 remove the ghosts
                             </h2>
@@ -147,10 +152,14 @@
                             </form>
                         {% elif loop.index == 7 %}
                             <h2>
-
+                                fire the magic
                             </h2>
                             <div class="description">
+                                the ritual requires very strong magic.<br>
+                                gather all your power, and hit someone with all of it.<br>
+                                this magic talisman will absorb it if it's strong enough.<br>
 
+                                <i>the talisman is made of white marble, and has "800+" engraved on it.</i>
                             </div>
                         {% endif %}
                     </div>

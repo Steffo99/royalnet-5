@@ -68,8 +68,8 @@ def new_lol_rank(item: db.LeagueOfLegends):
 
 def process():
     while True:
-        logger.info("Pausing for 30 minutes.")
-        time.sleep(1800)
+        #logger.info("Pausing for 30 minutes.")
+        #time.sleep(1800)
         session = db.Session()
         logger.info("Now updating Halloween data.")
         update_block(session, session.query(db.Halloween).all())
