@@ -32,7 +32,7 @@ def pre_request():
 
 @app.route("/")
 def page_owlcaptain():
-    return render_template("ohciaodinuovo.html")
+    return render_template("owlcaptain.html")
 
 
 @app.route("/voiceofevil", methods=["POST"])
