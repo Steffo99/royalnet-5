@@ -377,7 +377,7 @@ def ses_identify():
             db_session.add(halloween)
             db_session.commit()
         db_session.close()
-    response.headers["Access-Control-Allow-Origin"] = "http://lvh.me:1234"
+    response.headers["Access-Control-Allow-Origin"] = "https://owlcaptain.tk"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
