@@ -368,6 +368,15 @@ def ses_identify():
         "username": fl_session.get("username"),
         "id": fl_session.get("user_id")
     })
+    if fl_session.get("user_id") is not None:
+        db_session = db.Session()
+        royal = db_session.query(db.Royal).filter_by(id=fl_session.get("user_id")).one_or_none()
+        halloween = db_session.query(db.Halloween).filter_by(royal=royal).one_or_none()
+        if halloween is None:
+            halloween = db.Halloween(royal=royal, first_trigger=datetime.datetime.now())
+            db_session.add(halloween)
+            db_session.commit()
+        db_session.close()
     response.headers["Access-Control-Allow-Origin"] = "http://lvh.me:1234"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
