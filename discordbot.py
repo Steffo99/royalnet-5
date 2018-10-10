@@ -37,6 +37,19 @@ queue_emojis = [":one:",
                 ":nine:",
                 ":keycap_ten:"]
 
+# Zalgo text
+zalgo_up = [' ̍', ' ̎', ' ̄', ' ̅', ' ̿', ' ̑', ' ̆', ' ̐', ' ͒', ' ͗', ' ͑', ' ̇', ' ̈', ' ̊', ' ͂', ' ̓', ' ̈́', ' ͊',
+           ' ͋', ' ͌', ' ̃', ' ̂', ' ̌', ' ͐', ' ́', ' ̋', ' ̏', ' ̽', ' ̉', ' ͣ', ' ͤ', ' ͥ', ' ͦ', ' ͧ', ' ͨ', ' ͩ',
+           ' ͪ', ' ͫ', ' ͬ', ' ͭ', ' ͮ', ' ͯ', ' ̾', ' ͛', ' ͆', ' ̚', ]
+zalgo_down = ['̖', ' ̗', ' ̘', ' ̙', ' ̜', ' ̝', ' ̞', ' ̟', ' ̠', ' ̤', ' ̥', ' ̦', ' ̩', ' ̪', ' ̫', ' ̬', ' ̭', ' ̮',
+           ' ̯', ' ̰', ' ̱', ' ̲', ' ̳', ' ̹', ' ̺', ' ̻', ' ̼', ' ͅ', ' ͇', ' ͈', ' ͉', ' ͍', ' ͎', ' ͓', ' ͔', ' ͕',
+           ' ͖', ' ͙', ' ͚', ' ', ]
+zalgo_middle = [' ̕', ' ̛', ' ̀', ' ́', ' ͘', ' ̡', ' ̢', ' ̧', ' ̨', ' ̴', ' ̵', ' ̶', ' ͜', ' ͝', ' ͞', ' ͟', ' ͠', ' ͢',
+           ' ̸', ' ̷', ' ͡', ]
+
+# Halloween images
+images = ["https://i.imgur.com/PNCRnRe.png", "https://i.imgur.com/iY7y54n.png", "https://i.imgur.com/v1QBVZ2.png"]
+
 # Init the event loop
 loop = asyncio.get_event_loop()
 
@@ -174,6 +187,33 @@ class Video:
         if not self.downloaded:
             raise FileNotDownloadedError()
         return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
+
+
+class SecretVideo(Video):
+
+    def __str__(self):
+        final_string = ""
+        for letter in self.file:
+            final_string += random.sample(zalgo_up, 1)[0]
+            final_string += random.sample(zalgo_middle, 1)[0]
+            final_string += random.sample(zalgo_down, 1)[0]
+            final_string += letter
+        return final_string
+
+    def plain_text(self):
+        final_string = ""
+        for letter in self.file:
+            final_string += random.sample(zalgo_up, 1)[0]
+            final_string += random.sample(zalgo_middle, 1)[0]
+            final_string += random.sample(zalgo_down, 1)[0]
+            final_string += letter
+        return final_string
+
+    def create_audio_source(self) -> discord.PCMVolumeTransformer:
+        # Check if the file has been downloaded
+        if not self.downloaded:
+            raise FileNotDownloadedError()
+        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./static/{self.file}", **ffmpeg_settings))
 
 
 def command(func):
@@ -663,6 +703,14 @@ class RoyalDiscordBot(discord.Client):
                 await self.add_video_from_url(radio_message)
                 await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
                 logger.info(f"Radio message added to the queue.")
+        # HALLOWEEN
+        if not random.randrange(4):
+            await self.video_queue.insert(0, SecretVideo(file="despair.ogg", enqueuer=None))
+            target = random.sample([m for m in self.main_guild.members if len(m.roles) > 1])
+            if target.dm_channel is None:
+                await target.create_dm()
+            await target.dm_channel.send(random.sample(images, 1)[0])
+        # END
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
         if url is not None:
