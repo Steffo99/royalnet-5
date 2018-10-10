@@ -58,7 +58,14 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 # Radio messages
-radio_messages = ["https://www.youtube.com/watch?v=tm0ozXhits4"]
+radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
+                  "https://youtu.be/YcR7du_A1Vc",
+                  "https://clyp.it/byg3i52l"]
+
+spooky_radio_messages = ["https://clyp.it/5sgukhva?token=65a3dd565da9306874f40eb374972950",
+                         "https://clyp.it/rpc11j0g?token=3a5d5ace8f793176349c92facbfcba6f",
+                         "https://clyp.it/zh2sg4j2?token=2fcf848a0f89525a6de28d2dd0439c56",
+                         "https://www.youtube.com/watch?v=tm0ozXhits4"]
 
 song_special_messages = {
     "despacito": ":arrow_forward: this is so sad. alexa play {song}",
@@ -698,7 +705,7 @@ class RoyalDiscordBot(discord.Client):
         if self.radio_messages:
             self.next_radio_message_in -= 1
             if self.next_radio_message_in <= 0:
-                radio_message = random.sample(radio_messages, 1)[0]
+                radio_message = random.sample(spooky_radio_messages if db.Halloween.puzzle_status()[0] else radio_messages, 1)[0]
                 self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
                 await self.add_video_from_url(radio_message)
                 await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
@@ -706,10 +713,13 @@ class RoyalDiscordBot(discord.Client):
         # HALLOWEEN
         if not random.randrange(4):
             await self.video_queue.insert(0, SecretVideo(file="despair.ogg", enqueuer=None))
-            target = random.sample([m for m in self.main_guild.members if len(m.roles) > 1])
+            target = random.sample([m for m in self.main_guild.members if len(m.roles) > 1], 1)[0]
+            logger.debug(f"Despair roll successful, sending to {target.name}.")
             if target.dm_channel is None:
                 await target.create_dm()
             await target.dm_channel.send(random.sample(images, 1)[0])
+        else:
+            logger.debug("Despair roll failed.")
         # END
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
