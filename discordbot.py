@@ -38,14 +38,14 @@ queue_emojis = [":one:",
                 ":keycap_ten:"]
 
 # Zalgo text
-zalgo_up = [' ̍', ' ̎', ' ̄', ' ̅', ' ̿', ' ̑', ' ̆', ' ̐', ' ͒', ' ͗', ' ͑', ' ̇', ' ̈', ' ̊', ' ͂', ' ̓', ' ̈́', ' ͊',
-           ' ͋', ' ͌', ' ̃', ' ̂', ' ̌', ' ͐', ' ́', ' ̋', ' ̏', ' ̽', ' ̉', ' ͣ', ' ͤ', ' ͥ', ' ͦ', ' ͧ', ' ͨ', ' ͩ',
-           ' ͪ', ' ͫ', ' ͬ', ' ͭ', ' ͮ', ' ͯ', ' ̾', ' ͛', ' ͆', ' ̚', ]
-zalgo_down = ['̖', ' ̗', ' ̘', ' ̙', ' ̜', ' ̝', ' ̞', ' ̟', ' ̠', ' ̤', ' ̥', ' ̦', ' ̩', ' ̪', ' ̫', ' ̬', ' ̭', ' ̮',
-           ' ̯', ' ̰', ' ̱', ' ̲', ' ̳', ' ̹', ' ̺', ' ̻', ' ̼', ' ͅ', ' ͇', ' ͈', ' ͉', ' ͍', ' ͎', ' ͓', ' ͔', ' ͕',
-           ' ͖', ' ͙', ' ͚', ' ', ]
-zalgo_middle = [' ̕', ' ̛', ' ̀', ' ́', ' ͘', ' ̡', ' ̢', ' ̧', ' ̨', ' ̴', ' ̵', ' ̶', ' ͜', ' ͝', ' ͞', ' ͟', ' ͠', ' ͢',
-           ' ̸', ' ̷', ' ͡', ]
+zalgo_up = ['̍', '̎', '̄', '̅', '̿', '̑', '̆', '̐', '͒', '͗', '͑', '̇', '̈', '̊', '͂', '̓', '̈́', '͊',
+            '͋', '͌', '̃', '̂', '̌', '͐', '́', '̋', '̏', '̽', '̉', 'ͣ', 'ͤ', 'ͥ', 'ͦ', 'ͧ', 'ͨ', 'ͩ',
+            'ͪ', 'ͫ', 'ͬ', 'ͭ', 'ͮ', 'ͯ', '̾', '͛', '͆', '̚', ]
+zalgo_down = ['̖', '̗', '̘', '̙', '̜', '̝', '̞', '̟', '̠', '̤', '̥', '̦', '̩', '̪', '̫', '̬', '̭', '̮',
+              '̯', '̰', '̱', '̲', '̳', '̹', '̺', '̻', '̼', 'ͅ', '͇', '͈', '͉', '͍', '͎', '͓', '͔', '͕',
+              '͖', '͙', '͚', '', ]
+zalgo_middle = ['̕', '̛', '̀', '́', '͘', '̡', '̢', '̧', '̨', '̴', '̵', '̶', '͜', '͝', '͞', '͟', '͠', '͢',
+                '̸', '̷', '͡', ]
 
 # Halloween images
 images = ["https://i.imgur.com/PNCRnRe.png", "https://i.imgur.com/iY7y54n.png", "https://i.imgur.com/v1QBVZ2.png"]
@@ -570,8 +570,8 @@ class RoyalDiscordBot(discord.Client):
                         # EASTER EGG, REMOVE LATER
                         if "ghostbusters" in now_playing.plain_text().lower():
                             halloween = await loop.run_in_executor(executor, session.query(db.Halloween)
-                                                                             .filter_by(royal=enqueuer.royal)
-                                                                             .one_or_none)
+                                                                   .filter_by(royal=enqueuer.royal)
+                                                                   .one_or_none)
                             halloween[5] = datetime.datetime.now()
                         # END
                         await loop.run_in_executor(executor, session.commit)
@@ -712,7 +712,7 @@ class RoyalDiscordBot(discord.Client):
                 logger.info(f"Radio message added to the queue.")
         # HALLOWEEN
         if not random.randrange(4):
-            await self.video_queue.insert(0, SecretVideo(file="despair.ogg", enqueuer=None))
+            self.video_queue.insert(0, SecretVideo(file="despair.ogg", enqueuer=None))
             target = random.sample([m for m in self.main_guild.members if len(m.roles) > 1], 1)[0]
             logger.debug(f"Despair roll successful, sending to {target.name}.")
             if target.dm_channel is None:
