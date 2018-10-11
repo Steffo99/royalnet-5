@@ -373,6 +373,13 @@ def ses_identify():
         royal = db_session.query(db.Royal).filter_by(id=fl_session.get("user_id")).one_or_none()
         halloween = db_session.query(db.Halloween).filter_by(royal=royal).one_or_none()
         if halloween is None:
+            if not fl_g.event_started:
+                try:
+                    telegram_bot.send_message(config["Telegram"]["main_group"],
+                                              f"💀 <b>Che le settimane dello spavento abbiano inizio!</b>",
+                                              parse_mode="HTML", disable_web_page_preview=True)
+                except Exception:
+                    pass
             halloween = db.Halloween(royal=royal, first_trigger=datetime.datetime.now())
             db_session.add(halloween)
             db_session.commit()

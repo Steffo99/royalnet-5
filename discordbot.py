@@ -572,7 +572,8 @@ class RoyalDiscordBot(discord.Client):
                             halloween = await loop.run_in_executor(executor, session.query(db.Halloween)
                                                                    .filter_by(royal=enqueuer.royal)
                                                                    .one_or_none)
-                            halloween[5] = datetime.datetime.now()
+                            if halloween is not None:
+                                halloween[5] = datetime.datetime.now()
                         # END
                         await loop.run_in_executor(executor, session.commit)
                         await loop.run_in_executor(executor, session.close)
