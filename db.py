@@ -958,6 +958,8 @@ class Halloween(Base):
         for h in halloweens:
             if h.royal.role == "Affiliato":
                 continue
+            if h.royal.username == "Steffo":
+                continue
             for i in range(7):
                 if h.first_trigger is not None:
                     started = True
