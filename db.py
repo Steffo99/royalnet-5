@@ -996,11 +996,12 @@ class Halloween(Base):
         if self[3] is None:
             # osu! sss
             osu = session.query(Osu).join(Royal).filter_by(id=self.royal.id).one_or_none()
-            r = requests.get(f"https://osu.ppy.sh/api/get_scores"
-                             f"?k={config['Osu!']['ppy_api_key']}&b=2038&u={osu.osu_id}")
-            j = r.json()
-            if len(j) > 0:
-                self[3] = datetime.datetime.now()
+            if osu is not None:
+                r = requests.get(f"https://osu.ppy.sh/api/get_scores"
+                                 f"?k={config['Osu!']['ppy_api_key']}&b=2038&u={osu.osu_id}")
+                j = r.json()
+                if len(j) > 0:
+                    self[3] = datetime.datetime.now()
 
 
 # If run as script, create all the tables in the db

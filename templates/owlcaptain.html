@@ -70,6 +70,21 @@
                 i'll reveal that when all others are complete, just to be safe.
             </div>
             <div class="subquests">
+                {% if g.all_moons_done %}
+                    <div class="quest">
+                        <div class="progress">
+                            <i class="far fa-moon todo"></i>
+                        </div>
+                        <h1>
+                            PERFORM THE RITUAL!
+                        </h1>
+                        <div class="description">
+                            if <a href="https://ryg.steffo.eu/game/halloween">you have enough moons</a>, prepare for a journey to the unknown.<br>
+                            when the time runs out, prepare for the ritual.<br>
+                            you'll receive the location through a safe channel, please do not spread it.
+                        </div>
+                    </div>
+                {% endif %}
                 {% for quest in g.event_progress %}
                     <div class="quest {% if quest %}quest-clear{% endif %}" id="{{ loop.index }}">
                         <div class="progress">
@@ -91,7 +106,7 @@
                         {% elif loop.index == 2 %}
                             {# la zucca di balu e max #}
                             <h2>
-                                carve the ritual pumpkin
+                                <u title="updated">♦</u> carve the ritual pumpkin
                             </h2>
                             <div class="description">
                                 prepare a pumpkin, and empty its inside.<br>

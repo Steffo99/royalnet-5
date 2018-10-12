@@ -24,6 +24,10 @@ sentry = Sentry(app, dsn=config["Sentry"]["token"])
 @app.before_request
 def pre_request():
     fl_g.event_started, fl_g.event_progress = db.Halloween.puzzle_status()
+    fl_g.all_moons_done = True
+    for moon in fl_g.event_progress:
+        if not moon:
+            fl_g.all_moons_done = False
     fl_g.time_left = datetime.datetime.fromtimestamp(1540999800) - datetime.datetime.now()
     fl_g.display_on_main_site = (fl_g.time_left < datetime.timedelta(days=7)) or __debug__
     fl_g.css = "spoopy.less" if (fl_g.event_started or __debug__) else "nryg.less"
@@ -70,8 +74,7 @@ def page_mansion():
 
 @app.route("/whatpumpkin", methods=["POST"])
 def page_whatpumpkin():
-    abort(400)
-    return
+    return redirect("https://t.me/Steffo")
 
 
 if __name__ == "__main__":
