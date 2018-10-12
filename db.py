@@ -956,6 +956,8 @@ class Halloween(Base):
         completed = [False for _ in range(7)]
         started = False
         for h in halloweens:
+            if h.royal.username == "Paltri":
+                continue
             for i in range(7):
                 if h.first_trigger is not None:
                     started = True
