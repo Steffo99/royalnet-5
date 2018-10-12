@@ -42,7 +42,7 @@ def cast(spell_name: str, target_name: str, platform: str, halloween_callback=No
     # HALLOWEEN
     if total >= 800:
         halloween_callback()
-        return "❇️ Ho lanciato <b>{spell}</b> su " \
+        return f"❇️ Ho lanciato <b>{spell}</b> su " \
                f"<i>{target_name}</i>.\n" \
                f"{crit_msg}" \
                f"...ma non succede nulla."
