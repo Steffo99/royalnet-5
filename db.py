@@ -986,7 +986,7 @@ class Halloween(Base):
             # LoL last match
             lol = session.query(LeagueOfLegends).join(Royal).filter_by(id=self.royal.id).one_or_none()
             if lol is not None:
-                r = requests.get(f"https://euw1.api.riotgames.com/lol/match/v3/matchlists/by-account/207525171"
+                r = requests.get(f"https://euw1.api.riotgames.com/lol/match/v3/matchlists/by-account/{lol.account_id}"
                                  f"?api_key={config['League of Legends']['riot_api_key']}")
                 if r.status_code != 200:
                     raise RequestError("Error in the Halloween LoL check.")
