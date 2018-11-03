@@ -47,9 +47,6 @@ zalgo_down = ['̖', '̗', '̘', '̙', '̜', '̝', '̞', '̟', '̠', '̤', '̥', 
 zalgo_middle = ['̕', '̛', '̀', '́', '͘', '̡', '̢', '̧', '̨', '̴', '̵', '̶', '͜', '͝', '͞', '͟', '͠', '͢',
                 '̸', '̷', '͡', ]
 
-# Halloween images
-images = ["https://i.imgur.com/PNCRnRe.png", "https://i.imgur.com/iY7y54n.png", "https://i.imgur.com/v1QBVZ2.png"]
-
 # Init the event loop
 loop = asyncio.get_event_loop()
 
@@ -61,11 +58,6 @@ config.read("config.ini")
 radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
                   "https://youtu.be/YcR7du_A1Vc",
                   "https://clyp.it/byg3i52l"]
-
-spooky_radio_messages = ["https://clyp.it/5sgukhva?token=65a3dd565da9306874f40eb374972950",
-                         "https://clyp.it/rpc11j0g?token=3a5d5ace8f793176349c92facbfcba6f",
-                         "https://clyp.it/zh2sg4j2?token=2fcf848a0f89525a6de28d2dd0439c56",
-                         "https://www.youtube.com/watch?v=tm0ozXhits4"]
 
 song_special_messages = {
     "despacito": ":arrow_forward: this is so sad. alexa play {song}",
