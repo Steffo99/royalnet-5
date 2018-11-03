@@ -749,6 +749,20 @@ table {
             grid-column: 3;
         }
     }
+
+    .halloweenmini {
+        background-color: #311515;
+        padding: 18px;
+        grid-template-columns: 100%;
+
+        .mysterystatus.game-score {
+            font-size: 0;
+
+            i {
+                font-size: 34px;
+            }
+        }
+    }
 }
 
 .wiki {
@@ -814,6 +828,11 @@ table {
         .right {
             grid-column: 2;
         }
+
+        .halloween {
+            grid-column-start: 1;
+            grid-column-end: 3;
+        }
     }
 
     @media (max-width:600px) {
@@ -827,6 +846,26 @@ table {
 
         .right {
             grid-row: 2;
+        }
+
+        .halloween {
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+    }
+
+    .halloween {
+        .lower-box {
+            text-align: center;
+
+            .time-left {
+                font-size: 64px;
+                font-family: "Consolas", "Source Code Pro", monospace;
+            }
+
+            .mysterystatus {
+                font-size: 64px;
+            }
         }
     }
 }
