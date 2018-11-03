@@ -529,12 +529,6 @@ def cmd_roll(bot: Bot, update: Update):
     bot.send_message(update.message.chat.id, f"🎲 {result}")
 
 
-@catch_and_report
-def cmd_exception(bot: Bot, update: Update):
-    if __debug__:
-        raise Exception("/exception was called")
-
-
 def process(arg_discord_connection):
     if arg_discord_connection is not None:
         global discord_connection
@@ -553,7 +547,6 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("balurage", cmd_balurage))
     u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
-    u.dispatcher.add_handler(CommandHandler("ban", cmd_ban))
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
     u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
@@ -563,8 +556,6 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
     u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
-    if __debug__:
-        u.dispatcher.add_handler(CommandHandler("exception", cmd_exception))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
