@@ -220,7 +220,7 @@ class SecretVideo(Video):
         # Check if the file has been downloaded
         if not self.downloaded:
             raise FileNotDownloadedError()
-        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./static/{self.file}", **ffmpeg_settings))
+        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
 
 
 def command(func):
@@ -567,14 +567,6 @@ class RoyalDiscordBot(discord.Client):
                                                       filename=now_playing.plain_text(),
                                                       timestamp=datetime.datetime.now())
                         session.add(played_music)
-                        # EASTER EGG, REMOVE LATER
-                        if "ghostbusters" in now_playing.plain_text().lower():
-                            halloween = await loop.run_in_executor(executor, session.query(db.Halloween)
-                                                                   .filter_by(royal=enqueuer.royal)
-                                                                   .one_or_none)
-                            if halloween is not None:
-                                halloween[5] = datetime.datetime.now()
-                        # END
                         await loop.run_in_executor(executor, session.commit)
                         await loop.run_in_executor(executor, session.close)
                     except sqlalchemy.exc.OperationalError:
@@ -706,7 +698,7 @@ class RoyalDiscordBot(discord.Client):
         if self.radio_messages:
             self.next_radio_message_in -= 1
             if self.next_radio_message_in <= 0:
-                radio_message = random.sample(spooky_radio_messages if db.Halloween.puzzle_status()[0] else radio_messages, 1)[0]
+                radio_message = random.sample(radio_messages, 1)[0]
                 self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
                 await self.add_video_from_url(radio_message)
                 await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")

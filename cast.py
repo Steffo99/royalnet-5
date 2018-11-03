@@ -3,7 +3,7 @@ import math
 import db
 
 
-def cast(spell_name: str, target_name: str, platform: str, halloween_callback=None) -> str:
+def cast(spell_name: str, target_name: str, platform: str) -> str:
     spell = spell_name.capitalize()
     # Seed the rng with the spell name
     # so that spells always deal the same damage
@@ -41,7 +41,6 @@ def cast(spell_name: str, target_name: str, platform: str, halloween_callback=No
         crit_msg = ""
     # HALLOWEEN
     if total >= 800:
-        halloween_callback()
         return f"❇️ Ho lanciato <b>{spell}</b> su " \
                f"<i>{target_name}</i>.\n" \
                f"{crit_msg}" \

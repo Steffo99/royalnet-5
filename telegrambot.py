@@ -124,28 +124,13 @@ def cmd_cast(bot: Bot, update: Update):
     session = db.Session()
     # Find a target for the spell
     target = random.sample(session.query(db.Telegram).all(), 1)[0]
-    # HALLOWEEN
-    caster = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
-
-    def callback():
-        if caster is None:
-            return
-        nsession = db.Session()
-        halloween = nsession.query(db.Halloween).filter_by(royal=caster.royal).one_or_none()
-        if halloween is not None:
-            halloween[7] = datetime.datetime.now()
-            nsession.commit()
-        nsession.close()
     # Close the session
     session.close()
     # END
-    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell, halloween_callback=callback,
+    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell,
                                                        target_name=target.username if target.username is not None
                                                        else target.first_name, platform="telegram"),
                      parse_mode="HTML")
-
-
-
 
 
 @catch_and_report
@@ -326,48 +311,6 @@ def on_callback_query(bot: Bot, update: Update):
             raise
         finally:
             session.close()
-
-
-@catch_and_report
-def cmd_ban(bot: Bot, update: Update):
-    if datetime.date.today() != datetime.date(2019, 4, 1):
-        bot.send_message(update.message.chat.id, "⚠ Non è il giorno adatto per bannare persone!")
-        return
-    session = db.Session()
-    try:
-        last_bans = session.query(db.AprilFoolsBan).filter(db.AprilFoolsBan.datetime > (datetime.datetime.now() - datetime.timedelta(minutes=15))).all()
-        if len(last_bans) > 0:
-            bot.send_message(update.message.chat.id, "⚠ /ban è in cooldown.\n"
-                                                     "Può essere usato solo 1 volta ogni 15 minuti!")
-            return
-        try:
-            arg = update.message.text.split(" ", 1)[1]
-        except IndexError:
-            bot.send_message(update.message.chat.id, "⚠ Devi specificare un bersaglio!")
-            return
-        target_user = session.query(db.Telegram).filter_by(username=arg).one_or_none()
-        if target_user is None:
-            bot.send_message(update.message.chat.id, "⚠ Il bersaglio specificato non esiste nel RYGdb.\n"
-                                                     "Le possibilità sono due: non è un membro RYG, "
-                                                     "oppure non si è ancora registrato e va bannato manualmente.")
-            return
-        if int(target_user.telegram_id) == 25167391:
-            bot.send_message(update.message.chat.id, "⚠ Il creatore della chat non può essere espulso.")
-            return
-        bannerino = db.AprilFoolsBan(from_user_id=update.message.from_user.id, to_user_id=target_user.telegram_id, datetime=datetime.datetime.now())
-        session.add(bannerino)
-        session.commit()
-        bot.kick_chat_member(update.message.chat.id, target_user.telegram_id)
-        bot.unban_chat_member(update.message.chat.id, target_user.telegram_id)
-        try:
-            bot.send_message(target_user.telegram_id, "https://t.me/joinchat/AYAGH0TEav8WcbPVfNe75A")
-        except Exception:
-            pass
-        bot.send_message(update.message.chat.id, "🔨")
-    except Exception as e:
-        pass
-    finally:
-        session.close()
 
 
 @catch_and_report

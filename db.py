@@ -966,47 +966,6 @@ class Halloween(Base):
                 if h[i+1]:
                     completed[i] = True
         return started, completed
-    
-    def update(self, session):
-        if self[1] is None:
-            # Dota last match
-            dota = session.query(Dota).join(Steam).join(Royal).filter_by(id=self.royal.id).one_or_none()
-            if dota is not None:
-                dota_id = Steam.to_steam_id_3(dota.steam_id)
-                r = requests.get(f"https://api.opendota.com/api/players/{dota_id}/recentMatches")
-                if r.status_code != 200:
-                    raise RequestError("Error in the Halloween Dota check.")
-                j = r.json()
-                match = j[0]
-                if match["hero_id"] == 81 and (match["radiant_win"] ^ match["player_slot"] // 128):
-                    logging.debug(f"{self.royal.username} has obtained Moon A via Dota.")
-                    self[1] = datetime.datetime.now()
-                else:
-                    logging.debug(f"{self.royal.username} hasn't passed the LoL challenge yet.")
-            # LoL last match
-            lol = session.query(LeagueOfLegends).join(Royal).filter_by(id=self.royal.id).one_or_none()
-            if lol is not None:
-                r = requests.get(f"https://euw1.api.riotgames.com/lol/match/v3/matchlists/by-account/{lol.account_id}"
-                                 f"?api_key={config['League of Legends']['riot_api_key']}")
-                if r.status_code != 200:
-                    raise RequestError("Error in the Halloween LoL check.")
-                j = r.json()
-                match = j["matches"][0]
-                if match["champion"] == 120:
-                    self[1] = datetime.datetime.now()
-                    logging.debug(f"{self.royal.username} has obtained Moon A via LoL.")
-                else:
-                    logging.debug(f"{self.royal.username} hasn't passed the LoL challenge yet.")
-        if self[3] is None:
-            # osu! sss
-            osu = session.query(Osu).join(Royal).filter_by(id=self.royal.id).one_or_none()
-            if osu is not None:
-                r = requests.get(f"https://osu.ppy.sh/api/get_scores"
-                                 f"?k={config['Osu!']['ppy_api_key']}&b=2038&u={osu.osu_id}")
-                j = r.json()
-                if len(j) > 0:
-                    self[3] = datetime.datetime.now()
-
 
 # If run as script, create all the tables in the db
 if __name__ == "__main__":

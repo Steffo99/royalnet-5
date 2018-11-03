@@ -6,14 +6,18 @@
         <meta name="description" content="{{ wiki_page.content[:97] }}...">
     {% endif %}
     <script>
-        var edits = false;
+        let edits = false;
 
         function newEdit() {
             edits = true;
         }
 
-        function onSubmit() {
+        function onEnter() {
             edits = false;
+        }
+
+        function onExit() {
+            edits = true;
         }
 
         window.onbeforeunload = function() {
@@ -45,7 +49,7 @@
                 <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
                     <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
                     <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
-                    <input class="submit" type="submit" onsubmit="onSubmit()" value="Invia">
+                    <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Invia">
                 </form>
             </div>
         {% endif %}

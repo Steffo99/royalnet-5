@@ -316,7 +316,7 @@ def page_wiki(key: str):
                                       f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>'
                                       f' {"(" + edit_reason + ")" if edit_reason else ""}'
                                       f' [{"+" if difference > 0 else ""}{difference}]\n'
-                                      f' {"<b>" + user.username + " è stato premiato con 1 fioryg!</b>" if fioryg_roll > fioryg_chance else ""}',
+                                      f' {user.username + " è stato premiato con 1 fioryg!" if fioryg_roll > fioryg_chance else ""}',
                                       parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
             pass
@@ -368,33 +368,14 @@ def ses_identify():
         "username": fl_session.get("username"),
         "id": fl_session.get("user_id")
     })
-    if fl_session.get("user_id") is not None:
-        db_session = db.Session()
-        royal = db_session.query(db.Royal).filter_by(id=fl_session.get("user_id")).one_or_none()
-        halloween = db_session.query(db.Halloween).filter_by(royal=royal).one_or_none()
-        if halloween is None:
-            if not fl_g.event_started:
-                try:
-                    telegram_bot.send_message(config["Telegram"]["main_group"],
-                                              f"💀 <b>Che le settimane dello spavento abbiano inizio!</b>",
-                                              parse_mode="HTML", disable_web_page_preview=True)
-                except Exception:
-                    pass
-            halloween = db.Halloween(royal=royal, first_trigger=datetime.datetime.now())
-            db_session.add(halloween)
-            db_session.commit()
-        db_session.close()
-    response.headers["Access-Control-Allow-Origin"] = "https://owlcaptain.tk"
+    response.headers["Access-Control-Allow-Origin"] = "https://steffo.eu"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 
 @app.before_request
 def pre_request():
-    fl_g.event_started, fl_g.event_progress = db.Halloween.puzzle_status()
-    fl_g.time_left = datetime.datetime.fromtimestamp(1540999800) - datetime.datetime.now()
-    fl_g.display_on_main_site = (fl_g.time_left < datetime.timedelta(days=7)) or __debug__
-    fl_g.css = "spoopy.less" if fl_g.event_started else "nryg.less"
+    fl_g.css = "nryg.less"
     fl_g.rygconf = config
 
 
