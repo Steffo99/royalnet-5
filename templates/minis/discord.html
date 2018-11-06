@@ -25,7 +25,7 @@
         {% if record["fav_song"] %}
             <div class="game-title fav-video">Canzone preferita</div>
             <div class="game-score fav-video" title="{{ record["fav_song"] }}">
-                {{ record["fav_song"] }}
+                <a href="/music/{{ record["discord_id"] }}">{{ record["fav_song"] }}</a>
             </div>
             <div class="game-extra fav-video">{{ record["max_plays"] }}x</div>
         {% else %}

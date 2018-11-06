@@ -342,20 +342,15 @@ def page_music():
     return render_template("topsongs.html", songs=songs)
 
 
-@app.route("/music/<name>")
-def page_music_individual(name: str):
+@app.route("/music/<discord_id>")
+def page_music_individual(discord_id: str):
     db_session = db.Session()
-    user = db_session.query(db.Royal).filter_by(username=name).one_or_none()
-    if user is None:
-        db_session.close()
-        abort(404)
-        return
-    discord = db_session.query(db.Discord).filter_by(royal=user).one_or_none()
+    discord = db_session.query(db.Discord).filter_by(discord_id=discord_id).one_or_none()
     if discord is None:
         db_session.close()
         abort(404)
         return
-    songs = db_session.execute(query_discord_music.single_top_songs, {"discordid": discord.id})
+    songs = db_session.execute(query_discord_music.single_top_songs, {"discordid": discord.discord_id})
     db_session.close()
     return render_template("topsongs.html", songs=songs, discord=discord)
 
