@@ -69,7 +69,7 @@ song_special_messages = {
     "updog": ":arrow_forward: What's up, dog? {song}!",
     "sayo-nara": ":arrow_forward: I gently open the door. {song} awaits me inside.",
     "monika": ":arrow_forward: Just Monika. Just Monika. Just {song}.",
-    "take me home": ":arrow_forward: Take me home, to {song}, the place I belong!",
+    "country road": ":arrow_forward: Take me home, to {song}, the place I belong!",
     "never gonna give you up": ":arrow_forward: Rickrolling in 2018. Enjoy {song}!",
     "september": ":arrow_forward: Do you remember? {song}.",
     "homestuck": ":arrow_forward: > Enter song name. {song}",
@@ -89,10 +89,15 @@ song_special_messages = {
     "persona": ":arrow_forward: You'll never see {song} comiiiiing!",
     "flamingo": ":arrow_forward: How many {song} do you have to eat?",
     "linkin park": ":arrow_forward: Crawling in my {song}!",
-    "magicite": "⚠️ Warning: {song} contiene numerosi bug.",
+    "magicite": "⚠️ Warning: {song} contiene numerosi bug. E' ora in riproduzione.",
     "papers please": ":arrow_forward: Glory to Arstotzka! {song}!",
     "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}",
-    "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?"
+    "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?",
+    "the world revolving": ":arrow_forward: CHAOS! CHAOS! I CAN DO {song}!",
+    "deltarune": ":arrow_forward: You hug Ralsei. A strange music starts playing: {song}",
+    "song of unhealing": ":arrow_forward: BEN {song}",
+    "police academy": ":arrow_forward: {song} - freedom.png",
+    "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!"
 }
 
 # FFmpeg settings
@@ -301,6 +306,7 @@ class RoyalDiscordBot(discord.Client):
             "!file": self.cmd_play,
             "!skip": self.cmd_skip,
             "!s": self.cmd_skip,
+            "!next": self.cmd_skip,
             "!remove": self.cmd_remove,
             "!r": self.cmd_remove,
             "!cancel": self.cmd_remove,
@@ -453,10 +459,12 @@ class RoyalDiscordBot(discord.Client):
                                 message += f" | 🎮 {member.activity.name}"
                                 # Rich presence
                                 try:
-                                    message += f" ({member.activity.state})"
+                                    if member.activity.state is not None:
+                                        message += f" ({member.activity.state})"
                                 except AttributeError:
                                     try:
-                                        message += f" ({member.activity.details})"
+                                        if member.activity.details is not None:
+                                            message += f" ({member.activity.details})"
                                     except AttributeError:
                                         pass
                             elif member.activity.type == discord.ActivityType.streaming:
@@ -546,7 +554,7 @@ class RoyalDiscordBot(discord.Client):
                 voice_client.play(audio_source)
                 del self.video_queue[0]
                 activity = discord.Activity(name=now_playing.plain_text(),
-                                            type=discord.ActivityType.playing)
+                                            type=discord.ActivityType.listening)
                 logger.debug(f"Updated bot presence to {now_playing.plain_text()}.")
                 await self.change_presence(status=discord.Status.online, activity=activity)
                 if now_playing.enqueuer is not None:
@@ -581,6 +589,7 @@ class RoyalDiscordBot(discord.Client):
                 if voice_client.is_connected():
                     logger.info("Disconnecting due to inactivity.")
                     await voice_client.disconnect()
+                    await self.change_presence(status=discord.Status.online, activity=None)
                     await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):

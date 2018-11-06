@@ -334,6 +334,32 @@ def page_diario():
     return render_template("diario.html", g=fl_g, entries=diario_entries)
 
 
+@app.route("/music")
+def page_music():
+    db_session = db.Session()
+    songs = db_session.execute(query_discord_music.top_songs)
+    db_session.close()
+    return render_template("topsongs.html", songs=songs)
+
+
+@app.route("/music/<name>")
+def page_music_individual(name: str):
+    db_session = db.Session()
+    user = db_session.query(db.Royal).filter_by(username=name).one_or_none()
+    if user is None:
+        db_session.close()
+        abort(404)
+        return
+    discord = db_session.query(db.Discord).filter_by(royal=user).one_or_none()
+    if discord is None:
+        db_session.close()
+        abort(404)
+        return
+    songs = db_session.execute(query_discord_music.single_top_songs, {"discordid": discord.id})
+    db_session.close()
+    return render_template("topsongs.html", songs=songs, discord=discord)
+
+
 @app.route("/api/token")
 def api_token():
     username = request.form.get("username", "")

@@ -118,3 +118,14 @@ LEFT JOIN
   ) last_play_times ON playedmusic.timestamp = last_play_times.last_play_time
 ) last_songs ON last_songs.discord_id = discord.discord_id
 WHERE discord.royal_id = :royal;"""
+
+top_songs = """SELECT playedmusic.filename, COUNT(*) c 
+FROM playedmusic 
+GROUP BY playedmusic.filename 
+ORDER BY c DESC;"""
+
+single_top_songs = """SELECT playedmusic.filename, COUNT(*) c 
+FROM playedmusic 
+WHERE playedmusic.enqueuer_id = :discordid 
+GROUP BY playedmusic.filename 
+ORDER BY c DESC;"""
