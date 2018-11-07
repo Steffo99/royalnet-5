@@ -220,6 +220,10 @@ class SecretVideo(Video):
         return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
 
 
+def escape(message: str):
+    return message.replace("<", "&lt;").replace(">", "&gt;")
+
+
 def command(func):
     """Decorator. Runs the function as a Discord command."""
 
@@ -420,7 +424,7 @@ class RoyalDiscordBot(discord.Client):
                     if channel == 0:
                         message += "<b>Non in chat vocale:</b>\n"
                     else:
-                        message += f"<b>In #{channels[channel].name}:</b>\n"
+                        message += f"<b>In #{escape(channels[channel].name)}:</b>\n"
                     for member in members_in_channels[channel]:
                         # Ignore not-connected non-notable members
                         if channel == 0 and len(member.roles) < 2:
@@ -450,32 +454,31 @@ class RoyalDiscordBot(discord.Client):
                                 message += f"🔊 "
                         # Nickname
                         if member.nick is not None:
-                            message += member.nick
+                            message += escape(member.nick)
                         else:
-                            message += member.name
+                            message += escape(member.name)
                         # Game or stream
                         if member.activity is not None:
                             if member.activity.type == discord.ActivityType.playing:
-                                message += f" | 🎮 {member.activity.name}"
+                                message += f" | 🎮 {escape(member.activity.name)}"
                                 # Rich presence
                                 try:
                                     if member.activity.state is not None:
-                                        message += f" ({member.activity.state})"
+                                        message += f" ({escape(member.activity.state)})"
                                 except AttributeError:
                                     try:
                                         if member.activity.details is not None:
-                                            message += f" ({member.activity.details})"
+                                            message += f" ({escape(member.activity.details)})"
                                     except AttributeError:
                                         pass
                             elif member.activity.type == discord.ActivityType.streaming:
-                                message += f" | 📡 [{member.activity.name}]({member.activity.url})"
+                                message += f" | 📡 [{escape(member.activity.name)}]({escape(member.activity.url)})"
                             elif member.activity.type == discord.ActivityType.listening:
-                                message += f" | 🎧 {member.activity.name}"
+                                message += f" | 🎧 {escape(member.activity.name)}"
                             elif member.activity.type == discord.ActivityType.watching:
-                                message += f" | 📺 {member.activity.name}"
+                                message += f" | 📺 {escape(member.activity.name)}"
                         message += "\n"
                     message += "\n"
-                message = message.replace("<", "&lt;").replace(">", "&gt;")
                 connection.send(message)
                 logger.debug(f"Answered successfully cvlist request.")
             elif msg.startswith("!"):
