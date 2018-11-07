@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Requires SENTRY_AUTH_TOKEN and SENTRY_ORG set in .profile
+SENTRY_ORG=${SENTRY_ORG}
+SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 old=$(git rev-list HEAD -n 1)
 git pull
 new=$(git rev-list HEAD -n 1)
 if [ ${old} = ${new} ]; then
         version=$(sentry-cli releases propose-version)
-        sentry-cli releases --org stefano-pigozzi new -p royalnet ${version}
-        sentry-cli releases --org stefano-pigozzi set-commits --auto ${version}
+        sentry-cli releases new -p royalnet ${version}
+        sentry-cli releases set-commits --auto ${version}
 fi
 sudo python3.6 -m pip install -r requirements.txt
 sudo service apache2 restart
