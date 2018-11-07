@@ -475,6 +475,7 @@ class RoyalDiscordBot(discord.Client):
                                 message += f" | 📺 {member.activity.name}"
                         message += "\n"
                     message += "\n"
+                message = message.replace("<", "&lt;").replace(">", "&gt;")
                 connection.send(message)
                 logger.debug(f"Answered successfully cvlist request.")
             elif msg.startswith("!"):

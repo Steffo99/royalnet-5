@@ -332,7 +332,7 @@ def cmd_eat(bot: Bot, update: Update):
 def cmd_ship(bot: Bot, update: Update):
     try:
         _, name_one, name_two = update.message.text.split(" ", 2)
-    except IndexError:
+    except ValueError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato correttamente i due nomi!\n"
                                                  "Sintassi corretta: `/ship <nome> <nome>`", parse_mode="Markdown")
         return
@@ -376,6 +376,7 @@ def cmd_bridge(bot: Bot, update: Update):
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠ Non hai specificato un comando!\n"
                                                  "Sintassi corretta: `/bridge <comando> <argomenti>`", parse_mode="Markdown")
+        return
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
     if result == "error":

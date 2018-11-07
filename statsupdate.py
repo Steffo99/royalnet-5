@@ -37,7 +37,7 @@ def update_block(session: db.Session, block: list, delay: float=0, change_callba
         try:
             change = item.update(session=session)
         except Exception as e:
-            logger.error(f"Error {sys.exc_info()} while updating {repr(item)}.")
+            logger.warning(f"Error {sys.exc_info()} while updating {repr(item)}.")
             sentry.extra_context({
                 "item": repr(item)
             })
@@ -61,7 +61,11 @@ def new_dota_rank(item: db.Dota):
 def new_lol_rank(item: db.LeagueOfLegends):
     try:
         telegram_bot.send_message(config["Telegram"]["main_group"],
-                                  f"✳️ {item.royal.username} è salito di rank su League of Legends!")
+                                  f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                  f"\n"
+                                  f"Solo/Duo: {item.solo_division} {item.solo_rank}\n"
+                                  f"Flex: {item.flex_division} {item.flex_rank}\n"
+                                  f"3v3: {item.twtr_division} {item.twtr_rank}")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
 
