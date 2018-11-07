@@ -376,6 +376,7 @@ def cmd_bridge(bot: Bot, update: Update):
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠ Non hai specificato un comando!\n"
                                                  "Sintassi corretta: `/bridge <comando> <argomenti>`", parse_mode="Markdown")
+        return
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
     if result == "error":
