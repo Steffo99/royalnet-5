@@ -332,7 +332,7 @@ def cmd_eat(bot: Bot, update: Update):
 def cmd_ship(bot: Bot, update: Update):
     try:
         _, name_one, name_two = update.message.text.split(" ", 2)
-    except IndexError:
+    except ValueError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato correttamente i due nomi!\n"
                                                  "Sintassi corretta: `/ship <nome> <nome>`", parse_mode="Markdown")
         return
