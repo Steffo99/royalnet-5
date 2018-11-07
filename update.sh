@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Requires SENTRY_AUTH_TOKEN and SENTRY_ORG set in .profile
-SENTRY_ORG=${SENTRY_ORG}
-SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+# Requires SENTRY_AUTH_TOKEN and SENTRY_ORG set in .sentryclirc
 
 old=$(git rev-list HEAD -n 1)
 git pull
