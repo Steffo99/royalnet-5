@@ -325,7 +325,8 @@ class RoyalDiscordBot(discord.Client):
             "!yes": self.null,
             "!no": self.null,
             "!pause": self.cmd_pause,
-            "!resume": self.cmd_resume
+            "!resume": self.cmd_resume,
+            "!m": self.cmd_m
         }
         self.video_queue: typing.List[Video] = []
         self.now_playing = None
@@ -737,6 +738,26 @@ class RoyalDiscordBot(discord.Client):
         await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
         await channel.send(f"✅ Video aggiunto alla coda.")
         logger.debug(f"Added ytsearch:{search} to the queue as YouTube search.")
+
+    @command
+    async def cmd_m(self, channel, author, params):
+        await self.add_video_from_file("./opusfiles/m/1.opus")
+        await self.add_video_from_file("./opusfiles/m/2.opus")
+        await self.add_video_from_file("./opusfiles/m/3.opus")
+        await self.add_video_from_file("./opusfiles/m/4.opus")
+        await self.add_video_from_file("./opusfiles/m/5.opus")
+        await self.add_video_from_file("./opusfiles/m/6.opus")
+        await self.add_video_from_file("./opusfiles/m/7.opus")
+        await self.add_video_from_file("./opusfiles/m/8.opus")
+        await self.add_video_from_file("./opusfiles/m/9.opus")
+        await self.add_video_from_file("./opusfiles/m/a.opus")
+        await self.add_video_from_file("./opusfiles/m/b.opus")
+        await self.add_video_from_file("./opusfiles/m/c.opus")
+        await self.add_video_from_file("./opusfiles/m/d.opus")
+        await self.add_video_from_file("./opusfiles/m/e.opus")
+        await self.add_video_from_file("./opusfiles/m/f.opus")
+        await self.add_video_from_file("./opusfiles/m/g.opus")
+        await channel.send(f"?")
 
     @command
     @requires_connected_voice_client
