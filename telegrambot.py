@@ -547,6 +547,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("ahnonlosoio", cmd_ahnonlosoio))
     u.dispatcher.add_handler(CommandHandler("balurage", cmd_balurage))
     u.dispatcher.add_handler(CommandHandler("diario", cmd_diario))
+    u.dispatcher.add_handler(CommandHandler("spaggia", cmd_diario))
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
