@@ -139,7 +139,7 @@ class Video:
         if file is None and info is None:
             self.file = str(hash(url)) + ".opus"
         elif info is not None:
-            self.file = re.sub(r'[/\\?*"<>|!:]', "_", info["title"]) + ".opus"
+            self.file = "./opusfiles/" + re.sub(r'[/\\?*"<>|!:]', "_", info["title"]) + ".opus"
         else:
             self.file = file
         self.downloaded = False if file is None else True
@@ -190,7 +190,7 @@ class Video:
         # Check if the file has been downloaded
         if not self.downloaded:
             raise FileNotDownloadedError()
-        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
+        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"{self.file}", **ffmpeg_settings))
 
 
 class SecretVideo(Video):
