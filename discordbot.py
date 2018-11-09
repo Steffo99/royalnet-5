@@ -179,7 +179,7 @@ class Video:
                                        "key": 'FFmpegExtractAudio',
                                        "preferredcodec": 'opus'
                                    }],
-                                   "outtmpl": f"./opusfiles/{self.file}",
+                                   "outtmpl": self.file,
                                    "progress_hooks": progress_hooks,
                                    "quiet": True}) as ytdl:
             await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.url]))
