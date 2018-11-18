@@ -18,7 +18,7 @@
         <h1>
             Attività su Discord
         </h1>
-        <canvas class="members-graph-7d" id="discord-members-graph-7d"></canvas>
+        <canvas class="graph members-graph-7d" id="discord-members-graph-7d" height="40"></canvas>
         <script>
             new Chart("discord-members-graph-7d",
                 {
@@ -31,17 +31,26 @@
                         ],
                         "datasets": [
                             {
-                                "label": "Online",
-                                "borderColor": "#6dcff6",
+                                "label": "In cv",
+                                "borderColor": "#fe7f00",
+                                "backgroundColor": "#fe7f0022",
+                                "borderWidth": 4,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
                                 "data": [
                                     {% for point in activityreports %}
-                                        {{ point.discord_members_online }},
+                                        {{ point.discord_members_cv }},
                                     {% endfor %}
                                 ]
                             },
                             {
                                 "label": "In game",
                                 "borderColor": "#9ae915",
+                                "backgroundColor": "#9ae91511",
+                                "borderWidth": 1,
+                                "borderDash": [2],
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "disabled",
                                 "data": [
                                     {% for point in activityreports %}
                                         {{ point.discord_members_ingame }},
@@ -49,14 +58,95 @@
                                 ]
                             },
                             {
-                                "label": "In cv",
-                                "borderColor": "#fe7f00",
+                                "label": "Online",
+                                "borderColor": "#6dcff6",
+                                "backgroundColor": "#6dcff611",
+                                "borderWidth": 1,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": 0,
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_members_online }},
+                                    {% endfor %}
+                                ]
+                            }
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
+        <canvas class="graph cv-graph-7d" id="discord-cv-graph-7d" height="40"></canvas>
+        <script>
+            new Chart("discord-cv-graph-7d",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in activityreports %}
+                                "{{ point.timestamp.strftime("%a %H:%M") }}",
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "Membri in cv",
+                                "borderColor": "#a0ccff",
+                                "backgroundColor": "#a0ccff22",
+                                "borderWidth": 4,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
                                 "data": [
                                     {% for point in activityreports %}
                                         {{ point.discord_members_cv }},
                                     {% endfor %}
                                 ]
                             },
+                            {
+                                "label": "Utenti in cv",
+                                "borderColor": "#ffff00",
+                                "backgroundColor": "#ffff0011",
+                                "borderWidth": 2,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": 0,
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_cv }},
+                                    {% endfor %}
+                                ]
+                            },
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
+        <canvas class="graph channels-graph-7d" id="discord-channels-graph-7d" height="40"></canvas>
+        <script>
+            new Chart("discord-channels-graph-7d",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in activityreports %}
+                                "{{ point.timestamp.strftime("%a %H:%M") }}",
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "Canali utilizzati",
+                                "borderColor": "#ff0000",
+                                "backgroundColor": "#ff000022",
+                                "borderWidth": 2,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_channels_used }},
+                                    {% endfor %}
+                                ]
+                            }
                         ]
                     },
                     "options":{
