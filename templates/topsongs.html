@@ -18,7 +18,7 @@
         <tbody>
             {% for song in songs %}
                 <tr>
-                    <td>{{ song[0] }}</td>
+                    <td><a href="https://www.youtube.com/results?sp=EgIQAQ%253D%253D&search_query={{ song[0] }}">{{ song[0] }}</a></td>
                     <td>{{ song[1] }}</td>
                 </tr>
             {% endfor %}
