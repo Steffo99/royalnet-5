@@ -333,10 +333,6 @@ class RoyalDiscordBot(discord.Client):
         self.radio_messages = True
         self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
         self.inactivity_timer = 0
-        asyncio.ensure_future(self.queue_predownload_videos())
-        asyncio.ensure_future(self.queue_play_next_video())
-        asyncio.ensure_future(self.inactivity_countdown())
-        asyncio.ensure_future(self.activity_task())
 
     async def on_ready(self):
         # Get the main channel
@@ -349,6 +345,10 @@ class RoyalDiscordBot(discord.Client):
             raise InvalidConfigError("The main guild does not exist!")
         await self.change_presence(status=discord.Status.online, activity=None)
         logger.info("Bot is ready!")
+        asyncio.ensure_future(self.queue_predownload_videos())
+        asyncio.ensure_future(self.queue_play_next_video())
+        asyncio.ensure_future(self.inactivity_countdown())
+        asyncio.ensure_future(self.activity_task())
 
     async def on_message(self, message: discord.Message):
         if message.channel != self.main_channel or message.author.bot:
