@@ -355,6 +355,14 @@ def page_music_individual(discord_id: str):
     return render_template("topsongs.html", songs=songs, discord=discord)
 
 
+@app.route("/activity")
+def page_activity():
+    db_session = db.Session()
+    reports = db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all()
+    db_session.close()
+    return render_template("activity.html", activityreports=reports)
+
+
 @app.route("/api/token")
 def api_token():
     username = request.form.get("username", "")
