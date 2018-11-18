@@ -635,7 +635,7 @@ class RoyalDiscordBot(discord.Client):
 
     async def activity_task(self):
         await self.wait_until_ready()
-        time_to_wait = config["Discord"]["activityreport_sample_time"]
+        time_to_wait = int(config["Discord"]["activityreport_sample_time"])
         while True:
             await self.create_activityreport()
             logger.debug(f"Waiting {time_to_wait} seconds before the next record.")
