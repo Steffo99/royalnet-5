@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block prehead %}
+    <meta name="description" content="Statistiche sull'attività della Royal Games">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js" integrity="sha384-DhLzB4p1BEBSNugP/gw0UBLxHx7kHgldDGYtGinCssfp4HK+sG4ByZDau4pWmpqG" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block pagetitle %}
+    {{ game_name }}
+{% endblock %}
+
+{% block body %}
+    <div class="discord-activity">
+        <h1>
+            Attività su Discord
+        </h1>
+        <canvas class="members-graph-7d" id="discord-members-graph-7d"></canvas>
+        <script>
+            new Chart("discord-members-graph-7d",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in activityreports %}
+                                {{ point.timestamp.strftime("%a %H:%M") }}
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "Online",
+                                "borderColor": "#6dcff6",
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_members_online }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "In game",
+                                "borderColor": "#9ae915",
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_members_ingame }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "In cv",
+                                "borderColor": "#fe7f00",
+                                "data": [
+                                    {% for point in activityreports %}
+                                        {{ point.discord_members_cv }},
+                                    {% endfor %}
+                                ]
+                            },
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
+    </div>
+{% endblock %}

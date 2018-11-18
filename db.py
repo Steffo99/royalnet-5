@@ -967,6 +967,22 @@ class Halloween(Base):
                     completed[i] = True
         return started, completed
 
+
+class ActivityReport(Base):
+    __tablename__ = "activityreports"
+
+    timestamp = Column(DateTime, primary_key=True)
+
+    discord_members_online = Column(Integer)
+    discord_members_ingame = Column(Integer)
+    discord_cv = Column(Integer)
+    discord_members_cv = Column(Integer)
+    discord_channels_used = Column(Integer)
+
+    def __repr__(self):
+        return f"<ActivityReport at {self.timestamp.isoformat()}>"
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

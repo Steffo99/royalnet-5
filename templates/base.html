@@ -17,14 +17,6 @@
                 <img src="{{ url_for('static', filename='FixMeRYGLogo.jpg') }}" class="ryg-logo">
                 <b>Royalnet</b>
                 <a href="/">Home</a>
-                <span class="desktop-only">
-                {% if session.get('username') is not none %}
-                    <a href="{{ g.rygconf['Telegram']['invite_link'] }}">Telegram</a>
-                    <a href="{{ g.rygconf['Discord']['invite_link'] }}">Discord</a>
-                    <a href="https://steamcommunity.com/groups/royalgamescastle">Steam</a>
-                    <a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a>
-                {% endif %}
-                </span>
             </div>
             <div class="right">
                 {% if config["DEBUG"] %}

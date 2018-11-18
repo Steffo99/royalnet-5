@@ -8,21 +8,6 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 {% endblock %}
 
-{% block posthead %}
-    <script>
-        function timer() {
-            let now = new Date().getTime();
-            let to = new Date("Oct 31, 2018 15:30:00").getTime();
-            let result = to - now;
-            document.getElementById("time-left").innerHTML = Math.floor(String((result / 3600000))) + "h "
-                                                           + Math.floor(String((result / 60000) % 60)) + "m "
-                                                           + Math.floor(String((result / 1000) % 60)) + "s";
-        }
-
-        setInterval(timer, 100);
-    </script>
-{% endblock %}
-
 {% block body %}
     <h1 id="main-title">
         Royal Games
@@ -49,9 +34,24 @@
                     <a href="/diario">Visualizza tutto</a>
                 </div>
             </div>
-
         </div>
         <div class="right">
+            <div class="box">
+                <div class="upper-box">
+                    Link utili
+                </div>
+                <div class="lower-box">
+                    <ul>
+                        <li><a href="{{ g.rygconf['Telegram']['invite_link'] }}">Link di unione a Telegram</a></li>
+                        <li><a href="{{ g.rygconf['Discord']['invite_link'] }}">Link di invito a Discord</a></li>
+                        <li><a href="https://steamcommunity.com/groups/royalgamescastle">Gruppo Steam Community</a></li>
+                        <li><a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a></li>
+                        <li><a href="/music">Statistiche su Royal Music</a></li>
+                        <li><a href="http://amazon.steffo.eu/royal-music-cache/">File in cache di Royal Music</a></li>
+                        <li><a href="/activity">Statistiche sull'attività</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="box">
                 <div class="upper-box">
                     Membri
@@ -76,7 +76,6 @@
                         <li><a href="/game/discord">Discord</a></li>
                         <li><a href="/game/steam">Steam</a></li>
                         <li><a href="/game/dota">Dota 2</a></li>
-                        <!--li><a href="/game/rl">Rocket League</a></li-->
                         <li><a href="/game/lol">League of Legends</a></li>
                         <li><a href="/game/ow">Overwatch</a></li>
                         <li><a href="/game/osu">osu!</a></li>

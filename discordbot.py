@@ -336,6 +336,7 @@ class RoyalDiscordBot(discord.Client):
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
         asyncio.ensure_future(self.inactivity_countdown())
+        asyncio.ensure_future(self.activity_task())
 
     async def on_ready(self):
         # Get the main channel
@@ -596,6 +597,48 @@ class RoyalDiscordBot(discord.Client):
                     await voice_client.disconnect()
                     await self.change_presence(status=discord.Status.online, activity=None)
                     await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
+
+    async def create_activityreport(self):
+        logger.debug("Fetching Discord users...")
+        discord_users = list(self.main_guild.members)
+        online_members_count = 0
+        ingame_members_count = 0
+        cv_count = 0
+        cv_members_count = 0
+        non_empty_channels = []
+        for member in discord_users:
+            if member.bot:
+                continue
+            if member.voice is not None:
+                cv_count += 1
+                if member.voice.channel.id not in non_empty_channels:
+                    non_empty_channels.append(member.voice.channel.id)
+            if len(member.roles) >= 2:
+                if member.voice is not None:
+                    cv_members_count += 1
+                if member.status != discord.Status.offline and member.status != discord.Status.idle:
+                    online_members_count += 1
+                if member.activity is not None and member.activity.type == discord.ActivityType.playing:
+                    ingame_members_count += 1
+        logger.debug("Creating and committing db.ActivityReport...")
+        session = db.Session()
+        activityreport = db.ActivityReport(timestamp=datetime.datetime.now(),
+                                           discord_members_online=online_members_count,
+                                           discord_members_ingame=ingame_members_count,
+                                           discord_cv=cv_count,
+                                           discord_members_cv=cv_members_count,
+                                           discord_channels_used=len(non_empty_channels))
+        session.add(activityreport)
+        await loop.run_in_executor(executor, session.commit)
+        await loop.run_in_executor(executor, session.close)
+        logger.info("ActivityReport created.")
+
+    async def activity_task(self):
+        time_to_wait = config["Discord"]["activityreport_sample_time"]
+        while True:
+            await self.create_activityreport()
+            logger.debug(f"Waiting {time_to_wait} seconds before the next record.")
+            await asyncio.sleep(time_to_wait)
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
