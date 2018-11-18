@@ -360,7 +360,7 @@ def page_activity():
     db_session = db.Session()
     reports = list(db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
     db_session.close()
-    return render_template("activity.html", activityreports=reversed(reports))
+    return render_template("activity.html", activityreports=list(reversed(reports)))
 
 
 @app.route("/api/token")
