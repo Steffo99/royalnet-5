@@ -358,7 +358,7 @@ def page_music_individual(discord_id: str):
 @app.route("/activity")
 def page_activity():
     db_session = db.Session()
-    reports = db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all()
+    reports = list(db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
     db_session.close()
     return render_template("activity.html", activityreports=reversed(reports))
 
