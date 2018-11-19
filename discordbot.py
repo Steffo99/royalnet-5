@@ -609,12 +609,12 @@ class RoyalDiscordBot(discord.Client):
         for member in discord_users:
             if member.bot:
                 continue
-            if member.voice is not None:
+            if member.voice is not None and member.voice.channel != self.main_guild.afk_channel:
                 cv_count += 1
                 if member.voice.channel.id not in non_empty_channels:
                     non_empty_channels.append(member.voice.channel.id)
             if len(member.roles) >= 2:
-                if member.voice is not None:
+                if member.voice is not None and member.voice.channel != self.main_guild.afk_channel:
                     cv_members_count += 1
                 if member.status != discord.Status.offline and member.status != discord.Status.idle:
                     online_members_count += 1
