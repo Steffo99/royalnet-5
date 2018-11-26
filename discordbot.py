@@ -97,7 +97,8 @@ song_special_messages = {
     "deltarune": ":arrow_forward: You hug Ralsei. A strange music starts playing: {song}",
     "song of unhealing": ":arrow_forward: BEN {song}",
     "police academy": ":arrow_forward: {song} - freedom.png",
-    "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!"
+    "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
+    "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
 }
 
 # FFmpeg settings
@@ -106,11 +107,35 @@ ffmpeg_settings = {}
 # Init the executor
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
+
+class Succ:
+    """All calls to this class return itself."""
+
+    def __bool__(self):
+        return False
+    
+    def __getattr__(self):
+        return Succ()
+
+    def __call__(self, *args, **kwargs):
+        return Succ()
+
+    def __str__(self):
+        return "succ"
+
+    def __repr__(self):
+        return "<Succ>"
+
+
 # Init the Sentry client
-sentry = raven.Client(config["Sentry"]["token"],
-                      release=raven.fetch_git_sha(os.path.dirname(__file__)),
-                      install_logging_hook=False,
-                      hook_libraries=[])
+if config.get("Sentry") and config["Sentry"].get("token"):
+    sentry = raven.Client(config["Sentry"]["token"],
+                        release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                        install_logging_hook=False,
+                        hook_libraries=[])
+else:
+    logger.warning("Sentry not set, ignoring all calls to it.")
+    sentry = Succ()
 
 
 class DurationError(Exception):
