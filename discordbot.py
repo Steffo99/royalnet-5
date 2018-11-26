@@ -19,6 +19,7 @@ import errors
 import datetime
 import sqlalchemy.exc
 import coloredlogs
+import errors
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -138,26 +139,6 @@ else:
     sentry = Succ()
 
 
-class DurationError(Exception):
-    pass
-
-
-class InfoNotRetrievedError(Exception):
-    pass
-
-
-class FileNotDownloadedError(Exception):
-    pass
-
-
-class AlreadyDownloadedError(Exception):
-    pass
-
-
-class InvalidConfigError(Exception):
-    pass
-
-
 class Video:
     def __init__(self, url: str = None, file: str = None, info: dict = None, enqueuer: discord.Member = None):
         self.url = url
@@ -188,14 +169,14 @@ class Video:
     async def download(self, progress_hooks: typing.List["function"] = None):
         # File already downloaded
         if self.downloaded:
-            raise AlreadyDownloadedError()
+            raise errors.AlreadyDownloadedError()
         # No progress hooks
         if progress_hooks is None:
             progress_hooks = []
         # Check if under max duration
         self.duration = datetime.timedelta(seconds=self.info.get("duration", 0))
         if self.info is not None and self.duration.total_seconds() > int(config["YouTube"]["max_duration"]):
-            raise DurationError()
+            raise errors.DurationError()
         # Download the file
         logger.info(f"Now downloading {repr(self)}.")
         with youtube_dl.YoutubeDL({"noplaylist": True,
@@ -214,7 +195,7 @@ class Video:
     def create_audio_source(self) -> discord.PCMVolumeTransformer:
         # Check if the file has been downloaded
         if not self.downloaded:
-            raise FileNotDownloadedError()
+            raise errors.FileNotDownloadedError()
         return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"{self.file}", **ffmpeg_settings))
 
 
@@ -241,7 +222,7 @@ class SecretVideo(Video):
     def create_audio_source(self) -> discord.PCMVolumeTransformer:
         # Check if the file has been downloaded
         if not self.downloaded:
-            raise FileNotDownloadedError()
+            raise errors.FileNotDownloadedError()
         return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
 
 
@@ -362,11 +343,11 @@ class RoyalDiscordBot(discord.Client):
         # Get the main channel
         self.main_channel = self.get_channel(int(config["Discord"]["main_channel"]))
         if not isinstance(self.main_channel, discord.TextChannel):
-            raise InvalidConfigError("The main channel is not a TextChannel!")
+            raise errors.InvalidConfigError("The main channel is not a TextChannel!")
         # Get the main guild
         self.main_guild = self.get_guild(int(config["Discord"]["server_id"]))
         if not isinstance(self.main_guild, discord.Guild):
-            raise InvalidConfigError("The main guild does not exist!")
+            raise errors.InvalidConfigError("The main guild does not exist!")
         await self.change_presence(status=discord.Status.online, activity=None)
         logger.info("Bot is ready!")
         asyncio.ensure_future(self.queue_predownload_videos())
