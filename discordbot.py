@@ -101,7 +101,8 @@ song_special_messages = {
     "police academy": ":arrow_forward: {song} - freedom.png",
     "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
     "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
-    "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico."   
+    "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
+    "k/da": ":arrow_forward: You won a free deportation to Korea! Now playing: {song}."
 }
 
 # FFmpeg settings
