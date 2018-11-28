@@ -54,6 +54,7 @@ loop = asyncio.get_event_loop()
 # Init the config reader
 config = configparser.ConfigParser()
 config.read("config.ini")
+config = dict(config)
 
 # Radio messages
 radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
@@ -560,7 +561,7 @@ class RoyalDiscordBot(discord.Client):
                 now_playing = self.video_queue[0]
                 try:
                     audio_source = now_playing.create_audio_source()
-                except FileNotDownloadedError:
+                except errors.FileNotDownloadedError:
                     continue
                 logger.info(f"Started playing {repr(now_playing)}.")
                 voice_client.play(audio_source)
