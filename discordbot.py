@@ -20,6 +20,7 @@ import datetime
 import sqlalchemy.exc
 import coloredlogs
 import errors
+import math
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -50,10 +51,6 @@ zalgo_middle = ['̕', '̛', '̀', '́', '͘', '̡', '̢', '̧', '̨', '̴', '̵'
 
 # Init the event loop
 loop = asyncio.get_event_loop()
-
-# Init the config reader
-config = configparser.ConfigParser()
-config.read("config.ini")
 
 # Radio messages
 radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
@@ -141,20 +138,33 @@ else:
 
 
 class Video:
+    """A video to be played in the bot."""
+
     def __init__(self, url: str = None, file: str = None, info: dict = None, enqueuer: discord.Member = None):
+        # Url of the video if it has to be downloaded
         self.url = url
+        # Filename of the downloaded video
         if file is None and info is None:
+            # Get it from the url hash
             self.file = str(hash(url)) + ".opus"
         elif info is not None:
+            # Get it from the video title
             self.file = "./opusfiles/" + re.sub(r'[/\\?*"<>|!:]', "_", info["title"]) + ".opus"
         else:
+            # The filename was explicitly passed
             self.file = file
-        self.downloaded = False if file is None else True
+        # Was the file already downloaded?
+        self.downloaded = (file is not None)
+        # Do we already have info on the video?
         self.info = info
+        # Who added the video to the queue?
         self.enqueuer = enqueuer
-        self.duration = None
+        # How long is the video?
+        if info is not None:
+            self.duration = info.get("duration")
 
     def __str__(self):
+        """Format the title to be used on Discord using Markdown."""
         if self.info is None or "title" not in self.info:
             return f"`{self.file}`"
         return f"_{self.info['title']}_"
@@ -163,11 +173,12 @@ class Video:
         return f"<discordbot.Video {str(self)}>"
 
     def plain_text(self):
+        """Format the video title without any Markdown."""
         if self.info is None or "title" not in self.info:
             return self.file
         return self.info['title']
 
-    async def download(self, progress_hooks: typing.List["function"] = None):
+    def download(self, progress_hooks: typing.List["function"] = None):
         # File already downloaded
         if self.downloaded:
             raise errors.AlreadyDownloadedError()
@@ -176,10 +187,11 @@ class Video:
             progress_hooks = []
         # Check if under max duration
         self.duration = datetime.timedelta(seconds=self.info.get("duration", 0))
-        if self.info is not None and self.duration.total_seconds() > int(config["YouTube"]["max_duration"]):
+        # Refuse downloading if over YouTube max_duration
+        if self.info is not None and self.duration.total_seconds() > self.max_duration:
             raise errors.DurationError()
         # Download the file
-        logger.info(f"Now downloading {repr(self)}.")
+        logger.info(f"Downloading: {repr(self)}")
         with youtube_dl.YoutubeDL({"noplaylist": True,
                                    "format": "best",
                                    "postprocessors": [{
@@ -189,8 +201,8 @@ class Video:
                                    "outtmpl": self.file,
                                    "progress_hooks": progress_hooks,
                                    "quiet": True}) as ytdl:
-            await loop.run_in_executor(executor, functools.partial(ytdl.download, [self.url]))
-        logger.info(f"Download of {repr(self)} complete.")
+            ytdl.download(self.url)
+        logger.info(f"Download complete: {repr(self)}")
         self.downloaded = True
 
     def create_audio_source(self) -> discord.PCMVolumeTransformer:
@@ -201,6 +213,7 @@ class Video:
 
 
 class SecretVideo(Video):
+    """A video to be played, but with a Zalgo'ed title."""
 
     def __str__(self):
         final_string = ""
@@ -219,12 +232,6 @@ class SecretVideo(Video):
             final_string += random.sample(zalgo_down, 1)[0]
             final_string += letter
         return final_string
-
-    def create_audio_source(self) -> discord.PCMVolumeTransformer:
-        # Check if the file has been downloaded
-        if not self.downloaded:
-            raise errors.FileNotDownloadedError()
-        return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"./opusfiles/{self.file}", **ffmpeg_settings))
 
 
 def escape(message: str):
@@ -335,22 +342,61 @@ class RoyalDiscordBot(discord.Client):
             "!resume": self.cmd_resume
         }
         self.video_queue: typing.List[Video] = []
-        self.now_playing = None
-        self.radio_messages = True
-        self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
+        self.now_playing: typing.Optional[Video] = None
+        self.load_config("config.ini")
         self.inactivity_timer = 0
 
+    def load_config(self, filename):
+    # Init the config reader
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    # Token
+    try:
+        self.token = config["Discord"]["bot_token"]
+    except KeyError, ValueError:
+        raise errors.InvalidConfigError("Missing Discord bot token.")
+    # Main channels, will be fully loaded when ready
+    try:
+        self.main_guild_id = int(config["Discord"]["server_id"])
+        self.main_channel_id = int(config["Discord"]["main_channel"]
+    except KeyError, ValueError:
+        raise errors.InvalidConfigError("Missing main guild and channel ids.")
+    # Max enqueable video duration
+    try:
+        self.max_duration = int(config["YouTube"].get("max_duration"))
+    except KeyError, ValueError:
+        logger.warning("Max video duration is not set, setting it to infinity.")
+        self.max_duration = math.inf
+    # Max videos to predownload
+    try:
+        self.max_videos_to_predownload = int(config["YouTube"]["predownload_videos"])
+    except KeyError, ValueError:
+        logger.warning("Max videos to predownload is not set, setting it to infinity.")
+        self.max_videos_to_predownload = None
+    # Radio messages
+    try:
+        self.radio_messages_enabled = True if config["Discord"]["radio_messages_enabled"] == "True" else False
+        self.radio_messages_every = int(config["Discord"]["radio_messages_every"])
+        self.radio_messages_next_in = self.radio_messages_every
+    except KeyError, ValueError:
+        logger.warning("Radio messages config error, disabling them.")
+        self.radio_messages_enabled = False
+        self.radio_messages_every = mathf.inf
+        self.radio_messages_next_in = mathf.inf
+
     async def on_ready(self):
-        # Get the main channel
-        self.main_channel = self.get_channel(int(config["Discord"]["main_channel"]))
-        if not isinstance(self.main_channel, discord.TextChannel):
-            raise errors.InvalidConfigError("The main channel is not a TextChannel!")
         # Get the main guild
-        self.main_guild = self.get_guild(int(config["Discord"]["server_id"]))
+        self.main_guild = self.get_guild(self.main_guild_id)
         if not isinstance(self.main_guild, discord.Guild):
             raise errors.InvalidConfigError("The main guild does not exist!")
+        # Get the main channel
+        self.main_channel = self.get_channel(self.main_channel_id)
+        if not isinstance(self.main_channel, discord.TextChannel):
+            raise errors.InvalidConfigError("The main channel is not a TextChannel!")
+        # Show yourself!
         await self.change_presence(status=discord.Status.online, activity=None)
         logger.info("Bot is ready!")
+        # Start the bot tasks
         asyncio.ensure_future(self.queue_predownload_videos())
         asyncio.ensure_future(self.queue_play_next_video())
         asyncio.ensure_future(self.inactivity_countdown())
@@ -504,12 +550,12 @@ class RoyalDiscordBot(discord.Client):
 
     async def queue_predownload_videos(self):
         while True:
-            for index, video in enumerate(self.video_queue[:int(config["YouTube"]["predownload_videos"])].copy()):
+            for index, video in enumerate(self.video_queue[:(None if self.max_videos_to_predownload == math.inf else self.max_videos_to_predownload].copy()):
                 if video.downloaded:
                     continue
                 try:
                     with async_timeout.timeout(int(config["YouTube"]["download_timeout"])):
-                        await video.download()
+                        await loop.run_in_executor(executor, video.download)
                 except asyncio.TimeoutError:
                     logger.warning(f"Video download took more than {config['YouTube']['download_timeout']}s:"
                                    f" {video.plain_text()}")
@@ -520,7 +566,7 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 except DurationError:
                     await self.main_channel.send(f"⚠️ {str(video)} dura più di"
-                                                 f" {str(int(config['YouTube']['max_duration']) // 60)}"
+                                                 f" {self.max_duration // 60}"
                                                  f" minuti, quindi è stato rimosso dalla coda.")
                     del self.video_queue[index]
                     continue
@@ -560,7 +606,7 @@ class RoyalDiscordBot(discord.Client):
                 now_playing = self.video_queue[0]
                 try:
                     audio_source = now_playing.create_audio_source()
-                except FileNotDownloadedError:
+                except errors.FileNotDownloadedError:
                     continue
                 logger.info(f"Started playing {repr(now_playing)}.")
                 voice_client.play(audio_source)
@@ -750,15 +796,13 @@ class RoyalDiscordBot(discord.Client):
                                "Sintassi: `!play <url|ricercayoutube|nomefile>`")
             return
         channel.typing()
-        # If the radio messages are enabled...
-        if self.radio_messages:
-            self.next_radio_message_in -= 1
-            if self.next_radio_message_in <= 0:
-                radio_message = random.sample(radio_messages, 1)[0]
-                self.next_radio_message_in = int(config["Discord"]["radio_messages_every"])
-                await self.add_video_from_url(radio_message)
-                await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
-                logger.info(f"Radio message added to the queue.")
+        self.next_radio_message_in -= 1
+        if self.next_radio_message_in <= 0:
+            radio_message = random.sample(radio_messages, 1)[0]
+            self.next_radio_message_in = self.radio_messages_every
+            await self.add_video_from_url(radio_message)
+            await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
+            logger.info(f"Radio message added to the queue.")
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
         if url is not None:
@@ -931,19 +975,23 @@ class RoyalDiscordBot(discord.Client):
 
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        if not self.radio_messages_enabled:
+            await channel.send("⚠ I messaggi radio sono stati disabilitati dall'amministratore del bot.")
+            return
         if len(params) < 2:
-            self.radio_messages = not self.radio_messages
+            await channel.send("⚠ Sintassi del comando non valida.\n"
+                               "Sintassi: `!radiomessages <on|off>`")
         else:
             if params[1].lower() == "on":
-                self.radio_messages = True
+                self.radio_messages_next_in = self.radio_messages_every
             elif params[1].lower() == "off":
-                self.radio_messages = False
+                self.radio_messages_next_in = math.inf
             else:
                 await channel.send("⚠ Sintassi del comando non valida.\n"
-                                   "Sintassi: `!radiomessages [on|off]`")
+                                   "Sintassi: `!radiomessages <on|off>`")
                 return
-        logger.info(f"Radio messages status toggled to {self.radio_messages}.")
-        await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages else 'disattivati'}**.")
+        logger.info(f"Radio messages status to {'enabled' if self.radio_messages.next_in < math.inf else 'disabled'}.")
+        await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages.next_in < math.inf else 'disattivati'}**.")
 
     @command
     @requires_connected_voice_client
@@ -972,7 +1020,7 @@ def process(users_connection=None):
         logger.info("Initializing Telegram-Discord connection...")
         asyncio.ensure_future(bot.feed_pipe(users_connection))
     logger.info("Logging in...")
-    loop.run_until_complete(bot.login(config["Discord"]["bot_token"], bot=True))
+    loop.run_until_complete(bot.login(bot.token, bot=True))
     logger.info("Connecting...")
     loop.run_until_complete(bot.connect())
     logger.info("Now stopping...")
