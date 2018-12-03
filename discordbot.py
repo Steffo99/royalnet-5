@@ -21,6 +21,7 @@ import sqlalchemy.exc
 import coloredlogs
 import errors
 import math
+import enum
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -137,7 +138,7 @@ else:
     sentry = Succ()
 
 
-class Video:
+class OldVideo:
     """A video to be played in the bot."""
 
     def __init__(self, url: str = None, file: str = None, info: dict = None, enqueuer: discord.Member = None):
@@ -217,6 +218,92 @@ class Video:
             raise errors.FileNotDownloadedError()
         self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"{self.file}", **ffmpeg_settings))
 
+    def suggestion(self) -> typing.Optional[str]:
+        """The suggested video to add to the queue after this one."""
+        raise NotImplementedError()
+
+
+class Video:
+    def __init__(self, enqueuer: typing.Optional[discord.Member]=None):
+        self.is_ready = False
+        self.name = None
+        self.enqueuer = enqueuer
+        self.audio_source = None
+
+    def __str__(self):
+        return self.name
+
+    def plain_text(self):
+        """Title without formatting to be printed on terminals."""
+        return self.name
+
+    def database_text(self):
+        """The text to be stored in the database for the stats. Usually the same as plain_text()."""
+        return self.name
+
+    def __repr__(self):
+        return f"<Video {self.name} ({'' if self.is_ready else 'not '}ready) added by {self.enqueuer}>"
+
+    def ready_up(self):
+        """Prepare the video for playback in some way. For example, download it."""
+        raise NotImplementedError()
+
+    def make_audio_source(self):
+        """Create an AudioSource to be played through Discord, and store and return it."""
+        raise NotImplementedError()
+    
+    def get_suggestion(self):
+        """Get the next suggested video, to be used when the queue is in LoopMode.FOLLOW_SUGGESTION"""
+        raise NotImplementedError()
+
+# TODO: split Video in YoutubeDLVideo and LocalFileVideo
+
+class YoutubeDLVideo(Video):
+    """A file sourcing from YoutubeDL."""
+
+    def __init__(self, url, enqueuer: typing.Optional[discord.Member]=None):
+        super().__init__(enqueuer)
+        self.url = url
+        self.info = None
+
+    def get_info(self):
+        """Get info about the video."""
+        ...
+
+    def ready_up(self):
+        """Download the video."""
+        ...
+
+    def get_filename(self):
+        """Generate the filename of the video."""
+        ...
+
+    def make_audio_source(self):
+        ...
+
+    def get_suggestion(self):
+        ...
+    
+
+class LocalFileVideo(Video):
+    """A file sourcing from the local opusfiles folder."""
+
+    def __init__(self, filename):
+        super().__init__()
+        self.filename = filename
+
+    def suggestion(self) -> typing.Optional[str]:
+        return None
+
+    ...
+
+
+class LoopMode(enum.Enum):
+    NORMAL = enum.auto()
+    LOOP_QUEUE = enum.auto()
+    LOOP_SINGLE = enum.auto()
+    FOLLOW_SUGGESTIONS = enum.auto()
+
 
 class VideoQueue():
     """The queue of videos to be played."""
@@ -224,15 +311,36 @@ class VideoQueue():
     def __init__(self):
         self.list: typing.List[Video] = []
         self.now_playing: typing.Optional[Video] = None
+        self.loop_mode = LoopMode.NORMAL
 
     def __len__(self) -> int:
         return len(self.list)
+
+    def __next__(self) -> Video:
+        video = self.next_video()
+        self.advance_queue()
+        return video
+
+    def __repr__(self) -> str:
+        return f"<VideoQueue of length {len(self)}>"
 
     def add(self, video: Video, position: int=None) -> None:
         if position is None:
             self.list.append(video)
             return
         self.list.insert(position, video)
+    
+    def advance_queue(self):
+        if loop_mode == LoopMode.NORMAL:
+            del self.list[0]
+        elif loop_mode == LoopMode.LOOP_QUEUE:
+            self.add(self.list[0])
+            del self.list[0]
+        elif loop_mode == LoopMode.LOOP_SINGLE:
+            pass
+        elif loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            self.add(self.list[0].suggestion(), 0)
+            del self.list[0]
     
     def next_video(self) -> typing.Optional[Video]:
         if len(self.list) == 0:
@@ -257,6 +365,13 @@ class VideoQueue():
             elif title in video.file:
                 return video
         return None
+
+    def undownloaded_videos(self, limit: typing.Optional[int]=None):
+        l = []
+        for video in self.list[:limit]:
+            if not video.downloaded:
+                l.append(video)
+        return l
     
     def __getitem__(self, index: int) -> Video:
         """Get an element from the list."""
@@ -600,7 +715,7 @@ class RoyalDiscordBot(discord.Client):
 
     async def queue_predownload_videos(self):
         while True:
-            for index, video in enumerate(self.video_queue.list[:(None if self.max_videos_to_predownload == math.inf else self.max_videos_to_predownload].copy()):
+            for index, video in enumerate(self.video_queue.undownloaded_videos(self.max_videos_to_predownload)):
                 if video.downloaded:
                     continue
                 try:
