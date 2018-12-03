@@ -698,6 +698,7 @@ class RoyalDiscordBot(discord.Client):
                 # Start playing the AudioSource
                 logger.info(f"Started playing {self.voice_queue.now_playing}")
                 voice_client.play(audio_source)
+                #TODO
 
                 
 
