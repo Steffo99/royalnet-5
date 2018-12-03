@@ -15,7 +15,6 @@ import configparser
 import async_timeout
 import raven
 import logging
-import errors
 import datetime
 import sqlalchemy.exc
 import coloredlogs
@@ -104,7 +103,7 @@ class Succ:
     def __bool__(self):
         return False
     
-    def __getattr__(self):
+    def __getattr__(self, attr):
         return Succ()
 
     def __call__(self, *args, **kwargs):
@@ -117,15 +116,16 @@ class Succ:
         return "<Succ>"
 
 
+# TODO
 # Init the Sentry client
-if config.get("Sentry") and config["Sentry"].get("token"):
-    sentry = raven.Client(config["Sentry"]["token"],
-                        release=raven.fetch_git_sha(os.path.dirname(__file__)),
-                        install_logging_hook=False,
-                        hook_libraries=[])
-else:
-    logger.warning("Sentry not set, ignoring all calls to it.")
-    sentry = Succ()
+# if config.get("Sentry") and config["Sentry"].get("token"):
+#     sentry = raven.Client(config["Sentry"]["token"],
+#                         release=raven.fetch_git_sha(os.path.dirname(__file__)),
+#                         install_logging_hook=False,
+#                         hook_libraries=[])
+# else:
+logger.warning("Sentry not set, ignoring all calls to it.")
+sentry = Succ()
 
 
 class Video:
@@ -186,7 +186,7 @@ class YoutubeDLVideo(Video):
             data = ytdl.extract_info(url=self.url, download=False)
         if data is None:
             raise errors.VideoInfoExtractionFailed()
-        if "entries" in info:
+        if "entries" in data:
             raise errors.VideoIsPlaylist()
         self.info = data
         self.name = data.get("title")
@@ -205,9 +205,9 @@ class YoutubeDLVideo(Video):
 
     def get_filename(self):
         """Generate the filename of the video."""
-        if info is None:
+        if self.info is None:
             raise errors.VideoInfoUnknown()
-        return f"./opusfiles/{re.sub(r'[/\\?*"<>|!:]', "_", info["title"])}.opus"
+        return "./opusfiles/{}.opus".format(re.sub(r'[/\\?*"<>|!:]', "_", self.info.get("title", self.info["id"])))
     
     def ready_up(self):
         """Download the video."""
@@ -274,18 +274,18 @@ class VideoQueue():
         self.list.insert(position, video)
     
     def advance_queue(self):
-        if loop_mode == LoopMode.NORMAL:
+        if self.loop_mode == LoopMode.NORMAL:
             try:
                 self.now_playing = self.list.pop(0)
             except IndexError:
                 self.now_playing = None
-        elif loop_mode == LoopMode.LOOP_QUEUE:
+        elif self.loop_mode == LoopMode.LOOP_QUEUE:
             self.add(self.list[0])
             self.now_playing = self.list.pop(0)
-        elif loop_mode == LoopMode.LOOP_SINGLE:
+        elif self.loop_mode == LoopMode.LOOP_SINGLE:
             pass
-        elif loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            if now_playing is None:
+        elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            if self.now_playing is None:
                 self.now_playing = None
                 return
             self.now_playing = self.now_playing.suggestion()
@@ -436,46 +436,54 @@ class RoyalDiscordBot(discord.Client):
         self.load_config("config.ini")
         self.inactivity_timer = 0
 
+    # noinspection PyAttributeOutsideInit
     def load_config(self, filename):
-    # Init the config reader
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    # Token
-    try:
-        self.token = config["Discord"]["bot_token"]
-    except KeyError, ValueError:
-        raise errors.InvalidConfigError("Missing Discord bot token.")
-    # Main channels, will be fully loaded when ready
-    try:
-        self.main_guild_id = int(config["Discord"]["server_id"])
-        self.main_channel_id = int(config["Discord"]["main_channel"]
-    except KeyError, ValueError:
-        raise errors.InvalidConfigError("Missing main guild and channel ids.")
-    # Max enqueable video duration
-    # Defined in the YoutubeDLVideo class
-    # Max videos to predownload
-    try:
-        self.max_videos_to_predownload = int(config["Video"]["cache_size"])
-    except KeyError, ValueError:
-        logger.warning("Max videos to predownload is not set, setting it to infinity.")
-        self.max_videos_to_predownload = None
-    # Max time to ready a video
-    try:
-        self.max_video_ready_time = int(config["Video"]["max_ready_time"])
-    except KeyError, ValueError:
-        logger.warning("Max time to ready a video is not set, setting it to infinity. ")
-        self.max_video_ready_time = mathf.inf
-    # Radio messages
-    try:
-        self.radio_messages_enabled = True if config["Discord"]["radio_messages_enabled"] == "True" else False
-        self.radio_messages_every = int(config["Discord"]["radio_messages_every"])
-        self.radio_messages_next_in = self.radio_messages_every
-    except KeyError, ValueError:
-        logger.warning("Radio messages config error, disabling them.")
-        self.radio_messages_enabled = False
-        self.radio_messages_every = mathf.inf
-        self.radio_messages_next_in = mathf.inf
+        # Init the config reader
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        # Token
+        try:
+            self.token = config["Discord"]["bot_token"]
+        except (KeyError, ValueError):
+            raise errors.InvalidConfigError("Missing Discord bot token.")
+        # Main channels, will be fully loaded when ready
+        try:
+            self.main_guild_id = int(config["Discord"]["server_id"])
+            self.main_channel_id = int(config["Discord"]["main_channel"])
+        except (KeyError, ValueError):
+            raise errors.InvalidConfigError("Missing main guild and channel ids.")
+        # Max enqueable video duration
+        # Defined in the YoutubeDLVideo class
+        # Max videos to predownload
+        try:
+            self.max_videos_to_predownload = int(config["Video"]["cache_size"])
+        except (KeyError, ValueError):
+            logger.warning("Max videos to predownload is not set, setting it to infinity.")
+            self.max_videos_to_predownload = None
+        # Max time to ready a video
+        try:
+            self.max_video_ready_time = int(config["Video"]["max_ready_time"])
+        except (KeyError, ValueError):
+            logger.warning("Max time to ready a video is not set, setting it to infinity. ")
+            self.max_video_ready_time = math.inf
+        # Radio messages
+        try:
+            self.radio_messages_enabled = True if config["Discord"]["radio_messages_enabled"] == "True" else False
+            self.radio_messages_every = int(config["Discord"]["radio_messages_every"])
+            self.radio_messages_next_in = self.radio_messages_every
+        except (KeyError, ValueError):
+            logger.warning("Radio messages config error, disabling them.")
+            self.radio_messages_enabled = False
+            self.radio_messages_every = math.inf
+            self.radio_messages_next_in = math.inf
+        # Activity reporting
+        try:
+            self.activity_report_sample_time = int(config["Discord"]["activityreport_sample_time"])
+        except (KeyError, ValueError):
+            logger.warning("Activity reporting config error, disabling it.")
+            self.activity_report_sample_time = math.inf
 
+    # noinspection PyAsyncCall
     async def on_ready(self):
         # Get the main guild
         self.main_guild = self.get_guild(self.main_guild_id)
@@ -525,7 +533,7 @@ class RoyalDiscordBot(discord.Client):
 
     async def on_error(self, event_method, *args, **kwargs):
         ei = sys.exc_info()
-        logger.error(f"Critical error: {repr(ei[1])}")
+        logger.critical(f"Critical error: {repr(ei)}")
         # noinspection PyBroadException
         try:
             await self.main_channel.send(f"☢️ **ERRORE CRITICO NELL'EVENTO** `{event_method}`!\n"
@@ -533,7 +541,7 @@ class RoyalDiscordBot(discord.Client):
                                          f"Una segnalazione di errore è stata automaticamente mandata a Steffo.\n\n"
                                          f"Dettagli dell'errore:\n"
                                          f"```python\n"
-                                         f"{repr(ei[1])}\n"
+                                         f"{repr(ei)}\n"
                                          f"```")
             await self.change_presence(status=discord.Status.invisible)
             await self.close()
@@ -644,10 +652,10 @@ class RoyalDiscordBot(discord.Client):
         while True:
             await asyncio.sleep(1)
             # Might have some problems with del
-            for index, video in enumerate(self.video_queue.undownloaded_videos(self.max_videos_to_predownload)):
+            for index, video in enumerate(self.video_queue.not_ready_videos(self.max_videos_to_predownload)):
                 try:
                     with async_timeout.timeout(self.max_video_ready_time):
-                        loop.run_in_executor(executor, video.ready_up)
+                        await loop.run_in_executor(executor, video.ready_up)
                 except asyncio.TimeoutError:
                     logger.warning(f"Video {repr(video)} took more than {self.max_video_ready_time} to download, skipping...")
                     await self.main_channel.send(f"⚠️ La preparazione di {video} ha richiesto più di {self.max_video_ready_time} secondi, pertanto è stato rimosso dalla coda.")
@@ -669,7 +677,7 @@ class RoyalDiscordBot(discord.Client):
                     await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
                                                  f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
                                                  f"```python\n"
-                                                 f"{str(e)}"
+                                                 f"{str(e.args)}"
                                                  f"```")
                     del self.video_queue.list[index]
                     continue
@@ -687,20 +695,45 @@ class RoyalDiscordBot(discord.Client):
                 if voice_client.is_paused():
                     continue
                 # Advance the queue
-                self.voice_queue.advance_queue()
+                self.video_queue.advance_queue()
                 # Try to generate an AudioSource
-                if self.voice_queue.now_playing is None:
+                if self.video_queue.now_playing is None:
                     continue
                 try:
-                    audio_source = self.voice_queue.now_playing.make_audio_source()
-                except errors.VideoIsNotReady():
+                    audio_source = self.video_queue.now_playing.make_audio_source()
+                except errors.VideoIsNotReady:
                     continue
                 # Start playing the AudioSource
-                logger.info(f"Started playing {self.voice_queue.now_playing}")
+                logger.info(f"Started playing {self.video_queue.now_playing.plain_text()}.")
                 voice_client.play(audio_source)
-                #TODO
-
-                
+                # Update the voice_client activity
+                activity = discord.Activity(name=self.video_queue.now_playing.plain_text(),
+                                            type=discord.ActivityType.listening)
+                logger.debug("Updating bot presence...")
+                await self.change_presence(status=discord.Status.online, activity=activity)
+                # Record the played song in the database
+                if self.video_queue.now_playing.enqueuer is not None:
+                    logger.debug(f"Adding {self.video_queue.now_playing.plain_text()} to db.PlayedMusic...")
+                    try:
+                        session = db.Session()
+                        enqueuer = await loop.run_in_executor(executor, session.query(db.Discord)
+                                                              .filter_by(discord_id=self.video_queue.now_playing.enqueuer.id)
+                                                              .one_or_none)
+                        played_music = db.PlayedMusic(enqueuer=enqueuer,
+                                                      filename=self.video_queue.now_playing.database_text(),
+                                                      timestamp=datetime.datetime.now())
+                        session.add(played_music)
+                        await loop.run_in_executor(executor, session.commit)
+                        await loop.run_in_executor(executor, session.close)
+                    except sqlalchemy.exc.OperationalError:
+                        pass
+                # Send a message in chat
+                for key in song_special_messages:
+                    if key in self.video_queue.now_playing.name.lower():
+                        await self.main_channel.send(song_special_messages[key].format(song=str(self.video_queue.now_playing)))
+                        break
+                else:
+                    await self.main_channel.send(f":arrow_forward: Ora in riproduzione: {str(self.video_queue.now_playing)}")
 
     async def inactivity_countdown(self):
         while True:
@@ -752,11 +785,12 @@ class RoyalDiscordBot(discord.Client):
 
     async def activity_task(self):
         await self.wait_until_ready()
-        time_to_wait = int(config["Discord"]["activityreport_sample_time"])
+        if self.activity_report_sample_time == math.inf:
+            return
         while True:
             await self.create_activityreport()
-            logger.debug(f"Waiting {time_to_wait} seconds before the next record.")
-            await asyncio.sleep(time_to_wait)
+            logger.debug(f"Waiting {self.activity_report_sample_time} seconds before the next record.")
+            await asyncio.sleep(self.activity_report_sample_time)
 
     async def add_video_from_url(self, url, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
@@ -774,13 +808,10 @@ class RoyalDiscordBot(discord.Client):
         if "entries" in info:
             logger.debug(f"Playlist detected at {url}.")
             for entry in info["entries"]:
-                self.video_queue.add(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer), index)
+                self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
             return
         logger.debug(f"Single video detected at {url}.")
-        self.video_queue.add(Video(url=entry["webpage_url"], info=entry, enqueuer=enqueuer), index)
-
-    async def add_video_from_file(self, file, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
-        self.video_queue.add(Video(file=file, enqueuer=enqueuer), index)
+        self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
 
     @command
     async def null(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -852,10 +883,11 @@ class RoyalDiscordBot(discord.Client):
                                "Sintassi: `!play <url|ricercayoutube|nomefile>`")
             return
         channel.typing()
-        self.next_radio_message_in -= 1
-        if self.next_radio_message_in <= 0:
+        self.radio_messages_next_in -= 1
+        if self.radio_messages_next_in <= 0:
             radio_message = random.sample(radio_messages, 1)[0]
-            self.next_radio_message_in = self.radio_messages_every
+            # pycharm are you drunk
+            self.radio_messages_next_in = self.radio_messages_every
             await self.add_video_from_url(radio_message)
             await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
             logger.info(f"Radio message added to the queue.")
@@ -866,21 +898,6 @@ class RoyalDiscordBot(discord.Client):
             await self.add_video_from_url(url.group(0), enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
             logger.debug(f"Added {url} to the queue as URL.")
-            return
-        # Parse the parameter as file
-        file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
-        if os.path.exists(file_path):
-            # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author)
-            await channel.send(f"✅ Video aggiunto alla coda.")
-            logger.debug(f"Added {file_path} to the queue as file.")
-            return
-        file_path += ".opus"
-        if os.path.exists(file_path):
-            # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author)
-            await channel.send(f"✅ Video aggiunto alla coda.")
-            logger.debug(f"Added {file_path} to the queue as file.")
             return
         # Search the parameter on youtube
         search = " ".join(params[1:])
@@ -974,8 +991,8 @@ class RoyalDiscordBot(discord.Client):
         if len(self.video_queue) == 0:
             await channel.send("⚠ Non ci sono video in coda!")
             return
-        random.shuffle(self.video_queue.list)
         logger.info(f"The queue was shuffled by {author.name}#{author.discriminator}.")
+        self.video_queue.shuffle()
         await channel.send("♠️ ♦️ ♣️ ♥️ Shuffle completo!")
 
     @command
@@ -984,9 +1001,8 @@ class RoyalDiscordBot(discord.Client):
         if len(self.video_queue) == 0:
             await channel.send("⚠ Non ci sono video in coda!")
             return
-        # TODO
-        raise NotImplementedError()
         logger.info(f"The queue was cleared by {author.name}#{author.discriminator}.")
+        self.video_queue.clear()
         await channel.send(":regional_indicator_x: Tutti i video in coda rimossi.")
 
     @command
@@ -996,9 +1012,6 @@ class RoyalDiscordBot(discord.Client):
             await channel.send("⚠ Non hai specificato una canzone da riprodurre!\n"
                                "Sintassi: `!forceplay <url|ricercayoutube|nomefile>`")
             return
-        for voice_client in self.voice_clients:
-            if voice_client.is_playing():
-                voice_client.stop()
         logger.info(f"Video play was forced by {author.name}#{author.discriminator}.")
         # Parse the parameter as URL
         url = re.match(r"(?:https?://|ytsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
@@ -1007,28 +1020,16 @@ class RoyalDiscordBot(discord.Client):
             await self.add_video_from_url(url.group(0), enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
             logger.debug(f"Forced {url} as URL.")
-            return
-        # Parse the parameter as file
-        file_path = os.path.join(os.path.join(os.path.curdir, "opusfiles"), " ".join(params[1:]))
-        if os.path.exists(file_path):
-            # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author)
+        else:
+            # Search the parameter on youtube
+            search = " ".join(params[1:])
+            # This is a search
+            await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
             await channel.send(f"✅ Video aggiunto alla coda.")
-            logger.debug(f"Forced {file_path} as file.")
-            return
-        file_path += ".opus"
-        if os.path.exists(file_path):
-            # This is a file
-            await self.add_video_from_file(file=file_path, enqueuer=author)
-            await channel.send(f"✅ Video aggiunto alla coda.")
-            logger.debug(f"Forced {file_path} as file.")
-            return
-        # Search the parameter on youtube
-        search = " ".join(params[1:])
-        # This is a search
-        await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
-        await channel.send(f"✅ Video aggiunto alla coda.")
-        logger.debug(f"Forced ytsearch:{search} as YouTube search.")
+            logger.debug(f"Forced ytsearch:{search} as YouTube search.")
+        for voice_client in self.voice_clients:
+            if voice_client.is_playing():
+                voice_client.stop()
 
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1047,8 +1048,8 @@ class RoyalDiscordBot(discord.Client):
                 await channel.send("⚠ Sintassi del comando non valida.\n"
                                    "Sintassi: `!radiomessages <on|off>`")
                 return
-        logger.info(f"Radio messages status to {'enabled' if self.radio_messages.next_in < math.inf else 'disabled'}.")
-        await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages.next_in < math.inf else 'disattivati'}**.")
+        logger.info(f"Radio messages status to {'enabled' if self.radio_messages_next_in < math.inf else 'disabled'}.")
+        await channel.send(f"📻 Messaggi radio **{'attivati' if self.radio_messages_next_in < math.inf else 'disattivati'}**.")
 
     @command
     @requires_connected_voice_client
