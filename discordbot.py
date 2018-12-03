@@ -40,16 +40,6 @@ queue_emojis = [":one:",
                 ":nine:",
                 ":keycap_ten:"]
 
-# Zalgo text
-zalgo_up = ['̍', '̎', '̄', '̅', '̿', '̑', '̆', '̐', '͒', '͗', '͑', '̇', '̈', '̊', '͂', '̓', '̈́', '͊',
-            '͋', '͌', '̃', '̂', '̌', '͐', '́', '̋', '̏', '̽', '̉', 'ͣ', 'ͤ', 'ͥ', 'ͦ', 'ͧ', 'ͨ', 'ͩ',
-            'ͪ', 'ͫ', 'ͬ', 'ͭ', 'ͮ', 'ͯ', '̾', '͛', '͆', '̚', ]
-zalgo_down = ['̖', '̗', '̘', '̙', '̜', '̝', '̞', '̟', '̠', '̤', '̥', '̦', '̩', '̪', '̫', '̬', '̭', '̮',
-              '̯', '̰', '̱', '̲', '̳', '̹', '̺', '̻', '̼', 'ͅ', '͇', '͈', '͉', '͍', '͎', '͓', '͔', '͕',
-              '͖', '͙', '͚', '', ]
-zalgo_middle = ['̕', '̛', '̀', '́', '͘', '̡', '̢', '̧', '̨', '̴', '̵', '̶', '͜', '͝', '͞', '͟', '͠', '͢',
-                '̸', '̷', '͡', ]
-
 # Init the event loop
 loop = asyncio.get_event_loop()
 
@@ -138,91 +128,6 @@ else:
     sentry = Succ()
 
 
-class OldVideo:
-    """A video to be played in the bot."""
-
-    def __init__(self, url: str = None, file: str = None, info: dict = None, enqueuer: discord.Member = None):
-        # Url of the video if it has to be downloaded
-        self.url = url
-        # Filename of the downloaded video
-        if file is None and info is None:
-            # Get it from the url hash
-            self.file = str(hash(url)) + ".opus"
-        elif info is not None:
-            # Get it from the video title
-            self.file = "./opusfiles/" + re.sub(r'[/\\?*"<>|!:]', "_", info["title"]) + ".opus"
-        else:
-            # The filename was explicitly passed
-            self.file = file
-        # Was the file already downloaded?
-        self.downloaded = (file is not None)
-        # Do we already have info on the video?
-        self.info = info
-        # Who added the video to the queue?
-        self.enqueuer = enqueuer
-        # How long and what title has the video?
-        if info is not None:
-            self.duration = info.get("duration")
-            self.title = info.get("title")
-        else:
-            self.duration = None
-            self.title = None
-        # No audio source exists yet
-        self.audio_source = None
-
-    def __str__(self):
-        """Format the title to be used on Discord using Markdown."""
-        if self.info is None or "title" not in self.info:
-            return f"`{self.file}`"
-        return f"_{self.info['title']}_"
-
-    def __repr__(self):
-        return f"<discordbot.Video {str(self)}>"
-
-    def plain_text(self):
-        """Format the video title without any Markdown."""
-        if self.info is None or "title" not in self.info:
-            return self.file
-        return self.info['title']
-
-    def download(self, progress_hooks: typing.List["function"] = None):
-        # File already downloaded
-        if self.downloaded:
-            raise errors.AlreadyDownloadedError()
-        # No progress hooks
-        if progress_hooks is None:
-            progress_hooks = []
-        # Check if under max duration
-        self.duration = datetime.timedelta(seconds=self.info.get("duration", 0))
-        # Refuse downloading if over YouTube max_duration
-        if self.info is not None and self.duration.total_seconds() > self.max_duration:
-            raise errors.DurationError()
-        # Download the file
-        logger.info(f"Downloading: {repr(self)}")
-        with youtube_dl.YoutubeDL({"noplaylist": True,
-                                   "format": "best",
-                                   "postprocessors": [{
-                                       "key": 'FFmpegExtractAudio',
-                                       "preferredcodec": 'opus'
-                                   }],
-                                   "outtmpl": self.file,
-                                   "progress_hooks": progress_hooks,
-                                   "quiet": True}) as ytdl:
-            ytdl.download(self.url)
-        logger.info(f"Download complete: {repr(self)}")
-        self.downloaded = True
-
-    def load(self) -> None:
-        # Check if the file has been downloaded
-        if not self.downloaded:
-            raise errors.FileNotDownloadedError()
-        self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f"{self.file}", **ffmpeg_settings))
-
-    def suggestion(self) -> typing.Optional[str]:
-        """The suggested video to add to the queue after this one."""
-        raise NotImplementedError()
-
-
 class Video:
     def __init__(self, enqueuer: typing.Optional[discord.Member]=None):
         self.is_ready = False
@@ -231,14 +136,20 @@ class Video:
         self.audio_source = None
 
     def __str__(self):
+        if self.name is None:
+            return "_Untitled_"
         return self.name
 
     def plain_text(self):
         """Title without formatting to be printed on terminals."""
+        if self.name is None:
+            return "Untitled"
         return self.name
 
     def database_text(self):
         """The text to be stored in the database for the stats. Usually the same as plain_text()."""
+        if self.name is None:
+            raise errors.VideoHasNoName()
         return self.name
 
     def __repr__(self):
@@ -256,11 +167,10 @@ class Video:
         """Get the next suggested video, to be used when the queue is in LoopMode.FOLLOW_SUGGESTION"""
         raise NotImplementedError()
 
-# TODO: split Video in YoutubeDLVideo and LocalFileVideo
 
 class YoutubeDLVideo(Video):
     """A file sourcing from YoutubeDL."""
-
+    
     def __init__(self, url, enqueuer: typing.Optional[discord.Member]=None):
         super().__init__(enqueuer)
         self.url = url
@@ -268,34 +178,67 @@ class YoutubeDLVideo(Video):
 
     def get_info(self):
         """Get info about the video."""
-        ...
+        if self.info:
+            return
+        with youtube_dl.YoutubeDL({"quiet": True,
+                                   "ignoreerrors": True,
+                                   "simulate": True}) as ytdl:
+            data = ytdl.extract_info(url=self.url, download=False)
+        if data is None:
+            raise errors.VideoInfoExtractionFailed()
+        if "entries" in info:
+            raise errors.VideoIsPlaylist()
+        self.info = data
+        self.name = data.get("title")
 
-    def ready_up(self):
-        """Download the video."""
-        ...
+    def __str__(self):
+        if self.info is None:
+            return f"`{self.url}`"
+        return f"_{self.name}_"
+
+    def plain_text(self):
+        if self.info is None:
+            return self.url
+        if not self.name.isprintable():
+            return self.url
+        return self.name
 
     def get_filename(self):
         """Generate the filename of the video."""
-        ...
-
-    def make_audio_source(self):
-        ...
-
-    def get_suggestion(self):
-        ...
+        if info is None:
+            raise errors.VideoInfoUnknown()
+        return f"./opusfiles/{re.sub(r'[/\\?*"<>|!:]', "_", info["title"])}.opus"
     
-
-class LocalFileVideo(Video):
-    """A file sourcing from the local opusfiles folder."""
-
-    def __init__(self, filename):
-        super().__init__()
-        self.filename = filename
-
-    def suggestion(self) -> typing.Optional[str]:
-        return None
-
-    ...
+    def ready_up(self):
+        """Download the video."""
+        # Skip download if it is already ready
+        if self.is_ready:
+            return
+        # Retrieve info about the video
+        self.get_info()
+        # Check if the file to download already exists
+        if os.path.exists(self.get_filename()):
+            self.is_ready = True
+            return
+        # Download the file
+        logger.info(f"Starting youtube_dl download of {repr(self)}")
+        with youtube_dl.YoutubeDL({"noplaylist": True,
+                                   "format": "best",
+                                   "postprocessors": [{
+                                       "key": 'FFmpegExtractAudio',
+                                       "preferredcodec": 'opus'
+                                   }],
+                                   "outtmpl": self.get_filename(),
+                                   "quiet": True}) as ytdl:
+            ytdl.download(self.url)
+        logger.info(f"Completed youtube_dl download of {repr(self)}")
+        self.is_ready = True
+        
+    def make_audio_source(self):
+        if not self.is_ready:
+            raise errors.VideoIsNotReady()
+        self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.get_filename(), **ffmpeg_settings))
+        return self.audio_source
 
 
 class LoopMode(enum.Enum):
@@ -332,15 +275,20 @@ class VideoQueue():
     
     def advance_queue(self):
         if loop_mode == LoopMode.NORMAL:
-            del self.list[0]
+            try:
+                self.now_playing = self.list.pop(0)
+            except IndexError:
+                self.now_playing = None
         elif loop_mode == LoopMode.LOOP_QUEUE:
             self.add(self.list[0])
-            del self.list[0]
+            self.now_playing = self.list.pop(0)
         elif loop_mode == LoopMode.LOOP_SINGLE:
             pass
         elif loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            self.add(self.list[0].suggestion(), 0)
-            del self.list[0]
+            if now_playing is None:
+                self.now_playing = None
+                return
+            self.now_playing = self.now_playing.suggestion()
     
     def next_video(self) -> typing.Optional[Video]:
         if len(self.list) == 0:
@@ -357,47 +305,24 @@ class VideoQueue():
     def forward(self) -> None:
         self.now_playing = self.list.pop(0)
 
-    def find_video(self, title: str) -> typing.Optional[Video]:
-        """Returns the first video with a certain title (or filename)."""
+    def find_video(self, name: str) -> typing.Optional[Video]:
+        """Returns the first video with a certain name."""
         for video in self.list:
-            if title in video.title:
-                return video
-            elif title in video.file:
+            if name in video.name:
                 return video
         return None
 
-    def undownloaded_videos(self, limit: typing.Optional[int]=None):
+    def not_ready_videos(self, limit: typing.Optional[int]=None):
+        """Return the non-ready videos in the first limit positions of the queue."""
         l = []
         for video in self.list[:limit]:
-            if not video.downloaded:
+            if not video.is_ready:
                 l.append(video)
         return l
     
     def __getitem__(self, index: int) -> Video:
         """Get an element from the list."""
         return self.list[index]
-
-
-class SecretVideo(Video):
-    """A video to be played, but with a Zalgo'ed title."""
-
-    def __str__(self):
-        final_string = ""
-        for letter in self.file:
-            final_string += random.sample(zalgo_up, 1)[0]
-            final_string += random.sample(zalgo_middle, 1)[0]
-            final_string += random.sample(zalgo_down, 1)[0]
-            final_string += letter
-        return final_string
-
-    def plain_text(self):
-        final_string = ""
-        for letter in self.file:
-            final_string += random.sample(zalgo_up, 1)[0]
-            final_string += random.sample(zalgo_middle, 1)[0]
-            final_string += random.sample(zalgo_down, 1)[0]
-            final_string += letter
-        return final_string
 
 
 def escape(message: str):
@@ -527,17 +452,19 @@ class RoyalDiscordBot(discord.Client):
     except KeyError, ValueError:
         raise errors.InvalidConfigError("Missing main guild and channel ids.")
     # Max enqueable video duration
-    try:
-        self.max_duration = int(config["YouTube"].get("max_duration"))
-    except KeyError, ValueError:
-        logger.warning("Max video duration is not set, setting it to infinity.")
-        self.max_duration = math.inf
+    # Defined in the YoutubeDLVideo class
     # Max videos to predownload
     try:
-        self.max_videos_to_predownload = int(config["YouTube"]["predownload_videos"])
+        self.max_videos_to_predownload = int(config["Video"]["cache_size"])
     except KeyError, ValueError:
         logger.warning("Max videos to predownload is not set, setting it to infinity.")
         self.max_videos_to_predownload = None
+    # Max time to ready a video
+    try:
+        self.max_video_ready_time = int(config["Video"]["max_ready_time"])
+    except KeyError, ValueError:
+        logger.warning("Max time to ready a video is not set, setting it to infinity. ")
+        self.max_video_ready_time = mathf.inf
     # Radio messages
     try:
         self.radio_messages_enabled = True if config["Discord"]["radio_messages_enabled"] == "True" else False
@@ -715,24 +642,15 @@ class RoyalDiscordBot(discord.Client):
 
     async def queue_predownload_videos(self):
         while True:
+            await asyncio.sleep(1)
+            # Might have some problems with del
             for index, video in enumerate(self.video_queue.undownloaded_videos(self.max_videos_to_predownload)):
-                if video.downloaded:
-                    continue
                 try:
-                    with async_timeout.timeout(int(config["YouTube"]["download_timeout"])):
-                        await loop.run_in_executor(executor, video.download)
+                    with async_timeout.timeout(self.max_video_ready_time):
+                        loop.run_in_executor(executor, video.ready_up)
                 except asyncio.TimeoutError:
-                    logger.warning(f"Video download took more than {config['YouTube']['download_timeout']}s:"
-                                   f" {video.plain_text()}")
-                    await self.main_channel.send(f"⚠️ Il download di {str(video)} ha richiesto più di"
-                                                 f" {config['YouTube']['download_timeout']} secondi, pertanto è stato"
-                                                 f" rimosso dalla coda.")
-                    del self.video_queue.list[index]
-                    continue
-                except DurationError:
-                    await self.main_channel.send(f"⚠️ {str(video)} dura più di"
-                                                 f" {self.max_duration // 60}"
-                                                 f" minuti, quindi è stato rimosso dalla coda.")
+                    logger.warning(f"Video {repr(video)} took more than {self.max_video_ready_time} to download, skipping...")
+                    await self.main_channel.send(f"⚠️ La preparazione di {video} ha richiesto più di {self.max_video_ready_time} secondi, pertanto è stato rimosso dalla coda.")
                     del self.video_queue.list[index]
                     continue
                 except Exception as e:
@@ -747,22 +665,41 @@ class RoyalDiscordBot(discord.Client):
                         "video": video.plain_text()
                     })
                     sentry.captureException()
-                    logger.error(f"Video download error: {str(e)}")
+                    logger.error(f"Uncaught video download error: {e}")
                     await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
                                                  f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
-                                                 f"**Dettagli sull'errore:**\n"
                                                  f"```python\n"
                                                  f"{str(e)}"
                                                  f"```")
                     del self.video_queue.list[index]
                     continue
-            await asyncio.sleep(1)
 
     async def queue_play_next_video(self):
         await self.wait_until_ready()
         while True:
-            # TODO
-            raise NotImplementedError("queue_play_next_video isn't done yet!")
+            await asyncio.sleep(1)
+            for voice_client in self.voice_clients:
+                # Do not add play videos if something else is playing!
+                if not voice_client.is_connected():
+                    continue
+                if voice_client.is_playing():
+                    continue
+                if voice_client.is_paused():
+                    continue
+                # Advance the queue
+                self.voice_queue.advance_queue()
+                # Try to generate an AudioSource
+                if self.voice_queue.now_playing is None:
+                    continue
+                try:
+                    audio_source = self.voice_queue.now_playing.make_audio_source()
+                except errors.VideoIsNotReady():
+                    continue
+                # Start playing the AudioSource
+                logger.info(f"Started playing {self.voice_queue.now_playing}")
+                voice_client.play(audio_source)
+
+                
 
     async def inactivity_countdown(self):
         while True:
