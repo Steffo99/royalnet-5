@@ -257,7 +257,7 @@ def cmd_vote(bot: Bot, update: Update):
                                    parse_mode="HTML")
         vote.message_id = message.message_id
         session.commit()
-    except Exception as e:
+    except Exception:
         raise
     finally:
         session.close()
