@@ -246,6 +246,8 @@ class LoopMode(enum.Enum):
     LOOP_QUEUE = enum.auto()
     LOOP_SINGLE = enum.auto()
     FOLLOW_SUGGESTIONS = enum.auto()
+    AUTO_SHUFFLE = enum.auto()
+    LOOPING_SHUFFLE = enum.auto()
 
 
 class VideoQueue():
@@ -274,6 +276,7 @@ class VideoQueue():
         self.list.insert(position, video)
     
     def advance_queue(self):
+        """Advance the queue to the next video."""
         if self.loop_mode == LoopMode.NORMAL:
             try:
                 self.now_playing = self.list.pop(0)
@@ -289,6 +292,16 @@ class VideoQueue():
                 self.now_playing = None
                 return
             self.now_playing = self.now_playing.suggestion()
+        elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
+            self.shuffle()
+            try:
+                self.now_playing = self.list.pop(0)
+            except IndexError:
+                self.now_playing = None
+        elif self.loop_mode == LoopMode.LOOPING_SHUFFLE:
+            self.shuffle()
+            self.add(self.list[0])
+            self.now_playing = self.list.pop(0)
     
     def next_video(self) -> typing.Optional[Video]:
         if len(self.list) == 0:
@@ -301,9 +314,6 @@ class VideoQueue():
     def clear(self):
         self.list = None
         self.now_playing = None
-
-    def forward(self) -> None:
-        self.now_playing = self.list.pop(0)
 
     def find_video(self, name: str) -> typing.Optional[Video]:
         """Returns the first video with a certain name."""
@@ -430,7 +440,9 @@ class RoyalDiscordBot(discord.Client):
             "!yes": self.null,
             "!no": self.null,
             "!pause": self.cmd_pause,
-            "!resume": self.cmd_resume
+            "!resume": self.cmd_resume,
+            "!loop": self.cmd_loop,
+            "!l": self.cmd_loop
         }
         self.video_queue: VideoQueue = VideoQueue()
         self.load_config("config.ini")
@@ -513,13 +525,13 @@ class RoyalDiscordBot(discord.Client):
             }
         })
         if not message.content.startswith("!"):
-            await message.channel.send(f":warning: In questa chat sono consentiti solo comandi per il bot.\n"
+            await message.channel.send(f"⚠️ In questa chat sono consentiti solo comandi per il bot.\n"
                                        f"Riinvia il tuo messaggio in un altro canale!")
             await message.delete()
             return
         data = message.content.split(" ")
         if data[0] not in self.commands:
-            await message.channel.send(":warning: Comando non riconosciuto.")
+            await message.channel.send("⚠️ Comando non riconosciuto.")
             return
         logger.debug(f"Received command: {message.content}")
         sentry.extra_context({
@@ -802,7 +814,7 @@ class RoyalDiscordBot(discord.Client):
                                               functools.partial(ytdl.extract_info, url=url, download=False))
         if info is None:
             logger.debug(f"No video found at {url}.")
-            await self.main_channel.send(f"⚠ Non è stato trovato nessun video all'URL `{url}`,"
+            await self.main_channel.send(f"⚠️ Non è stato trovato nessun video all'URL `{url}`,"
                                          f" pertanto non è stato aggiunto alla coda.")
             return
         if "entries" in info:
@@ -834,7 +846,7 @@ class RoyalDiscordBot(discord.Client):
                                   royal_username=params[0],
                                   discord_user=author)
         except errors.AlreadyExistingError:
-            await channel.send("⚠ Il tuo account Discord è già collegato a un account RYG "
+            await channel.send("⚠️ Il tuo account Discord è già collegato a un account RYG "
                                "o l'account RYG che hai specificato è già collegato a un account Discord.")
             return
         session.add(d)
@@ -846,13 +858,13 @@ class RoyalDiscordBot(discord.Client):
     async def cmd_cv(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         """Summon the bot in the author's voice channel."""
         if author is None:
-            await channel.send("⚠ Questo comando richiede un autore.")
+            await channel.send("⚠️ Questo comando richiede un autore.")
             return
         if author.voice is None:
-            await channel.send("⚠ Non sei in nessun canale!")
+            await channel.send("⚠️ Non sei in nessun canale!")
             return
         if author.voice.channel == self.main_guild.afk_channel:
-            await channel.send("⚠ Non posso connettermi al canale AFK!")
+            await channel.send("⚠️ Non posso connettermi al canale AFK!")
             return
         if author.voice.channel.bitrate < 64000:
             await channel.send("ℹ️ Sei in un canale con un bitrate ridotto.\n"
@@ -879,7 +891,7 @@ class RoyalDiscordBot(discord.Client):
     @requires_connected_voice_client
     async def cmd_play(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         if len(params) < 2:
-            await channel.send("⚠ Non hai specificato una canzone da riprodurre!\n"
+            await channel.send("⚠️ Non hai specificato una canzone da riprodurre!\n"
                                "Sintassi: `!play <url|ricercayoutube|nomefile>`")
             return
         channel.typing()
@@ -916,13 +928,13 @@ class RoyalDiscordBot(discord.Client):
                 logger.debug(f"A song was skipped.")
                 break
         else:
-            await channel.send("⚠ Non c'è nessun video in riproduzione.")
+            await channel.send("⚠️ Non c'è nessun video in riproduzione.")
 
     @command
     @requires_connected_voice_client
     async def cmd_remove(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         if len(self.video_queue) == 0:
-            await channel.send("⚠ Non c'è nessun video in coda.")
+            await channel.send("⚠️ Non c'è nessun video in coda.")
             return
         if len(params) == 1:
             index = len(self.video_queue) - 1
@@ -930,12 +942,12 @@ class RoyalDiscordBot(discord.Client):
             try:
                 index = int(params[1]) - 1
             except ValueError:
-                await channel.send("⚠ Il numero inserito non è valido.\n"
+                await channel.send("⚠️ Il numero inserito non è valido.\n"
                                    "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
                 return
         if len(params) < 3:
             if abs(index) >= len(self.video_queue):
-                await channel.send("⚠ Il numero inserito non corrisponde a nessun video nella playlist.\n"
+                await channel.send("⚠️ Il numero inserito non corrisponde a nessun video nella playlist.\n"
                                    "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
                 return
             video = self.video_queue.list.pop(index)
@@ -945,27 +957,27 @@ class RoyalDiscordBot(discord.Client):
         try:
             start = int(params[1]) - 1
         except ValueError:
-            await channel.send("⚠ Il numero iniziale inserito non è valido.\n"
+            await channel.send("⚠️ Il numero iniziale inserito non è valido.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
         if start >= len(self.video_queue):
-            await channel.send("⚠ Il numero iniziale inserito non corrisponde a nessun video nella"
+            await channel.send("⚠️ Il numero iniziale inserito non corrisponde a nessun video nella"
                                " playlist.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
         try:
             end = int(params[2]) - 2
         except ValueError:
-            await channel.send("⚠ Il numero finale inserito non è valido.\n"
+            await channel.send("⚠️ Il numero finale inserito non è valido.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
         if end >= len(self.video_queue):
-            await channel.send("⚠ Il numero finale inserito non corrisponde a nessun video nella"
+            await channel.send("⚠️ Il numero finale inserito non corrisponde a nessun video nella"
                                " playlist.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
         if start > end:
-            await channel.send("⚠ Il numero iniziale è maggiore del numero finale.\n"
+            await channel.send("⚠️ Il numero iniziale è maggiore del numero finale.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
         del self.video_queue.list[start:end]
@@ -974,15 +986,61 @@ class RoyalDiscordBot(discord.Client):
 
     @command
     async def cmd_queue(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        msg = ""
+        if self.loop_mode == LoopMode.NORMAL:
+            msg += "Modalità attuale: ➡️ **Nessuna ripetizione**\n\n"
+        elif self.loop_mode == LoopMode.LOOP_QUEUE:
+            msg += "Modalità attuale: 🔁 **Ripeti intera coda**\n\n"
+        elif self.loop_mode == LoopMode.LOOP_SINGLE:
+            msg += "Modalità attuale: 🔂 **Ripeti canzone singola**\n\n"
+        elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            msg += "Modalità attuale: 🔃 **Continua con video suggeriti**\n\n"
+        elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
+            msg += "Modalità attuale: 🔀 **Video casuale dalla coda**\n\n"
+        elif self.loop_mode == LoopMode.LOOPING_SHUFFLE:
+            msg += "Modalità attuale: 🔄 **Ripeti casualmente dalla coda**\n\n"
+        msg += "**Video in coda:**\n"
         if len(self.video_queue) == 0:
-            await channel.send("**Video in coda:**\n"
-                               "nessuno")
-            return
-        msg = "**Video in coda:**\n"
-        for index, video in enumerate(self.video_queue.list[:10]):
-            msg += f"{queue_emojis[index]} {str(video)}\n"
-        if len(self.video_queue) > 10:
-            msg += f"più altri {len(self.video_queue) - 10} video!"
+            msg += "☁️ _nessuno_"
+        if self.loop_mode == LoopMode.NORMAL:
+            for index, video in enumerate(self.video_queue.list[:10]):
+                msg += f"{queue_emojis[index]} {str(video)}\n"
+            if len(self.video_queue) > 10:
+                msg += f"più altri {len(self.video_queue) - 10} video!"
+        elif self.loop_mode == LoopMode.LOOP_QUEUE:
+            for index, video in enumerate(self.video_queue.list[:10]):
+                msg += f"{queue_emojis[index]} {str(video)}\n"
+            if len(self.video_queue) > 10:
+                msg += f"più altri {len(self.video_queue) - 10} video che si ripetono!"
+            if len(self.video_queue) < 6:
+                count = len(self.video_queue)
+                while count < 10:
+                    for index, video in enumerate(self.video_queue.list[:10]):
+                        msg += f"*️⃣ {str(video)}\n"
+                    count += len(self.video_queue)
+        elif self.loop_mode == LoopMode.LOOP_SINGLE:
+            video = self.video_queue[0]
+            msg += f"1️⃣ {str(video)}\n"
+            for index in range(9):
+                msg += f"*️⃣ {str(video)}\n"
+        elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            msg += "🌈"
+        elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
+            for index, video in enumerate(self.video_queue.list[:10]):
+                msg += f"#️⃣ {str(video)}\n"
+            if len(self.video_queue) > 10:
+                msg += f"più altri {len(self.video_queue) - 10} video!"
+        elif self.loop_mode == LoopMode.LOOPING_SHUFFLE:
+            for index, video in enumerate(self.video_queue.list[:10]):
+                msg += f"#️⃣ {str(video)}\n"
+            if len(self.video_queue) > 10:
+                msg += f"più altri {len(self.video_queue) - 10} video che si ripetono!"
+            if len(self.video_queue) < 6:
+                count = len(self.video_queue)
+                while count < 10:
+                    for index, video in enumerate(self.video_queue.list[:10]):
+                        msg += f"*️⃣ {str(video)}\n"
+                    count += len(self.video_queue)
         await channel.send(msg)
 
     @command
@@ -1069,6 +1127,34 @@ class RoyalDiscordBot(discord.Client):
                 voice_client.resume()
                 logger.debug(f"The audio stream was resumed.")
                 await channel.send(f"⏯ Riproduzione ripresa.")
+
+    @command
+    @requires_connected_voice_client
+    async def cmd_loop(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        if len(params) < 2:
+            await channel.send("⚠ Sintassi del comando non valida.\n"
+                               "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
+        if params[1] == "off":
+            self.video_queue.loop_mode = LoopMode.NORMAL
+            await channel.send("➡️ Modalità di coda impostata: **Nessuna ripetizione**")
+        elif params[1] == "loop1":
+            self.video_queue.loop_mode = LoopMode.LOOP_SINGLE
+            await channel.send("🔂 Modalità di coda impostata: **Ripeti canzone singola**")
+        elif params[1] == "loopall":
+            self.video_queue.loop_mode = LoopMode.LOOP_QUEUE
+            await channel.send("🔁 Modalità di coda impostata: **Ripeti intera coda**")
+        elif params[1] == "suggest":
+            # self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
+            await channel.send("⚠️ La modalità **Continua con video suggeriti** non è ancora stata implementata.")
+        elif params[1] == "shuffle":
+            self.video_queue.loop_mode = LoopMode.AUTO_SHUFFLE
+            await channel.send("🔀 Modalità di coda impostata: **Video casuale dalla coda**")
+        elif params[1] == "loopshuffle":
+            self.video_queue.loop_mode = LoopMode.LOOPING_SHUFFLE
+            await channel.send("🔄 Modalità di coda impostata: **Ripeti casualmente dalla coda**")
+        else:
+            await channel.send("⚠️ Sintassi del comando non valida.\n"
+                               "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
 
 
 def process(users_connection=None):
