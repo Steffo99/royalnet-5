@@ -28,3 +28,23 @@ class AlreadyDownloadedError(Exception):
 
 class InvalidConfigError(Exception):
     pass
+
+
+class VideoHasNoName(Exception):
+    pass
+
+
+class VideoInfoExtractionFailed(Exception):
+    pass
+
+
+class VideoIsPlaylist(Exception):
+    pass
+
+
+class VideoInfoUnknown(Exception):
+    pass
+
+
+class VideoIsNotReady(Exception):
+    pass
