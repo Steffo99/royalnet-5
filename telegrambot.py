@@ -199,8 +199,7 @@ def cmd_diario(bot: Bot, update: Update):
             saver = author
         except IndexError:
             if update.message.reply_to_message is None:
-                bot.send_message(update.message.chat.id, f"⚠ Non hai specificato cosa aggiungere al diario! Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario oppure scrivere `/diario@royalgamesbot <messaggio>` per aggiungere quel messaggio nel diario.\n"
-                                                         f"Se l'hai fatto, e continua a comparire questo errore, allora Telegram è stupido e non mi vuole far vedere il messaggio a cui hai risposto.", parse_mode="Markdown")
+                bot.send_message(update.message.chat.id, f"⚠ Non hai specificato cosa aggiungere al diario! Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario oppure scrivere `/diario@royalgamesbot <messaggio>` per aggiungere quel messaggio nel diario.", parse_mode="Markdown")
                 return
             text = update.message.reply_to_message.text
             author = session.query(db.Telegram).filter_by(telegram_id=update.message.reply_to_message.from_user.id).one_or_none()
@@ -258,7 +257,7 @@ def cmd_vote(bot: Bot, update: Update):
                                    parse_mode="HTML")
         vote.message_id = message.message_id
         session.commit()
-    except Exception as e:
+    except Exception:
         raise
     finally:
         session.close()
