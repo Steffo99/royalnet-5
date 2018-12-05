@@ -320,7 +320,6 @@ class VideoQueue:
 
     def clear(self):
         self.list = None
-        self.now_playing = None
 
     def find_video(self, name: str) -> typing.Optional[Video]:
         """Returns the first video with a certain name."""
