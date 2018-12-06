@@ -713,7 +713,7 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 # Ensure the next video is ready
                 next_video = self.video_queue.next_video()
-                if next_video is None or next_video.is_ready:
+                if next_video is None or not next_video.is_ready:
                     continue
                 # Advance the queue
                 self.video_queue.advance_queue()
