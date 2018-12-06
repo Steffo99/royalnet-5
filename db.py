@@ -332,13 +332,15 @@ class Dota(Base):
 
 
 class LeagueOfLegendsRanks(enum.Enum):
-    BRONZE = 0
-    SILVER = 1
-    GOLD = 2
-    PLATINUM = 3
-    DIAMOND = 4
-    MASTER = 5
-    CHALLENGER = 6
+    IRON = 0
+    BRONZE = 1
+    SILVER = 2
+    GOLD = 3
+    PLATINUM = 4
+    DIAMOND = 5
+    MASTER = 6
+    GRANDMASTER = 7
+    CHALLENGER = 8
 
 
 class RomanNumerals(enum.Enum):
