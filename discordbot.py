@@ -712,7 +712,8 @@ class RoyalDiscordBot(discord.Client):
                 if voice_client.is_paused():
                     continue
                 # Ensure the next video is ready
-                if self.video_queue.next_video().is_ready:
+                next_video = self.video_queue.next_video()
+                if next_video is not None and next_video.is_ready:
                     continue
                 # Advance the queue
                 self.video_queue.advance_queue()
