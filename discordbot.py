@@ -818,23 +818,24 @@ class RoyalDiscordBot(discord.Client):
     async def add_video_from_url(self, url: str, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
         # Retrieve info
         logger.debug(f"Retrieving info for {url}.")
-        with youtube_dl.YoutubeDL({"quiet": True,
-                                   "ignoreerrors": True,
-                                   "simulate": True}) as ytdl:
-            info = await loop.run_in_executor(executor,
-                                              functools.partial(ytdl.extract_info, url=url, download=False))
-        if info is None:
-            logger.debug(f"No video found at {url}.")
-            await self.main_channel.send(f"⚠️ Non è stato trovato nessun video all'URL `{url}`,"
-                                         f" pertanto non è stato aggiunto alla coda.")
-            return
-        if "entries" in info:
-            logger.debug(f"Playlist detected at {url}.")
-            for entry in info["entries"]:
-                self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
-            return
-        logger.debug(f"Single video detected at {url}.")
-        self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
+        async with self.main_channel.typing():
+            with youtube_dl.YoutubeDL({"quiet": True,
+                                       "ignoreerrors": True,
+                                       "simulate": True}) as ytdl:
+                info = await loop.run_in_executor(executor,
+                                                  functools.partial(ytdl.extract_info, url=url, download=False))
+            if info is None:
+                logger.debug(f"No video found at {url}.")
+                await self.main_channel.send(f"⚠️ Non è stato trovato nessun video all'URL `{url}`,"
+                                             f" pertanto non è stato aggiunto alla coda.")
+                return
+            if "entries" in info:
+                logger.debug(f"Playlist detected at {url}.")
+                for entry in info["entries"]:
+                    self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
+                return
+            logger.debug(f"Single video detected at {url}.")
+            self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
 
     @command
     async def null(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
