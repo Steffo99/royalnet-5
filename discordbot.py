@@ -444,8 +444,10 @@ class RoyalDiscordBot(discord.Client):
             "!no": self.null,
             "!pause": self.cmd_pause,
             "!resume": self.cmd_resume,
-            "!loop": self.cmd_loop,
-            "!l": self.cmd_loop
+            "!loop": self.cmd_mode,
+            "!l": self.cmd_mode,
+            "!mode": self.cmd_mode,
+            "!m": self.cmd_mode
         }
         self.video_queue: VideoQueue = VideoQueue()
         self.load_config("config.ini")
@@ -1007,7 +1009,7 @@ class RoyalDiscordBot(discord.Client):
         elif self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
             msg += "Modalità attuale: :twisted_rightwards_arrows: **Video casuale dalla coda**\n"
         elif self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE:
-            msg += "Modalità attuale: :arrows_counterclockwise: **Ripeti casualmente dalla coda**\n"
+            msg += "Modalità attuale: :arrows_counterclockwise: **Video casuali infiniti dalla coda**\n"
         msg += "**Video in coda:**\n"
         if self.video_queue.now_playing is None:
             msg += ":cloud: _nessuno_"
@@ -1090,6 +1092,7 @@ class RoyalDiscordBot(discord.Client):
             if params[1].lower() == "on":
                 self.radio_messages_next_in = self.radio_messages_every
             elif params[1].lower() == "off":
+                # noinspection PyAttributeOutsideInit wtf
                 self.radio_messages_next_in = math.inf
             else:
                 await channel.send("⚠ Sintassi del comando non valida.\n"
@@ -1120,29 +1123,29 @@ class RoyalDiscordBot(discord.Client):
 
     @command
     @requires_connected_voice_client
-    async def cmd_loop(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+    async def cmd_mode(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         if len(params) < 2:
             await channel.send("⚠ Sintassi del comando non valida.\n"
-                               "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
+                               "Sintassi: `!mode <normal|repeat|loop|random|endless>`")
             return
-        if params[1] == "off":
+        if params[1] == "normal":
             self.video_queue.loop_mode = LoopMode.NORMAL
             await channel.send("➡️ Modalità di coda impostata: **Nessuna ripetizione**")
-        elif params[1] == "loop1":
+        elif params[1] == "repeat":
             self.video_queue.loop_mode = LoopMode.LOOP_SINGLE
             await channel.send("🔂 Modalità di coda impostata: **Ripeti canzone singola**")
-        elif params[1] == "loopall":
+        elif params[1] == "loop":
             self.video_queue.loop_mode = LoopMode.LOOP_QUEUE
             await channel.send("🔁 Modalità di coda impostata: **Ripeti intera coda**")
         elif params[1] == "suggest":
             # self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
             await channel.send("⚠️ La modalità **Continua con video suggeriti** non è ancora stata implementata.")
-        elif params[1] == "shuffle":
+        elif params[1] == "random":
             self.video_queue.loop_mode = LoopMode.AUTO_SHUFFLE
             await channel.send("🔀 Modalità di coda impostata: **Video casuale dalla coda**")
-        elif params[1] == "loopshuffle":
+        elif params[1] == "endless":
             self.video_queue.loop_mode = LoopMode.LOOPING_SHUFFLE
-            await channel.send("🔄 Modalità di coda impostata: **Ripeti casualmente dalla coda**")
+            await channel.send("🔄 Modalità di coda impostata: **Video casuali infiniti dalla coda**")
         else:
             await channel.send("⚠️ Sintassi del comando non valida.\n"
                                "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
