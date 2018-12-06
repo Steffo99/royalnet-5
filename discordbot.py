@@ -134,9 +134,9 @@ class Succ:
 # Init the Sentry client
 if config.get("Sentry") and config["Sentry"].get("token"):
     sentry = raven.Client(config["Sentry"]["token"],
-                        release=raven.fetch_git_sha(os.path.dirname(__file__)),
-                        install_logging_hook=False,
-                        hook_libraries=[])
+                          release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                          install_logging_hook=False,
+                          hook_libraries=[])
 else:
     logger.warning("Sentry not set, ignoring all calls to it.")
     sentry = Succ()

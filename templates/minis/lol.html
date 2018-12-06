@@ -31,7 +31,7 @@
             {% if record.solo_division is none %}
                 <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.solo_division.name|lower + "_" + record.solo_rank.name|lower + ".png") }}" class="rank" title="{{ record.solo_division.name|capitalize }} {{ record.solo_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.solo_division.name|lower + ".png") }}" class="rank" title="{{ record.solo_division.name|capitalize }} {{ record.solo_rank.name }}">
             {% endif %}
         </div>
         <div class="game-title flexq">
@@ -41,7 +41,7 @@
             {% if record.flex_division is none %}
                 <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.flex_division.name|lower + "_" + record.flex_rank.name|lower + ".png") }}" class="rank" title="{{ record.flex_division.name|capitalize }} {{ record.flex_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.flex_division.name|lower + ".png") }}" class="rank" title="{{ record.flex_division.name|capitalize }} {{ record.flex_rank.name }}">
             {% endif %}
         </div>
         <div class="game-title twtrq">
@@ -51,7 +51,7 @@
             {% if record.twtr_division is none %}
                 <img src="{{ url_for('static', filename='lol-rank-icons/provisional.png') }}" title="Non classificato" class="rank">
             {% else %}
-                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.twtr_division.name|lower + "_" + record.twtr_rank.name|lower + ".png") }}" class="rank" title="{{ record.twtr_division.name|capitalize }} {{ record.twtr_rank.name }}">
+                <img src="{{ url_for('static', filename='lol-rank-icons/' + record.twtr_division.name|lower + ".png") }}" class="rank" title="{{ record.twtr_division.name|capitalize }} {{ record.twtr_rank.name }}">
             {% endif %}
         </div>
     </div>
