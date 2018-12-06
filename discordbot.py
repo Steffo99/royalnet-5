@@ -318,7 +318,7 @@ class VideoQueue:
         random.shuffle(self.list)
 
     def clear(self):
-        self.list = None
+        self.list = []
 
     def find_video(self, name: str) -> typing.Optional[Video]:
         """Returns the first video with a certain name."""
@@ -711,17 +711,15 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 if voice_client.is_paused():
                     continue
+                # Ensure the next video is ready
+                if self.video_queue.next_video().is_ready:
+                    continue
                 # Advance the queue
                 self.video_queue.advance_queue()
                 # Try to generate an AudioSource
                 if self.video_queue.now_playing is None:
                     continue
-                while True:
-                    try:
-                        audio_source = self.video_queue.now_playing.make_audio_source()
-                        break
-                    except errors.VideoIsNotReady:
-                        await asyncio.sleep(1)
+                audio_source = self.video_queue.now_playing.make_audio_source()
                 # Start playing the AudioSource
                 logger.info(f"Started playing {self.video_queue.now_playing.plain_text()}.")
                 voice_client.play(audio_source)
