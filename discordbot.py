@@ -238,7 +238,11 @@ class YoutubeDLVideo(Video):
                                    }],
                                    "outtmpl": self.get_filename(),
                                    "quiet": True}) as ytdl:
-            ytdl.download([self.url])
+            # K/DA hard code, remove soon_ish
+            if self.url == "https://www.youtube.com/watch?v=UOxkGD8qRB4":
+                ytdl.download(["https://www.youtube.com/watch?v=qU7dqywqwWQ"])
+            else:
+                ytdl.download([self.url])
         logger.info(f"Completed youtube_dl download of {repr(self)}")
         self.is_ready = True
 
@@ -836,11 +840,6 @@ class RoyalDiscordBot(discord.Client):
                 for entry in info["entries"]:
                     self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
                 return
-            # KDA hardcode, remove me soon
-            if "kda" in url.lower():
-                self.video_queue.add(YoutubeDLVideo("https://www.youtube.com/watch?v=qU7dqywqwWQ", enqueuer=enqueuer),
-                                     index)
-            # end
             logger.debug(f"Single video detected at {url}.")
             self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
 
