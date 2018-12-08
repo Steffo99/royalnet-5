@@ -837,7 +837,7 @@ class RoyalDiscordBot(discord.Client):
                     self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
                 return
             # KDA hardcode, remove me soon
-            if "k/da" in info.get("title", ""):
+            if "K/DA" in info.get("title", ""):
                 self.video_queue.add(YoutubeDLVideo("https://www.youtube.com/watch?v=qU7dqywqwWQ", enqueuer=enqueuer),
                                      index)
             # end
