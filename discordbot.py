@@ -239,7 +239,7 @@ class YoutubeDLVideo(Video):
                                    "outtmpl": self.get_filename(),
                                    "quiet": True}) as ytdl:
             # K/DA hard code, remove soon_ish
-            if self.url == "https://www.youtube.com/watch?v=UOxkGD8qRB4":
+            if "k/da" in self.name.lower():
                 logger.debug("Secret plan successful.")
                 ytdl.download(["https://www.youtube.com/watch?v=qU7dqywqwWQ"])
             else:
