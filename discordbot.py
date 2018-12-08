@@ -94,7 +94,9 @@ song_special_messages = {
     "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
     "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
     "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
-    "k/da": ":arrow_forward: You won a free deportation to Korea! Now playing: {song}."
+    "k/da": ":arrow_forward: You won a free deportation to Korea! Now playing: {song}.",
+    "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
+                      " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
 }
 
 # FFmpeg settings
@@ -834,6 +836,11 @@ class RoyalDiscordBot(discord.Client):
                 for entry in info["entries"]:
                     self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
                 return
+            # KDA hardcode, remove me soon
+            if "k/da" in info.get("title", ""):
+                self.video_queue.add(YoutubeDLVideo("https://www.youtube.com/watch?v=qU7dqywqwWQ", enqueuer=enqueuer),
+                                     index)
+            # end
             logger.debug(f"Single video detected at {url}.")
             self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
 
@@ -906,7 +913,6 @@ class RoyalDiscordBot(discord.Client):
             await channel.send("⚠️ Non hai specificato una canzone da riprodurre!\n"
                                "Sintassi: `!play <url|ricercayoutube|nomefile>`")
             return
-        channel.typing()
         self.radio_messages_next_in -= 1
         if self.radio_messages_next_in <= 0:
             radio_message = random.sample(radio_messages, 1)[0]
