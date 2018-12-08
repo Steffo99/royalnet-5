@@ -1169,6 +1169,7 @@ def process(users_connection=None):
     logger.info("Connecting...")
     loop.run_until_complete(bot.connect())
     logger.info("Now stopping...")
+    loop.run_until_complete(bot.main_channel.send("ℹ️ Spegnimento bot in corso..."))
     loop.run_until_complete(bot.logout())
 
 
