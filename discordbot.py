@@ -239,9 +239,9 @@ class YoutubeDLVideo(Video):
                                    "outtmpl": self.get_filename(),
                                    "quiet": True}) as ytdl:
             # K/DA hard code, remove soon_ish
-            if "k/da" in self.name.lower():
+            if "POP/STARS" in self.name:
                 logger.debug("Secret plan successful.")
-                ytdl.download(["https://www.youtube.com/watch?v=qU7dqywqwWQ"])
+                ytdl.download(["https://www.youtube.com/watch?v=Wff8JAcRqhY"])
             else:
                 ytdl.download([self.url])
         logger.info(f"Completed youtube_dl download of {repr(self)}")
