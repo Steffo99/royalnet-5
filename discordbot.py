@@ -94,7 +94,8 @@ song_special_messages = {
     "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
     "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
     "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
-    "k/da": ":arrow_forward: You won a free deportation to Korea! Now playing: {song}.",
+    "k/da": ":arrow_forward: Che noia... Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
+            "La prossima volta, metti qualcosa di diverso, per piacere.,
     "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
                       " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
 }
@@ -238,12 +239,7 @@ class YoutubeDLVideo(Video):
                                    }],
                                    "outtmpl": self.get_filename(),
                                    "quiet": True}) as ytdl:
-            # K/DA hard code, remove soon_ish
-            if "POP/STARS" in self.name:
-                logger.debug("Secret plan successful.")
-                ytdl.download(["https://www.youtube.com/watch?v=Wff8JAcRqhY"])
-            else:
-                ytdl.download([self.url])
+            ytdl.download([self.url])
         logger.info(f"Completed youtube_dl download of {repr(self)}")
         self.is_ready = True
 
