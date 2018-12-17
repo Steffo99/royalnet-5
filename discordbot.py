@@ -95,7 +95,7 @@ song_special_messages = {
     "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
     "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
     "k/da": ":arrow_forward: Che noia... Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
-            "La prossima volta, metti qualcosa di diverso, per piacere.,
+            "La prossima volta, metti qualcosa di diverso, per piacere.",
     "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
                       " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
 }
