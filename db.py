@@ -334,12 +334,18 @@ class LeagueOfLegendsRanks(enum.Enum):
     GRANDMASTER = 7
     CHALLENGER = 8
 
+    def __str__(self):
+        return self.name.capitalize()
+
 
 class RomanNumerals(enum.Enum):
     I = 1
     II = 2
     III = 3
     IV = 4
+
+    def __str__(self):
+        return self.name
 
 
 class LeagueOfLegends(Base):
@@ -414,6 +420,12 @@ class LeagueOfLegends(Base):
         flex.value = (None, None) if flex_q is None else (LeagueOfLegendsRanks[flex_q["tier"]], RomanNumerals[flex_q["rank"]])
         twtr.value = (None, None) if twtr_q is None else (LeagueOfLegendsRanks[twtr_q["tier"]], RomanNumerals[twtr_q["rank"]])
         self.highest_mastery_champ = mastery[0]["championId"]
+        self.solo_division = solo.value[0]
+        self.solo_rank = solo.value[1]
+        self.flex_division = flex.value[0]
+        self.flex_rank = flex.value[1]
+        self.twtr_division = twtr.value[0]
+        self.twtr_rank = twtr.value[1]
         return solo, flex, twtr
 
     def highest_mastery_champ_name(self):
