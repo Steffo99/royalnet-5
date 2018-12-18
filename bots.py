@@ -26,8 +26,11 @@ if __name__ == "__main__":
     telegram.start()
     logger.info("Starting Reddit Bot process...")
     reddit.start()
-    logger.info("Starting StatsUpdate process...")
-    stats.start()
+    if not __debug__:
+        logger.info("Starting StatsUpdate process...")
+        stats.start()
+    else:
+        logger.warning("StatsUpdate process disabled in debug mode.")
     try:
         while True:
             if discord.exitcode is not None:
@@ -48,7 +51,7 @@ if __name__ == "__main__":
                 reddit = multiprocessing.Process(target=redditbot.process)
                 logger.info("Restarting Reddit Bot process...")
                 reddit.start()
-            if stats.exitcode is not None:
+            if not __debug__ and stats.exitcode is not None:
                 logger.warning(f"StatsUpdater exited with {stats.exitcode}")
                 del stats
                 stats = multiprocessing.Process(target=statsupdate.process)

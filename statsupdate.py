@@ -62,17 +62,17 @@ def new_lol_rank(item, change: typing.Tuple[Dirty]):
     try:
         if solo:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"✳️ {item.royal.username} ha un nuovo rank in **SOLO/DUO** su League of Legends!\n"
                                       f"{solo.initial_value[0]} {solo.initial_value[1]} -> **{solo.value[0]} {solo.value[1]}**",
                                       parse_mode="Markdown")
         if flex:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"✳️ {item.royal.username} ha un nuovo rank in **FLEX** su League of Legends!\n"
                                       f"{flex.initial_value[0]} {flex.initial_value[1]} -> **{flex.value[0]} {flex.value[1]}**",
                                       parse_mode="Markdown")
         if twtr:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"✳️ {item.royal.username} ha un nuovo rank in **3V3** su League of Legends!\n"
                                       f"{twtr.initial_value[0]} {twtr.initial_value[1]} -> **{twtr.value[0]} {twtr.value[1]}**",
                                       parse_mode="Markdown")
     except Exception:
@@ -81,9 +81,6 @@ def new_lol_rank(item, change: typing.Tuple[Dirty]):
 
 def process():
     while True:
-        if not __debug__:
-            logger.info("Pausing for 30 minutes.")
-            time.sleep(1800)
         session = db.Session()
         logger.info("Now updating Steam data.")
         update_block(session, session.query(db.Steam).all())
@@ -100,6 +97,8 @@ def process():
         logger.info("Now updating Overwatch data.")
         update_block(session, session.query(db.Overwatch).all(), delay=5)
         session.commit()
+        logger.info("Pausing for 30 minutes.")
+        time.sleep(1800)
 
 
 if __name__ == "__main__":
