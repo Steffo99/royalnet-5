@@ -1,5 +1,3 @@
-import requests
-import errors
 import db
 import time
 import logging
@@ -10,7 +8,7 @@ import typing
 import telegram
 import sys
 import coloredlogs
-import datetime
+from dirty import Dirty
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -44,12 +42,12 @@ def update_block(session: db.Session, block: list, delay: float=0, change_callba
             sentry.captureException()
             continue
         if change:
-            change_callback(item)
+            change_callback(item, change)
         sleep_time = delay - time.clock() + t
         time.sleep(sleep_time if sleep_time > 0 else 0)
 
 
-def new_dota_rank(item: db.Dota):
+def new_dota_rank(item: db.Dota, change):
     try:
         telegram_bot.send_message(config["Telegram"]["main_group"],
                                   f"✳️ {item.steam.royal.username} è salito a"
@@ -58,14 +56,25 @@ def new_dota_rank(item: db.Dota):
         logger.warning(f"Couldn't notify on Telegram: {item}")
 
 
-def new_lol_rank(item: db.LeagueOfLegends):
+def new_lol_rank(item, change: typing.Tuple[Dirty]):
+    # It always gets called, even when there is no change
+    solo, flex, twtr = change
     try:
-        telegram_bot.send_message(config["Telegram"]["main_group"],
-                                  f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
-                                  f"\n"
-                                  f"Solo/Duo: {item.solo_division} {item.solo_rank}\n"
-                                  f"Flex: {item.flex_division} {item.flex_rank}\n"
-                                  f"3v3: {item.twtr_division} {item.twtr_rank}")
+        if solo:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"{solo.initial_value[0]} {solo.initial_value[1]} -> **{solo.value[0]} {solo.value[1]}**",
+                                      parse_mode="Markdown")
+        if flex:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"{flex.initial_value[0]} {flex.initial_value[1]} -> **{flex.value[0]} {flex.value[1]}**",
+                                      parse_mode="Markdown")
+        if twtr:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha cambiato rank su League of Legends!\n"
+                                      f"{twtr.initial_value[0]} {twtr.initial_value[1]} -> **{twtr.value[0]} {twtr.value[1]}**",
+                                      parse_mode="Markdown")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
 

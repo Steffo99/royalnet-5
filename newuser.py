@@ -32,7 +32,7 @@ except Exception as e:
 else:
     session.add(overwatch)
 try:
-    lol = db.LeagueOfLegends.create(session, user.id, input("League summoner name: "))
+    lol = db.LeagueOfLegends.create(user.id, input("League summoner name: "))
 except Exception as e:
     print(e)
 else:

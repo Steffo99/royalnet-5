@@ -1,7 +1,3 @@
-class RequestError(Exception):
-    pass
-
-
 class NotFoundError(Exception):
     pass
 
@@ -47,4 +43,8 @@ class VideoInfoUnknown(Exception):
 
 
 class VideoIsNotReady(Exception):
+    pass
+
+
+class PrivateError(Exception):
     pass
