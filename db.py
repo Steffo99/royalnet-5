@@ -593,19 +593,19 @@ class Overwatch(Base):
         try:
             j = r.json()["eu"]["stats"].get("competitive")
             if j is None:
-                logging.debug(f"No stats for {repr(self)}, skipping...")
+                logger.debug(f"No stats for {repr(self)}, skipping...")
                 return
             if not j["game_stats"]:
-                logging.debug(f"No stats for {repr(self)}, skipping...")
+                logger.debug(f"No stats for {repr(self)}, skipping...")
                 return
             j = j["overall_stats"]
         except TypeError:
-            logging.debug(f"No stats for {repr(self)}, skipping...")
+            logger.debug(f"No stats for {repr(self)}, skipping...")
             return
         try:
             self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
         except AttributeError:
-            logging.debug(f"No icon available for {repr(self)}.")
+            logger.debug(f"No icon available for {repr(self)}.")
         self.level = j["prestige"] * 100 + j["level"]
         self.rank = j["comprank"]
 
