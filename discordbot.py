@@ -333,7 +333,7 @@ class VideoQueue:
     def not_ready_videos(self, limit: typing.Optional[int] = None):
         """Return the non-ready videos in the first limit positions of the queue."""
         video_list = []
-        for video in self.list[:limit]:
+        for video in (self.list[:limit] + [self.now_playing]):
             if not video.is_ready:
                 video_list.append(video)
         return video_list
@@ -672,8 +672,7 @@ class RoyalDiscordBot(discord.Client):
         while True:
             await asyncio.sleep(1)
             # Might have some problems with del
-            for index, video in enumerate(self.video_queue.not_ready_videos(self.max_videos_to_predownload) +
-                                          [self.video_queue.now_playing]):
+            for index, video in enumerate(self.video_queue.not_ready_videos(self.max_videos_to_predownload)):
                 try:
                     with async_timeout.timeout(self.max_video_ready_time):
                         await loop.run_in_executor(executor, video.ready_up)
