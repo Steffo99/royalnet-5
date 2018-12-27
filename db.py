@@ -433,7 +433,7 @@ class LeagueOfLegends(Base):
         return champ["name"]
 
     def highest_mastery_champ_image(self):
-        champ = loldata.get_champ_by_key(self.highest_mastery_champ)
+        champ = loldata.get_champ_by_key(self.highest_mastery_champ).replace("'", "")
         return loldata.get_champ_icon(champ["name"])
 
 
