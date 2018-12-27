@@ -333,7 +333,7 @@ class VideoQueue:
     def not_ready_videos(self, limit: typing.Optional[int] = None):
         """Return the non-ready videos in the first limit positions of the queue."""
         video_list = []
-        for video in (self.list[:limit] + [self.now_playing]):
+        for video in (self.list[:limit] + ([self.now_playing] if self.now_playing else [])):
             if not video.is_ready:
                 video_list.append(video)
         return video_list

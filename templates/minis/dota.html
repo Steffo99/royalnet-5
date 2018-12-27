@@ -1,10 +1,10 @@
 <style>
-@font-face {
-    font-family: "Radiance";
-    src: url("https://cdn.dota2.com/apps/dota2/fonts/radiance.eot?#iefix") format("embedded-opentype"), url("https://cdn.dota2.com/apps/dota2/fonts/radiance.woff") format("woff"), url("https://cdn.dota2.com/apps/dota2/fonts/radiance.ttf") format("truetype"), url("https://cdn.dota2.com/apps/dota2/fonts/radiance.svg#ywftsvg") format("svg");
-    font-style: normal;
-    font-weight: normal;
-}
+    @font-face {
+        font-family: "Radiance";
+        src: url("{{ url_for('static', filename='radiancedota.ttf') }}");
+        font-style: normal;
+        font-weight: normal;
+    }
 </style>
 <div class="game-panel">
     <div class="game-grid dota">
@@ -15,7 +15,7 @@
             </a>
         </div>
         <div class="game-title wins">
-            Vittorie
+            VITTORIE
         </div>
         <div class="game-score wins">
             <span>{{ record.wins }}</span>
