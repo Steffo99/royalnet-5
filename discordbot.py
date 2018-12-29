@@ -428,6 +428,9 @@ class RoyalDiscordBot(discord.Client):
             "!cv": self.cmd_cv,
             "!summon": self.cmd_cv,
             "!play": self.cmd_play,
+            "!alexaplay": self.cmd_play,
+            "!okgoogleplay": self.cmd_play,
+            "!heysiriplay": self.cmd_play,
             "!p": self.cmd_play,
             "!search": self.cmd_play,
             "!file": self.cmd_play,
@@ -576,7 +579,8 @@ class RoyalDiscordBot(discord.Client):
         while True:
             msg = await loop.run_in_executor(executor, connection.recv)
             logger.debug(f"Received from the Telegram-Discord pipe: {msg}")
-            if msg == "get cv":
+            full_cv = (msg == "get cv full")
+            if msg.startswith("get cv"):
                 discord_members = list(self.main_guild.members)
                 channels = {0: None}
                 members_in_channels = {0: []}
@@ -601,7 +605,7 @@ class RoyalDiscordBot(discord.Client):
                         message += f"<b>In #{escape(channels[channel].name)}:</b>\n"
                     for member in members_in_channels[channel]:
                         # Ignore not-connected non-notable members
-                        if channel == 0 and len(member.roles) < 2:
+                        if not full_cv and channel == 0 and len(member.roles) < 2:
                             continue
                         # Ignore offline members
                         if member.status == discord.Status.offline and member.voice is None:
@@ -638,13 +642,9 @@ class RoyalDiscordBot(discord.Client):
                                 # Rich presence
                                 try:
                                     if member.activity.state is not None:
-                                        message += f" ({escape(member.activity.state)})"
+                                        message += f" ({escape(member.activity.state} | {member.activity.details)})"
                                 except AttributeError:
-                                    try:
-                                        if member.activity.details is not None:
-                                            message += f" ({escape(member.activity.details)})"
-                                    except AttributeError:
-                                        pass
+                                    message += f" (⚠️)"
                             elif member.activity.type == discord.ActivityType.streaming:
                                 message += f" | 📡 [{escape(member.activity.name)}]({escape(member.activity.url)})"
                             elif member.activity.type == discord.ActivityType.listening:

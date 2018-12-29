@@ -107,7 +107,11 @@ def cmd_discord(bot: Bot, update: Update):
     if discord_connection is None:
         bot.send_message(update.message.chat.id, "⚠ Il bot non è collegato a Discord al momento.")
         return
-    discord_connection.send("get cv")
+    # dirty hack as usual
+    if update.message.text.endswith("full"):
+        discord_connection.send("get cv full")
+    else:
+        discord_connection.send("get cv")
     message = discord_connection.recv()
     bot.send_message(update.message.chat.id, message, disable_web_page_preview=True, parse_mode="HTML")
 
