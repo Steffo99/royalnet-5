@@ -644,7 +644,7 @@ class RoyalDiscordBot(discord.Client):
                                     if member.activity.state is not None:
                                         message += f" ({escape(member.activity.state)} | {escape(member.activity.details)})"
                                 except AttributeError:
-                                    message += f" (⚠️)"
+                                    pass
                             elif member.activity.type == discord.ActivityType.streaming:
                                 message += f" | 📡 [{escape(member.activity.name)}]({escape(member.activity.url)})"
                             elif member.activity.type == discord.ActivityType.listening:
