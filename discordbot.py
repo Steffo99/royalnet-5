@@ -642,7 +642,7 @@ class RoyalDiscordBot(discord.Client):
                                 # Rich presence
                                 try:
                                     if member.activity.state is not None:
-                                        message += f" ({escape(member.activity.state} | {member.activity.details)})"
+                                        message += f" ({escape(member.activity.state)} | {escape(member.activity.details)})"
                                 except AttributeError:
                                     message += f" (⚠️)"
                             elif member.activity.type == discord.ActivityType.streaming:
