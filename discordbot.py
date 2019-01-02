@@ -449,7 +449,7 @@ class RoyalDiscordBot(discord.Client):
     def load_config(self, filename):
         # Init the config reader
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read(filename)
         # Token
         try:
             self.token = config["Discord"]["bot_token"]
