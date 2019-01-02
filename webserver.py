@@ -415,6 +415,7 @@ def hooks_github():
         message += f"<b>{commit['message']}</b> di {commit['author']}\n"
     telegram_bot.send_message(config["Telegram"]["main_group"],
                               parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+    return "Done."
 
 
 @app.before_request
