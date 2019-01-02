@@ -1,7 +1,11 @@
 import random
 import re
+# discord.py has a different name
+# noinspection PyPackageRequirements
 import discord
+# noinspection PyPackageRequirements
 import discord.opus
+# noinspection PyPackageRequirements
 import discord.voice_client
 import functools
 import sys
@@ -108,6 +112,8 @@ class Video:
         raise NotImplementedError()
 
 
+# this is not an abstract class pycharm wtf
+# noinspection PyAbstractClass
 class YoutubeDLVideo(Video):
     """A file sourcing from YoutubeDL."""
 
@@ -511,7 +517,8 @@ class RoyalDiscordBot(discord.Client):
                     "k/da": ":arrow_forward: Che noia...\n"
                             "Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
                             "La prossima volta, metti qualcosa di diverso, per piacere.",
-                    "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
+                    "youtube rewind": ":arrow_forward: Perchè ti vuoi così male?"
+                                      " Sigh, ascolta, discutere con te è inutile."
                                       " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
                 }
             else:
@@ -519,7 +526,6 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Song text easter egg information not found, defaulting to disabled.")
             self.song_text_easter_eggs = {}
-
 
     # noinspection PyAsyncCall
     async def on_ready(self):
@@ -657,7 +663,8 @@ class RoyalDiscordBot(discord.Client):
                                 # Rich presence
                                 try:
                                     if member.activity.state is not None:
-                                        message += f" ({escape(member.activity.state)} | {escape(member.activity.details)})"
+                                        message += f" ({escape(member.activity.state)}" \
+                                            f" | {escape(member.activity.details)})"
                                 except AttributeError:
                                     pass
                             elif member.activity.type == discord.ActivityType.streaming:
@@ -695,7 +702,8 @@ class RoyalDiscordBot(discord.Client):
                     logger.warning(
                         f"Video {repr(video)} took more than {self.max_video_ready_time} to download, skipping...")
                     await self.main_channel.send(
-                        f"⚠️ La preparazione di {video} ha richiesto più di {self.max_video_ready_time} secondi, pertanto è stato rimosso dalla coda.")
+                        f"⚠️ La preparazione di {video} ha richiesto più di {self.max_video_ready_time} secondi,"
+                        f" pertanto è stato rimosso dalla coda.")
                     del self.video_queue.list[index]
                     continue
                 except Exception as e:
@@ -855,14 +863,17 @@ class RoyalDiscordBot(discord.Client):
             logger.debug(f"Single video detected at {url}.")
             self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
 
+    # noinspection PyUnusedLocal
     @command
     async def null(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         pass
 
+    # noinspection PyUnusedLocal
     @command
     async def cmd_ping(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         await channel.send(f"Pong!")
 
+    # noinspection PyUnusedLocal
     @command
     async def cmd_register(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         session = db.Session()
@@ -884,6 +895,7 @@ class RoyalDiscordBot(discord.Client):
         session.close()
         await channel.send("✅ Sincronizzazione completata!")
 
+    # noinspection PyUnusedLocal
     @command
     async def cmd_cv(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         """Summon the bot in the author's voice channel."""
@@ -917,6 +929,7 @@ class RoyalDiscordBot(discord.Client):
             await author.voice.channel.connect()
             await channel.send(f"⤵️ Mi sono connesso in <#{author.voice.channel.id}>.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_play(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -948,6 +961,7 @@ class RoyalDiscordBot(discord.Client):
         await channel.send(f"✅ Video aggiunto alla coda.")
         logger.debug(f"Added ytsearch:{search} to the queue.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_skip(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -960,6 +974,7 @@ class RoyalDiscordBot(discord.Client):
         else:
             await channel.send("⚠️ Non c'è nessun video in riproduzione.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_remove(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1014,6 +1029,7 @@ class RoyalDiscordBot(discord.Client):
         await channel.send(f":regional_indicator_x: {end - start} video rimossi dalla coda.")
         logger.debug(f"Removed from queue {end - start} videos.")
 
+    # noinspection PyUnusedLocal
     @command
     async def cmd_queue(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         msg = ""
@@ -1079,6 +1095,7 @@ class RoyalDiscordBot(discord.Client):
                 msg += "a ripetizione casuale!"
         await channel.send(msg)
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_shuffle(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1089,6 +1106,7 @@ class RoyalDiscordBot(discord.Client):
         self.video_queue.shuffle()
         await channel.send("🔀 Shuffle completo!")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_clear(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1099,6 +1117,7 @@ class RoyalDiscordBot(discord.Client):
         self.video_queue.clear()
         await channel.send(":regional_indicator_x: Tutti i video in coda rimossi.")
 
+    # noinspection PyUnusedLocal
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         if not self.radio_messages:
@@ -1121,6 +1140,7 @@ class RoyalDiscordBot(discord.Client):
         await channel.send(
             f"📻 Messaggi radio **{'attivati' if self.radio_messages_next_in < math.inf else 'disattivati'}**.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1131,6 +1151,7 @@ class RoyalDiscordBot(discord.Client):
                 await channel.send(f"⏸ Riproduzione messa in pausa.\n"
                                    f"Riprendi con `!resume`.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_resume(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1140,6 +1161,7 @@ class RoyalDiscordBot(discord.Client):
                 logger.debug(f"The audio stream was resumed.")
                 await channel.send(f"⏯ Riproduzione ripresa.")
 
+    # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_mode(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
