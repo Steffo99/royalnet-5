@@ -928,6 +928,7 @@ class RoyalDiscordBot(discord.Client):
         if self.radio_messages_next_in <= 0:
             radio_message = random.sample(self.radio_messages, 1)[0]
             # pycharm are you drunk
+            # noinspection PyAttributeOutsideInit
             self.radio_messages_next_in = self.radio_messages_every
             await self.add_video_from_url(radio_message)
             await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
@@ -1086,7 +1087,7 @@ class RoyalDiscordBot(discord.Client):
             return
         logger.info(f"The queue was shuffled by {author.name}#{author.discriminator}.")
         self.video_queue.shuffle()
-        await channel.send("♠️ ♦️ ♣️ ♥️ Shuffle completo!")
+        await channel.send("🔀 Shuffle completo!")
 
     @command
     @requires_connected_voice_client
