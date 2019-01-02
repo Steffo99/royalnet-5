@@ -8,7 +8,9 @@ import typing
 import telegram
 import sys
 import coloredlogs
+import requests
 from dirty import Dirty
+from sentry_sdk import configure_scope
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -34,6 +36,23 @@ def update_block(session: db.Session, block: list, delay: float=0, change_callba
         t = time.clock()
         try:
             change = item.update(session=session)
+        except requests.exceptions.HTTPError as e:
+            with configure_scope() as scope:
+                if str(e.response.status_code).startswith("5"):
+                    scope.level = "warning"
+                    logger.warning(f"Server error {sys.exc_info()} while updating {repr(item)}.")
+                else:
+                    scope.level = "error"
+                    logger.error(f"Error {sys.exc_info()} while updating {repr(item)}.")
+            sentry.extra_context({
+                "item": repr(item),
+                "response": {
+                    "code": e.response.status_code,
+                    "text": e.response.text
+                }
+            })
+            sentry.captureException()
+            continue
         except Exception as e:
             logger.warning(f"Error {sys.exc_info()} while updating {repr(item)}.")
             sentry.extra_context({
