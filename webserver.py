@@ -402,6 +402,20 @@ def ses_identify():
     return response
 
 
+@app.route("/hooks/github")
+def hooks_github():
+    try:
+        j = request.get_json()
+    except Exception:
+        abort(400)
+        return
+    message = f"🐙 {j['size']} aggiornamenti a Royalnet ricevuti:\n"
+    for commit in j.get("commits", []):
+        message += f"<b>{commit['message']}</b> di {commit['author']}\n"
+    telegram_bot.send_message(config["Telegram"]["main_group"],
+                              parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+
+
 @app.before_request
 def pre_request():
     fl_g.css = "nryg.less"
