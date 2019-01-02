@@ -47,6 +47,7 @@ blockquote {
     &.spoiler {
         color: transparent;
         border-color: @spoiler-color;
+        border-left-style: dashed;
         background-color: rgba(red(@spoiler-color), green(@spoiler-color), blue(@spoiler-color), 0.1);
 
         &:hover {
@@ -57,6 +58,7 @@ blockquote {
     &:target {
         color: @highlight-color;
         border-color: @highlight-color;
+        border-left-style: dotted;
         background-color: rgba(red(@highlight-color), green(@highlight-color), blue(@highlight-color), 0.1);
     }
 }
