@@ -402,13 +402,14 @@ def ses_identify():
     return response
 
 
-@app.route("/hooks/github")
+@app.route("/hooks/github", methods=["POST"])
 def hooks_github():
     try:
         j = request.get_json()
     except Exception:
         abort(400)
         return
+    # TODO: add secret check
     message = f"🐙 {j['size']} aggiornamenti a Royalnet ricevuti:\n"
     for commit in j.get("commits", []):
         message += f"<b>{commit['message']}</b> di {commit['author']}\n"
