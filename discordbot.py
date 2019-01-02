@@ -42,53 +42,6 @@ number_emojis = [":one:",
 # Init the event loop
 loop = asyncio.get_event_loop()
 
-song_special_messages = {
-    "despacito": ":arrow_forward: this is so sad. alexa play {song}",
-    "faded": ":arrow_forward: Basta Garf, lasciami ascoltare {song}",
-    "ligma": ":arrow_forward: What is ligma? {song}!",
-    "sugma": ":arrow_forward: What is sugma? {song}!",
-    "sugondese": ":arrow_forward: What is sugondese? {song}!",
-    "bofa": ":arrow_forward: What is bofa? {song}!",
-    "updog": ":arrow_forward: What's up, dog? {song}!",
-    "sayo-nara": ":arrow_forward: I gently open the door. {song} awaits me inside.",
-    "monika": ":arrow_forward: Just Monika. Just Monika. Just {song}.",
-    "country road": ":arrow_forward: Take me home, to {song}, the place I belong!",
-    "never gonna give you up": ":arrow_forward: Rickrolling in 2018. Enjoy {song}!",
-    "september": ":arrow_forward: Do you remember? {song}.",
-    "homestuck": ":arrow_forward: > Enter song name. {song}",
-    "undertale": ":arrow_forward: Howdy! I'm Flowey! Listen to this friendly song: {song}",
-    "pumped up kicks": ":arrow_forward: Non metterti mica in testa strane idee ascoltando {song}...",
-    "jesus": ":arrow_forward: Respawn in 3 giorni. Intanto, ascolta {song}.",
-    "through The fire And flames": ":arrow_forward: Fai {song} su osu!, se ne sei capace!",
-    "slow clap": ":arrow_forward: :clap: :clap: :clap: {song} :clap: :clap: :clap:",
-    "pub scrubs": ":arrow_forward: MAV COME BACK WE MISS {song}!",
-    "alleluia": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
-    "wah": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
-    "waluigi": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
-    "nyan cat": ":arrow_forward: Meow! :3 {song}",
-    "dragonborn": ":arrow_forward: FUS RO {song}!",
-    "dovahkiin": ":arrow_forward: FUS RO {song}!",
-    "initial d": ":arrow_forward: Guarda mamma sto driftando sul balcone di Balu grazie a {song}!",
-    "persona": ":arrow_forward: You'll never see {song} comiiiiing!",
-    "flamingo": ":arrow_forward: How many {song} do you have to eat?",
-    "linkin park": ":arrow_forward: Crawling in my {song}!",
-    "magicite": "⚠️ Warning: {song} contiene numerosi bug. E' ora in riproduzione.",
-    "papers please": ":arrow_forward: Glory to Arstotzka! {song}!",
-    "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}",
-    "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?",
-    "the world revolving": ":arrow_forward: CHAOS! CHAOS! I CAN DO {song}!",
-    "deltarune": ":arrow_forward: You hug Ralsei. A strange music starts playing: {song}",
-    "song of unhealing": ":arrow_forward: BEN {song}",
-    "police academy": ":arrow_forward: {song} - freedom.png",
-    "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
-    "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
-    "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
-    "k/da": ":arrow_forward: Che noia... Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
-            "La prossima volta, metti qualcosa di diverso, per piacere.",
-    "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
-                      " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
-}
-
 # FFmpeg settings
 ffmpeg_settings = {}
 
@@ -511,6 +464,61 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Sentry client config error, disabling it.")
             self.sentry_token = None
+        # Easter eggs
+        try:
+            if config["Discord"]["song_text_easter_eggs_enabled"] == "True":
+                self.song_text_easter_eggs = {
+                    "despacito": ":arrow_forward: this is so sad. alexa play {song}",
+                    "faded": ":arrow_forward: Basta Garf, lasciami ascoltare {song}",
+                    "ligma": ":arrow_forward: What is ligma? {song}!",
+                    "sugma": ":arrow_forward: What is sugma? {song}!",
+                    "sugondese": ":arrow_forward: What is sugondese? {song}!",
+                    "bofa": ":arrow_forward: What is bofa? {song}!",
+                    "updog": ":arrow_forward: What's up, dog? {song}!",
+                    "sayo-nara": ":arrow_forward: I gently open the door. {song} awaits me inside.",
+                    "monika": ":arrow_forward: Just Monika. Just Monika. Just {song}.",
+                    "country road": ":arrow_forward: Take me home, to {song}, the place I belong!",
+                    "never gonna give you up": ":arrow_forward: Rickrolling in 2018. Enjoy {song}!",
+                    "september": ":arrow_forward: Do you remember? {song}.",
+                    "homestuck": ":arrow_forward: > Enter song name. {song}",
+                    "undertale": ":arrow_forward: Howdy! I'm Flowey! Listen to this friendly song: {song}",
+                    "pumped up kicks": ":arrow_forward: Non metterti mica in testa strane idee ascoltando {song}...",
+                    "jesus": ":arrow_forward: Respawn in 3 giorni. Intanto, ascolta {song}.",
+                    "through The fire And flames": ":arrow_forward: Fai {song} su osu!, se ne sei capace!",
+                    "slow clap": ":arrow_forward: :clap: :clap: :clap: {song} :clap: :clap: :clap:",
+                    "pub scrubs": ":arrow_forward: MAV COME BACK WE MISS {song}!",
+                    "alleluia": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+                    "wah": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+                    "waluigi": ":arrow_forward: Wah. Waaaah. Waluigi tiime: {song}",
+                    "nyan cat": ":arrow_forward: Meow! :3 {song}",
+                    "dragonborn": ":arrow_forward: FUS RO {song}!",
+                    "dovahkiin": ":arrow_forward: FUS RO {song}!",
+                    "initial d": ":arrow_forward: Guarda mamma sto driftando sul balcone di Balu grazie a {song}!",
+                    "persona": ":arrow_forward: You'll never see {song} comiiiiing!",
+                    "flamingo": ":arrow_forward: How many {song} do you have to eat?",
+                    "linkin park": ":arrow_forward: Crawling in my {song}!",
+                    "magicite": "⚠️ Warning: {song} contiene numerosi bug. E' ora in riproduzione.",
+                    "papers please": ":arrow_forward: Glory to Arstotzka! {song}!",
+                    "we are number one": ":arrow_forward: Now paying respect to Robbie Rotten: {song}",
+                    "jump up superstar": ":arrow_forward: Is {song} the Tengen Toppa Guren Lagann opening?",
+                    "the world revolving": ":arrow_forward: CHAOS! CHAOS! I CAN DO {song}!",
+                    "deltarune": ":arrow_forward: You hug Ralsei. A strange music starts playing: {song}",
+                    "song of unhealing": ":arrow_forward: BEN {song}",
+                    "police academy": ":arrow_forward: {song} - freedom.png",
+                    "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
+                    "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
+                    "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
+                    "k/da": ":arrow_forward: Che noia...\n"
+                            "Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
+                            "La prossima volta, metti qualcosa di diverso, per piacere.",
+                    "youtube rewind": ":arrow_forward: Perchè ti vuoi così male? Sigh, ascolta, discutere con te è inutile."
+                                      " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
+                }
+            else:
+                self.song_text_easter_eggs = {}
+        except (KeyError, ValueError):
+            logger.warning("Song text easter egg information not found, defaulting to disabled.")
+            self.song_text_easter_eggs = {}
 
 
     # noinspection PyAsyncCall
@@ -759,10 +767,10 @@ class RoyalDiscordBot(discord.Client):
                     except sqlalchemy.exc.OperationalError:
                         pass
                 # Send a message in chat
-                for key in song_special_messages:
+                for key in self.song_text_easter_eggs:
                     if key in self.video_queue.now_playing.name.lower():
                         await self.main_channel.send(
-                            song_special_messages[key].format(song=str(self.video_queue.now_playing)))
+                            self.song_text_easter_eggs[key].format(song=str(self.video_queue.now_playing)))
                         break
                 else:
                     await self.main_channel.send(
@@ -918,7 +926,7 @@ class RoyalDiscordBot(discord.Client):
             return
         self.radio_messages_next_in -= 1
         if self.radio_messages_next_in <= 0:
-            radio_message = random.sample(radio_messages, 1)[0]
+            radio_message = random.sample(self.radio_messages, 1)[0]
             # pycharm are you drunk
             self.radio_messages_next_in = self.radio_messages_every
             await self.add_video_from_url(radio_message)
