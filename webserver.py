@@ -415,8 +415,8 @@ def hooks_github():
     # TODO: add secret check
     message = f"🐙 Nuovi aggiornamenti a Royalnet:\n"
     for commit in j.get("commits", []):
-        message += f"<b>{commit['message']}</b> di {commit['author']}\n"
-    telegram_bot.send_message(config["Telegram"]["main_group"],
+        message += f'<a href="https://github.com/Steffo99/royalnet/commit/{commit["sha"]}">{commit["message"]}</b> di {commit["author"]}\n'
+    telegram_bot.send_message(config["Telegram"]["main_group"], message,
                               parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
     return "Done."
 
