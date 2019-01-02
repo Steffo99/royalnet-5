@@ -416,7 +416,7 @@ def hooks_github():
     message = f"🐙 Nuovi aggiornamenti a Royalnet:\n"
     for commit in j.get("commits", []):
         if commit["distinct"]:
-            message += f'<a href="https://github.com/Steffo99/royalnet/commit/{commit["url"]}">{commit["message"]}</a> di <b>{commit["author"].get("username", "anonimo")}</b>\n'
+            message += f'<a href="{commit["url"]}">{commit["message"]}</a> di <b>{commit["author"].get("username", "anonimo")}</b>\n'
     telegram_bot.send_message(config["Telegram"]["main_group"], message,
                               parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
     return "Done."
