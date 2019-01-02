@@ -409,8 +409,11 @@ def hooks_github():
     except Exception:
         abort(400)
         return
+    if j is None:
+        abort(400)
+        return
     # TODO: add secret check
-    message = f"🐙 {j['size']} aggiornamenti a Royalnet ricevuti:\n"
+    message = f"🐙 Nuovi aggiornamenti a Royalnet:\n"
     for commit in j.get("commits", []):
         message += f"<b>{commit['message']}</b> di {commit['author']}\n"
     telegram_bot.send_message(config["Telegram"]["main_group"],
