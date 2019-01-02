@@ -1443,5 +1443,5 @@ def get_champ_by_key(key):
 
 
 def get_champ_icon(name: str):
-    name = name.replace(" ", "")
+    name = name.replace(" ", "").replace("'", "")
     return f"http://ddragon.leagueoflegends.com/cdn/8.19.1/img/champion/{name}.png"
