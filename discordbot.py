@@ -27,25 +27,20 @@ logger = logging.getLogger(__name__)
 os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
 coloredlogs.install(level="DEBUG", logger=logger)
 
-# Queue emojis
-queue_emojis = [":one:",
-                ":two:",
-                ":three:",
-                ":four:",
-                ":five:",
-                ":six:",
-                ":seven:",
-                ":eight:",
-                ":nine:",
-                ":keycap_ten:"]
+# Number emojis from one to ten
+number_emojis = [":one:",
+                 ":two:",
+                 ":three:",
+                 ":four:",
+                 ":five:",
+                 ":six:",
+                 ":seven:",
+                 ":eight:",
+                 ":nine:",
+                 ":keycap_ten:"]
 
 # Init the event loop
 loop = asyncio.get_event_loop()
-
-# Radio messages
-radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
-                  "https://youtu.be/YcR7du_A1Vc",
-                  "https://clyp.it/byg3i52l"]
 
 song_special_messages = {
     "despacito": ":arrow_forward: this is so sad. alexa play {song}",
@@ -482,12 +477,26 @@ class RoyalDiscordBot(discord.Client):
             self.max_video_ready_time = math.inf
         # Radio messages
         try:
-            self.radio_messages_enabled = True if config["Discord"]["radio_messages_enabled"] == "True" else False
-            self.radio_messages_every = int(config["Discord"]["radio_messages_every"])
-            self.radio_messages_next_in = self.radio_messages_every
+            if config["Discord"]["radio_messages_enabled"] == "True":
+                self.radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
+                                       "https://youtu.be/YcR7du_A1Vc",
+                                       "https://clyp.it/byg3i52l"]
+                try:
+                    self.radio_messages_every = int(config["Discord"]["radio_messages_every"])
+                    self.radio_messages_next_in = self.radio_messages_every
+                except (KeyError, ValueError):
+                    logger.warning("Radio messages config error, disabling them.")
+                    self.radio_messages = []
+                    self.radio_messages_every = math.inf
+                    self.radio_messages_next_in = math.inf
+            else:
+                logger.info("Radio messages are force-disabled.")
+                self.radio_messages = []
+                self.radio_messages_every = math.inf
+                self.radio_messages_next_in = math.inf
         except (KeyError, ValueError):
             logger.warning("Radio messages config error, disabling them.")
-            self.radio_messages_enabled = False
+            self.radio_messages = []
             self.radio_messages_every = math.inf
             self.radio_messages_next_in = math.inf
         # Activity reporting
@@ -502,6 +511,7 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Sentry client config error, disabling it.")
             self.sentry_token = None
+
 
     # noinspection PyAsyncCall
     async def on_ready(self):
@@ -1017,12 +1027,12 @@ class RoyalDiscordBot(discord.Client):
             msg += f":arrow_forward: {str(self.video_queue.now_playing)}\n"
         if self.video_queue.loop_mode == LoopMode.NORMAL:
             for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f"{queue_emojis[index]} {str(video)}\n"
+                msg += f"{number_emojis[index]} {str(video)}\n"
             if len(self.video_queue) > 10:
                 msg += f"più altri {len(self.video_queue) - 10} video!"
         elif self.video_queue.loop_mode == LoopMode.LOOP_QUEUE:
             for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f"{queue_emojis[index]} {str(video)}\n"
+                msg += f"{number_emojis[index]} {str(video)}\n"
             if len(self.video_queue) > 10:
                 msg += f"più altri {len(self.video_queue) - 10} video che si ripetono!"
             else:
@@ -1082,7 +1092,7 @@ class RoyalDiscordBot(discord.Client):
 
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if not self.radio_messages_enabled:
+        if not self.radio_messages:
             await channel.send("⚠ I messaggi radio sono stati disabilitati dall'amministratore del bot.")
             return
         if len(params) < 2:
