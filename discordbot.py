@@ -42,12 +42,6 @@ queue_emojis = [":one:",
 # Init the event loop
 loop = asyncio.get_event_loop()
 
-# TODO: remove me
-# Init the config reader
-config = configparser.ConfigParser()
-config.read("config.ini")
-config = dict(config)
-
 # Radio messages
 radio_messages = ["https://www.youtube.com/watch?v=3-yeK1Ck4yk",
                   "https://youtu.be/YcR7du_A1Vc",
@@ -124,17 +118,6 @@ class Succ:
 
     def __repr__(self):
         return "<Succ>"
-
-
-# TODO
-# if config.get("Sentry") and config["Sentry"].get("token"):
-#     sentry = raven.Client(config["Sentry"]["token"],
-#                         release=raven.fetch_git_sha(os.path.dirname(__file__)),
-#                         install_logging_hook=False,
-#                         hook_libraries=[])
-# else:
-logger.warning("Sentry not set, ignoring all calls to it.")
-sentry = Succ()
 
 
 class Video:
@@ -353,12 +336,12 @@ def command(func):
     async def new_func(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str], *args,
                        **kwargs):
         if author is not None:
-            sentry.user_context({
+            self.sentry.user_context({
                 "discord_id": author.id,
                 "username": f"{author.name}#{author.discriminator}"
             })
         else:
-            sentry.user_context({
+            self.sentry.user_context({
                 "source": "Telegram"
             })
         try:
@@ -376,7 +359,7 @@ def command(func):
                                    f"```")
             except Exception:
                 pass
-            sentry.captureException(exc_info=ei)
+            self.sentry.captureException(exc_info=ei)
         else:
             return result
 
@@ -457,6 +440,14 @@ class RoyalDiscordBot(discord.Client):
         }
         self.video_queue: VideoQueue = VideoQueue()
         self.load_config("config.ini")
+        if self.sentry_token:
+            self.sentry = raven.Client(self.sentry_token,
+                                       release=raven.fetch_git_sha(os.path.dirname(__file__)),
+                                       install_logging_hook=False,
+                                       hook_libraries=[])
+        else:
+            logger.warning("Sentry not set, ignoring all calls to it.")
+            self.sentry = Succ()
         self.inactivity_timer = 0
 
     # noinspection PyAttributeOutsideInit
@@ -505,6 +496,12 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Activity reporting config error, disabling it.")
             self.activity_report_sample_time = math.inf
+        # Sentry error reporting
+        try:
+            self.sentry_token = config["Sentry"]["token"]
+        except (KeyError, ValueError):
+            logger.warning("Sentry client config error, disabling it.")
+            self.sentry_token = None
 
     # noinspection PyAsyncCall
     async def on_ready(self):
@@ -528,7 +525,7 @@ class RoyalDiscordBot(discord.Client):
     async def on_message(self, message: discord.Message):
         if message.channel != self.main_channel or message.author.bot:
             return
-        sentry.user_context({
+        self.sentry.user_context({
             "discord": {
                 "discord_id": message.author.id,
                 "name": message.author.name,
@@ -545,7 +542,7 @@ class RoyalDiscordBot(discord.Client):
             await message.channel.send("⚠️ Comando non riconosciuto.")
             return
         logger.debug(f"Received command: {message.content}")
-        sentry.extra_context({
+        self.sentry.extra_context({
             "command": data[0],
             "message": message
         })
@@ -571,7 +568,7 @@ class RoyalDiscordBot(discord.Client):
         except Exception:
             logger.error(f"Double critical error: {sys.exc_info()}")
         loop.stop()
-        sentry.captureException(exc_info=ei)
+        self.sentry.captureException(exc_info=ei)
         exit(1)
 
     async def feed_pipe(self, connection):
@@ -684,17 +681,17 @@ class RoyalDiscordBot(discord.Client):
                     del self.video_queue.list[index]
                     continue
                 except Exception as e:
-                    sentry.user_context({
+                    self.sentry.user_context({
                         "discord": {
                             "discord_id": video.enqueuer.id,
                             "name": video.enqueuer.name,
                             "discriminator": video.enqueuer.discriminator
                         }
                     })
-                    sentry.extra_context({
+                    self.sentry.extra_context({
                         "video": video.plain_text()
                     })
-                    sentry.captureException()
+                    self.sentry.captureException()
                     logger.error(f"Uncaught video download error: {e}")
                     await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
                                                  f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
