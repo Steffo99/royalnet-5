@@ -2,6 +2,8 @@ import praw
 import configparser
 import db
 import logging
+# python-telegram-bot has a different name
+# noinspection PyPackageRequirements
 import telegram
 import time
 import raven
@@ -61,7 +63,8 @@ def process():
                     try:
                         telegram_bot.send_message(config["Telegram"]["main_group"],
                                                   f'ℹ️ Nuovo post su r/RoyalGames:\n'
-                                                  f'<a href="https://reddit.com{submission.permalink}">{submission.title}</a>\n'
+                                                  f'<a href="https://reddit.com{submission.permalink}">'
+                                                  f'{submission.title}</a>\n'
                                                   f'da <b>u/{submission.author}</b>',
                                                   parse_mode="HTML", disable_notification=True)
                     except telegram.error.TimedOut:

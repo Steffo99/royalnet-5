@@ -6,15 +6,20 @@ import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, UniqueConstraint, PrimaryKeyConstraint, Boolean, or_, LargeBinary, Text, Date, func, desc
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, \
+                       UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date
 import requests
 from errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
+# Both packages have different pip names
+# noinspection PyPackageRequirements
 from discord import User as DiscordUser
+# noinspection PyPackageRequirements
 from telegram import User as TelegramUser
 import loldata
 from dirty import Dirty
+import query_discord_music
 
 # Init the config reader
 import configparser
@@ -126,14 +131,16 @@ class Steam(Base):
         return f"https://steamcdn-a.akamaihd.net/steam/apps/{self.most_played_game_id}/header.jpg"
 
     def avatar_url(self):
-        return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/{self.avatar_hex}.jpg"
+        return f"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/{self.avatar_hex[0:2]}/"\
+               f"{self.avatar_hex}.jpg"
 
     @staticmethod
     def create(session: Session, royal_id: int, steam_id: str):
         s = session.query(Steam).get(steam_id)
         if s is not None:
             raise AlreadyExistingError(repr(s))
-        r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={steam_id}")
+        r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
+                         f"?key={config['Steam']['api_key']}&steamids={steam_id}")
         r.raise_for_status()
         j = r.json()
         if len(j) == 0:
@@ -141,12 +148,14 @@ class Steam(Base):
         s = Steam(royal_id=royal_id,
                   steam_id=steam_id,
                   persona_name=j["response"]["players"][0]["personaname"],
-                  avatar_hex=re.search(r"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1))
+                  avatar_hex=re.search(r"https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../"
+                                       r"(.+).jpg", j["response"]["players"][0]["avatar"]).group(1))
         return s
 
     @staticmethod
     def find_trade_token(trade_url):
-        return re.search(r"https://steamcommunity\.com/tradeoffer/new/\?partner=[0-9]+&token=(.{8})", trade_url).group(1)
+        return re.search(r"https://steamcommunity\.com/tradeoffer/new/\?partner=[0-9]+&token=(.{8})", trade_url)\
+                 .group(1)
 
     @staticmethod
     def to_steam_id_2(steam_id):
@@ -163,13 +172,17 @@ class Steam(Base):
         else:
             return f"{int(steam_id) - 76561197960265728}"
 
+    # noinspection PyUnusedLocal
     def update(self, session=None, raise_if_private: bool=False):
-        r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={config['Steam']['api_key']}&steamids={self.steam_id}")
+        r = requests.get(f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
+                         f"?key={config['Steam']['api_key']}&steamids={self.steam_id}")
         r.raise_for_status()
         j = r.json()
         self.persona_name = j["response"]["players"][0]["personaname"]
-        self.avatar_hex = re.search(r"https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
-        r = requests.get(f"http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key={config['Steam']['api_key']}&steamid={self.steam_id}&format=json")
+        self.avatar_hex = re.search(r"https://steamcdn-a\.akamaihd\.net/steamcommunity/public/images/avatars/../"
+                                    r"(.+).jpg", j["response"]["players"][0]["avatar"]).group(1)
+        r = requests.get(f"http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/"
+                         f"?key={config['Steam']['api_key']}&steamid={self.steam_id}&format=json")
         r.raise_for_status()
         j = r.json()
         if "response" not in j or "games" not in j["response"] or len(j["response"]["games"]) < 1:
@@ -258,7 +271,9 @@ class Dota(Base):
 
     def get_rank_icon_url(self):
         # Rank icon is determined by the first digit of the rank tier
-        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{str(self.rank_tier)[0] if self.rank_tier is not None else '0'}.png"
+        if self.rank_tier is None:
+            return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png"
+        return f"https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_{str(self.rank_tier)[0]}.png"
 
     def get_rank_stars_url(self):
         # Rank stars are determined by the second digit of the rank tier
@@ -305,6 +320,7 @@ class Dota(Base):
         new_record.update()
         return new_record
 
+    # noinspection PyUnusedLocal
     def update(self, session=None) -> bool:
         r = requests.get(f"https://api.opendota.com/api/players/{Steam.to_steam_id_3(self.steam_id)}")
         r.raise_for_status()
@@ -376,7 +392,8 @@ class LeagueOfLegends(Base):
 
     @staticmethod
     def create(royal_id, summoner_name) -> "LeagueOfLegends":
-        r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}?api_key={config['League of Legends']['riot_api_key']}")
+        r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
+                         f"?api_key={config['League of Legends']['riot_api_key']}")
         r.raise_for_status()
         data = r.json()
         lol = LeagueOfLegends()
@@ -389,14 +406,18 @@ class LeagueOfLegends(Base):
         lol.update()
         return lol
 
+    # noinspection PyUnusedLocal
     def update(self, session=None):
-        r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
+        r = requests.get(f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/"
+                         f"{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         r.raise_for_status()
         data = r.json()
-        r = requests.get(f"https://euw1.api.riotgames.com/lol/league/v4/positions/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
+        r = requests.get(f"https://euw1.api.riotgames.com/lol/league/v4/positions/by-summoner/"
+                         f"{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         r.raise_for_status()
         rank = r.json()
-        r = requests.get(f"https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
+        r = requests.get(f"https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/"
+                         f"{self.summoner_id}?api_key={config['League of Legends']['riot_api_key']}")
         r.raise_for_status()
         mastery = r.json()
         solo_q = None
@@ -416,9 +437,12 @@ class LeagueOfLegends(Base):
         solo = Dirty((self.solo_division, self.solo_rank))
         flex = Dirty((self.flex_division, self.flex_rank))
         twtr = Dirty((self.twtr_division, self.twtr_rank))
-        solo.value = (None, None) if solo_q is None else (LeagueOfLegendsRanks[solo_q["tier"]], RomanNumerals[solo_q["rank"]])
-        flex.value = (None, None) if flex_q is None else (LeagueOfLegendsRanks[flex_q["tier"]], RomanNumerals[flex_q["rank"]])
-        twtr.value = (None, None) if twtr_q is None else (LeagueOfLegendsRanks[twtr_q["tier"]], RomanNumerals[twtr_q["rank"]])
+        solo.value = (None, None) if solo_q is None else (LeagueOfLegendsRanks[solo_q["tier"]],
+                                                          RomanNumerals[solo_q["rank"]])
+        flex.value = (None, None) if flex_q is None else (LeagueOfLegendsRanks[flex_q["tier"]],
+                                                          RomanNumerals[flex_q["rank"]])
+        twtr.value = (None, None) if twtr_q is None else (LeagueOfLegendsRanks[twtr_q["tier"]],
+                                                          RomanNumerals[twtr_q["rank"]])
         self.highest_mastery_champ = mastery[0]["championId"]
         self.solo_division = solo.value[0]
         self.solo_rank = solo.value[1]
@@ -477,6 +501,7 @@ class Osu(Base):
                          mania_pp=j3["pp_raw"])
         return new_record
 
+    # noinspection PyUnusedLocal
     def update(self, session=None):
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=0")
         r0.raise_for_status()
@@ -582,6 +607,7 @@ class Overwatch(Base):
     def icon_url(self):
         return f"https://d1u1mce87gyfbn.cloudfront.net/game/unlocks/{self.icon}.png"
 
+    # noinspection PyUnusedLocal
     def update(self, session=None):
         r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
             "User-Agent": "Royal-Bot/4.1",
@@ -724,7 +750,7 @@ class VoteQuestion(Base):
         text = f"<b>{self.question}</b>\n\n"
         none, yes, no, abstain = 0, 0, 0, 0
         if self.message_id is not None:
-            query = session.execute("SELECT * FROM telegram LEFT JOIN (SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice FROM votequestion JOIN voteanswer ON votequestion.id = voteanswer.question_id WHERE votequestion.message_id = " + str(self.message_id) + ") answer ON telegram.telegram_id = answer.user_id ORDER BY answer.choice;")
+            query = session.execute(query_discord_music.vote_answers, {"message_id": self.message_id})
             for record in query:
                 if record["username"] == "royalgamesbot":
                     continue

@@ -129,3 +129,15 @@ FROM playedmusic
 WHERE playedmusic.enqueuer_id = :discordid 
 GROUP BY playedmusic.filename 
 ORDER BY c DESC;"""
+
+vote_answers = """SELECT * 
+FROM telegram 
+LEFT JOIN 
+  (
+  SELECT voteanswer.question_id, voteanswer.user_id, voteanswer.choice 
+  FROM votequestion 
+  JOIN voteanswer 
+  ON votequestion.id = voteanswer.question_id 
+  WHERE votequestion.message_id = :message_id
+  ) answer ON telegram.telegram_id = answer.user_id 
+ORDER BY answer.choice;"""

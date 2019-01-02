@@ -4,7 +4,10 @@ import typing
 import db
 import errors
 import stagismo
+# python-telegram-bot has a different name
+# noinspection PyPackageRequirements
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
+# noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import dice
 import sys
@@ -159,7 +162,9 @@ def cmd_ciaoruozi(bot: Bot, update: Update):
 
 @catch_and_report
 def cmd_ahnonlosoio(bot: Bot, update: Update):
-    if update.message.reply_to_message is not None and update.message.reply_to_message.text in ["/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!"]:
+    if update.message.reply_to_message is not None and update.message.reply_to_message.text in [
+        "/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!", "Ah, non lo so neppure io!"
+    ]:
         bot.send_message(update.message.chat.id, "Ah, non lo so neppure io!")
     else:
         bot.send_message(update.message.chat.id, "Ah, non lo so io!")
@@ -171,7 +176,10 @@ def cmd_balurage(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb! Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
+            bot.send_message(update.message.chat.id,
+                             "⚠ Il tuo account Telegram non è registrato al RYGdb!\n\n"
+                             "Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                             parse_mode="Markdown")
             return
         try:
             reason = update.message.text.split(" ", 1)[1]
@@ -203,10 +211,17 @@ def cmd_diario(bot: Bot, update: Update):
             saver = author
         except IndexError:
             if update.message.reply_to_message is None:
-                bot.send_message(update.message.chat.id, f"⚠ Non hai specificato cosa aggiungere al diario! Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario oppure scrivere `/diario@royalgamesbot <messaggio>` per aggiungere quel messaggio nel diario.", parse_mode="Markdown")
+                bot.send_message(update.message.chat.id,
+                                 f"⚠ Non hai specificato cosa aggiungere al diario!\n\n"
+                                 f"Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario"
+                                 f" oppure scrivere `/diario@royalgamesbot <messaggio>`"
+                                 f" per aggiungere quel messaggio nel diario.",
+                                 parse_mode="Markdown")
                 return
             text = update.message.reply_to_message.text
-            author = session.query(db.Telegram).filter_by(telegram_id=update.message.reply_to_message.from_user.id).one_or_none()
+            author = session.query(db.Telegram)\
+                            .filter_by(telegram_id=update.message.reply_to_message.from_user.id)\
+                            .one_or_none()
             saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if text is None:
             bot.send_message(update.message.chat.id, f"⚠ Il messaggio a cui hai risposto non contiene testo.")
@@ -257,7 +272,8 @@ def cmd_vote(bot: Bot, update: Update):
         inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
                                                 [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
                                                 [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
-        message = bot.send_message(update.message.chat.id, vote.generate_text(session=session), reply_markup=inline_keyboard,
+        message = bot.send_message(update.message.chat.id, vote.generate_text(session=session),
+                                   reply_markup=inline_keyboard,
                                    parse_mode="HTML")
         vote.message_id = message.message_id
         session.commit()
@@ -290,7 +306,9 @@ def on_callback_query(bot: Bot, update: Update):
                                                " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
                                           parse_mode="Markdown")
                 return
-            question = session.query(db.VoteQuestion).filter_by(message_id=update.callback_query.message.message_id).one()
+            question = session.query(db.VoteQuestion)\
+                              .filter_by(message_id=update.callback_query.message.message_id)\
+                              .one()
             answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
             if answer is None:
                 answer = db.VoteAnswer(question=question, choice=choice, user=user)
@@ -304,11 +322,16 @@ def on_callback_query(bot: Bot, update: Update):
                 bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
                                           cache_time=1)
             session.commit()
-            inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
-                                                    [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
-                                                    [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
-            bot.edit_message_text(message_id=update.callback_query.message.message_id, chat_id=update.callback_query.message.chat.id,
-                                  text=question.generate_text(session), reply_markup=inline_keyboard,
+            inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì",
+                                                                          callback_data="vote_yes")],
+                                                    [InlineKeyboardButton("🔴 No",
+                                                                          callback_data="vote_no")],
+                                                    [InlineKeyboardButton("⚫️ Astieniti",
+                                                                          callback_data="vote_abstain")]])
+            bot.edit_message_text(message_id=update.callback_query.message.message_id,
+                                  chat_id=update.callback_query.message.chat.id,
+                                  text=question.generate_text(session),
+                                  reply_markup=inline_keyboard,
                                   parse_mode="HTML")
         except Exception:
             raise
@@ -345,7 +368,7 @@ def cmd_ship(bot: Bot, update: Update):
     part_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
     try:
         mixed = part_one.group(0) + part_two.group(0)
-    except:
+    except Exception:
         bot.send_message(update.message.chat.id, "⚠ I nomi specificati non sono validi.\n"
                                                  "Riprova con dei nomi diversi!")
         return
@@ -377,8 +400,10 @@ def cmd_bridge(bot: Bot, update: Update):
     try:
         data = update.message.text.split(" ", 1)[1]
     except IndexError:
-        bot.send_message(update.message.chat.id, "⚠ Non hai specificato un comando!\n"
-                                                 "Sintassi corretta: `/bridge <comando> <argomenti>`", parse_mode="Markdown")
+        bot.send_message(update.message.chat.id,
+                         "⚠ Non hai specificato un comando!\n"
+                         "Sintassi corretta: `/bridge <comando> <argomenti>`",
+                         parse_mode="Markdown")
         return
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
@@ -464,7 +489,10 @@ def cmd_newevent(bot: Bot, update: Update):
         return
     # Create the event
     session = db.Session()
-    telegram_user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
+    telegram_user = session.query(db.Telegram)\
+                           .filter_by(telegram_id=update.message.from_user.id)\
+                           .join(db.Royal)\
+                           .one_or_none()
     event = db.Event(author=telegram_user.royal,
                      name=name,
                      description=description,
