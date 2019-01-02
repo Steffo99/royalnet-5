@@ -81,6 +81,11 @@ def catch_and_report(func: "function"):
 
 
 @catch_and_report
+def cmd_ping(bot: Bot, update: Update):
+    bot.send_message(update.message.chat.id, "🏓 Pong!")
+
+
+@catch_and_report
 def cmd_register(bot: Bot, update: Update):
     session = db.Session()
     try:
@@ -568,6 +573,7 @@ def process(arg_discord_connection):
     logger.info("Creating updater...")
     u = Updater(config["Telegram"]["bot_token"])
     logger.info("Registering handlers...")
+    u.dispatcher.add_handler(CommandHandler("ping", cmd_ping))
     u.dispatcher.add_handler(CommandHandler("register", cmd_register))
     u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
     u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
