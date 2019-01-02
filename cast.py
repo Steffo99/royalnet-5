@@ -39,13 +39,13 @@ def cast(spell_name: str, target_name: str, platform: str) -> str:
         total *= crit
     else:
         crit_msg = ""
-    # HALLOWEEN
-    if total >= 800:
-        return f"❇️ Ho lanciato <b>{spell}</b> su " \
-               f"<i>{target_name}</i>.\n" \
-               f"{crit_msg}" \
-               f"...ma non succede nulla."
-    # END
+
+   
+
+        
+
+              
+
     if platform == "telegram":
         if dmg_dice == 10 and dmg_max == 100 and dmg_mod == 20:
             return f"❇️‼️ Ho lanciato <b>{spell}</b> su " \
