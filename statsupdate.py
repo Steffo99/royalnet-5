@@ -101,6 +101,7 @@ def new_lol_rank(item, change: typing.Tuple[Dirty]):
 def process():
     while True:
         session = db.Session()
+
         logger.info("Now updating Steam data.")
         update_block(session, session.query(db.Steam).all())
         session.commit()

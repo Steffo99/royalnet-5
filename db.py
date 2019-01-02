@@ -522,8 +522,6 @@ class Discord(Base):
 
     @staticmethod
     def create(session: Session, royal_username, discord_user: DiscordUser):
-        # TODO: remove this
-        print("Discord.create is deprecated and should be removed soon.")
         d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
         if d is not None:
             raise AlreadyExistingError(repr(d))
