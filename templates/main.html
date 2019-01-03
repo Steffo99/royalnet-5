@@ -32,7 +32,7 @@
                 </div>
                 <div class="lower-box">
                     {% include "components/diarioentry.html" %}
-                    <a href="/diario">Visualizza tutto</a>
+                    <a href="{{ url_for("page_diario") }}">Visualizza tutto</a>
                 </div>
             </div>
             {% include "components/wikibox.html" %}
@@ -58,7 +58,7 @@
                         <li><a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a></li>
                         <li><a href="{{ url_for("page_music") }}">Statistiche su Royal Music</a></li>
                         <li><a href="http://amazon.steffo.eu/royal-music-cache/">File in cache di Royal Music</a></li>
-                        <li><a href="/activity">Statistiche sull'attività</a></li>
+                        <li><a href="{{ url_for("page_activity") }}">Statistiche sull'attività</a></li>
                     </ul>
                 </div>
             </div>
@@ -80,15 +80,15 @@
                 </div>
                 <div class="lower-box">
                     <ul>
-                        <li><a href="/game/ryg">Royal Games</a></li>
-                        <li><a href="/game/halloween">Halloween 2018</a></li>
-                        <li><a href="/game/tg">Telegram</a></li>
-                        <li><a href="/game/discord">Discord</a></li>
-                        <li><a href="/game/steam">Steam</a></li>
-                        <li><a href="/game/dota">Dota 2</a></li>
-                        <li><a href="/game/lol">League of Legends</a></li>
-                        <li><a href="/game/ow">Overwatch</a></li>
-                        <li><a href="/game/osu">osu!</a></li>
+                        <li><a href="{{ url_for("page_game", name="ryg") }}">Royal Games</a></li>
+                        <li><a href="{{ url_for("page_game", name="halloween") }}">Halloween 2018</a></li>
+                        <li><a href="{{ url_for("page_game", name="tg") }}">Telegram</a></li>
+                        <li><a href="{{ url_for("page_game", name="discord") }}">Discord</a></li>
+                        <li><a href="{{ url_for("page_game", name="steam") }}">Steam</a></li>
+                        <li><a href="{{ url_for("page_game", name="dota") }}">Dota 2</a></li>
+                        <li><a href="{{ url_for("page_game", name="lol") }}">League of Legends</a></li>
+                        <li><a href="{{ url_for("page_game", name="ow") }}">Overwatch</a></li>
+                        <li><a href="{{ url_for("page_game", name="osu") }}">osu!</a></li>
                     </ul>
                 </div>
             </div>

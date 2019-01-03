@@ -37,12 +37,12 @@
         {% if record.most_played_game_id %}
             <a href="https://store.steampowered.com/app/{{ record.most_played_game_id }}/">
                 <div class="game-banner">
-                    <img src="https://steamcdn-a.akamaihd.net/steam/apps/{{ record.most_played_game_id }}/header.jpg">
+                    <img class="game-image" src="https://steamcdn-a.akamaihd.net/steam/apps/{{ record.most_played_game_id }}/header.jpg" alt="{{ record.most_played_game_id }}">
                 </div>
             </a>
         {% else %}
             <div class="game-banner">
-                <img>
+                <div class="game-image">
             </div>
         {% endif %}
     </div>

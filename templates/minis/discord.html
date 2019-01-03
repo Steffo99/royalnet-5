@@ -7,7 +7,7 @@
 <div class="game-panel">
     <div class="game-grid discord">
         <div class="player">
-            <img src="https://cdn.discordapp.com/avatars/{{ record["discord_id"] }}/{{ record["avatar_hex"] }}" class="player-image">
+            <img src="https://cdn.discordapp.com/avatars/{{ record["discord_id"] }}/{{ record["avatar_hex"] }}" class="player-image" alt="">
             <span class="player-name">{{ record["name"] }}#{{ record["discriminator"] }}</span>
         </div>
         {% if record["last_song"] %}

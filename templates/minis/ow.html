@@ -10,7 +10,7 @@
     <div class="game-grid ow">
         <div class="player">
             <a href="https://playoverwatch.com/en-us/career/pc/eu/{{ record.__str__(separator='-') }}">
-                <img src="{{ record.icon_url() }}" class="player-image">
+                <img src="{{ record.icon_url() }}" class="player-image" alt="">
                 <span class="player-name">{{ record }}</span>
             </a>
         </div>
@@ -25,7 +25,7 @@
                 <div class="icon unranked"></div>
                 <span class="text unranked">Non classificato</span>
             {% else %}
-                <img class="icon ranked" src="{{ record.rank_url() }}">
+                <img class="icon ranked" src="{{ record.rank_url() }}" title="{{ record.rank_name() }}" alt="{{ record.rank_name() }}">
                 <span class="text ranked">{{ record.rank }}</span>
             {% endif %}
         </div>

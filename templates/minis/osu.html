@@ -4,30 +4,30 @@
         <div class="background-color"></div>
         <div class="player">
             <a href="https://osu.ppy.sh/users/{{ record.osu_id }}">
-                <img src="https://a.ppy.sh/{{ record.osu_id }}" class="player-image">
+                <img src="https://a.ppy.sh/{{ record.osu_id }}" class="player-image" alt="">
                 <span class="player-name">{{ record.osu_name }}</span>
             </a>
         </div>
         <div class="game-title standard">
-            <img src="https://osu.ppy.sh/help/wiki/shared/mode/osu.png"> osu!
+            <img src="https://osu.ppy.sh/help/wiki/shared/mode/osu.png" alt=""> osu!
         </div>
         <div class="game-score standard">
             <span class="number">{{ record.std_pp | int }}</span><span class="pp">pp</span>
         </div>
         <div class="game-title taiko">
-            <img src="https://osu.ppy.sh/help/wiki/shared/mode/taiko.png"> taiko
+            <img src="https://osu.ppy.sh/help/wiki/shared/mode/taiko.png" alt=""> taiko
         </div>
         <div class="game-score taiko">
             <span class="number">{{ record.taiko_pp | int }}</span><span class="pp">pp</span>
         </div>
         <div class="game-title catch">
-            <img src="https://osu.ppy.sh/help/wiki/shared/mode/catch.png"> catch
+            <img src="https://osu.ppy.sh/help/wiki/shared/mode/catch.png" alt=""> catch
         </div>
         <div class="game-score catch">
             <span class="number">{{ record.catch_pp | int }}</span><span class="pp">pp</span>
         </div>
         <div class="game-title mania">
-            <img src="https://osu.ppy.sh/help/wiki/shared/mode/mania.png"> mania
+            <img src="https://osu.ppy.sh/help/wiki/shared/mode/mania.png" alt=""> mania
         </div>
         <div class="game-score mania">
             <span class="number">{{ record.mania_pp | int }}</span><span class="pp">pp</span>

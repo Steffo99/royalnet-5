@@ -10,7 +10,7 @@
     <div class="game-grid dota">
         <div class="player">
             <a href="https://www.opendota.com/players/{{ record.steam.to_steam_id_3(record.steam.steam_id) }}">
-                <img src="{{ record.steam.avatar_url() }}" class="player-image">
+                <img src="{{ record.steam.avatar_url() }}" class="player-image" alt="">
                 <span class="player-name">{{ record.steam.persona_name }}</span>
             </a>
         </div>
@@ -22,13 +22,13 @@
         </div>
         <div class="rank">
             {% if record.rank_tier is none %}
-                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
+                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
                 <span class="text">Non classificato</span>
             {% elif record.rank_tier < 10 %}
-                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png">
+                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
                 <span class="text">{{ record.rank_tier }} piazzamenti completati</span>
             {% else %}
-                <img class="medal" src="{{ record.get_rank_icon_url() }}">{% if record.get_rank_stars_url() %}<img class="stars" src="{{ record.get_rank_stars_url() }}">{% endif %}
+                <img class="medal" src="{{ record.get_rank_icon_url() }}" alt="">{% if record.get_rank_stars_url() %}<img class="stars" src="{{ record.get_rank_stars_url() }}" alt="">{% endif %}
                 <span class="text">{{ record.get_rank_name() }}[{{ record.get_rank_number() }}]</span>
             {% endif %}
         </div>

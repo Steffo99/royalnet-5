@@ -650,6 +650,22 @@ class Overwatch(Base):
             n = 7
         return f"https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/season-2/rank-{n}.png"
 
+    def rank_name(self):
+        if self.rank < 1500:
+            return "Bronze"
+        elif self.rank < 2000:
+            return "Silver"
+        elif self.rank < 2500:
+            return "Gold"
+        elif self.rank < 3000:
+            return "Platinum"
+        elif self.rank < 3500:
+            return "Diamond"
+        elif self.rank < 4000:
+            return "Master"
+        else:
+            return "Grandmaster"
+
 
 class Diario(Base):
     __tablename__ = "diario"
