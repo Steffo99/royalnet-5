@@ -48,3 +48,6 @@ class VideoIsNotReady(Exception):
 
 class PrivateError(Exception):
     pass
+
+class PastDateError(Exception):
+    pass
