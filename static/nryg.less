@@ -349,10 +349,15 @@ table {
 
         .game-title {
             font-style: normal;
+            text-align: center;
 
             img {
                 vertical-align: sub;
             }
+        }
+
+        .game-score {
+            text-align: center;
         }
 
         .standard {
@@ -546,6 +551,8 @@ table {
         font-family: "Motiva Sans", sans-serif;
         padding: 18px;
         background: url("https://steamstore-a.akamaihd.net/public/images/v6/colored_body_top2.png?v=2") center;
+        grid-template-columns: auto 124px;
+        grid-template-rows: 58px 36px;
 
         .player .player-name {
             grid-row: 1;
@@ -566,7 +573,9 @@ table {
 
             .game-image {
                 height: 58px;
+                width: 124px;
                 border-radius: 4px;
+                display: inline-block;
             }
         }
 
