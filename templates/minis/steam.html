@@ -37,7 +37,7 @@
         {% if record.most_played_game_id %}
             <a href="https://store.steampowered.com/app/{{ record.most_played_game_id }}/">
                 <div class="game-banner">
-                    <img class="game-image" src="https://steamcdn-a.akamaihd.net/steam/apps/{{ record.most_played_game_id }}/header.jpg" alt="{{ record.most_played_game_id }}">
+                    <img class="game-image" src="https://steamcdn-a.akamaihd.net/steam/apps/{{ record.most_played_game_id }}/header.jpg" alt="{{ record.most_played_game_id }}" title="Gioco più giocato nelle ultime 2 settimane">
                 </div>
             </a>
         {% else %}
