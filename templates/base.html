@@ -14,7 +14,7 @@
     <body>
         <nav>
             <div class="left">
-                <img src="{{ url_for('static', filename='FixMeRYGLogo.jpg') }}" class="ryg-logo">
+                <img src="{{ url_for('static', filename='FixMeRYGLogo.jpg') }}" alt="" class="ryg-logo">
                 <b>Royalnet</b>
                 <a href="/">Home</a>
             </div>
@@ -26,10 +26,10 @@
                 {% endif %}
                 <span class="login-status">
                     {% if session.get('username') is not none %}
-                        <a href="/profile/{{ session.get('username') }}">{{ session.get('username') }}</a>
-                        <a class="btn" href="/logout">Logout</a>
+                        <a href="{{ url_for('page_profile', name=session.get('username')) }}">{{ session.get('username') }}</a>
+                        <a class="btn" href="{{ url_for('page_logout') }}">Logout</a>
                     {% else %}
-                        <a class="btn" href="/login">Login</a>
+                        <a class="btn" href="{{ url_for('page_login') }}">Login</a>
                     {% endif %}
                 </span>
             </div>

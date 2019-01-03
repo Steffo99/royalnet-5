@@ -44,11 +44,19 @@
                 </div>
                 <div class="lower-box">
                     <ul>
-                        <li><a href="{{ g.rygconf['Telegram']['invite_link'] }}">Link di unione a Telegram</a></li>
-                        <li><a href="{{ g.rygconf['Discord']['invite_link'] }}">Link di invito a Discord</a></li>
+                        {% if g.rygconf['Telegram']['invite_link'] %}
+                            <li><a href="{{ g.rygconf['Telegram']['invite_link'] }}">Link di unione a Telegram</a></li>
+                        {% else %}
+                            <li><i>Link di unione a Telegram disattivato</i></li>
+                        {% endif %}
+                        {% if g.rygconf['Discord']['invite_link'] %}
+                            <li><a href="{{ g.rygconf['Discord']['invite_link'] }}">Link di invito a Discord</a></li>
+                        {% else %}
+                            <li><i>Link di invito a Discord disattivato</i></li>
+                        {% endif %}
                         <li><a href="https://steamcommunity.com/groups/royalgamescastle">Gruppo Steam Community</a></li>
                         <li><a href="https://new.reddit.com/r/RoyalGames/">/r/RoyalGames</a></li>
-                        <li><a href="/music">Statistiche su Royal Music</a></li>
+                        <li><a href="{{ url_for("page_music") }}">Statistiche su Royal Music</a></li>
                         <li><a href="http://amazon.steffo.eu/royal-music-cache/">File in cache di Royal Music</a></li>
                         <li><a href="/activity">Statistiche sull'attività</a></li>
                     </ul>
