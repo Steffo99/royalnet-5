@@ -23,7 +23,7 @@
             </div>
         {% endif %}
         {% if record["fav_song"] %}
-            <div class="game-title fav-video"><a href="/music/{{ record["discord_id"] }}">Canzone preferita</a></div>
+            <div class="game-title fav-video"><a href="{{ url_for("page_music_individual", discord_id=record["discord_id"]) }}">Canzone preferita</a></div>
             <div class="game-score fav-video" title="{{ record["fav_song"] }}">
                 <a href="https://www.youtube.com/results?sp=EgIQAQ%253D%253D&search_query={{ record["fav_song"] }}">{{ record["fav_song"] }}</a>
             </div>
