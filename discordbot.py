@@ -424,13 +424,13 @@ class RoyalDiscordBot(discord.Client):
         # Defined in the YoutubeDLVideo class
         # Max videos to predownload
         try:
-            self.max_videos_to_predownload = int(config["Video"]["cache_size"])
+            self.max_videos_to_predownload = int(config["Discord"]["video_cache_size"])
         except (KeyError, ValueError):
             logger.warning("Max videos to predownload is not set, setting it to infinity.")
             self.max_videos_to_predownload = None
         # Max time to ready a video
         try:
-            self.max_video_ready_time = int(config["Video"]["max_ready_time"])
+            self.max_video_ready_time = int(config["Discord"]["max_ready_time"])
         except (KeyError, ValueError):
             logger.warning("Max time to ready a video is not set, setting it to infinity. ")
             self.max_video_ready_time = math.inf
