@@ -299,6 +299,23 @@ table {
 //Dirtiest hack ever
 .game-panels {
     font-size: 0;
+    width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (min-width: 792px)
+    {
+        width: 776px;
+    }
+
+    @media (min-width: 1180px)
+    {
+        width: 1164px;
+    }
+
+    @media (min-width: 1568px) {
+        width: 1552px;
+    }
 
     .game-panel {
         font-size: medium;
@@ -576,6 +593,7 @@ table {
                 width: 124px;
                 border-radius: 4px;
                 display: inline-block;
+                background-color: rgba(0, 0, 0, 10%);
             }
         }
 
@@ -915,6 +933,11 @@ table {
     @media (min-width: 1180px)
     {
         width: 1164px;
+    }
+
+    @media (min-width: 1568px)
+    {
+        width: 1552px;
     }
 }
 
