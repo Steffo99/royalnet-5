@@ -451,12 +451,18 @@ def cmd_newevent(bot: Bot, update: Update):
     # Parse the timestring
     try:
         parsed_time = parse_timestring(timestring)
+        if parsed_time < datetime.datetime.now():
+            raise PastDateError()
     except ValueError:
         bot.send_message(update.message.chat.id, "⚠ Non è stato possibile leggere la data.\n"
                                                  "Sintassi corretta:\n"
                                                  "```/newevent <timestamp|[[[anno-]mese-]giorno-]ore-minuti"
                                                  "|{numero}{w|d|h|m}> <nome>\n"
                                                  "[descrizione]```", parse_mode="Markdown")
+        return
+    except PastDateError:
+        bot.send_message(update.message.chat.id, "⚠ La data inserita è una data passata.\n"
+                                                 "per favore inserisci una data futura.\n", parse_mode="Markdown")
         return
     # Create the event
     session = db.Session()
