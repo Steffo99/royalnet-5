@@ -7,6 +7,7 @@ import bcrypt
 import configparser
 import markdown2
 import datetime
+# noinspection PyPackageRequirements
 import telegram
 import query_discord_music
 import random
@@ -187,7 +188,8 @@ def page_editprofile():
             profile_data.royal.fiorygi += 1
             try:
                 telegram_bot.send_message(config["Telegram"]["main_group"],
-                                          f'⭐️ {profile_data.royal.username} ha configurato la sua bio su Royalnet e ha ottenuto un fioryg!',
+                                          f'⭐️ {profile_data.royal.username} ha configurato la sua bio su Royalnet'
+                                          f' e ha ottenuto un fioryg!',
                                           parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
             except Exception:
                 pass
@@ -236,7 +238,7 @@ def page_game(name: str):
     elif name == "discord":
         game_name = "Discord"
         query = [dict(row) for row in db_session.execute(query_discord_music.all_query)]
-    elif name == "halloween":
+    elif name == "halloween2018":
         game_name = "Rituale di Halloween"
         query = db_session.query(db.Halloween).all()
     else:
@@ -267,12 +269,17 @@ def page_wiki(key: str):
         # Embed YouTube videos
         converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                                           extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
-        converted_md = re.sub(r"{https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?.*?&?v=|youtu.be\/)([0-9A-Za-z-]+).*?}",
-               r'<div class="youtube-embed">'
-               r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0" frameborder="0"'
-               r' allow="autoplay; encrypted-media" allowfullscreen width="640px" height="320px"></iframe>'
-               r'</div>', converted_md)
-        converted_md = re.sub(r"{https?:\/\/clyp.it\/([a-z0-9]+)}",
+        converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
+                              r'<div class="youtube-embed">'
+                              r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0"'
+                              r'           frameborder="0"'
+                              r'           allow="autoplay; encrypted-media"'
+                              r'           allowfullscreen'
+                              r'           width="640px"'
+                              r'           height="320px">'
+                              r'   </iframe>'
+                              r'</div>', converted_md)
+        converted_md = re.sub(r"{https?://clyp.it/([a-z0-9]+)}",
                               r'<div class="clyp-embed">'
                               r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
                               r'    </iframe>'
@@ -309,14 +316,15 @@ def page_wiki(key: str):
         new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
         db_session.add(new_log)
         db_session.commit()
+        message = f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata' \
+                  f' modificata da' \
+                  f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>' \
+                  f' {"(" + edit_reason + ")" if edit_reason else ""}' \
+                  f' [{"+" if difference > 0 else ""}{difference}]\n'
+        if fioryg_roll > fioryg_chance:
+            message += f"⭐️ {user.username} è stato premiato con 1 fioryg per la modifica!"
         try:
-            telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata'
-                                      f' modificata da'
-                                      f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>'
-                                      f' {"(" + edit_reason + ")" if edit_reason else ""}'
-                                      f' [{"+" if difference > 0 else ""}{difference}]\n'
-                                      f' {user.username + " è stato premiato con 1 fioryg!" if fioryg_roll > fioryg_chance else ""}',
+            telegram_bot.send_message(config["Telegram"]["main_group"], message,
                                       parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
             pass
@@ -416,7 +424,8 @@ def hooks_github():
     message = f"🐙 Nuovi aggiornamenti a Royalnet:\n"
     for commit in j.get("commits", []):
         if commit["distinct"]:
-            message += f'<a href="{commit["url"]}">{commit["message"]}</a> di <b>{commit["author"].get("username", "anonimo")}</b>\n'
+            message += f'<a href="{commit["url"]}">{commit["message"]}</a>' \
+                       f' di <b>{commit["author"].get("username", "anonimo")}</b>\n'
     telegram_bot.send_message(config["Telegram"]["main_group"], message,
                               parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
     return "Done."
