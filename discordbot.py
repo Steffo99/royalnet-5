@@ -112,8 +112,6 @@ class Video:
         raise NotImplementedError()
 
 
-# this is not an abstract class pycharm wtf
-# noinspection PyAbstractClass
 class YoutubeDLVideo(Video):
     """A file sourcing from YoutubeDL."""
 
@@ -185,6 +183,9 @@ class YoutubeDLVideo(Video):
             raise errors.VideoIsNotReady()
         self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.get_filename(), **ffmpeg_settings))
         return self.audio_source
+
+    def get_suggestion(self):
+        return None
 
 
 class LoopMode(enum.Enum):
