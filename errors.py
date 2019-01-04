@@ -56,3 +56,7 @@ class PastDateError(Exception):
 
 class MissingAPIKeyError(Exception):
     pass
+
+
+class LoopModeError(Exception):
+    pass

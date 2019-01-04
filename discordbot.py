@@ -32,8 +32,9 @@ logger = logging.getLogger(__name__)
 os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(message)s"
 coloredlogs.install(level="DEBUG", logger=logger)
 
-# Number emojis from one to ten
-number_emojis = [":one:",
+# Number emojis from zero (now playing) to ten
+number_emojis = [":arrow_forward:",
+                 ":one:",
                  ":two:",
                  ":three:",
                  ":four:",
@@ -128,6 +129,7 @@ class YoutubeDLVideo(Video):
         """Get info about the video."""
         if self.info:
             return
+        logger.debug(f"Getting info on {self.url}...")
         with youtube_dl.YoutubeDL({"quiet": True,
                                    "ignoreerrors": True,
                                    "simulate": True}) as ytdl:
@@ -193,9 +195,13 @@ class YoutubeDLVideo(Video):
             return
         # Ensure the video has info
         self.get_info()
+        # Ensure the video is from youtube
         if self.info["extractor"] != "youtube":
             # TODO: add more websites?
             self.suggestion = NotImplemented
+        # Log the attempt
+        logger.debug(f"Getting a suggestion for {self.url}...")
+        # Check for the api key
         if self.youtube_api_key is None:
             raise errors.MissingAPIKeyError()
         # Request search data (costs 100 API units)
@@ -231,19 +237,13 @@ class VideoQueue:
 
     def __init__(self):
         self.list: typing.List[Video] = []
-        self.now_playing: typing.Optional[Video] = None
         self.loop_mode = LoopMode.NORMAL
 
     def __len__(self) -> int:
         return len(self.list)
 
-    def __next__(self) -> Video:
-        video = self.next_video()
-        self.advance_queue()
-        return video
-
     def __repr__(self) -> str:
-        return f"<VideoQueue of length {len(self)}>"
+        return f"<VideoQueue of length {len(self)} in mode {self.loop_mode}>"
 
     def add(self, video: Video, position: int = None) -> None:
         if position is None:
@@ -251,44 +251,28 @@ class VideoQueue:
             return
         self.list.insert(position, video)
 
+    def pop(self, index) -> Video:
+        if self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            raise errors.LoopModeError("Can't pop items from a suggestion queue.")
+        result = self[index]
+        self.list.remove(result)
+        return result
+
     def advance_queue(self):
         """Advance the queue to the next video."""
-        if self.loop_mode == LoopMode.NORMAL:
-            try:
-                self.now_playing = self.list.pop(0)
-            except IndexError:
-                self.now_playing = None
-        elif self.loop_mode == LoopMode.LOOP_QUEUE:
-            self.add(self.list[0])
-            self.now_playing = self.list.pop(0)
-        elif self.loop_mode == LoopMode.LOOP_SINGLE:
-            pass
-        elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            if self.now_playing is None:
-                if len(self.list) > 0:
-                    self.now_playing = self.list.pop(0)
-                else:
-                    return
-            self.now_playing.get_suggestion()
-            self.now_playing = self.now_playing.suggestion
-        elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
-            self.shuffle()
-            try:
-                self.now_playing = self.list.pop(0)
-            except IndexError:
-                self.now_playing = None
-        elif self.loop_mode == LoopMode.LOOPING_SHUFFLE:
-            self.shuffle()
-            self.add(self.list[0])
-            self.now_playing = self.list.pop(0)
+        del self[0]
     
     def next_video(self) -> typing.Optional[Video]:
-        if len(self.list) == 0:
+        try:
+            return self[1]
+        except IndexError:
             return None
-        return self.list[0]
 
     def shuffle(self):
-        random.shuffle(self.list)
+        part = self.list[1:]
+        random.shuffle(part)
+        part.insert(0, self.list[0])
+        self.list = part
 
     def clear(self):
         self.list = []
@@ -303,33 +287,90 @@ class VideoQueue:
     def not_ready_videos(self, limit: typing.Optional[int] = None):
         """Return the non-ready videos in the first limit positions of the queue."""
         video_list = []
-        # In single video repeat, the only video to be loaded is the one currently playing
-        if self.loop_mode == LoopMode.LOOP_SINGLE:
-            if self.now_playing is None or self.now_playing.is_ready:
-                return video_list
-            else:
-                video_list.append(self.now_playing)
-                return video_list
-        # In suggestion mode, preload the current video and the next suggested one
-        if self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            video = self.now_playing
-            if video is None:
-                return video_list
-            video.get_suggestion()
-            if not video.is_ready:
-                video_list.append(video)
-            if not video.suggestion.is_ready:
-                video_list.append(video.suggestion)
-            return video_list
-        # In all other modes, the videos to be loaded are the current one plus the following ones
-        for video in (self.list[:limit] + ([self.now_playing] if self.now_playing else [])):
+        for video in (self[:limit]):
             if not video.is_ready:
                 video_list.append(video)
         return video_list
 
-    def __getitem__(self, index: int) -> Video:
-        """Get an element from the list."""
-        return self.list[index]
+    async def async_not_ready_videos(self, limit: typing.Optional[int] = None):
+        """Return the non-ready videos in the first limit positions of the queue."""
+        video_list = []
+        full_list = await loop.run_in_executor(executor, functools.partial(self.__getitem__, slice(None, limit, None)))
+        for video in full_list:
+            if not video.is_ready:
+                video_list.append(video)
+        return video_list
+
+    def __getitem__(self, index: typing.Union[int, slice]) -> typing.Union[Video, typing.Iterable]:
+        """Get an enqueued element."""
+        if isinstance(index, int):
+            if self.loop_mode == LoopMode.NORMAL:
+                return self.list[index]
+            elif self.loop_mode == LoopMode.LOOP_QUEUE:
+                if len(self.list) == 0:
+                    raise IndexError()
+                return self.list[index % len(self.list)]
+            elif self.loop_mode == LoopMode.LOOP_SINGLE:
+                if len(self.list) == 0:
+                    raise IndexError()
+                return self.list[0]
+            elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+                counter = index
+                video = self.list[0]
+                while counter > 0:
+                    video.get_suggestion()
+                    video = video.suggestion
+                    counter -= 1
+                return video
+            elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
+                if index == 0:
+                    return self.list[0]
+                elif index >= len(self.list):
+                    raise IndexError()
+                number = random.randrange(1, len(self.list))
+                return self.list[number]
+            elif self.loop_mode == LoopMode.LOOPING_SHUFFLE:
+                if index == 0:
+                    return self.list[0]
+                number = random.randrange(1, len(self.list))
+                return self.list[number]
+        else:
+            # FIXME: won't work properly in multiple cases, but should work fine enough for now
+            video_list = []
+            if self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+                try:
+                    video = self.list[0]
+                except IndexError:
+                    return video_list
+                while True:
+                    if video is None:
+                        break
+                    video_list.append(video)
+                    video = video.suggestion
+            else:
+                for i in range(len(self)):
+                    video_list.append(self[i])
+            return video_list[index]
+
+    async def async_getitem(self, index):
+        return await loop.run_in_executor(executor, functools.partial(self.__getitem__, index))
+
+    def __delitem__(self, index: typing.Union[int, slice]):
+        if isinstance(index, int):
+            if self.loop_mode == LoopMode.LOOP_SINGLE:
+                pass
+            elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+                if index != 0:
+                    raise errors.LoopModeError("Deleting suggested videos different than the current one is impossible.")
+                else:
+                    video = self[0]
+                    if video.suggestion is not None:
+                        self.list.append(video.suggestion)
+                    del self.list[0]
+            del self.list[index]
+        else:
+            for i in range(index.start, index.stop, index.step):
+                del self[i]
 
 
 def escape(message: str):
@@ -758,7 +799,8 @@ class RoyalDiscordBot(discord.Client):
         while True:
             await asyncio.sleep(1)
             # Might have some problems with del
-            for index, video in enumerate(self.video_queue.not_ready_videos(self.max_videos_to_predownload)):
+            not_ready_videos = await self.video_queue.async_not_ready_videos(self.max_videos_to_predownload)
+            for index, video in enumerate(not_ready_videos):
                 try:
                     with async_timeout.timeout(self.max_video_ready_time):
                         await loop.run_in_executor(executor, video.ready_up)
@@ -783,12 +825,22 @@ class RoyalDiscordBot(discord.Client):
                     })
                     self.sentry.captureException()
                     logger.error(f"Uncaught video download error: {e}")
-                    await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
-                                                 f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
-                                                 f"```python\n"
-                                                 f"{str(e.args)}"
-                                                 f"```")
-                    del self.video_queue.list[index]
+                    if self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS or \
+                       self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE or \
+                       self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
+                        await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
+                                                     f"{str(video)}, quindi la coda è stata svuotata.\n\n"
+                                                     f"```python\n"
+                                                     f"{str(e.args)}"
+                                                     f"```")
+                        self.video_queue.clear()
+                    else:
+                        await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
+                                                     f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
+                                                     f"```python\n"
+                                                     f"{str(e.args)}"
+                                                     f"```")
+                        del self.video_queue[index]
                     continue
 
     async def queue_play_next_video(self):
@@ -799,39 +851,34 @@ class RoyalDiscordBot(discord.Client):
                 # Do not add play videos if something else is playing!
                 if not voice_client.is_connected():
                     continue
-                if voice_client.is_playing():
+                # Find the "now_playing" video
+                try:
+                    current_video = await self.video_queue.async_getitem(0)
+                except IndexError:
                     continue
-                if voice_client.is_paused():
-                    continue
-                # Ensure the next video is ready
-                next_video = self.video_queue.next_video()
-                if next_video is None or not next_video.is_ready:
-                    continue
-                # Advance the queue
-                self.video_queue.advance_queue()
                 # Try to generate an AudioSource
-                if self.video_queue.now_playing is None:
+                try:
+                    audio_source = current_video.make_audio_source()
+                except errors.VideoIsNotReady:
                     continue
-                audio_source = self.video_queue.now_playing.make_audio_source()
                 # Start playing the AudioSource
-                logger.info(f"Started playing {self.video_queue.now_playing.plain_text()}.")
+                logger.info(f"Started playing {current_video.plain_text()}.")
                 voice_client.play(audio_source)
                 # Update the voice_client activity
-                activity = discord.Activity(name=self.video_queue.now_playing.plain_text(),
+                activity = discord.Activity(name=current_video.plain_text(),
                                             type=discord.ActivityType.listening)
                 logger.debug("Updating bot presence...")
                 await self.change_presence(status=discord.Status.online, activity=activity)
                 # Record the played song in the database
-                if self.video_queue.now_playing.enqueuer is not None:
-                    logger.debug(f"Adding {self.video_queue.now_playing.plain_text()} to db.PlayedMusic...")
+                if current_video.enqueuer is not None:
+                    logger.debug(f"Adding {current_video.plain_text()} to db.PlayedMusic...")
                     try:
                         session = db.Session()
                         enqueuer = await loop.run_in_executor(executor, session.query(db.Discord)
-                                                              .filter_by(
-                            discord_id=self.video_queue.now_playing.enqueuer.id)
+                                                              .filter_by(discord_id=current_video.enqueuer.id)
                                                               .one_or_none)
                         played_music = db.PlayedMusic(enqueuer=enqueuer,
-                                                      filename=self.video_queue.now_playing.database_text(),
+                                                      filename=current_video.database_text(),
                                                       timestamp=datetime.datetime.now())
                         session.add(played_music)
                         await loop.run_in_executor(executor, session.commit)
@@ -840,13 +887,17 @@ class RoyalDiscordBot(discord.Client):
                         pass
                 # Send a message in chat
                 for key in self.song_text_easter_eggs:
-                    if key in self.video_queue.now_playing.name.lower():
+                    if key in current_video.name.lower():
                         await self.main_channel.send(
-                            self.song_text_easter_eggs[key].format(song=str(self.video_queue.now_playing)))
+                            self.song_text_easter_eggs[key].format(song=str(current_video)))
                         break
                 else:
                     await self.main_channel.send(
-                        f":arrow_forward: Ora in riproduzione: {str(self.video_queue.now_playing)}")
+                        f":arrow_forward: Ora in riproduzione: {str(current_video)}")
+                # Wait until the song is finished
+                while voice_client.is_playing() or voice_client.is_paused():
+                    await asyncio.sleep(1)
+                self.video_queue.advance_queue()
 
     async def inactivity_countdown(self):
         while True:
@@ -1063,7 +1114,7 @@ class RoyalDiscordBot(discord.Client):
                 await channel.send("⚠️ Il numero inserito non corrisponde a nessun video nella playlist.\n"
                                    "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
                 return
-            video = self.video_queue.list.pop(index)
+            video = self.video_queue.pop(index)
             await channel.send(f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
             logger.debug(f"Removed from queue: {video.plain_text()}")
             return
@@ -1093,7 +1144,7 @@ class RoyalDiscordBot(discord.Client):
             await channel.send("⚠️ Il numero iniziale è maggiore del numero finale.\n"
                                "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
             return
-        del self.video_queue.list[start:end]
+        del self.video_queue[start:end]
         await channel.send(f":regional_indicator_x: {end - start} video rimossi dalla coda.")
         logger.debug(f"Removed from queue {end - start} videos.")
 
@@ -1114,53 +1165,14 @@ class RoyalDiscordBot(discord.Client):
         elif self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE:
             msg += "Modalità attuale: :arrows_counterclockwise: **Video casuali infiniti dalla coda**\n"
         msg += "**Video in coda:**\n"
-        if self.video_queue.now_playing is None:
+        if len(self.video_queue) == 0:
             msg += ":cloud: _nessuno_\n"
-        else:
-            msg += f":arrow_forward: {str(self.video_queue.now_playing)}\n"
-        if self.video_queue.loop_mode == LoopMode.NORMAL:
-            for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f"{number_emojis[index]} {str(video)}\n"
-            if len(self.video_queue) > 10:
-                msg += f"più altri {len(self.video_queue) - 10} video!"
-        elif self.video_queue.loop_mode == LoopMode.LOOP_QUEUE:
-            for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f"{number_emojis[index]} {str(video)}\n"
-            if len(self.video_queue) > 10:
-                msg += f"più altri {len(self.video_queue) - 10} video che si ripetono!"
-            else:
-                if len(self.video_queue) < 6:
-                    count = len(self.video_queue)
-                    while count < 10:
-                        for index, video in enumerate(self.video_queue.list[:10]):
-                            msg += f":asterisk: {str(video)}\n"
-                        count += len(self.video_queue)
-                msg += "e avanti così!"
-        elif self.video_queue.loop_mode == LoopMode.LOOP_SINGLE:
-            video = self.video_queue.now_playing
-            for index in range(9):
-                msg += f":asterisk: {str(video)}\n"
-            msg += "all'infinito!"
-        elif self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            msg += "e i prossimi video suggeriti!"
-        elif self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
-            for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f":hash: {str(video)}\n"
-            if len(self.video_queue) > 10:
-                msg += f"più altri {len(self.video_queue) - 10} video!"
-        elif self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE:
-            for index, video in enumerate(self.video_queue.list[:10]):
-                msg += f":hash: {str(video)}\n"
-            if len(self.video_queue) > 10:
-                msg += f"più altri {len(self.video_queue) - 10} video che si ripetono!"
-            else:
-                if len(self.video_queue) < 6:
-                    count = len(self.video_queue)
-                    while count < 10:
-                        for index, video in enumerate(self.video_queue.list[:10]):
-                            msg += f":asterisk: {str(video)}\n"
-                        count += len(self.video_queue)
-                msg += "a ripetizione casuale!"
+        for index in range(11):
+            try:
+                video = await self.video_queue.async_getitem(index)
+            except IndexError:
+                break
+            msg += f"{number_emojis[index]} {str(video)}\n"
         await channel.send(msg)
 
     # noinspection PyUnusedLocal
