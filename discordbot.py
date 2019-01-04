@@ -79,6 +79,7 @@ class Video:
         self.name = None
         self.enqueuer = enqueuer
         self.audio_source = None
+        self.suggestion = None
 
     def __str__(self):
         if self.name is None:
@@ -108,8 +109,9 @@ class Video:
         """Create an AudioSource to be played through Discord, and store and return it."""
         raise NotImplementedError()
 
-    def get_suggestion(self) -> typing.Optional["Video"]:
-        """Get the next suggested video, to be used when the queue is in LoopMode.FOLLOW_SUGGESTION"""
+    def get_suggestion(self):
+        """Set the next suggested video in the self.suggestion variable, to be used when the queue is in
+        LoopMode.FOLLOW_SUGGESTION"""
         raise NotImplementedError()
 
 
@@ -186,14 +188,16 @@ class YoutubeDLVideo(Video):
         self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.get_filename(), **ffmpeg_settings))
         return self.audio_source
 
-    def get_suggestion(self) -> typing.Optional["YoutubeDLVideo"]:
-        if self.info["extractor"] != "youtube":
-            # TODO: add more websites?
-            return None
-        if self.youtube_api_key is None:
-            raise errors.MissingAPIKeyError()
+    def get_suggestion(self):
+        if self.suggestion is not None:
+            return
         # Ensure the video has info
         self.get_info()
+        if self.info["extractor"] != "youtube":
+            # TODO: add more websites?
+            self.suggestion = NotImplemented
+        if self.youtube_api_key is None:
+            raise errors.MissingAPIKeyError()
         # Request search data (costs 100 API units)
         r = requests.get("https://www.googleapis.com/youtube/v3/search?part=snippet", params={
             "part": "snippet",
@@ -206,11 +210,11 @@ class YoutubeDLVideo(Video):
         j = r.json()
         # Find the suggested video
         if len(j["items"]) < 1:
-            raise errors.NotFoundError()
+            self.suggestion = ...
         first_video_id = j["items"][0]["id"]["videoId"]
-        return YoutubeDLVideo(f"https://www.youtube.com/watch?v={first_video_id}",
-                              enqueuer=None,
-                              youtube_api_key=self.youtube_api_key)
+        self.suggestion = YoutubeDLVideo(f"https://www.youtube.com/watch?v={first_video_id}",
+                                         enqueuer=None,
+                                         youtube_api_key=self.youtube_api_key)
 
 
 class LoopMode(enum.Enum):
@@ -261,9 +265,12 @@ class VideoQueue:
             pass
         elif self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
             if self.now_playing is None:
-                self.now_playing = None
-                return
-            self.now_playing = self.now_playing.get_suggestion()
+                if len(self.list) > 0:
+                    self.now_playing = self.list.pop(0)
+                else:
+                    return
+            self.now_playing.get_suggestion()
+            self.now_playing = self.now_playing.suggestion
         elif self.loop_mode == LoopMode.AUTO_SHUFFLE:
             self.shuffle()
             try:
@@ -296,6 +303,25 @@ class VideoQueue:
     def not_ready_videos(self, limit: typing.Optional[int] = None):
         """Return the non-ready videos in the first limit positions of the queue."""
         video_list = []
+        # In single video repeat, the only video to be loaded is the one currently playing
+        if self.loop_mode == LoopMode.LOOP_SINGLE:
+            if self.now_playing is None or self.now_playing.is_ready:
+                return video_list
+            else:
+                video_list.append(self.now_playing)
+                return video_list
+        # In suggestion mode, preload the current video and the next suggested one
+        if self.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
+            video = self.now_playing
+            if video is None:
+                return video_list
+            video.get_suggestion()
+            if not video.is_ready:
+                video_list.append(video)
+            if not video.suggestion.is_ready:
+                video_list.append(video.suggestion)
+            return video_list
+        # In all other modes, the videos to be loaded are the current one plus the following ones
         for video in (self.list[:limit] + ([self.now_playing] if self.now_playing else [])):
             if not video.is_ready:
                 video_list.append(video)
@@ -558,6 +584,12 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Command prefix not set, defaulting to '!'.")
             self.command_prefix = "!"
+        # Youtube API Key
+        try:
+            self.youtube_api_key = config["YouTube"]["youtube_data_api_key"]
+        except (KeyError, ValueError):
+            logger.warning("Youtube API key not set, disabling suggestion mode.")
+            self.youtube_api_key = None
 
     # noinspection PyAsyncCall
     async def on_ready(self):
@@ -890,10 +922,14 @@ class RoyalDiscordBot(discord.Client):
             if "entries" in info:
                 logger.debug(f"Playlist detected at {url}.")
                 for entry in info["entries"]:
-                    self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
+                    self.video_queue.add(YoutubeDLVideo(entry["webpage_url"],
+                                                        enqueuer=enqueuer,
+                                                        youtube_api_key=self.youtube_api_key), index)
                 return
             logger.debug(f"Single video detected at {url}.")
-            self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
+            self.video_queue.add(YoutubeDLVideo(url,
+                                                enqueuer=enqueuer,
+                                                youtube_api_key=self.youtube_api_key), index)
 
     # noinspection PyUnusedLocal
     @command
@@ -1072,14 +1108,14 @@ class RoyalDiscordBot(discord.Client):
         elif self.video_queue.loop_mode == LoopMode.LOOP_SINGLE:
             msg += "Modalità attuale: :repeat_one: **Ripeti canzone singola**\n"
         elif self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            msg += "Modalità attuale: :arrows_clockwise: **Continua con video suggeriti**\n"
+            msg += "Modalità attuale: :sparkles: **Continua con video suggeriti**\n"
         elif self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
             msg += "Modalità attuale: :twisted_rightwards_arrows: **Video casuale dalla coda**\n"
         elif self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE:
             msg += "Modalità attuale: :arrows_counterclockwise: **Video casuali infiniti dalla coda**\n"
         msg += "**Video in coda:**\n"
         if self.video_queue.now_playing is None:
-            msg += ":cloud: _nessuno_"
+            msg += ":cloud: _nessuno_\n"
         else:
             msg += f":arrow_forward: {str(self.video_queue.now_playing)}\n"
         if self.video_queue.loop_mode == LoopMode.NORMAL:
@@ -1106,7 +1142,7 @@ class RoyalDiscordBot(discord.Client):
                 msg += f":asterisk: {str(video)}\n"
             msg += "all'infinito!"
         elif self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            msg += ":rainbow:"
+            msg += "e i prossimi video suggeriti!"
         elif self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
             for index, video in enumerate(self.video_queue.list[:10]):
                 msg += f":hash: {str(video)}\n"
@@ -1211,8 +1247,12 @@ class RoyalDiscordBot(discord.Client):
             self.video_queue.loop_mode = LoopMode.LOOP_QUEUE
             await channel.send("🔁 Modalità di coda impostata: **Ripeti intera coda**")
         elif params[1] == "suggest":
+            if self.youtube_api_key is None:
+                await channel.send("⚠️ La modalità **Continua con video suggeriti**"
+                                   " non è configurata correttamente ed è stata disattivata.")
+                return
             self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
-            await channel.send("🌈️ Modalità di coda impostata: **Continua con video suggeriti**")
+            await channel.send("✨ Modalità di coda impostata: **Continua con video suggeriti**")
         elif params[1] == "random":
             self.video_queue.loop_mode = LoopMode.AUTO_SHUFFLE
             await channel.send("🔀 Modalità di coda impostata: **Video casuale dalla coda**")
