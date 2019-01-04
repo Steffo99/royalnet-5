@@ -188,8 +188,9 @@ def page_editprofile():
             profile_data.royal.fiorygi += 1
             try:
                 telegram_bot.send_message(config["Telegram"]["main_group"],
-                                          f'⭐️ {profile_data.royal.username} ha configurato la sua bio su Royalnet'
-                                          f' e ha ottenuto un fioryg!',
+                                          f'⭐️ {profile_data.royal.username} ha'
+                                          f' <a href="http://ryg.steffo.eu/editprofile">configurato la sua bio</a>'
+                                          f' su Royalnet e ha ottenuto un fioryg!',
                                           parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
             except Exception:
                 pass
