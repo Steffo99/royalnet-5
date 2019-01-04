@@ -52,3 +52,7 @@ class PrivateError(Exception):
 
 class PastDateError(Exception):
     pass
+
+
+class MissingAPIKeyError(Exception):
+    pass

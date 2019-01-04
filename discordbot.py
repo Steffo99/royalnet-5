@@ -25,6 +25,7 @@ import coloredlogs
 import errors
 import math
 import enum
+import requests
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class Video:
         """Create an AudioSource to be played through Discord, and store and return it."""
         raise NotImplementedError()
 
-    def get_suggestion(self):
+    def get_suggestion(self) -> typing.Optional["Video"]:
         """Get the next suggested video, to be used when the queue is in LoopMode.FOLLOW_SUGGESTION"""
         raise NotImplementedError()
 
@@ -115,10 +116,11 @@ class Video:
 class YoutubeDLVideo(Video):
     """A file sourcing from YoutubeDL."""
 
-    def __init__(self, url, enqueuer: typing.Optional[discord.Member] = None):
+    def __init__(self, url, enqueuer: typing.Optional[discord.Member] = None, *, youtube_api_key: str = None):
         super().__init__(enqueuer)
         self.url = url
         self.info = None
+        self.youtube_api_key = youtube_api_key
 
     def get_info(self):
         """Get info about the video."""
@@ -184,8 +186,31 @@ class YoutubeDLVideo(Video):
         self.audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.get_filename(), **ffmpeg_settings))
         return self.audio_source
 
-    def get_suggestion(self):
-        return None
+    def get_suggestion(self) -> typing.Optional["YoutubeDLVideo"]:
+        if self.info["extractor"] != "youtube":
+            # TODO: add more websites?
+            return None
+        if self.youtube_api_key is None:
+            raise errors.MissingAPIKeyError()
+        # Ensure the video has info
+        self.get_info()
+        # Request search data (costs 100 API units)
+        r = requests.get("https://www.googleapis.com/youtube/v3/search?part=snippet", params={
+            "part": "snippet",
+            "type": "video",
+            "key": self.youtube_api_key,
+            "relatedToVideoId": self.info["id"]
+        })
+        r.raise_for_status()
+        # Parse the request data
+        j = r.json()
+        # Find the suggested video
+        if len(j["items"]) < 1:
+            raise errors.NotFoundError()
+        first_video_id = j["items"][0]["id"]["videoId"]
+        return YoutubeDLVideo(f"https://www.youtube.com/watch?v={first_video_id}",
+                              enqueuer=None,
+                              youtube_api_key=self.youtube_api_key)
 
 
 class LoopMode(enum.Enum):
@@ -1180,8 +1205,8 @@ class RoyalDiscordBot(discord.Client):
             self.video_queue.loop_mode = LoopMode.LOOP_QUEUE
             await channel.send("🔁 Modalità di coda impostata: **Ripeti intera coda**")
         elif params[1] == "suggest":
-            # self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
-            await channel.send("⚠️ La modalità **Continua con video suggeriti** non è ancora stata implementata.")
+            self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
+            await channel.send("🌈️ Modalità di coda impostata: **Continua con video suggeriti**")
         elif params[1] == "random":
             self.video_queue.loop_mode = LoopMode.AUTO_SHUFFLE
             await channel.send("🔀 Modalità di coda impostata: **Video casuale dalla coda**")
