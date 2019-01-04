@@ -13,13 +13,15 @@
     <h1>
         Royal Games su {{ game_name }}
     </h1>
-    <div class="game-page">
-        <div class="game-panels">
-            {% for mini in minis %}
-                {% with record = mini %}
-                    {% include "minis/" + game_short_name + ".html" %}
-                {% endwith %}
-            {% endfor %}
+    <div class="omnicontainer">
+        <div class="game">
+            <div class="game-panels">
+                {% for mini in minis %}
+                    {% with record = mini %}
+                        {% include "minis/" + game_short_name + ".html" %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 {% endblock %}

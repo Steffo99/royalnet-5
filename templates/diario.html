@@ -10,11 +10,13 @@
 
 {% block body %}
     <h1>
-        Diario
+        Diario <a href="{{ url_for("page_wiki", key="Diario") }}" class="whatsthis">Cos'è?</a>
     </h1>
-    <div class="diario">
-        {% for entry in entries %}
-            {% include "components/diarioentry.html" %}
-        {% endfor %}
+    <div class="omnicontainer">
+        <div class="diario">
+            {% for entry in entries %}
+                {% include "components/diarioentry.html" %}
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
