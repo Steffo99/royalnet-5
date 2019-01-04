@@ -588,7 +588,7 @@ class RoyalDiscordBot(discord.Client):
                 "discriminator": message.author.discriminator
             }
         })
-        if not message.content.startswith("!"):
+        if not message.content.startswith(self.command_prefix):
             await message.channel.send(f"⚠️ In questa chat sono consentiti solo comandi per il bot.\n"
                                        f"Riinvia il tuo messaggio in un altro canale!")
             await message.delete()
