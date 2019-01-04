@@ -382,44 +382,44 @@ def requires_rygdb(func, optional=False):
 
 
 class RoyalDiscordBot(discord.Client):
-    def __init__(self, command_prefix="!", *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.main_channel: typing.Optional[discord.TextChannel] = None
         self.main_guild: typing.Optional[discord.Guild] = None
-        self.commands = {
-            f"{command_prefix}ping": self.cmd_ping,
-            f"{command_prefix}cv": self.cmd_cv,
-            f"{command_prefix}summon": self.cmd_cv,
-            f"{command_prefix}play": self.cmd_play,
-            f"{command_prefix}alexaplay": self.cmd_play,
-            f"{command_prefix}okgoogleplay": self.cmd_play,
-            f"{command_prefix}heysiriplay": self.cmd_play,
-            f"{command_prefix}p": self.cmd_play,
-            f"{command_prefix}search": self.cmd_play,
-            f"{command_prefix}file": self.cmd_play,
-            f"{command_prefix}skip": self.cmd_skip,
-            f"{command_prefix}s": self.cmd_skip,
-            f"{command_prefix}next": self.cmd_skip,
-            f"{command_prefix}remove": self.cmd_remove,
-            f"{command_prefix}r": self.cmd_remove,
-            f"{command_prefix}cancel": self.cmd_remove,
-            f"{command_prefix}queue": self.cmd_queue,
-            f"{command_prefix}q": self.cmd_queue,
-            f"{command_prefix}shuffle": self.cmd_shuffle,
-            f"{command_prefix}clear": self.cmd_clear,
-            f"{command_prefix}register": self.cmd_register,
-            f"{command_prefix}radiomessages": self.cmd_radiomessages,
-            f"{command_prefix}yes": self.null,
-            f"{command_prefix}no": self.null,
-            f"{command_prefix}pause": self.cmd_pause,
-            f"{command_prefix}resume": self.cmd_resume,
-            f"{command_prefix}loop": self.cmd_mode,
-            f"{command_prefix}l": self.cmd_mode,
-            f"{command_prefix}mode": self.cmd_mode,
-            f"{command_prefix}m": self.cmd_mode
-        }
         self.video_queue: VideoQueue = VideoQueue()
         self.load_config("config.ini")
+        self.commands = {
+            f"{self.command_prefix}ping": self.cmd_ping,
+            f"{self.command_prefix}cv": self.cmd_cv,
+            f"{self.command_prefix}summon": self.cmd_cv,
+            f"{self.command_prefix}play": self.cmd_play,
+            f"{self.command_prefix}alexaplay": self.cmd_play,
+            f"{self.command_prefix}okgoogleplay": self.cmd_play,
+            f"{self.command_prefix}heysiriplay": self.cmd_play,
+            f"{self.command_prefix}p": self.cmd_play,
+            f"{self.command_prefix}search": self.cmd_play,
+            f"{self.command_prefix}file": self.cmd_play,
+            f"{self.command_prefix}skip": self.cmd_skip,
+            f"{self.command_prefix}s": self.cmd_skip,
+            f"{self.command_prefix}next": self.cmd_skip,
+            f"{self.command_prefix}remove": self.cmd_remove,
+            f"{self.command_prefix}r": self.cmd_remove,
+            f"{self.command_prefix}cancel": self.cmd_remove,
+            f"{self.command_prefix}queue": self.cmd_queue,
+            f"{self.command_prefix}q": self.cmd_queue,
+            f"{self.command_prefix}shuffle": self.cmd_shuffle,
+            f"{self.command_prefix}clear": self.cmd_clear,
+            f"{self.command_prefix}register": self.cmd_register,
+            f"{self.command_prefix}radiomessages": self.cmd_radiomessages,
+            f"{self.command_prefix}yes": self.null,
+            f"{self.command_prefix}no": self.null,
+            f"{self.command_prefix}pause": self.cmd_pause,
+            f"{self.command_prefix}resume": self.cmd_resume,
+            f"{self.command_prefix}loop": self.cmd_mode,
+            f"{self.command_prefix}l": self.cmd_mode,
+            f"{self.command_prefix}mode": self.cmd_mode,
+            f"{self.command_prefix}m": self.cmd_mode
+        }
         if self.sentry_token:
             self.sentry = raven.Client(self.sentry_token,
                                        release=raven.fetch_git_sha(os.path.dirname(__file__)),
@@ -552,6 +552,12 @@ class RoyalDiscordBot(discord.Client):
         except (KeyError, ValueError):
             logger.warning("Song text easter egg information not found, defaulting to disabled.")
             self.song_text_easter_eggs = {}
+        # Discord command prefix
+        try:
+            self.command_prefix = config["Discord"]["command_prefix"]
+        except (KeyError, ValueError):
+            logger.warning("Command prefix not set, defaulting to '!'.")
+            self.command_prefix = "!"
 
     # noinspection PyAsyncCall
     async def on_ready(self):
