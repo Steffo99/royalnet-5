@@ -20,9 +20,7 @@
             </div>
             <div class="right">
                 {% if config["DEBUG"] %}
-                    <span id="debug-mode">
-                        DEBUG MODE
-                    </span>
+                    <span id="debug-mode">DEBUG MODE</span>
                 {% endif %}
                 <span class="login-status">
                     {% if session.get('username') is not none %}
