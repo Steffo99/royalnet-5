@@ -356,41 +356,41 @@ def requires_rygdb(func, optional=False):
 
 
 class RoyalDiscordBot(discord.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, command_prefix="!", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.main_channel: typing.Optional[discord.TextChannel] = None
         self.main_guild: typing.Optional[discord.Guild] = None
         self.commands = {
-            "!ping": self.cmd_ping,
-            "!cv": self.cmd_cv,
-            "!summon": self.cmd_cv,
-            "!play": self.cmd_play,
-            "!alexaplay": self.cmd_play,
-            "!okgoogleplay": self.cmd_play,
-            "!heysiriplay": self.cmd_play,
-            "!p": self.cmd_play,
-            "!search": self.cmd_play,
-            "!file": self.cmd_play,
-            "!skip": self.cmd_skip,
-            "!s": self.cmd_skip,
-            "!next": self.cmd_skip,
-            "!remove": self.cmd_remove,
-            "!r": self.cmd_remove,
-            "!cancel": self.cmd_remove,
-            "!queue": self.cmd_queue,
-            "!q": self.cmd_queue,
-            "!shuffle": self.cmd_shuffle,
-            "!clear": self.cmd_clear,
-            "!register": self.cmd_register,
-            "!radiomessages": self.cmd_radiomessages,
-            "!yes": self.null,
-            "!no": self.null,
-            "!pause": self.cmd_pause,
-            "!resume": self.cmd_resume,
-            "!loop": self.cmd_mode,
-            "!l": self.cmd_mode,
-            "!mode": self.cmd_mode,
-            "!m": self.cmd_mode
+            f"{command_prefix}ping": self.cmd_ping,
+            f"{command_prefix}cv": self.cmd_cv,
+            f"{command_prefix}summon": self.cmd_cv,
+            f"{command_prefix}play": self.cmd_play,
+            f"{command_prefix}alexaplay": self.cmd_play,
+            f"{command_prefix}okgoogleplay": self.cmd_play,
+            f"{command_prefix}heysiriplay": self.cmd_play,
+            f"{command_prefix}p": self.cmd_play,
+            f"{command_prefix}search": self.cmd_play,
+            f"{command_prefix}file": self.cmd_play,
+            f"{command_prefix}skip": self.cmd_skip,
+            f"{command_prefix}s": self.cmd_skip,
+            f"{command_prefix}next": self.cmd_skip,
+            f"{command_prefix}remove": self.cmd_remove,
+            f"{command_prefix}r": self.cmd_remove,
+            f"{command_prefix}cancel": self.cmd_remove,
+            f"{command_prefix}queue": self.cmd_queue,
+            f"{command_prefix}q": self.cmd_queue,
+            f"{command_prefix}shuffle": self.cmd_shuffle,
+            f"{command_prefix}clear": self.cmd_clear,
+            f"{command_prefix}register": self.cmd_register,
+            f"{command_prefix}radiomessages": self.cmd_radiomessages,
+            f"{command_prefix}yes": self.null,
+            f"{command_prefix}no": self.null,
+            f"{command_prefix}pause": self.cmd_pause,
+            f"{command_prefix}resume": self.cmd_resume,
+            f"{command_prefix}loop": self.cmd_mode,
+            f"{command_prefix}l": self.cmd_mode,
+            f"{command_prefix}mode": self.cmd_mode,
+            f"{command_prefix}m": self.cmd_mode
         }
         self.video_queue: VideoQueue = VideoQueue()
         self.load_config("config.ini")
