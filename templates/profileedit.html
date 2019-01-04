@@ -9,7 +9,9 @@
         Modifica profilo
     </h1>
     <form action="{{ url_for('page_editprofile') }}" method="POST">
-        <textarea name="bio" placeholder="Scrivi la tua bio qui...">{{ data.bio }}</textarea>
+        Puoi usare il <a href="{{ url_for('page_wiki', key='Meta') }}">Markdown</a> nella tua bio.
+        <textarea name="bio" placeholder="Scrivi la tua bio qui... (Markdown supportato)">{{ data.bio }}</textarea>
+        Se vuoi, puoi personalizzare il tuo profilo con un tuo <a href="https://www.w3schools.com/css/css_howto.asp">foglio di stile!</a>
         <textarea name="css" placeholder="Incolla il CSS per il tuo profilo qui...">{{ data.css }}</textarea>
         <input type="submit" value="Salva">
     </form>
