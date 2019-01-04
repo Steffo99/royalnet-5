@@ -20,6 +20,7 @@ from telegram import User as TelegramUser
 import loldata
 from dirty import Dirty
 import query_discord_music
+from flask import escape
 
 # Init the config reader
 import configparser
@@ -684,6 +685,9 @@ class Diario(Base):
 
     def __str__(self):
         return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
+
+    def to_html(self):
+        return str(escape(self.text)).replace("\n", "<br>")
 
     @staticmethod
     def import_from_json(file):

@@ -1,7 +1,7 @@
 <blockquote id="entry-{{ entry.id }}" class="entry {% if entry.spoiler %}spoiler{% endif %}">
     <div class="left">
     <p>
-        <span class="text">{{ entry.text }}</span>
+        <span class="text">{{ entry.to_html() | safe }}</span>
     </p>
     <p>
         <cite>— {% if entry.author is not none %}<a class="author" href="{{ url_for("page_profile", name=entry.author.royal.username) }}">{{ entry.author.royal.username }}</a>{% else %}<span class="author anonymous">Anonimo</span>{% endif %}, <span class="timestamp">{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</span> {% if entry.saver is not none and entry.saver != entry.author %}<span class="saver">(salvato da <a href="/profile/{{ entry.saver.royal.username }}">{{ entry.saver.royal.username }}</a>)</span>{% endif %}</cite>
