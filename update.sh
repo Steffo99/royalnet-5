@@ -3,6 +3,7 @@
 
 old=$(git rev-list HEAD -n 1)
 git pull
+git lfs pull
 new=$(git rev-list HEAD -n 1)
 if [ ${old} = ${new} ]; then
         version=$(sentry-cli releases propose-version)
