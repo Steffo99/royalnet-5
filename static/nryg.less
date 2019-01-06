@@ -254,6 +254,11 @@ table {
         border-radius: 0 0 4px 4px;
         padding: 8px;
     }
+
+    ul {
+        column-width: 200px;
+        word-wrap: break-word;
+    }
 }
 
 .input-grid {
@@ -267,6 +272,16 @@ table {
 
     input {
         grid-column: 2;
+    }
+}
+
+.super-title {
+    font-size: 64px;
+    text-align: center;
+
+    img {
+        height: 128px;
+        vertical-align: middle;
     }
 }
 
@@ -815,7 +830,9 @@ table {
 
     .wiki-log {
         font-family: "Consolas", "Source Code Pro", monospace;
+        font-size: small;
         margin-bottom: 12px;
+        opacity: 0.4;
 
         .last-reason {
             font-style: italic;
@@ -859,7 +876,7 @@ table {
     }
 }
 
-.main-page {
+.two-columns {
     display: grid;
 
     @media (min-width:601px) {
@@ -893,11 +910,6 @@ table {
             grid-row-start: 1;
             grid-row-end: 3;
         }
-    }
-
-    ul {
-        column-width: 200px;
-        word-wrap: break-word;
     }
 }
 
@@ -950,4 +962,23 @@ table {
 
 #edit-css {
     font-size: medium;
+}
+
+#members-list {
+    list-style: none;
+
+    li {
+        &::before {
+            content: "•";
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        &.admin {
+            &::before {
+                color: #ffff00;
+            }
+        }
+    }
 }

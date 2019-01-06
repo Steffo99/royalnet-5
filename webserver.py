@@ -61,8 +61,6 @@ def page_500():
 
 @app.route("/")
 def page_main():
-    if not fl_session.get("user_id"):
-        return redirect(url_for("page_login"))
     db_session = db.Session()
     royals = db_session.query(db.Royal).order_by(db.Royal.username).all()
     wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
@@ -72,7 +70,7 @@ def page_main():
     halloween = db.Halloween.puzzle_status()[1]
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           next_events=next_events, g=fl_g, escape=escape, halloween=enumerate(halloween))
+                           events=next_events, g=fl_g, escape=escape, halloween=enumerate(halloween))
 
 
 @app.route("/profile/<name>")
@@ -436,6 +434,11 @@ def hooks_github():
 def pre_request():
     fl_g.css = "nryg.less"
     fl_g.rygconf = config
+    if fl_session is not None and fl_session.get("username") is not None and fl_session.get("user_id") is not None:
+        fl_g.logged_in = True
+    else:
+        fl_g.logged_in = False
+
 
 
 if __name__ == "__main__":

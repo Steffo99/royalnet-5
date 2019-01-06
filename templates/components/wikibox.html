@@ -14,6 +14,8 @@
                 <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
             {% endfor %}
         </ul>
-        oppure... <input id="input-key" name="key" type="text" placeholder="Nome pagina" class="half"><button onclick="createpage()">Crea</button>
+        {% if g.logged_in %}
+            oppure... <input id="input-key" name="key" type="text" placeholder="Nome pagina" class="half"><button onclick="createpage()">Crea</button>
+        {% endif %}
     </div>
 </div>

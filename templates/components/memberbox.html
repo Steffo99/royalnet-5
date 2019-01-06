@@ -1,0 +1,12 @@
+<div class="box">
+    <div class="upper-box">
+        Membri
+    </div>
+    <div class="lower-box">
+        <ul>
+            {% for royal in royals %}
+                <li><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
