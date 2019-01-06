@@ -29,6 +29,28 @@ telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
 sentry = Sentry(app, dsn=config["Sentry"]["token"])
 
 
+@app.template_filter()
+def markdown(text):
+    """Convert a string to markdown."""
+    converted_md = markdown2.markdown(text.replace("<", "&lt;"),
+                                      extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
+    converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
+                          r'<div class="youtube-embed">'
+                          r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0"'
+                          r'           frameborder="0"'
+                          r'           allow="autoplay; encrypted-media"'
+                          r'           allowfullscreen'
+                          r'           width="640px"'
+                          r'           height="320px">'
+                          r'   </iframe>'
+                          r'</div>', converted_md)
+    converted_md = re.sub(r"{https?://clyp.it/([a-z0-9]+)}",
+                          r'<div class="clyp-embed">'
+                          r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
+                          r'    </iframe>'
+                          r'</div>', converted_md)
+    return Markup(converted_md)
+
 @app.errorhandler(400)
 def error_400(_=None):
     return render_template("400.html", g=fl_g)
@@ -68,9 +90,10 @@ def page_main():
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
     halloween = db.Halloween.puzzle_status()[1]
+    quests = db_session.query(db.Quest).all()
     db_session.close()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           events=next_events, g=fl_g, escape=escape, halloween=enumerate(halloween))
+                           events=next_events, g=fl_g, escape=escape, quests=quests, halloween=enumerate(halloween))
 
 
 @app.route("/profile/<name>")

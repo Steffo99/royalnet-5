@@ -1036,6 +1036,20 @@ class ActivityReport(Base):
         return f"<ActivityReport at {self.timestamp.isoformat()}>"
 
 
+class Quest(Base):
+    __tablename__ = "quests"
+
+    id = Column(Integer, primary_key=True)
+
+    title = Column(String)
+    description = Column(Text)
+    reward = Column(Integer)
+    expiration_date = Column(DateTime)
+
+    def __repr__(self):
+        return f"<Quest {self.id}: {self.title}>"
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

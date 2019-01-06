@@ -974,6 +974,51 @@ ul {
     }
 }
 
+
+.quest {
+    padding: 8px;
+    color: @accent-color;
+    font-family: "Verdana", sans-serif;
+    background-image: url("/static/plank.jpg");
+    display: grid;
+    grid-template-columns: auto 64px;
+    grid-row-gap: 2px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+
+    .title {
+        grid-row: 1;
+        grid-column: 1;
+        font-weight: bold;
+    }
+
+    .description {
+        grid-row: 2;
+        grid-column: 1;
+
+        p {
+            margin: 0;
+        }
+    }
+
+    .reward {
+        grid-row-start: 1;
+        grid-row-end: 3;
+        grid-column: 2;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+
+        .number {
+            font-size: xx-large;
+        }
+
+        .subtext {
+            font-size: smaller;
+        }
+    }
+}
+
 #debug-mode {
     color: red;
     font-weight: bold;

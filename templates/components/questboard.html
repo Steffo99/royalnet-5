@@ -3,8 +3,12 @@
         Tabellone delle quest
     </div>
     <div class="lower-box">
-        <div class="quest">
-
-        </div>
+        {% if quests %}
+        {% for quest in quests %}
+            {% include "components/quest.html" %}
+        {% endfor %}
+        {% else %}
+            <i>Non ci sono quest al momento.</i>
+        {% endif %}
     </div>
 </div>

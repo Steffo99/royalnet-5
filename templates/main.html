@@ -18,10 +18,14 @@
                 {% include "components/welcome.html" %}
             {% endif %}
             {% if g.logged_in %}
-                {% include "components/eventlist.html" %}
-                {% include "components/diariooftheday.html" %}
+                {% if events %}
+                    {% include "components/eventlist.html" %}
+                {% endif %}
             {% endif %}
             {% include "components/memberbox.html" %}
+            {% if g.logged_in %}
+                {% include "components/wikibox.html" %}
+            {% endif %}
         </div>
         <div class="right">
             {% if not g.logged_in %}
@@ -29,11 +33,11 @@
             {% endif %}
             {% if g.logged_in %}
                 {% include "components/questboard.html" %}
-                {% include "components/links.html" %}
             {% endif %}
             {% include "components/gamestatsbox.html" %}
             {% if g.logged_in %}
-                {% include "components/wikibox.html" %}
+                {% include "components/links.html" %}
+                {% include "components/diariooftheday.html" %}
             {% endif %}
         </div>
     </div>
