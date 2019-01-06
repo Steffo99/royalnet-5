@@ -1,11 +1,11 @@
-<div class="box">
+<div class="box" id="members-box">
     <div class="upper-box">
         Membri
     </div>
     <div class="lower-box">
         <ul>
             {% for royal in royals %}
-                <li><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
+                <li class="{% if royal.role == "Admin" %}admin{% endif %}"><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
             {% endfor %}
         </ul>
     </div>
