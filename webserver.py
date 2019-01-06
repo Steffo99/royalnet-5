@@ -12,6 +12,7 @@ import telegram
 import query_discord_music
 import random
 import re
+import functools
 from raven.contrib.flask import Sentry
 
 app = Flask(__name__)
@@ -51,6 +52,17 @@ def markdown(text):
                           r'</div>', converted_md)
     return Markup(converted_md)
 
+
+def require_login(f):
+    @functools.wraps(f)
+    def func(*args, **kwargs):
+        if not fl_g.logged_in:
+            abort(403)
+            return
+        return f(*args, **kwargs)
+    return func
+
+
 @app.errorhandler(400)
 def error_400(_=None):
     return render_template("400.html", g=fl_g)
@@ -84,7 +96,7 @@ def page_500():
 @app.route("/")
 def page_main():
     db_session = db.Session()
-    royals = db_session.query(db.Royal).order_by(db.Royal.username).all()
+    royals = db_session.query(db.Royal).order_by(db.Royal.fiorygi.desc()).all()
     wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
     random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
     next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
@@ -139,7 +151,7 @@ def page_loggedin():
     db_session.close()
     fl_session.permanent = True
     if user is None:
-        abort(403)
+        abort(400)
         return
     if user.password is None:
         fl_session["user_id"] = user.id
@@ -149,9 +161,7 @@ def page_loggedin():
         fl_session["user_id"] = user.id
         fl_session["username"] = username
         return redirect(url_for("page_main"))
-    else:
-        abort(403)
-        return
+    return redirect(url_for("page_login"))
 
 
 @app.route("/logout")
@@ -163,36 +173,32 @@ def page_logout():
 
 
 @app.route("/password", methods=["GET", "POST"])
+@require_login
 def page_password():
-    if not fl_session.get("user_id"):
-        return redirect(url_for("page_login"))
-    user_id = fl_session.get("user_id")
     if request.method == "GET":
-        if user_id is None:
-            return redirect(url_for("page_login"))
-        return render_template("password.html", g=fl_g)
+        return render_template("password.html")
     elif request.method == "POST":
         new_password = request.form.get("new", "")
         db_session = db.Session()
-        user = db_session.query(db.Royal).filter_by(id=user_id).one()
+        user = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         if user.password is None:
             user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
             user.fiorygi += 1
             db_session.commit()
             db_session.close()
             return redirect(url_for("page_main"))
-        else:
-            db_session.close()
-            return redirect(url_for("page_login"))
+        db_session.close()
+        abort(403)
 
 
 @app.route("/editprofile", methods=["GET", "POST"])
+@require_login
 def page_editprofile():
-    user_id = fl_session.get("user_id")
-    if not user_id:
-        return redirect(url_for("page_login"))
+    if not fl_g.logged_in:
+        abort(403)
+        return
     db_session = db.Session()
-    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=user_id).join(db.Royal).one_or_none()
+    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=fl_g.user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
         db_session.close()
         return render_template("profileedit.html", data=profile_data, g=fl_g)
@@ -203,7 +209,7 @@ def page_editprofile():
             abort(400)
             return
         if profile_data is None:
-            profile_data = db.ProfileData(royal_id=user_id, css=css, bio=bio)
+            profile_data = db.ProfileData(royal_id=fl_g.user_id, css=css, bio=bio)
             db_session.add(profile_data)
             db_session.flush()
             profile_data.royal.fiorygi += 1
@@ -219,7 +225,7 @@ def page_editprofile():
             profile_data.css = css
             profile_data.bio = bio
         db_session.commit()
-        royal = db_session.query(db.Royal).filter_by(id=user_id).one()
+        royal = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         db_session.close()
         return redirect(url_for("page_profile", name=royal.username))
 
@@ -270,14 +276,6 @@ def page_game(name: str):
     return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, g=fl_g)
 
 
-@app.route("/wiki")
-def page_wikihome():
-    db_session = db.Session()
-    wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
-    db_session.close()
-    return render_template("wikilist.html", wiki_pages=wiki_pages, g=fl_g)
-
-
 @app.route("/wiki/<key>", methods=["GET", "POST"])
 def page_wiki(key: str):
     db_session = db.Session()
@@ -309,10 +307,7 @@ def page_wiki(key: str):
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
                                wiki_log=wiki_latest_edit, g=fl_g)
     elif request.method == "POST":
-        user_id = fl_session.get('user_id')
-        user = db_session.query(db.Royal).filter_by(id=user_id).one()
-        if user_id is None:
-            db_session.close()
+        if not fl_g.logged_in:
             return redirect(url_for("page_login"))
         new_content = request.form.get("content")
         # Create new page
@@ -354,10 +349,8 @@ def page_wiki(key: str):
 
 
 @app.route("/diario")
+@require_login
 def page_diario():
-    user_id = fl_session.get("user_id")
-    if not user_id:
-        return redirect(url_for("page_login"))
     db_session = db.Session()
     diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
     db_session.close()
@@ -391,34 +384,6 @@ def page_activity():
     reports = list(db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
     db_session.close()
     return render_template("activity.html", activityreports=list(reversed(reports)))
-
-
-@app.route("/api/token")
-def api_token():
-    username = request.form.get("username", "")
-    password = request.form.get("password", "")
-    db_session = db.Session()
-    user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
-    if user is None:
-        db_session.close()
-        abort(403)
-        return
-    if user.password is None:
-        db_session.close()
-        abort(403)
-    if bcrypt.checkpw(bytes(password, encoding="utf8"), user.password):
-        new_token = db.LoginToken(royal=user, token=secrets.token_urlsafe())
-        db_session.add(new_token)
-        db_session.commit()
-        db_session.close()
-        return jsonify({
-            "id": user.id,
-            "username": user.username,
-            "token": new_token.token
-        })
-    else:
-        abort(403)
-        return
 
 
 @app.route("/ses/identify")
@@ -457,11 +422,12 @@ def hooks_github():
 def pre_request():
     fl_g.css = "nryg.less"
     fl_g.rygconf = config
-    if fl_session is not None and fl_session.get("username") is not None and fl_session.get("user_id") is not None:
+    fl_g.username = fl_session.get("username")
+    fl_g.user_id = fl_session.get("user_id")
+    if fl_session is not None and fl_g.username is not None and fl_g.user_id is not None:
         fl_g.logged_in = True
     else:
         fl_g.logged_in = False
-
 
 
 if __name__ == "__main__":

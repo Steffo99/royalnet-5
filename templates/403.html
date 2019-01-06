@@ -9,6 +9,25 @@
         403 - Forbidden
     </h1>
     <p>
-        Non puoi accedere a questa pagina. Magari hai sbagliato password?
+        Non puoi accedere a questa pagina.
     </p>
+    {% if g.logged_in %}
+        <p>
+            Forse dovresti provare a fare il <a href="{{ url_for("page_login") }}">login</a>...
+        </p>
+    {% else %}
+        <p>
+            Temo che questa pagina sia riservata agli amministratori...
+        </p>
+    {% endif %}
+    <blockquote class="entry">
+        <div class="left">
+            <p>
+                <span class="text">Io sono il padrone, questo è champagne, buon Natale!</span>
+            </p>
+            <p>
+                <cite>— <span class="author anonymous">Anonimo</span>, <span class="timestamp">2017-02-10 09:11:00</span></cite>
+            </p>
+        </div>
+    </blockquote>
 {% endblock %}
