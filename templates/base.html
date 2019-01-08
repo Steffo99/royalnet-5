@@ -23,8 +23,8 @@
                     <span id="debug-mode">DEBUG MODE</span>
                 {% endif %}
                 <span class="login-status">
-                    {% if session.get('username') is not none %}
-                        <a href="{{ url_for('page_profile', name=session.get('username')) }}">{{ session.get('username') }}</a>
+                    {% if g.user is not none %}
+                        <a href="{{ url_for('page_profile', name=g.user.username) }}">{{ g.user.username }}</a>
                         <a class="btn" href="{{ url_for('page_logout') }}">Logout</a>
                     {% else %}
                         <a class="btn" href="{{ url_for('page_login') }}">Login</a>

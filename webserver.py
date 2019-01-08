@@ -65,7 +65,7 @@ def require_login(f):
 
 @app.errorhandler(400)
 def error_400(_=None):
-    return render_template("400.html", g=fl_g)
+    return render_template("400.html")
 
 
 @app.route("/400")
@@ -75,7 +75,7 @@ def page_400():
 
 @app.errorhandler(403)
 def error_403(_=None):
-    return render_template("403.html", g=fl_g)
+    return render_template("403.html")
 
 
 @app.route("/403")
@@ -85,7 +85,7 @@ def page_403():
 
 @app.errorhandler(500)
 def error_500(_=None):
-    return render_template("500.html", g=fl_g)
+    return render_template("500.html")
 
 
 @app.route("/500")
@@ -95,61 +95,53 @@ def page_500():
 
 @app.route("/")
 def page_main():
-    db_session = db.Session()
-    royals = db_session.query(db.Royal).order_by(db.Royal.fiorygi.desc()).all()
-    wiki_pages = db_session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
-    random_diario = db_session.query(db.Diario).order_by(db.func.random()).first()
-    next_events = db_session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
+    royals = fl_g.session.query(db.Royal).order_by(db.Royal.fiorygi.desc()).all()
+    wiki_pages = fl_g.session.query(db.WikiEntry).order_by(db.WikiEntry.key).all()
+    random_diario = fl_g.session.query(db.Diario).order_by(db.func.random()).first()
+    next_events = fl_g.session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(
         db.Event.time).all()
-    halloween = db.Halloween.puzzle_status()[1]
-    quests = db_session.query(db.Quest).all()
-    db_session.close()
+    quests = fl_g.session.query(db.Quest).all()
     return render_template("main.html", royals=royals, wiki_pages=wiki_pages, entry=random_diario,
-                           events=next_events, g=fl_g, escape=escape, quests=quests, halloween=enumerate(halloween))
+                           events=next_events, escape=escape, quests=quests)
 
 
 @app.route("/profile/<name>")
 def page_profile(name: str):
-    db_session = db.Session()
-    user = db_session.query(db.Royal).filter_by(username=name).one_or_none()
+    user = fl_g.session.query(db.Royal).filter_by(username=name).one_or_none()
     if user is None:
-        db_session.close()
         abort(404)
         return
-    css = db_session.query(db.ProfileData).filter_by(royal=user).one_or_none()
-    steam = db_session.query(db.Steam).filter_by(royal=user).one_or_none()
-    osu = db_session.query(db.Osu).filter_by(royal=user).one_or_none()
-    dota = db_session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
-    lol = db_session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
-    ow = db_session.query(db.Overwatch).filter_by(royal=user).one_or_none()
-    tg = db_session.query(db.Telegram).filter_by(royal=user).one_or_none()
-    discord = db_session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
-    gamelog = db_session.query(db.GameLog).filter_by(royal=user).one_or_none()
-    halloween = db_session.query(db.Halloween).filter_by(royal=user).one_or_none()
-    terraria13 = db_session.query(db.Terraria13).filter_by(royal=user).one_or_none()
-    db_session.close()
+    css = fl_g.session.query(db.ProfileData).filter_by(royal=user).one_or_none()
+    steam = fl_g.session.query(db.Steam).filter_by(royal=user).one_or_none()
+    osu = fl_g.session.query(db.Osu).filter_by(royal=user).one_or_none()
+    dota = fl_g.session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
+    lol = fl_g.session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
+    ow = fl_g.session.query(db.Overwatch).filter_by(royal=user).one_or_none()
+    tg = fl_g.session.query(db.Telegram).filter_by(royal=user).one_or_none()
+    discord = fl_g.session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
+    gamelog = fl_g.session.query(db.GameLog).filter_by(royal=user).one_or_none()
+    halloween = fl_g.session.query(db.Halloween).filter_by(royal=user).one_or_none()
+    terraria13 = fl_g.session.query(db.Terraria13).filter_by(royal=user).one_or_none()
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
                                extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
     else:
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, g=fl_g, bio=converted_bio, gamelog=gamelog,
+                           tg=tg, discord=discord, bio=converted_bio, gamelog=gamelog,
                            halloween=halloween, terraria13=terraria13)
 
 
 @app.route("/login")
 def page_login():
-    return render_template("login.html", g=fl_g)
+    return render_template("login.html")
 
 
 @app.route("/loggedin", methods=["POST"])
 def page_loggedin():
     username = request.form.get("username", "")
     password = request.form.get("password", "")
-    db_session = db.Session()
-    user = db_session.query(db.Royal).filter_by(username=username).one_or_none()
-    db_session.close()
+    user = fl_g.session.query(db.Royal).filter_by(username=username).one_or_none()
     fl_session.permanent = True
     if user is None:
         abort(400)
@@ -180,15 +172,12 @@ def page_password():
         return render_template("password.html")
     elif request.method == "POST":
         new_password = request.form.get("new", "")
-        db_session = db.Session()
-        user = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
+        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         if user.password is None:
             user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
             user.fiorygi += 1
-            db_session.commit()
-            db_session.close()
+            fl_g.session.commit()
             return redirect(url_for("page_main"))
-        db_session.close()
         abort(403)
 
 
@@ -198,11 +187,9 @@ def page_editprofile():
     if not fl_g.logged_in:
         abort(403)
         return
-    db_session = db.Session()
-    profile_data = db_session.query(db.ProfileData).filter_by(royal_id=fl_g.user_id).join(db.Royal).one_or_none()
+    profile_data = fl_g.session.query(db.ProfileData).filter_by(royal_id=fl_g.user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
-        db_session.close()
-        return render_template("profileedit.html", data=profile_data, g=fl_g)
+        return render_template("profileedit.html", data=profile_data)
     elif request.method == "POST":
         css = request.form.get("css", "")
         bio = request.form.get("bio", "")
@@ -211,8 +198,8 @@ def page_editprofile():
             return
         if profile_data is None:
             profile_data = db.ProfileData(royal_id=fl_g.user_id, css=css, bio=bio)
-            db_session.add(profile_data)
-            db_session.flush()
+            fl_g.session.add(profile_data)
+            fl_g.session.flush()
             profile_data.royal.fiorygi += 1
             try:
                 telegram_bot.send_message(config["Telegram"]["main_group"],
@@ -225,71 +212,68 @@ def page_editprofile():
         else:
             profile_data.css = css
             profile_data.bio = bio
-        db_session.commit()
-        royal = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
-        db_session.close()
+        fl_g.session.commit()
+        royal = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         return redirect(url_for("page_profile", name=royal.username))
 
 
 @app.route("/game/<name>")
 def page_game(name: str):
-    db_session = db.Session()
     if name == "rl":
         game_name = "Rocket League"
-        query = db_session.query(db.RocketLeague).join(db.Steam).order_by(db.RocketLeague.solo_std_rank).all()
+        query = fl_g.session.query(db.RocketLeague).join(db.Steam).order_by(db.RocketLeague.solo_std_rank).all()
     elif name == "dota":
         game_name = "Dota 2"
-        query = db_session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc().nullslast()).all()
+        query = fl_g.session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc().nullslast(),
+                                                                    db.Dota.wins.desc()).all()
     elif name == "lol":
         game_name = "League of Legends"
-        query = db_session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast(),
-                                                              db.LeagueOfLegends.solo_rank,
-                                                              db.LeagueOfLegends.flex_division.desc().nullslast(),
-                                                              db.LeagueOfLegends.flex_rank,
-                                                              db.LeagueOfLegends.twtr_division.desc().nullslast(),
-                                                              db.LeagueOfLegends.twtr_rank,
-                                                              db.LeagueOfLegends.level).all()
+        query = fl_g.session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast(),
+                                                                db.LeagueOfLegends.solo_rank,
+                                                                db.LeagueOfLegends.flex_division.desc().nullslast(),
+                                                                db.LeagueOfLegends.flex_rank,
+                                                                db.LeagueOfLegends.twtr_division.desc().nullslast(),
+                                                                db.LeagueOfLegends.twtr_rank,
+                                                                db.LeagueOfLegends.level).all()
     elif name == "osu":
         game_name = "osu!"
-        query = db_session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()
+        query = fl_g.session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()
     elif name == "ow":
         game_name = "Overwatch"
-        query = db_session.query(db.Overwatch).order_by(db.Overwatch.rank.desc().nullslast()).all()
+        query = fl_g.session.query(db.Overwatch).order_by(db.Overwatch.rank.desc().nullslast()).all()
     elif name == "steam":
         game_name = "Steam"
-        query = db_session.query(db.Steam).order_by(db.Steam.persona_name).all()
+        query = fl_g.session.query(db.Steam).order_by(db.Steam.persona_name).all()
     elif name == "ryg":
         game_name = "Royalnet"
-        query = db_session.query(db.Royal).order_by(db.Royal.username).all()
+        query = fl_g.session.query(db.Royal).order_by(db.Royal.username).all()
     elif name == "tg":
         game_name = "Telegram"
-        query = db_session.query(db.Telegram).order_by(db.Telegram.telegram_id).all()
+        query = fl_g.session.query(db.Telegram).order_by(db.Telegram.telegram_id).all()
     elif name == "discord":
         game_name = "Discord"
-        query = [dict(row) for row in db_session.execute(query_discord_music.all_query)]
+        query = [dict(row) for row in fl_g.session.execute(query_discord_music.all_query)]
     elif name == "halloween2018":
         game_name = "Rituale di Halloween"
-        query = db_session.query(db.Halloween).all()
+        query = fl_g.session.query(db.Halloween).all()
     elif name == "terraria13":
         game_name = "Terraria 13"
-        query = db_session.query(db.Terraria13).all()
+        query = fl_g.session.query(db.Terraria13).all()
     else:
         abort(404)
         return
-    db_session.close()
-    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name, g=fl_g)
+    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name)
 
 
 @app.route("/wiki/<key>", methods=["GET", "POST"])
 def page_wiki(key: str):
-    db_session = db.Session()
-    wiki_page = db_session.query(db.WikiEntry).filter_by(key=key).one_or_none()
+    fl_g.session = db.Session()
+    wiki_page = fl_g.session.query(db.WikiEntry).filter_by(key=key).one_or_none()
     if request.method == "GET":
-        wiki_latest_edit = db_session.query(db.WikiLog).filter_by(edited_key=key) \
+        wiki_latest_edit = fl_g.session.query(db.WikiLog).filter_by(edited_key=key) \
             .order_by(db.WikiLog.timestamp.desc()).first()
-        db_session.close()
         if wiki_page is None:
-            return render_template("wikipage.html", key=key, g=fl_g)
+            return render_template("wikipage.html", key=key)
         # Embed YouTube videos
         converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                                           extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
@@ -309,18 +293,18 @@ def page_wiki(key: str):
                               r'    </iframe>'
                               r'</div>', converted_md)
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
-                               wiki_log=wiki_latest_edit, g=fl_g)
+                               wiki_log=wiki_latest_edit)
     elif request.method == "POST":
         if not fl_g.logged_in:
             return redirect(url_for("page_login"))
-        user = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
+        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         new_content = request.form.get("content")
         # Create new page
         if wiki_page is None:
             difference = len(new_content)
             wiki_page = db.WikiEntry(key=key, content=new_content)
-            db_session.add(wiki_page)
-            db_session.flush()
+            fl_g.session.add(wiki_page)
+            fl_g.session.flush()
         # Edit existing page
         else:
             difference = len(new_content) - len(wiki_page.content)
@@ -336,8 +320,8 @@ def page_wiki(key: str):
             fioryg_roll = -2
         edit_reason = request.form.get("reason")
         new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
-        db_session.add(new_log)
-        db_session.commit()
+        fl_g.session.add(new_log)
+        fl_g.session.commit()
         message = f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata' \
                   f' modificata da' \
                   f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>' \
@@ -356,38 +340,29 @@ def page_wiki(key: str):
 @app.route("/diario")
 @require_login
 def page_diario():
-    db_session = db.Session()
-    diario_entries = db_session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
-    db_session.close()
-    return render_template("diario.html", g=fl_g, entries=diario_entries)
+    diario_entries = fl_g.session.query(db.Diario).order_by(db.Diario.timestamp.desc()).all()
+    return render_template("diario.html", entries=diario_entries)
 
 
 @app.route("/music")
 def page_music():
-    db_session = db.Session()
-    songs = db_session.execute(query_discord_music.top_songs)
-    db_session.close()
+    songs = fl_g.session.execute(query_discord_music.top_songs)
     return render_template("topsongs.html", songs=songs)
 
 
 @app.route("/music/<discord_id>")
 def page_music_individual(discord_id: str):
-    db_session = db.Session()
-    discord = db_session.query(db.Discord).filter_by(discord_id=discord_id).one_or_none()
+    discord = fl_g.session.query(db.Discord).filter_by(discord_id=discord_id).one_or_none()
     if discord is None:
-        db_session.close()
         abort(404)
         return
-    songs = db_session.execute(query_discord_music.single_top_songs, {"discordid": discord.discord_id})
-    db_session.close()
+    songs = fl_g.session.execute(query_discord_music.single_top_songs, {"discordid": discord.discord_id})
     return render_template("topsongs.html", songs=songs, discord=discord)
 
 
 @app.route("/activity")
 def page_activity():
-    db_session = db.Session()
-    reports = list(db_session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
-    db_session.close()
+    reports = list(fl_g.session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
     return render_template("activity.html", activityreports=list(reversed(reports)))
 
 
@@ -427,12 +402,17 @@ def hooks_github():
 def pre_request():
     fl_g.css = "nryg.less"
     fl_g.rygconf = config
-    fl_g.username = fl_session.get("username")
-    fl_g.user_id = fl_session.get("user_id")
-    if fl_session is not None and fl_g.username is not None and fl_g.user_id is not None:
-        fl_g.logged_in = True
+    fl_g.session = db.Session()
+    if fl_session is None:
+        fl_g.user = None
     else:
-        fl_g.logged_in = False
+        fl_g.user = fl_g.session.query(db.Royal).filter_by(id=fl_session["user_id"]).one_or_none()
+
+
+@app.after_request
+def after_request(response):
+    fl_g.session.close()
+    return response
 
 
 if __name__ == "__main__":
