@@ -79,6 +79,11 @@
                         {% include "minis/ow.html" %}
                     {% endwith %}
                 {% endif %}
+                {% if terraria13 %}
+                    {% with record = terraria13 %}
+                        {% include "minis/terraria13.html" %}
+                    {% endwith %}
+                {% endif %}
             </div>
         </div>
     </div>
