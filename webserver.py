@@ -56,7 +56,7 @@ def markdown(text):
 def require_login(f):
     @functools.wraps(f)
     def func(*args, **kwargs):
-        if not fl_g.logged_in:
+        if not fl_g.user:
             abort(403)
             return
         return f(*args, **kwargs)
@@ -184,9 +184,6 @@ def page_password():
 @app.route("/editprofile", methods=["GET", "POST"])
 @require_login
 def page_editprofile():
-    if not fl_g.logged_in:
-        abort(403)
-        return
     profile_data = fl_g.session.query(db.ProfileData).filter_by(royal_id=fl_g.user_id).join(db.Royal).one_or_none()
     if request.method == "GET":
         return render_template("profileedit.html", data=profile_data)
@@ -295,9 +292,9 @@ def page_wiki(key: str):
         return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
                                wiki_log=wiki_latest_edit)
     elif request.method == "POST":
-        if not fl_g.logged_in:
+        if not fl_g.user:
             return redirect(url_for("page_login"))
-        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
+        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
         new_content = request.form.get("content")
         # Create new page
         if wiki_page is None:
