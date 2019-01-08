@@ -14,28 +14,28 @@
     </h1>
     <div class="two-columns">
         <div class="left">
-            {% if not g.logged_in %}
+            {% if not g.user %}
                 {% include "components/welcome.html" %}
             {% endif %}
-            {% if g.logged_in %}
+            {% if g.user %}
                 {% if events %}
                     {% include "components/eventlist.html" %}
                 {% endif %}
             {% endif %}
             {% include "components/memberbox.html" %}
-            {% if g.logged_in %}
+            {% if g.user %}
                 {% include "components/wikibox.html" %}
             {% endif %}
         </div>
         <div class="right">
-            {% if not g.logged_in %}
+            {% if not g.user %}
                 {% include "components/whatarewe.html" %}
             {% endif %}
-            {% if g.logged_in %}
+            {% if g.user %}
                 {% include "components/questboard.html" %}
             {% endif %}
             {% include "components/gamestatsbox.html" %}
-            {% if g.logged_in %}
+            {% if g.user %}
                 {% include "components/links.html" %}
                 {% include "components/diariooftheday.html" %}
             {% endif %}
