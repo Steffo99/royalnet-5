@@ -844,6 +844,41 @@ ul {
             }
         }
     }
+
+    .terraria13 {
+        border: 3px solid black;
+        padding: 15px;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("/static/stoneslab.png");
+        font-family: "Andy", sans-serif;
+        font-weight: bold;
+        color: white;
+        grid-row-gap: 5px;
+
+        .character {
+            grid-row: 1;
+            font-size: x-large;
+        }
+
+        .contribution-status {
+            grid-row: 2;
+
+            .contribution {
+                font-size: xx-large;
+
+                &.blue {
+                    color: #8686e5;
+                }
+
+                &.green {
+                    color: #92f892;
+                }
+
+                &.orange {
+                    color: #e9b688;
+                }
+            }
+        }
+    }
 }
 
 .wiki {

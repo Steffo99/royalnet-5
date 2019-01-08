@@ -1050,6 +1050,16 @@ class Quest(Base):
         return f"<Quest {self.id}: {self.title}>"
 
 
+class Terraria13(Base):
+    __tablename__ = "terraria13"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="terraria13", lazy="joined")
+
+    character_name = Column(String)
+    contribution = Column(Integer)
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")

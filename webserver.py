@@ -126,6 +126,7 @@ def page_profile(name: str):
     discord = db_session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
     gamelog = db_session.query(db.GameLog).filter_by(royal=user).one_or_none()
     halloween = db_session.query(db.Halloween).filter_by(royal=user).one_or_none()
+    terraria13 = db_session.query(db.Terraria13).filter_by(royal=user).one_or_none()
     db_session.close()
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
@@ -134,7 +135,7 @@ def page_profile(name: str):
         converted_bio = ""
     return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
                            tg=tg, discord=discord, g=fl_g, bio=converted_bio, gamelog=gamelog,
-                           halloween=halloween)
+                           halloween=halloween, terraria13=terraria13)
 
 
 @app.route("/login")
@@ -269,6 +270,9 @@ def page_game(name: str):
     elif name == "halloween2018":
         game_name = "Rituale di Halloween"
         query = db_session.query(db.Halloween).all()
+    elif name == "terraria13":
+        game_name = "Terraria 13"
+        query = db_session.query(db.Terraria13).all()
     else:
         abort(404)
         return
@@ -309,6 +313,7 @@ def page_wiki(key: str):
     elif request.method == "POST":
         if not fl_g.logged_in:
             return redirect(url_for("page_login"))
+        user = db_session.query(db.Royal).filter_by(id=fl_g.user_id).one()
         new_content = request.form.get("content")
         # Create new page
         if wiki_page is None:
