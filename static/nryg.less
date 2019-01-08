@@ -18,10 +18,6 @@ h1, h2, h3, h4, h5, h6 {
     color: @accent-color;
 }
 
-h1 .whatsthis {
-    font-size: large;
-}
-
 a {
     color: @link-color;
     text-decoration: none;
@@ -216,6 +212,11 @@ table {
 ul {
     list-style: none;
 
+    .multicolumn {
+        column-width: 192px;
+        word-wrap: break-word;
+    }
+
     li {
         &::before {
             content: "•";
@@ -232,20 +233,22 @@ ul {
     }
 }
 
+img {
+    max-width: 100%;
+
+    @media (max-width:792px) {
+        max-width: initial;
+    }
+}
+
+.whatsthis {
+    font-size: large;
+}
+
 .omnicontainer {
-    width: 380px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-
-    @media (min-width: 792px)
-    {
-        width: 776px;
-    }
-
-    @media (min-width: 1180px)
-    {
-        width: 1164px;
-    }
 
     @media (min-width: 1568px) {
         width: 1552px;
@@ -273,11 +276,6 @@ ul {
         border-radius: 0 0 4px 4px;
         padding: 8px;
     }
-
-    ul {
-        column-width: 200px;
-        word-wrap: break-word;
-    }
 }
 
 .input-grid {
@@ -291,28 +289,6 @@ ul {
 
     input {
         grid-column: 2;
-    }
-}
-
-.super-title {
-    font-size: 64px;
-    text-align: center;
-
-    img {
-        height: 128px;
-        vertical-align: middle;
-    }
-}
-
-@media (min-width:601px) {
-    .mobile-only {
-        display: none;
-    }
-}
-
-@media (max-width:600px) {
-    .desktop-only {
-        display: none;
     }
 }
 
@@ -934,7 +910,7 @@ ul {
 .two-columns {
     display: grid;
 
-    @media (min-width:601px) {
+    @media (min-width:791px) {
         //Desktop
 
         grid-template-columns: 50% 50%;
@@ -948,7 +924,7 @@ ul {
         }
     }
 
-    @media (max-width:600px) {
+    @media (max-width:792px) {
         //Mobile
 
         grid-template-columns: 100%;
@@ -1009,7 +985,6 @@ ul {
     }
 }
 
-
 .quest {
     padding: 8px;
     color: @accent-color;
@@ -1052,6 +1027,20 @@ ul {
         .subtext {
             font-size: smaller;
         }
+    }
+}
+
+#royal-games {
+    font-size: 64px;
+    text-align: center;
+
+    @media (max-width:792px) {
+        font-size: 32px;
+    }
+
+    img {
+        height: 128px;
+        vertical-align: middle;
     }
 }
 
