@@ -16,3 +16,4 @@ dice
 raven[flask]
 coloredlogs
 sentry_sdk
+libgravatar

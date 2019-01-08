@@ -21,9 +21,10 @@ import loldata
 from dirty import Dirty
 import query_discord_music
 from flask import escape
+import libgravatar
+import configparser
 
 # Init the config reader
-import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
@@ -47,6 +48,7 @@ class Royal(Base):
     role = Column(String)
     fiorygi = Column(Integer, default=0)
     member_since = Column(Date)
+    email = Column(String)
 
     @staticmethod
     def create(session: Session, username: str):
@@ -57,6 +59,12 @@ class Royal(Base):
 
     def __repr__(self):
         return f"<db.Royal {self.username}>"
+
+    def get_gravatar_url(self):
+        if self.email is None:
+            return f"https://www.gravatar.com/avatar/{libgravatar.md5_hash(self.username)}?d=identicon&f=y"
+        gravatar = libgravatar.Gravatar(self.email)
+        return gravatar.get_image(default="identicon")
 
 
 class Telegram(Base):
