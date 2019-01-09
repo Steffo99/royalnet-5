@@ -139,7 +139,7 @@ class Royal(Base, Mini):
         if self.email is None:
             return f"https://www.gravatar.com/avatar/{libgravatar.md5_hash(self.username)}?d=identicon&f=y"
         gravatar = libgravatar.Gravatar(self.email)
-        return gravatar.get_image(default="identicon")
+        return gravatar.get_image(default="identicon", use_ssl=True)
 
     @classmethod
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):

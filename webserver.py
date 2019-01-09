@@ -1,4 +1,3 @@
-import secrets
 from flask import Flask, render_template, request, abort, redirect, url_for, Markup, escape, jsonify
 from flask import session as fl_session
 from flask import g as fl_g
@@ -9,6 +8,7 @@ import markdown2
 import datetime
 # noinspection PyPackageRequirements
 import telegram
+import errors
 import query_discord_music
 import random
 import re
@@ -115,9 +115,14 @@ def page_profile(name: str):
     css = fl_g.session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     mini_data = []
     for game in db.mini_list:
-        data = game.mini_get_single_from_royal(fl_g.session, user)
+        try:
+            data = game.mini_get_single_from_royal(fl_g.session, user)
+        except errors.NotFoundError():
+            data = None
         # TODO: investigate on why instrumentedlists are returned
-        if isinstance(data, InstrumentedList):
+        if data is None:
+            continue
+        elif isinstance(data, InstrumentedList):
             mini_data.append({
                 "name": game._mini_name,
                 "data": data[0]
@@ -367,7 +372,7 @@ def pre_request():
     fl_g.css = "nryg.less"
     fl_g.rygconf = config
     fl_g.session = db.Session()
-    if fl_session is None:
+    if fl_session:
         fl_g.user = None
     else:
         fl_g.user = fl_g.session.query(db.Royal).filter_by(id=fl_session["user_id"]).one_or_none()
