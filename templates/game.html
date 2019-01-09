@@ -16,7 +16,7 @@
     <div class="game">
         <div class="game-panels">
             {% for record in mini_data %}
-                {% include "minis/" + record._mini_name + ".html" %}
+                {% include "minis/" + mini_type._mini_name + ".html" %}
             {% endfor %}
         </div>
     </div>

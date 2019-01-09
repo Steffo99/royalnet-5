@@ -118,9 +118,15 @@ def page_profile(name: str):
         data = game.mini_get_single_from_royal(fl_g.session, user)
         # TODO: investigate on why instrumentedlists are returned
         if isinstance(data, InstrumentedList):
-            mini_data.append(data[0])
+            mini_data.append({
+                "name": game._mini_name,
+                "data": data[0]
+            })
             continue
-        mini_data.append(data)
+        mini_data.append({
+            "name": game._mini_name,
+            "data": data
+        })
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
                                extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))

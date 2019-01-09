@@ -701,6 +701,18 @@ class Discord(Base, Mini):
             return "https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png"
         return f"https://cdn.discordapp.com/avatars/{self.discord_id}/{self.avatar_hex}.png?size={size}"
 
+    @classmethod
+    def mini_get_all(cls, session: Session):
+        return [dict(row) for row in session.execute(query_discord_music.all_query)]
+
+    @classmethod
+    def mini_get_single(cls, session: Session, **kwargs):
+        return session.execute(query_discord_music.one_query, {"royal": kwargs["royal"].id}).fetchone()
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return cls.mini_get_single(session, royal=royal)
+
 
 class Overwatch(Base, Mini):
     __tablename__ = "overwatch"

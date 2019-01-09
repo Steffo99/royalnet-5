@@ -35,8 +35,10 @@
             </div>
         {% endif %}
         <div class="game-panels">
-            {% for record in mini_data %}
-                {% include "minis/" + record._mini_name + ".html" %}
+            {% for mini in mini_data %}
+                {% with record = mini["data"] %}
+                    {% include "minis/" + mini["name"] + ".html" %}
+                {% endwith %}
             {% endfor %}
         </div>
     </div>
