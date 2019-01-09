@@ -40,7 +40,7 @@ os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(mes
 coloredlogs.install(level="DEBUG", logger=logger)
 
 
-def recursive_relationship_name_search(_class, keyword) -> typing.Optional[tuple]:
+def relationship_name_search(_class, keyword) -> typing.Optional[tuple]:
     """Recursively find a relationship with a given name."""
     inspected = set()
 
@@ -59,6 +59,26 @@ def recursive_relationship_name_search(_class, keyword) -> typing.Optional[tuple
             return None
 
     return search(inspect(_class), tuple())
+
+
+def relationship_link_chain(starting_class, ending_class) -> typing.Optional[tuple]:
+    """Find the path to follow to get from the starting table to the ending table."""
+    inspected = set()
+
+    def search(_mapper, chain):
+        inspected.add(_mapper)
+        if _mapper.class_ == ending_class:
+            return chain
+        relationships = _mapper.relationships
+        for _relationship in set(relationships):
+            if _relationship.mapper in inspected:
+                continue
+            result = search(_relationship.mapper, chain + (_relationship,))
+            if result is not None:
+                return result
+        return None
+
+    return search(inspect(starting_class), tuple())
 
 
 class Mini(object):
