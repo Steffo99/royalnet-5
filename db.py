@@ -10,6 +10,7 @@ from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey
                        UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
 from sqlalchemy.inspection import inspect
 import requests
+import errors
 from errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
@@ -73,15 +74,20 @@ def relationship_link_chain(starting_class, ending_class) -> typing.Optional[tup
         for _relationship in set(relationships):
             if _relationship.mapper in inspected:
                 continue
-            result = search(_relationship.mapper, chain + (_relationship,))
-            if result is not None:
-                return result
-        return None
+            try:
+                return search(_relationship.mapper, chain + (_relationship,))
+            except errors.NotFoundError:
+                continue
+        raise errors.NotFoundError()
 
     return search(inspect(starting_class), tuple())
 
 
 class Mini(object):
+    """Mixin for every table that has an associated mini."""
+    _mini_full_name = NotImplemented
+    _mini_name = NotImplemented
+
     @classmethod
     def mini_get_all(cls, session: Session) -> list:
         return session.query(cls).all()
@@ -92,12 +98,20 @@ class Mini(object):
 
     @classmethod
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
-        chain = recursive_relationship_name_search(cls, "royal")
-        pass
+        chain = relationship_link_chain(cls, Royal)
+        if chain is None:
+            chain = []
+        start = session.query(cls)
+        for connection in chain:
+            start = start.join(connection.mapper.class_)
+        start = start.filter(Royal.id == royal.id)
+        return start.one()
 
 
 class Royal(Base, Mini):
     __tablename__ = "royals"
+    _mini_full_name = "Royalnet"
+    _mini_name = "ryg"
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
@@ -128,8 +142,9 @@ class Royal(Base, Mini):
         return royal
 
 
-class Telegram(Base):
+class Telegram(Base, Mini):
     __tablename__ = "telegram"
+    _mini_full_name = "Telegram"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="telegram", lazy="joined")
@@ -178,8 +193,10 @@ class Telegram(Base):
         return royal.telegram
 
 
-class Steam(Base):
+class Steam(Base, Mini):
     __tablename__ = "steam"
+    _mini_full_name = "Steam"
+    _mini_name = "steam"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="steam", lazy="joined")
@@ -270,8 +287,10 @@ class Steam(Base):
         return royal.steam
 
 
-class RocketLeague(Base):
+class RocketLeague(Base, Mini):
     __tablename__ = "rocketleague"
+    _mini_full_name = "Rocket League"
+    _mini_name = "rl"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam", backref="rl", lazy="joined")
@@ -331,8 +350,10 @@ class RocketLeague(Base):
         return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
 
 
-class Dota(Base):
+class Dota(Base, Mini):
     __tablename__ = "dota"
+    _mini_full_name = "DOTA 2"
+    _mini_name = "dota"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam", backref="dota", lazy="joined")
@@ -442,8 +463,10 @@ class RomanNumerals(enum.Enum):
         return self.name
 
 
-class LeagueOfLegends(Base):
+class LeagueOfLegends(Base, Mini):
     __tablename__ = "leagueoflegends"
+    _mini_full_name = "League of Legends"
+    _mini_name = "lol"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="lol", lazy="joined")
@@ -539,8 +562,10 @@ class LeagueOfLegends(Base):
         return loldata.get_champ_icon(champ["name"])
 
 
-class Osu(Base):
+class Osu(Base, Mini):
     __tablename__ = "osu"
+    _mini_full_name = "osu!"
+    _mini_name = "osu"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal", backref="osu", lazy="joined")
@@ -605,9 +630,11 @@ class Osu(Base):
         return f"<db.Osu {self.osu_name}>"
 
 
-class Discord(Base):
+class Discord(Base, Mini):
     __tablename__ = "discord"
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
+    _mini_full_name = "Discord"
+    _mini_name = "discord"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="discord", lazy="joined")
@@ -650,8 +677,10 @@ class Discord(Base):
         return f"https://cdn.discordapp.com/avatars/{self.discord_id}/{self.avatar_hex}.png?size={size}"
 
 
-class Overwatch(Base):
+class Overwatch(Base, Mini):
     __tablename__ = "overwatch"
+    _mini_full_name = "Overwatch"
+    _mini_name = "ow"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal", backref="overwatch", lazy="joined")
@@ -995,9 +1024,11 @@ class LoginToken(Base):
         return f"<LoginToken for {self.royal.username}>"
 
 
-class Halloween(Base):
+class Halloween(Base, Mini):
     """This is some nice spaghetti, don't you think?"""
     __tablename__ = "halloween"
+    _mini_full_name = "Halloween 2018"
+    _mini_name = "halloween2018"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
     royal = relationship("Royal", backref="halloween", lazy="joined")
@@ -1110,8 +1141,10 @@ class Quest(Base):
         return f"<Quest {self.id}: {self.title}>"
 
 
-class Terraria13(Base):
+class Terraria13(Base, Mini):
     __tablename__ = "terraria13"
+    _mini_full_name = "Terraria 13"
+    _mini_name = "terraria13"
 
     game_name = "Terraria 13"
 
@@ -1123,7 +1156,6 @@ class Terraria13(Base):
 
     def __repr__(self):
         return f"<Terraria13 {self.character_name} {self.contribution}>"
-
 
 
 # If run as script, create all the tables in the db
