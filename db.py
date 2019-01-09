@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, \
                        UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
+from sqlalchemy.inspection import inspect
 import requests
 from errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
@@ -39,7 +40,43 @@ os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(mes
 coloredlogs.install(level="DEBUG", logger=logger)
 
 
-class Royal(Base):
+def recursive_relationship_name_search(_class, keyword) -> typing.Optional[tuple]:
+    """Recursively find a relationship with a given name."""
+    inspected = set()
+
+    def search(_mapper, chain):
+        inspected.add(_mapper)
+        relationships = _mapper.relationships
+        try:
+            return chain + (relationships[keyword],)
+        except KeyError:
+            for _relationship in set(relationships):
+                if _relationship.mapper in inspected:
+                    continue
+                result = search(_relationship.mapper, chain + (_relationship,))
+                if result is not None:
+                    return result
+            return None
+
+    return search(inspect(_class), tuple())
+
+
+class Mini(object):
+    @classmethod
+    def mini_get_all(cls, session: Session) -> list:
+        return session.query(cls).all()
+
+    @classmethod
+    def mini_get_single(cls, session: Session, **kwargs):
+        return session.query(cls).filter_by(**kwargs).one_or_none()
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        chain = recursive_relationship_name_search(cls, "royal")
+        pass
+
+
+class Royal(Base, Mini):
     __tablename__ = "royals"
 
     id = Column(Integer, primary_key=True)
@@ -65,6 +102,10 @@ class Royal(Base):
             return f"https://www.gravatar.com/avatar/{libgravatar.md5_hash(self.username)}?d=identicon&f=y"
         gravatar = libgravatar.Gravatar(self.email)
         return gravatar.get_image(default="identicon")
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal
 
 
 class Telegram(Base):
@@ -111,6 +152,10 @@ class Telegram(Base):
             return f"{self.first_name} {self.last_name}"
         else:
             return self.first_name
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal.telegram
 
 
 class Steam(Base):
@@ -199,6 +244,10 @@ class Steam(Base):
                 raise PrivateError(f"Game data is private")
             return
         self.most_played_game_id = j["response"]["games"][0]["appid"]
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal.steam
 
 
 class RocketLeague(Base):
@@ -902,23 +951,6 @@ class Reddit(Base):
         return f"<Reddit u/{self.username}>"
 
 
-class GameLog(Base):
-    __tablename__ = "gamelog"
-
-    royal_id = Column(Integer, ForeignKey("royals.id"))
-    royal = relationship("Royal", backref="gamelog", lazy="joined")
-
-    username = Column(String, primary_key=True)
-    owned_games = Column(Integer)
-    unfinished_games = Column(Integer)
-    beaten_games = Column(Integer)
-    completed_games = Column(Integer)
-    mastered_games = Column(Integer)
-
-    def __repr__(self):
-        return f"<GameLog {self.username}>"
-
-
 class ParsedRedditPost(Base):
     __tablename__ = "parsedredditposts"
 
@@ -1061,11 +1093,17 @@ class Quest(Base):
 class Terraria13(Base):
     __tablename__ = "terraria13"
 
+    game_name = "Terraria 13"
+
     royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
     royal = relationship("Royal", backref="terraria13", lazy="joined")
 
     character_name = Column(String)
     contribution = Column(Integer)
+
+    def __repr__(self):
+        return f"<Terraria13 {self.character_name} {self.contribution}>"
+
 
 
 # If run as script, create all the tables in the db
