@@ -35,54 +35,9 @@
             </div>
         {% endif %}
         <div class="game-panels">
-            {% with record = ryg %}
-                {% include "minis/ryg.html" %}
-            {% endwith %}
-            {% if halloween %}
-                {% with record = halloween %}
-                    {% include "minis/halloween2018.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if tg %}
-                {% with record = tg %}
-                    {% include "minis/tg.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if discord %}
-                {% with record = discord %}
-                    {% include "minis/discord.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if steam %}
-                {% with record = steam %}
-                    {% include "minis/steam.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if dota %}
-                {% with record = dota %}
-                    {% include "minis/dota.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if osu %}
-                {% with record = osu %}
-                    {% include "minis/osu.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if lol %}
-                {% with record = lol %}
-                    {% include "minis/lol.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if ow %}
-                {% with record = ow %}
-                    {% include "minis/ow.html" %}
-                {% endwith %}
-            {% endif %}
-            {% if terraria13 %}
-                {% with record = terraria13 %}
-                    {% include "minis/terraria13.html" %}
-                {% endwith %}
-            {% endif %}
+            {% for record in mini_data %}
+                {% include "minis/" + record._mini_name + ".html" %}
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

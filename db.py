@@ -87,10 +87,11 @@ class Mini(object):
     """Mixin for every table that has an associated mini."""
     _mini_full_name = NotImplemented
     _mini_name = NotImplemented
+    _mini_order = NotImplemented
 
     @classmethod
     def mini_get_all(cls, session: Session) -> list:
-        return session.query(cls).all()
+        return session.query(cls).order_by(*cls._mini_order).all()
 
     @classmethod
     def mini_get_single(cls, session: Session, **kwargs):
@@ -110,8 +111,6 @@ class Mini(object):
 
 class Royal(Base, Mini):
     __tablename__ = "royals"
-    _mini_full_name = "Royalnet"
-    _mini_name = "ryg"
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
@@ -120,6 +119,10 @@ class Royal(Base, Mini):
     fiorygi = Column(Integer, default=0)
     member_since = Column(Date)
     email = Column(String)
+
+    _mini_full_name = "Royalnet"
+    _mini_name = "ryg"
+    _mini_order = [fiorygi.desc()]
 
     @staticmethod
     def create(session: Session, username: str):
@@ -144,7 +147,6 @@ class Royal(Base, Mini):
 
 class Telegram(Base, Mini):
     __tablename__ = "telegram"
-    _mini_full_name = "Telegram"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="telegram", lazy="joined")
@@ -153,6 +155,10 @@ class Telegram(Base, Mini):
     first_name = Column(String)
     last_name = Column(String)
     username = Column(String)
+
+    _mini_full_name = "Telegram"
+    _mini_name = "tg"
+    _mini_order = [telegram_id]
 
     @staticmethod
     def create(session: Session, royal_username, telegram_user: TelegramUser):
@@ -195,8 +201,6 @@ class Telegram(Base, Mini):
 
 class Steam(Base, Mini):
     __tablename__ = "steam"
-    _mini_full_name = "Steam"
-    _mini_name = "steam"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="steam", lazy="joined")
@@ -206,6 +210,10 @@ class Steam(Base, Mini):
     avatar_hex = Column(String)
     trade_token = Column(String)
     most_played_game_id = Column(BigInteger)
+
+    _mini_full_name = "Steam"
+    _mini_name = "steam"
+    _mini_order = [steam_id]
 
     def __repr__(self):
         if not self.persona_name:
@@ -289,8 +297,6 @@ class Steam(Base, Mini):
 
 class RocketLeague(Base, Mini):
     __tablename__ = "rocketleague"
-    _mini_full_name = "Rocket League"
-    _mini_name = "rl"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam", backref="rl", lazy="joined")
@@ -314,6 +320,13 @@ class RocketLeague(Base, Mini):
     solo_std_mmr = Column(Integer)
 
     wins = Column(Integer)
+
+    _mini_full_name = "Rocket League"
+    _mini_name = "rl"
+    _mini_order = [solo_std_mmr.desc().nullslast(),
+                   doubles_mmr.desc().nullslast(),
+                   standard_mmr.desc().nullslast(),
+                   single_mmr.desc().nullslast()]
 
     def __repr__(self):
         return f"<db.RocketLeague {self.steam_id}>"
@@ -352,18 +365,18 @@ class RocketLeague(Base, Mini):
 
 class Dota(Base, Mini):
     __tablename__ = "dota"
-    _mini_full_name = "DOTA 2"
-    _mini_name = "dota"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam", backref="dota", lazy="joined")
 
     rank_tier = Column(Integer)
-
     wins = Column(Integer)
     losses = Column(Integer)
-
     most_played_hero = Column(Integer)
+
+    _mini_full_name = "DOTA 2"
+    _mini_name = "dota"
+    _mini_order = [rank_tier.desc().nullslast(), wins.desc().nullslast()]
 
     def __repr__(self):
         return f"<db.Dota {self.steam_id}>"
@@ -465,8 +478,6 @@ class RomanNumerals(enum.Enum):
 
 class LeagueOfLegends(Base, Mini):
     __tablename__ = "leagueoflegends"
-    _mini_full_name = "League of Legends"
-    _mini_name = "lol"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="lol", lazy="joined")
@@ -475,7 +486,6 @@ class LeagueOfLegends(Base, Mini):
     summoner_id = Column(String, primary_key=True)
     account_id = Column(String)
     summoner_name = Column(String)
-
     level = Column(Integer)
     solo_division = Column(Enum(LeagueOfLegendsRanks))
     solo_rank = Column(Enum(RomanNumerals))
@@ -483,8 +493,16 @@ class LeagueOfLegends(Base, Mini):
     flex_rank = Column(Enum(RomanNumerals))
     twtr_division = Column(Enum(LeagueOfLegendsRanks))
     twtr_rank = Column(Enum(RomanNumerals))
-
     highest_mastery_champ = Column(Integer)
+
+    _mini_full_name = "League of Legends"
+    _mini_name = "lol"
+    _mini_order = [solo_division.desc().nullslast(),
+                   solo_rank.desc().nullslast(),
+                   flex_division.desc().nullslast(),
+                   flex_rank.desc().nullslast(),
+                   twtr_division.desc().nullslast(),
+                   twtr_rank.desc().nullslast()]
 
     def __repr__(self):
         if not self.summoner_name:
@@ -564,19 +582,23 @@ class LeagueOfLegends(Base, Mini):
 
 class Osu(Base, Mini):
     __tablename__ = "osu"
-    _mini_full_name = "osu!"
-    _mini_name = "osu"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal", backref="osu", lazy="joined")
 
     osu_id = Column(Integer, primary_key=True)
     osu_name = Column(String)
-
     std_pp = Column(Float)
     taiko_pp = Column(Float)
     catch_pp = Column(Float)
     mania_pp = Column(Float)
+
+    _mini_full_name = "osu!"
+    _mini_name = "osu"
+    _mini_order = [mania_pp.desc().nullslast(),
+                   std_pp.desc().nullslast(),
+                   taiko_pp.desc().nullslast(),
+                   catch_pp.desc().nullslast()]
 
     @staticmethod
     def create(session: Session, royal_id, osu_name):
@@ -633,8 +655,6 @@ class Osu(Base, Mini):
 class Discord(Base, Mini):
     __tablename__ = "discord"
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
-    _mini_full_name = "Discord"
-    _mini_name = "discord"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
     royal = relationship("Royal", backref="discord", lazy="joined")
@@ -643,6 +663,10 @@ class Discord(Base, Mini):
     name = Column(String)
     discriminator = Column(Integer)
     avatar_hex = Column(String)
+
+    _mini_full_name = "Discord"
+    _mini_name = "discord"
+    _mini_order = [discord_id]
 
     def __str__(self):
         return f"{self.name}#{self.discriminator}"
@@ -679,8 +703,6 @@ class Discord(Base, Mini):
 
 class Overwatch(Base, Mini):
     __tablename__ = "overwatch"
-    _mini_full_name = "Overwatch"
-    _mini_name = "ow"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
     royal = relationship("Royal", backref="overwatch", lazy="joined")
@@ -688,9 +710,12 @@ class Overwatch(Base, Mini):
     battletag = Column(String, primary_key=True)
     discriminator = Column(Integer, primary_key=True)
     icon = Column(String)
-
     level = Column(Integer)
     rank = Column(Integer)
+
+    _mini_full_name = "Overwatch"
+    _mini_name = "ow"
+    _mini_order = [rank.desc().nullslast(), level.desc()]
 
     def __str__(self, separator="#"):
         return f"{self.battletag}{separator}{self.discriminator}"
@@ -1027,14 +1052,11 @@ class LoginToken(Base):
 class Halloween(Base, Mini):
     """This is some nice spaghetti, don't you think?"""
     __tablename__ = "halloween"
-    _mini_full_name = "Halloween 2018"
-    _mini_name = "halloween2018"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
     royal = relationship("Royal", backref="halloween", lazy="joined")
 
     first_trigger = Column(DateTime)
-
     puzzle_piece_a = Column(DateTime)
     puzzle_piece_b = Column(DateTime)
     puzzle_piece_c = Column(DateTime)
@@ -1042,8 +1064,11 @@ class Halloween(Base, Mini):
     puzzle_piece_e = Column(DateTime)
     puzzle_piece_f = Column(DateTime)
     puzzle_piece_g = Column(DateTime)
-
     boss_battle = Column(DateTime)
+
+    _mini_full_name = "Halloween 2018"
+    _mini_name = "halloween2018"
+    _mini_order = [first_trigger]
 
     def __getitem__(self, item):
         if not isinstance(item, int):
@@ -1143,8 +1168,6 @@ class Quest(Base):
 
 class Terraria13(Base, Mini):
     __tablename__ = "terraria13"
-    _mini_full_name = "Terraria 13"
-    _mini_name = "terraria13"
 
     game_name = "Terraria 13"
 
@@ -1154,8 +1177,16 @@ class Terraria13(Base, Mini):
     character_name = Column(String)
     contribution = Column(Integer)
 
+    _mini_full_name = "Terraria 13"
+    _mini_name = "terraria13"
+    _mini_order = [contribution.desc()]
+
     def __repr__(self):
         return f"<Terraria13 {self.character_name} {self.contribution}>"
+
+
+mini_list = [Royal, Telegram, Steam, RocketLeague, Dota, LeagueOfLegends, Osu, Discord, Overwatch, Halloween,
+             Terraria13]
 
 
 # If run as script, create all the tables in the db

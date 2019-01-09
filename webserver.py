@@ -112,24 +112,15 @@ def page_profile(name: str):
         abort(404)
         return
     css = fl_g.session.query(db.ProfileData).filter_by(royal=user).one_or_none()
-    steam = fl_g.session.query(db.Steam).filter_by(royal=user).one_or_none()
-    osu = fl_g.session.query(db.Osu).filter_by(royal=user).one_or_none()
-    dota = fl_g.session.query(db.Dota).join(db.Steam).filter_by(royal=user).one_or_none()
-    lol = fl_g.session.query(db.LeagueOfLegends).filter_by(royal=user).one_or_none()
-    ow = fl_g.session.query(db.Overwatch).filter_by(royal=user).one_or_none()
-    tg = fl_g.session.query(db.Telegram).filter_by(royal=user).one_or_none()
-    discord = fl_g.session.execute(query_discord_music.one_query, {"royal": user.id}).fetchone()
-    gamelog = fl_g.session.query(db.GameLog).filter_by(royal=user).one_or_none()
-    halloween = fl_g.session.query(db.Halloween).filter_by(royal=user).one_or_none()
-    terraria13 = fl_g.session.query(db.Terraria13).filter_by(royal=user).one_or_none()
+    mini_data = []
+    for game in db.mini_list:
+        mini_data.append(game.mini_get_single_from_royal(fl_g.session, user))
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
                                extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))
     else:
         converted_bio = ""
-    return render_template("profile.html", ryg=user, css=css, osu=osu, dota=dota, lol=lol, steam=steam, ow=ow,
-                           tg=tg, discord=discord, bio=converted_bio, gamelog=gamelog,
-                           halloween=halloween, terraria13=terraria13)
+    return render_template("profile.html", ryg=user, css=css, bio=converted_bio, mini_data=mini_data)
 
 
 @app.route("/login")
@@ -216,50 +207,14 @@ def page_editprofile():
 
 @app.route("/game/<name>")
 def page_game(name: str):
-    if name == "rl":
-        game_name = "Rocket League"
-        query = fl_g.session.query(db.RocketLeague).join(db.Steam).order_by(db.RocketLeague.solo_std_rank).all()
-    elif name == "dota":
-        game_name = "Dota 2"
-        query = fl_g.session.query(db.Dota).join(db.Steam).order_by(db.Dota.rank_tier.desc().nullslast(),
-                                                                    db.Dota.wins.desc()).all()
-    elif name == "lol":
-        game_name = "League of Legends"
-        query = fl_g.session.query(db.LeagueOfLegends).order_by(db.LeagueOfLegends.solo_division.desc().nullslast(),
-                                                                db.LeagueOfLegends.solo_rank,
-                                                                db.LeagueOfLegends.flex_division.desc().nullslast(),
-                                                                db.LeagueOfLegends.flex_rank,
-                                                                db.LeagueOfLegends.twtr_division.desc().nullslast(),
-                                                                db.LeagueOfLegends.twtr_rank,
-                                                                db.LeagueOfLegends.level).all()
-    elif name == "osu":
-        game_name = "osu!"
-        query = fl_g.session.query(db.Osu).order_by(db.Osu.mania_pp.desc().nullslast()).all()
-    elif name == "ow":
-        game_name = "Overwatch"
-        query = fl_g.session.query(db.Overwatch).order_by(db.Overwatch.rank.desc().nullslast()).all()
-    elif name == "steam":
-        game_name = "Steam"
-        query = fl_g.session.query(db.Steam).order_by(db.Steam.persona_name).all()
-    elif name == "ryg":
-        game_name = "Royalnet"
-        query = fl_g.session.query(db.Royal).order_by(db.Royal.username).all()
-    elif name == "tg":
-        game_name = "Telegram"
-        query = fl_g.session.query(db.Telegram).order_by(db.Telegram.telegram_id).all()
-    elif name == "discord":
-        game_name = "Discord"
-        query = [dict(row) for row in fl_g.session.execute(query_discord_music.all_query)]
-    elif name == "halloween2018":
-        game_name = "Rituale di Halloween"
-        query = fl_g.session.query(db.Halloween).all()
-    elif name == "terraria13":
-        game_name = "Terraria 13"
-        query = fl_g.session.query(db.Terraria13).all()
+    for game in db.mini_list:
+        if game._mini_name == name:
+            query = game.mini_get_all(fl_g.session)
+            break
     else:
         abort(404)
         return
-    return render_template("game.html", minis=query, game_name=game_name, game_short_name=name)
+    return render_template("game.html", mini_type=game, mini_data=query)
 
 
 @app.route("/wiki/<key>", methods=["GET", "POST"])
