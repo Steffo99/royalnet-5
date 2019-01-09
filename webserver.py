@@ -372,10 +372,10 @@ def pre_request():
     fl_g.css = "nryg.less"
     fl_g.rygconf = config
     fl_g.session = db.Session()
-    if fl_session:
-        fl_g.user = None
-    else:
+    try:
         fl_g.user = fl_g.session.query(db.Royal).filter_by(id=fl_session["user_id"]).one_or_none()
+    except KeyError:
+        fl_g.user = None
 
 
 @app.after_request
