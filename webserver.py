@@ -13,6 +13,7 @@ import query_discord_music
 import random
 import re
 import functools
+from sqlalchemy.orm.collections import InstrumentedList
 from raven.contrib.flask import Sentry
 
 app = Flask(__name__)
@@ -114,7 +115,12 @@ def page_profile(name: str):
     css = fl_g.session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     mini_data = []
     for game in db.mini_list:
-        mini_data.append(game.mini_get_single_from_royal(fl_g.session, user))
+        data = game.mini_get_single_from_royal(fl_g.session, user)
+        # TODO: investigate on why instrumentedlists are returned
+        if isinstance(data, InstrumentedList):
+            mini_data.append(data[0])
+            continue
+        mini_data.append(data)
     if css is not None:
         converted_bio = Markup(markdown2.markdown(css.bio.replace("<", "&lt;"),
                                extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"]))

@@ -101,12 +101,13 @@ class Mini(object):
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
         chain = relationship_link_chain(cls, Royal)
         if chain is None:
-            chain = []
+            chain = tuple()
         start = session.query(cls)
         for connection in chain:
             start = start.join(connection.mapper.class_)
         start = start.filter(Royal.id == royal.id)
-        return start.one()
+        mini = start.one()
+        return mini
 
 
 class Royal(Base, Mini):
@@ -1185,7 +1186,7 @@ class Terraria13(Base, Mini):
         return f"<Terraria13 {self.character_name} {self.contribution}>"
 
 
-mini_list = [Royal, Telegram, Steam, RocketLeague, Dota, LeagueOfLegends, Osu, Discord, Overwatch, Halloween,
+mini_list = [Royal, Telegram, Steam, Dota, LeagueOfLegends, Osu, Discord, Overwatch, Halloween,
              Terraria13]
 
 
