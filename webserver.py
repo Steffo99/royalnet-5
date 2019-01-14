@@ -117,7 +117,7 @@ def page_profile(name: str):
     for game in db.mini_list:
         try:
             data = game.mini_get_single_from_royal(fl_g.session, user)
-        except errors.NotFoundError():
+        except errors.NotFoundError:
             data = None
         # TODO: investigate on why instrumentedlists are returned
         if data is None:
