@@ -192,7 +192,7 @@ def page_password():
 @app.route("/editprofile", methods=["GET", "POST"])
 @require_login
 def page_editprofile():
-    profile_data = fl_g.session.query(db.ProfileData).filter_by(royal_id=fl_g.user_id).join(db.Royal).one_or_none()
+    profile_data = fl_g.session.query(db.ProfileData).filter_by(royal_id=fl_g.user.id).join(db.Royal).one_or_none()
     if request.method == "GET":
         return render_template("profileedit.html", data=profile_data)
     elif request.method == "POST":
@@ -202,7 +202,7 @@ def page_editprofile():
             abort(400)
             return
         if profile_data is None:
-            profile_data = db.ProfileData(royal_id=fl_g.user_id, css=css, bio=bio)
+            profile_data = db.ProfileData(royal_id=fl_g.user.id, css=css, bio=bio)
             fl_g.session.add(profile_data)
             fl_g.session.flush()
             profile_data.royal.fiorygi += 1
@@ -218,7 +218,7 @@ def page_editprofile():
             profile_data.css = css
             profile_data.bio = bio
         fl_g.session.commit()
-        royal = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
+        royal = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
         return redirect(url_for("page_profile", name=royal.username))
 
 
