@@ -106,7 +106,7 @@ class Mini(object):
         for connection in chain:
             start = start.join(connection.mapper.class_)
         start = start.filter(Royal.id == royal.id)
-        mini = start.one()
+        mini = start.one_or_none()
         return mini
 
 
