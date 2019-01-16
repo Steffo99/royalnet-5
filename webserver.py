@@ -120,9 +120,11 @@ def page_profile(name: str):
         except errors.NotFoundError:
             data = None
         # TODO: investigate on why instrumentedlists are returned
-        if data is None or len(data) == 0:
+        if data is None:
             continue
         elif isinstance(data, InstrumentedList):
+            if len(data) == 0:
+                continue
             mini_data.append({
                 "name": game._mini_name,
                 "data": data[0]
