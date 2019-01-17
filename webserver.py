@@ -115,11 +115,11 @@ def page_profile(name: str):
     css = fl_g.session.query(db.ProfileData).filter_by(royal=user).one_or_none()
     mini_data = []
     for game in db.mini_list:
+        # TODO: investigate on why instrumentedlists are returned, or minis are not found
         try:
             data = game.mini_get_single_from_royal(fl_g.session, user)
-        except errors.NotFoundError:
+        except Exception:
             data = None
-        # TODO: investigate on why instrumentedlists are returned
         if data is None:
             continue
         elif isinstance(data, InstrumentedList):
