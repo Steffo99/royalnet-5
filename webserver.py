@@ -194,33 +194,26 @@ def page_password():
 @app.route("/editprofile", methods=["GET", "POST"])
 @require_login
 def page_editprofile():
-    profile_data = fl_g.session.query(db.ProfileData).filter_by(royal_id=fl_g.user.id).join(db.Royal).one_or_none()
+    royal = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
+    profile_data = fl_g.session.query(db.ProfileData).filter_by(royal=royal).one_or_none()
     if request.method == "GET":
-        return render_template("profileedit.html", data=profile_data)
+        return render_template("profileedit.html", royal=royal, data=profile_data)
     elif request.method == "POST":
         css = request.form.get("css", "")
         bio = request.form.get("bio", "")
+        email = request.form.get("email")
         if "</style" in css:
             abort(400)
             return
+        royal.email = email
         if profile_data is None:
-            profile_data = db.ProfileData(royal_id=fl_g.user.id, css=css, bio=bio)
+            profile_data = db.ProfileData(royal=royal, css=css, bio=bio)
             fl_g.session.add(profile_data)
             fl_g.session.flush()
-            profile_data.royal.fiorygi += 1
-            try:
-                telegram_bot.send_message(config["Telegram"]["main_group"],
-                                          f'⭐️ {profile_data.royal.username} ha'
-                                          f' <a href="http://ryg.steffo.eu/editprofile">configurato la sua bio</a>'
-                                          f' su Royalnet e ha ottenuto un fioryg!',
-                                          parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
-            except Exception:
-                pass
         else:
             profile_data.css = css
             profile_data.bio = bio
         fl_g.session.commit()
-        royal = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
         return redirect(url_for("page_profile", name=royal.username))
 
 

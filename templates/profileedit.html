@@ -9,6 +9,7 @@
         Modifica profilo
     </h1>
     <form action="{{ url_for('page_editprofile') }}" method="POST">
+        <input type="email" name="email" placeholder="La tua e-mail (Gravatar)" value="{{ royal.email }}"><br>
         Puoi usare il <a href="{{ url_for('page_wiki', key='Meta') }}">Markdown</a> nella tua bio.
         <textarea name="bio" placeholder="Scrivi la tua bio qui... (Markdown supportato)">{{ data.bio }}</textarea>
         Se vuoi, puoi personalizzare il tuo profilo con un tuo <a href="https://www.w3schools.com/css/css_howto.asp">foglio di stile!</a>
