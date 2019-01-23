@@ -114,19 +114,19 @@ def osu_pp_change(item, change: typing.Tuple[DirtyDelta, DirtyDelta, DirtyDelta,
     try:
         if std.delta >= 1:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha ora **{std.value}pp** (+{std.delta}) su osu!",
+                                      f"✳️ {item.royal.username} ha ora **{int(std.value)}pp** (+{int(std.delta)}) su osu!",
                                       parse_mode="Markdown")
         if taiko.delta >= 1:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha ora **{taiko.value}pp** (+{taiko.delta}) su osu!taiko!",
+                                      f"✳️ {item.royal.username} ha ora **{int(taiko.value)}pp** (+{int(taiko.delta)}) su osu!taiko!",
                                       parse_mode="Markdown")
         if catch.delta >= 1:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha ora **{catch.value}pp** (+{catch.delta}) su osu!catch!",
+                                      f"✳️ {item.royal.username} ha ora **{int(catch.value)}pp** (+{int(catch.delta)}) su osu!catch!",
                                       parse_mode="Markdown")
         if mania.delta >= 1:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"✳️ {item.royal.username} ha ora **{mania.value}pp** (+{mania.delta}) su osu!mania!",
+                                      f"✳️ {item.royal.username} ha ora **{int(mania.value)}pp** (+{int(mania.delta)}) su osu!mania!",
                                       parse_mode="Markdown")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
