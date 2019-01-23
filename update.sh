@@ -10,6 +10,6 @@ if [ ${old} = ${new} ]; then
         sentry-cli releases new -p royalnet ${version}
         sentry-cli releases set-commits --auto ${version}
 fi
-sudo python3.6 -m pip install -r requirements.txt
+sudo python3.6 -m pip install -r requirements.txt --upgrade
 sudo service apache2 restart
 python3.6 -OO bots.py
