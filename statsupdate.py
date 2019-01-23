@@ -76,6 +76,7 @@ def new_dota_rank(item: db.Dota, change):
                                   f" {item.get_rank_name()} {item.get_rank_number()} su Dota 2!")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
+        sentry.captureException()
 
 
 def new_lol_rank(item, change: typing.Tuple[Dirty, Dirty, Dirty]):
@@ -105,6 +106,7 @@ def new_lol_rank(item, change: typing.Tuple[Dirty, Dirty, Dirty]):
                                       parse_mode="Markdown")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
+        sentry.captureException()
 
 
 def osu_pp_change(item, change: typing.Tuple[DirtyDelta, DirtyDelta, DirtyDelta, DirtyDelta]):
@@ -128,6 +130,7 @@ def osu_pp_change(item, change: typing.Tuple[DirtyDelta, DirtyDelta, DirtyDelta,
                                       parse_mode="Markdown")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
+        sentry.captureException()
 
 
 def process():
