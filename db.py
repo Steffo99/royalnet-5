@@ -1215,31 +1215,90 @@ mini_list = [Royal, Telegram, Steam, Dota, LeagueOfLegends, Osu, Discord, Overwa
              Terraria13]
 
 
-class Matchmaker(Base):
-    __tablename__ = "matchmakers"
+class Match(Base):
+    __tablename__ = "matches"
 
     id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime)
+    creator_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
+    creator = relationship("Telegram", backref="matches_created", lazy="joined")
 
-    matchmaking_name = Column(String)
-    matchmaking_desc = Column(Text)
-
+    match_title = Column(String)
+    match_desc = Column(Text)
     min_players = Column(Integer)
     max_players = Column(Integer)
+    closed = Column(Boolean, default=False)
 
-    timestamp = Column(DateTime)
-    expires_in = Column(DateTime)
+    message_id = Column(BigInteger)
 
-    players = relationship("MatchmakingEntry", lazy="joined")
+    def active_players_count(self):
+        count = 0
+        for player in self.players:
+            if player.status == MatchmakingStatus.READY or player.status == MatchmakingStatus.WAIT_FOR_ME:
+                count += 1
+        return count
+
+    def generate_text(self, session):
+        player_list = session.query(MatchPartecipation).filter_by(match=self).all()
+        title = f"<b>{self.match_title}</b>"
+        description = self.match_desc if self.match_desc else ""
+        if self.min_players:
+            minimum = f" <i>(minimo {self.min_players})</i>"
+        else:
+            minimum = ""
+        plist = f"Giocatori{minimum}:\n"
+        ignore_count = 0
+        for player in player_list:
+            if player.status == MatchmakingStatus.WAIT_FOR_ME:
+                icon = "🕒"
+            elif player.status == MatchmakingStatus.READY:
+                icon = "🔵"
+            elif player.status == MatchmakingStatus.IGNORED:
+                ignore_count += 1
+                continue
+            else:
+                continue
+            plist += f"{icon} {player.user.royal.username}\n"
+        if ignore_count:
+            ignored = f"❌ <i>{ignore_count} persone non ne hanno voglia.</i>\n"
+        else:
+            ignored = ""
+        if self.max_players:
+            players = f"[{self.active_players_count()}/{self.max_players}]"
+        else:
+            players = f"[{self.active_players_count()}]"
+        close = f"[matchmaking concluso]\n" if self.closed else ""
+        message = f"{title} {players}\n" \
+                  f"{description}\n" \
+                  f"{plist}\n" \
+                  f"{ignored}" \
+                  f"{close}"
+        return message
+
+    def __repr__(self):
+        return f"<Match {self.match_title}>"
 
 
-class MatchmakingEntry(Base):
-    __tablename__ = "matchmakingentry"
-
-    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
-    royal = relationship("Royal", backref="matchmades", lazy="joined")
-
+class MatchmakingStatus(enum.IntEnum):
+    WAIT_FOR_ME = 1
+    READY = 2
+    IGNORED = -1
 
 
+class MatchPartecipation(Base):
+    __tablename__ = "matchpartecipations"
+    __table_args__ = (PrimaryKeyConstraint("user_id", "match_id"),)
+
+    user_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
+    user = relationship("Telegram", backref="match_partecipations", lazy="joined")
+
+    match_id = Column(Integer, ForeignKey("matches.id"))
+    match = relationship("Match", backref="players", lazy="joined")
+
+    status = Column(Integer)
+
+    def __repr__(self):
+        return f"<MatchPartecipation {self.user.username} in {self.match.match_title}>"
 
 
 # If run as script, create all the tables in the db

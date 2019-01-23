@@ -64,19 +64,20 @@ def catch_and_report(func: "function"):
                                  f"```", parse_mode="Markdown")
             except Exception:
                 logger.error(f"Double critical error: {sys.exc_info()}")
-            if not __debug__:
-                sentry.user_context({
-                    "id": update.effective_user.id,
-                    "telegram": {
-                        "username": update.effective_user.username,
-                        "first_name": update.effective_user.first_name,
-                        "last_name": update.effective_user.last_name
-                    }
-                })
-                sentry.extra_context({
-                    "update": update.to_dict()
-                })
-                sentry.captureException()
+            if __debug__:
+                raise
+            sentry.user_context({
+                "id": update.effective_user.id,
+                "telegram": {
+                    "username": update.effective_user.username,
+                    "first_name": update.effective_user.first_name,
+                    "last_name": update.effective_user.last_name
+                }
+            })
+            sentry.extra_context({
+                "update": update.to_dict()
+            })
+            sentry.captureException()
     return new_func
 
 
@@ -282,32 +283,69 @@ def cmd_vote(bot: Bot, update: Update):
                                    parse_mode="HTML")
         vote.message_id = message.message_id
         session.commit()
-    except Exception:
-        raise
+    finally:
+        session.close()
+
+
+@catch_and_report
+def cmd_mm(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        if user is None:
+            bot.send_message(update.message.chat.id,
+                             "⚠ Il tuo account Telegram non è registrato a Royalnet!"
+                             " Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
+            return
+        match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
+                         update.message.text)
+        if match is None:
+            bot.send_message(update.message.chat.id,
+                             "⚠ Sintassi del comando errata.\n"
+                             "Sintassi: `/matchmaking@royalgamesbot [minplayers]-[maxplayers] per <gamename> \\n [descrizione]`")
+            return
+        min_players, max_players, match_name, match_desc = match.group(1, 2, 3, 4)
+        db_match = db.Match(timestamp=datetime.datetime.now(),
+                            match_title=match_name,
+                            match_desc=match_desc,
+                            min_players=min_players,
+                            max_players=max_players,
+                            creator=user)
+        session.add(db_match)
+        session.flush()
+        inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Ci sono!", callback_data="match_ready")],
+                                                [InlineKeyboardButton("🕒 Sto arrivando, aspettatemi!", callback_data="match_wait_for_me")],
+                                                [InlineKeyboardButton("❌ Non vengo.", callback_data="match_ignore")],
+                                                [InlineKeyboardButton("🚩 [termina la ricerca]", callback_data="match_close")]])
+        message = bot.send_message(update.message.chat.id, db_match.generate_text(session=session),
+                                   parse_mode="HTML",
+                                   reply_markup=inline_keyboard)
+        db_match.message_id = message.message_id
+        session.commit()
     finally:
         session.close()
 
 
 @catch_and_report
 def on_callback_query(bot: Bot, update: Update):
-    if update.callback_query.data == "vote_yes":
-        choice = db.VoteChoices.YES
-        emoji = "🔵"
-    elif update.callback_query.data == "vote_no":
-        choice = db.VoteChoices.NO
-        emoji = "🔴"
-    elif update.callback_query.data == "vote_abstain":
-        choice = db.VoteChoices.ABSTAIN
-        emoji = "⚫️"
-    else:
-        raise NotImplementedError()
     if update.callback_query.data.startswith("vote_"):
+        if update.callback_query.data == "vote_yes":
+            status = db.VoteChoices.YES
+            emoji = "🔵"
+        elif update.callback_query.data == "vote_no":
+            status = db.VoteChoices.NO
+            emoji = "🔴"
+        elif update.callback_query.data == "vote_abstain":
+            status = db.VoteChoices.ABSTAIN
+            emoji = "⚫️"
+        else:
+            raise NotImplementedError()
         session = db.Session()
         try:
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text="⚠ Il tuo account Telegram non è registrato al RYGdb!"
+                                          text="⚠ Il tuo account Telegram non è registrato a Royalnet!"
                                                " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
                                           parse_mode="Markdown")
                 return
@@ -316,14 +354,14 @@ def on_callback_query(bot: Bot, update: Update):
                               .one()
             answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
             if answer is None:
-                answer = db.VoteAnswer(question=question, choice=choice, user=user)
+                answer = db.VoteAnswer(question=question, choice=status, user=user)
                 session.add(answer)
                 bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
-            elif answer.choice == choice:
+            elif answer.choice == status:
                 session.delete(answer)
                 bot.answer_callback_query(update.callback_query.id, text=f"Hai ritratto il tuo voto.", cache_time=1)
             else:
-                answer.choice = choice
+                answer.choice = status
                 bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
                                           cache_time=1)
             session.commit()
@@ -338,8 +376,79 @@ def on_callback_query(bot: Bot, update: Update):
                                   text=question.generate_text(session),
                                   reply_markup=inline_keyboard,
                                   parse_mode="HTML")
-        except Exception:
-            raise
+        finally:
+            session.close()
+    elif update.callback_query.data.startswith("match_"):
+        session = db.Session()
+        try:
+            user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
+            if user is None:
+                bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                          text="⚠ Il tuo account Telegram non è registrato a Royalnet!"
+                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                                          parse_mode="Markdown")
+                return
+            match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
+            if update.callback_query.data == "match_ready":
+                status = db.MatchmakingStatus.READY
+                text = "🔵 Hai detto che sei pronto per giocare!"
+            elif update.callback_query.data == "match_wait_for_me":
+                status = db.MatchmakingStatus.WAIT_FOR_ME
+                text = "🕒 Hai chiesto agli altri di aspettarti."
+            elif update.callback_query.data == "match_ignore":
+                status = db.MatchmakingStatus.IGNORED
+                text = "❌ Non ti interessa questa partita."
+            elif update.callback_query.data == "match_close":
+                status = None
+                if match.creator == user:
+                    match.closed = True
+                    text = "🚩 Matchmaking chiuso!"
+                    for player in match.players:
+                        if player.status == db.MatchmakingStatus.READY or player.status == db.MatchmakingStatus.WAIT_FOR_ME:
+                            try:
+                                bot.send_message(player.user.telegram_id,
+                                                 f"🚩 Sei pronto? <b>{match.match_title}</b> sta iniziando!",
+                                                 parse_mode="HTML")
+                            except Exception as e:
+                                logger.warning(f"Failed to notify {player.user.username}: {e}")
+                else:
+                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                              text="⚠ Non sei il creatore di questo match!")
+                    return
+            else:
+                raise NotImplementedError()
+            if status:
+                if match.closed:
+                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                              text="⚠ Il matchmaking è terminato!")
+                    return
+                if match.max_players and match.active_players_count() >= match.max_players:
+                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                              text="⚠ La partita è piena.")
+                    return
+                player = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
+                if player is None:
+                    player = db.MatchPartecipation(match=match, status=status.value, user=user)
+                    session.add(player)
+                else:
+                    player.status = status.value
+            session.commit()
+            bot.answer_callback_query(update.callback_query.id, text=text, cache_time=1)
+            if not match.closed:
+                inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Ci sono!", callback_data="match_ready")],
+                                                        [InlineKeyboardButton("🕒 Sto arrivando, aspettatemi!",
+                                                                              callback_data="match_wait_for_me")],
+                                                        [InlineKeyboardButton("❌ Non vengo.",
+                                                                              callback_data="match_ignore")],
+                                                        [InlineKeyboardButton("🚩 [termina la ricerca]",
+                                                                              callback_data="match_close")]])
+            else:
+                inline_keyboard = None
+            bot.edit_message_text(message_id=update.callback_query.message.message_id,
+                                  chat_id=update.callback_query.message.chat.id,
+                                  text=match.generate_text(session),
+                                  reply_markup=inline_keyboard,
+                                  parse_mode="HTML")
         finally:
             session.close()
 
@@ -601,6 +710,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
     u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
+    u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))
+    u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
