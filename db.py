@@ -650,10 +650,10 @@ class Osu(Base, Mini):
         r3.raise_for_status()
         j3 = r3.json()[0]
         self.osu_name = j0["username"]
-        std.value = float(j0["pp_raw"])
-        taiko.value = float(j1["pp_raw"])
-        catch.value = float(j2["pp_raw"])
-        mania.value = float(j3["pp_raw"])
+        std.value = float(j0["pp_raw"] or 0)
+        taiko.value = float(j1["pp_raw"] or 0)
+        catch.value = float(j2["pp_raw"] or 0)
+        mania.value = float(j3["pp_raw"] or 0)
         self.std_pp = std.value
         self.taiko_pp = taiko.value
         self.catch_pp = catch.value
