@@ -11,3 +11,13 @@ class Dirty:
 
     def __bool__(self):
         return self.is_dirty()
+
+
+class DirtyDelta(Dirty):
+    @property
+    def delta(self):
+        return self.value - self.initial_value
+
+    @delta.setter
+    def delta(self, value):
+        self.value = self.initial_value + value

@@ -20,7 +20,7 @@ from discord import User as DiscordUser
 # noinspection PyPackageRequirements
 from telegram import User as TelegramUser
 import loldata
-from dirty import Dirty
+from dirty import Dirty, DirtyDelta
 import query_discord_music
 from flask import escape
 import libgravatar
@@ -589,10 +589,14 @@ class Osu(Base, Mini):
 
     osu_id = Column(Integer, primary_key=True)
     osu_name = Column(String)
-    std_pp = Column(Float)
-    taiko_pp = Column(Float)
-    catch_pp = Column(Float)
-    mania_pp = Column(Float)
+    std_pp = Column(Float, default=0)
+    std_best_song = Column(BigInteger)
+    taiko_pp = Column(Float, default=0)
+    taiko_best_song = Column(BigInteger)
+    catch_pp = Column(Float, default=0)
+    catch_best_song = Column(BigInteger)
+    mania_pp = Column(Float, default=0)
+    mania_best_song = Column(BigInteger)
 
     _mini_full_name = "osu!"
     _mini_name = "osu"
@@ -629,23 +633,32 @@ class Osu(Base, Mini):
 
     # noinspection PyUnusedLocal
     def update(self, session=None):
+        std = DirtyDelta(self.std_pp)
+        taiko = DirtyDelta(self.taiko_pp)
+        catch = DirtyDelta(self.catch_pp)
+        mania = DirtyDelta(self.mania_pp)
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=0")
         r0.raise_for_status()
+        j0 = r0.json()[0]
         r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=1")
         r1.raise_for_status()
+        j1 = r1.json()[0]
         r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=2")
         r2.raise_for_status()
+        j2 = r2.json()[0]
         r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=3")
         r3.raise_for_status()
-        j0 = r0.json()[0]
-        j1 = r1.json()[0]
-        j2 = r2.json()[0]
         j3 = r3.json()[0]
         self.osu_name = j0["username"]
-        self.std_pp = j0["pp_raw"]
-        self.taiko_pp = j1["pp_raw"]
-        self.catch_pp = j2["pp_raw"]
-        self.mania_pp = j3["pp_raw"]
+        std.value = j0["pp_raw"]
+        taiko.value = j1["pp_raw"]
+        catch.value = j2["pp_raw"]
+        mania.value = j3["pp_raw"]
+        self.std_pp = std.value
+        self.taiko_pp = taiko.value
+        self.catch_pp = catch.value
+        self.mania_pp = mania.value
+        return std, taiko, catch, mania
 
     def __repr__(self):
         if not self.osu_name:

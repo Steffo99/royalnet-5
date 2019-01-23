@@ -11,7 +11,7 @@ import telegram
 import sys
 import coloredlogs
 import requests
-from dirty import Dirty
+from dirty import Dirty, DirtyDelta
 from sentry_sdk import configure_scope
 
 logging.getLogger().disabled = True
@@ -78,10 +78,8 @@ def new_dota_rank(item: db.Dota, change):
         logger.warning(f"Couldn't notify on Telegram: {item}")
 
 
-def new_lol_rank(item, change: typing.Tuple[Dirty]):
+def new_lol_rank(item, change: typing.Tuple[Dirty, Dirty, Dirty]):
     # It always gets called, even when there is no change
-    # Assignment inspection is wrong
-    # noinspection PyTupleAssignmentBalance
     solo, flex, twtr = change
     try:
         if solo:
@@ -104,6 +102,29 @@ def new_lol_rank(item, change: typing.Tuple[Dirty]):
                                       f" su League of Legends!\n"
                                       f"{twtr.initial_value[0]} {twtr.initial_value[1]} ->"
                                       f" **{twtr.value[0]} {twtr.value[1]}**",
+                                      parse_mode="Markdown")
+    except Exception:
+        logger.warning(f"Couldn't notify on Telegram: {item}")
+
+
+def osu_pp_change(item, change: typing.Tuple[DirtyDelta, DirtyDelta, DirtyDelta, DirtyDelta]):
+    std, taiko, catch, mania = change
+    try:
+        if std.delta >= 1:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha ora **{std.value}pp** (+{std.value.delta}) su osu!",
+                                      parse_mode="Markdown")
+        if taiko.delta >= 1:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha ora **{std.value}pp** (+{std.value.delta}) su osu!taiko!",
+                                      parse_mode="Markdown")
+        if catch.delta >= 1:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha ora **{std.value}pp** (+{std.value.delta}) su osu!catch!",
+                                      parse_mode="Markdown")
+        if mania.delta >= 1:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      f"✳️ {item.royal.username} ha ora **{std.value}pp** (+{std.value.delta}) su osu!mania!",
                                       parse_mode="Markdown")
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
