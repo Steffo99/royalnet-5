@@ -1215,6 +1215,33 @@ mini_list = [Royal, Telegram, Steam, Dota, LeagueOfLegends, Osu, Discord, Overwa
              Terraria13]
 
 
+class Matchmaker(Base):
+    __tablename__ = "matchmakers"
+
+    id = Column(Integer, primary_key=True)
+
+    matchmaking_name = Column(String)
+    matchmaking_desc = Column(Text)
+
+    min_players = Column(Integer)
+    max_players = Column(Integer)
+
+    timestamp = Column(DateTime)
+    expires_in = Column(DateTime)
+
+    players = relationship("MatchmakingEntry", lazy="joined")
+
+
+class MatchmakingEntry(Base):
+    __tablename__ = "matchmakingentry"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="matchmades", lazy="joined")
+
+
+
+
+
 # If run as script, create all the tables in the db
 if __name__ == "__main__":
     print("Creating new tables...")
