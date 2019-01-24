@@ -317,7 +317,7 @@ def cmd_mm(bot: Bot, update: Update):
                                                 [InlineKeyboardButton("🕒 Sto arrivando, aspettatemi!", callback_data="match_wait_for_me")],
                                                 [InlineKeyboardButton("❌ Non vengo.", callback_data="match_ignore")],
                                                 [InlineKeyboardButton("🚩 [termina la ricerca]", callback_data="match_close")]])
-        message = bot.send_message(update.message.chat.id, db_match.generate_text(session=session),
+        message = bot.send_message(config["Telegram"]["announcement_group"], db_match.generate_text(session=session),
                                    parse_mode="HTML",
                                    reply_markup=inline_keyboard)
         db_match.message_id = message.message_id
@@ -445,7 +445,7 @@ def on_callback_query(bot: Bot, update: Update):
             else:
                 inline_keyboard = None
             bot.edit_message_text(message_id=update.callback_query.message.message_id,
-                                  chat_id=update.callback_query.message.chat.id,
+                                  chat_id=config["Telegram"]["announcement_group"],
                                   text=match.generate_text(session),
                                   reply_markup=inline_keyboard,
                                   parse_mode="HTML")
