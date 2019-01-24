@@ -1249,10 +1249,14 @@ class Match(Base):
         plist = f"Giocatori{minimum}:\n"
         ignore_count = 0
         for player in player_list:
-            if player.status == MatchmakingStatus.WAIT_FOR_ME:
-                icon = "🕒"
-            elif player.status == MatchmakingStatus.READY:
+            if player.status == MatchmakingStatus.READY:
                 icon = "🔵"
+            elif player.status == MatchmakingStatus.WAIT_FOR_ME:
+                icon = "🕒"
+            elif player.status == MatchmakingStatus.MAYBE:
+                icon = "❔"
+            elif player.status == MatchmakingStatus.SOMEONE_ELSE:
+                icon = "💬"
             elif player.status == MatchmakingStatus.IGNORED:
                 ignore_count += 1
                 continue
@@ -1282,6 +1286,8 @@ class Match(Base):
 class MatchmakingStatus(enum.IntEnum):
     WAIT_FOR_ME = 1
     READY = 2
+    MAYBE = 3
+    SOMEONE_ELSE = 4
     IGNORED = -1
 
 
