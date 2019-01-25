@@ -1295,7 +1295,7 @@ class Match(Base):
             "min_players": self.min_players,
             "max_players": self.max_players,
             "active_players": self.active_players_count(),
-            "players": len(self.active_players_count())
+            "players": len(self.players)
         }
 
 
