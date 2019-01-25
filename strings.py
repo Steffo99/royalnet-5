@@ -45,6 +45,7 @@ class MATCHMAKING:
     }
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\n Sintassi: `/mm [minplayers-][maxplayers] per <gamename> \\n [descrizione]`"
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\n Sintassi: `/mm [minplayers-][maxplayers] per <gamename> \\n[descrizione]`"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
+        UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}. \nPer piacere, {mention}, inviami un messaggio in privata!"

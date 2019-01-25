@@ -9,7 +9,7 @@ import stagismo
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
-from telegram.error import TimedOut
+from telegram.error import TimedOut, Unauthorized
 import dice
 import sys
 import os
@@ -396,11 +396,19 @@ def on_callback_query(bot: Bot, update: Update):
                                               text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
                     return
                 match.closed = True
+                failed_send = []
                 for player in match.players:
                     if player.status >= 1:
-                        bot.send_message(player.user.telegram_id,
-                                         s(strings.MATCHMAKING.GAME_START[player.status],
-                                           **match.format_dict()))
+                        try:
+                            bot.send_message(player.user.telegram_id,
+                                             s(strings.MATCHMAKING.GAME_START[player.status],
+                                               **match.format_dict()))
+                        except Unauthorized:
+                            failed_send.append(player)
+                if failed_send:
+                    for player in match.players:
+                        bot.send_message(int(config["Telegram"]["main_group"]),
+                                         s(strings.MATCHMAKING.ERRORS.UNAUTHORIZED, mention=player.user.mention()))
             elif update.callback_query.data == "match_cancel":
                 if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
@@ -431,7 +439,7 @@ def on_callback_query(bot: Bot, update: Update):
                     player.status = status.value
             session.commit()
             bot.answer_callback_query(update.callback_query.id,
-                                      text=s(strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data]),
+                                      text=strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data],
                                       cache_time=1)
             if not match.closed:
                 inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(strings.MATCHMAKING.BUTTONS[key],
