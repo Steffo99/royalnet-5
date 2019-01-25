@@ -402,11 +402,12 @@ def on_callback_query(bot: Bot, update: Update):
                         try:
                             bot.send_message(player.user.telegram_id,
                                              s(strings.MATCHMAKING.GAME_START[player.status],
-                                               **match.format_dict()))
+                                               **match.format_dict()),
+                                             parse_mode="HTML")
                         except Unauthorized:
                             failed_send.append(player)
                 if failed_send:
-                    for player in match.players:
+                    for player in failed_send:
                         bot.send_message(int(config["Telegram"]["main_group"]),
                                          s(strings.MATCHMAKING.ERRORS.UNAUTHORIZED, mention=player.user.mention()))
             elif update.callback_query.data == "match_cancel":
