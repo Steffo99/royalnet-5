@@ -346,8 +346,7 @@ def on_callback_query(bot: Bot, update: Update):
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text="⚠ Il tuo account Telegram non è registrato a Royalnet!"
-                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                                          text=strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion)\
@@ -391,7 +390,6 @@ def on_callback_query(bot: Bot, update: Update):
                 return
             match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
             if update.callback_query.data == "match_close":
-                status = None
                 if match.creator != user:
                     bot.answer_callback_query(update.callback_query.id,
                                               show_alert=True,
@@ -403,8 +401,22 @@ def on_callback_query(bot: Bot, update: Update):
                         bot.send_message(player.user.telegram_id,
                                          s(strings.MATCHMAKING.GAME_START[player.status],
                                            **match.format_dict()))
-            else:
-                raise NotImplementedError()
+            elif update.callback_query.data == "match_cancel":
+                if match.creator != user:
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
+                    return
+                match.closed = True
+            status = {
+                "match_ready": db.MatchmakingStatus.READY,
+                "match_wait_for_me": db.MatchmakingStatus.WAIT_FOR_ME,
+                "match_someone_else": db.MatchmakingStatus.SOMEONE_ELSE,
+                "match_maybe": db.MatchmakingStatus.MAYBE,
+                "match_ignore": db.MatchmakingStatus.IGNORED,
+                "match_close": None,
+                "match_cancel": None,
+            }.get(update.callback_query.data)
             if status:
                 if match.closed:
                     bot.answer_callback_query(update.callback_query.id,
