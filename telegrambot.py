@@ -402,7 +402,7 @@ def on_callback_query(bot: Bot, update: Update):
                                          s(strings.MATCHMAKING.GAME_START[player.status],
                                            **match.format_dict()))
             elif update.callback_query.data == "match_cancel":
-                if not (match.creator == user or match.creator_id == 25167391):
+                if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
                                               show_alert=True,
                                               text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
