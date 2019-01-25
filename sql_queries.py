@@ -1,4 +1,4 @@
-all_query = """SELECT
+all_music_query = """SELECT
   discord.royal_id,
   discord.discord_id,
   discord.name,
@@ -59,7 +59,7 @@ LEFT JOIN
 
 
 # TODO: can and should be optimized, but I'm too lazy for that
-one_query = """SELECT
+one_music_query = """SELECT
   discord.royal_id,
   discord.discord_id,
   discord.name,
@@ -141,3 +141,13 @@ LEFT JOIN
   WHERE votequestion.message_id = :message_id
   ) answer ON telegram.telegram_id = answer.user_id 
 ORDER BY answer.choice;"""
+
+activity_by_hour = """SELECT AVG(discord_members_online) online_members_avg,
+       AVG(discord_members_ingame) ingame_members_avg,
+       AVG(discord_members_cv) cv_members_avg,
+       AVG(discord_channels_used) channels_used_avg,
+       AVG(discord_cv) cv_avg,
+       extract(hour from timestamp) h 
+FROM activityreports 
+GROUP BY h 
+ORDER BY h;"""

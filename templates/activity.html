@@ -154,5 +154,67 @@
                     }
                 });
         </script>
+        <h1>
+            Media dell'attività per ogni ora
+        </h1>
+        <canvas class="graph members-graph-hour-bucket" id="discord-members-hour-bucket" height="60px"></canvas>
+        <script>
+            new Chart("discord-members-hour-bucket",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in hourly_avg %}
+                                "{{ point.h|int }}:00",
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "In cv",
+                                "borderColor": "#fe7f00",
+                                "backgroundColor": "#fe7f0022",
+                                "borderWidth": 4,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.cv_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "In game",
+                                "borderColor": "#9ae915",
+                                "backgroundColor": "#9ae91511",
+                                "borderWidth": 1,
+                                "borderDash": [2],
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "disabled",
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.ingame_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "Online",
+                                "borderColor": "#6dcff6",
+                                "backgroundColor": "#6dcff611",
+                                "borderWidth": 1,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": 0,
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.online_members_avg }},
+                                    {% endfor %}
+                                ]
+                            }
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
     </div>
 {% endblock %}

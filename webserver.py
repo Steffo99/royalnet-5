@@ -9,7 +9,7 @@ import datetime
 # noinspection PyPackageRequirements
 import telegram
 import errors
-import query_discord_music
+import sql_queries
 import random
 import re
 import functools
@@ -310,7 +310,7 @@ def page_diario():
 
 @app.route("/music")
 def page_music():
-    songs = fl_g.session.execute(query_discord_music.top_songs)
+    songs = fl_g.session.execute(sql_queries.top_songs)
     return render_template("topsongs.html", songs=songs)
 
 
@@ -320,14 +320,15 @@ def page_music_individual(discord_id: str):
     if discord is None:
         abort(404)
         return
-    songs = fl_g.session.execute(query_discord_music.single_top_songs, {"discordid": discord.discord_id})
+    songs = fl_g.session.execute(sql_queries.single_top_songs, {"discordid": discord.discord_id})
     return render_template("topsongs.html", songs=songs, discord=discord)
 
 
 @app.route("/activity")
 def page_activity():
     reports = list(fl_g.session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
-    return render_template("activity.html", activityreports=list(reversed(reports)))
+    hourly_avg = list(fl_g.session.execute(sql_queries.activity_by_hour))
+    return render_template("activity.html", activityreports=list(reversed(reports)), hourly_avg=hourly_avg)
 
 
 @app.route("/ses/identify")

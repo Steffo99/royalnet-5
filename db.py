@@ -21,7 +21,7 @@ from discord import User as DiscordUser
 from telegram import User as TelegramUser
 import loldata
 from dirty import Dirty, DirtyDelta
-import query_discord_music
+import sql_queries
 from flask import escape
 import libgravatar
 import configparser
@@ -716,11 +716,11 @@ class Discord(Base, Mini):
 
     @classmethod
     def mini_get_all(cls, session: Session):
-        return [dict(row) for row in session.execute(query_discord_music.all_query)]
+        return [dict(row) for row in session.execute(sql_queries.all_query)]
 
     @classmethod
     def mini_get_single(cls, session: Session, **kwargs):
-        return session.execute(query_discord_music.one_query, {"royal": kwargs["royal"].id}).fetchone()
+        return session.execute(sql_queries.one_query, {"royal": kwargs["royal"].id}).fetchone()
 
     @classmethod
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
@@ -927,7 +927,7 @@ class VoteQuestion(Base):
         text = f"<b>{self.question}</b>\n\n"
         none, yes, no, abstain = 0, 0, 0, 0
         if self.message_id is not None:
-            query = session.execute(query_discord_music.vote_answers, {"message_id": self.message_id})
+            query = session.execute(sql_queries.vote_answers, {"message_id": self.message_id})
             for record in query:
                 if record["username"] == "royalgamesbot":
                     continue
