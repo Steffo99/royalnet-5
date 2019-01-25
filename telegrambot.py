@@ -9,6 +9,7 @@ import stagismo
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.error import TimedOut
 import dice
 import sys
 import os
@@ -19,6 +20,8 @@ import configparser
 import markovify
 import raven
 import coloredlogs
+import strings
+s = strings.safely_format_string
 
 # Markov model
 try:
@@ -50,6 +53,8 @@ def catch_and_report(func: "function"):
         # noinspection PyBroadException
         try:
             return func(bot, update)
+        except TimedOut:
+            logger.warning(f"Telegram timed out in {update}")
         except Exception:
             logger.error(f"Critical error: {sys.exc_info()}")
             # noinspection PyBroadException
@@ -293,16 +298,13 @@ def cmd_mm(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id,
-                             "⚠ Il tuo account Telegram non è registrato a Royalnet!"
-                             " Registrati con `/register@royalgamesbot <nomeutenteryg>`.", parse_mode="Markdown")
+            bot.send_message(update.message.chat.id, strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED, parse_mode="Markdown")
             return
         match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
                          update.message.text)
         if match is None:
             bot.send_message(update.message.chat.id,
-                             "⚠ Sintassi del comando errata.\n"
-                             "Sintassi: `/matchmaking@royalgamesbot [minplayers]-[maxplayers] per <gamename> \\n [descrizione]`")
+                             "")
             return
         min_players, max_players, match_name, match_desc = match.group(1, 2, 3, 4)
         db_match = db.Match(timestamp=datetime.datetime.now(),
@@ -313,20 +315,9 @@ def cmd_mm(bot: Bot, update: Update):
                             creator=user)
         session.add(db_match)
         session.flush()
-        inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Possiamo iniziare!",
-                                                                      callback_data="match_ready")],
-                                                [InlineKeyboardButton("🕒 Ci sarò, aspettatemi!",
-                                                                      callback_data="match_wait_for_me")],
-                                                [InlineKeyboardButton("❔ Forse vengo, se non ci sono fate senza di me.",
-                                                                      callback_data="match_maybe")],
-                                                [InlineKeyboardButton("💬 Solo se viene anche qualcun altro...",
-                                                                      callback_data="match_someone_else")],
-                                                [InlineKeyboardButton("❌ Non ci sarò.",
-                                                                      callback_data="match_ignore")],
-                                                [InlineKeyboardButton("🗑 [annulla la partita]",
-                                                                      callback_data="match_delete")],
-                                                [InlineKeyboardButton("🚩 [avvia la partita]",
-                                                                      callback_data="match_close")]])
+        inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(strings.MATCHMAKING.BUTTONS[key],
+                                                                       callback_data=key)])
+                                                for key in strings.MATCHMAKING.BUTTONS])
         message = bot.send_message(config["Telegram"]["announcement_group"], db_match.generate_text(session=session),
                                    parse_mode="HTML",
                                    reply_markup=inline_keyboard)
@@ -393,55 +384,32 @@ def on_callback_query(bot: Bot, update: Update):
         try:
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
-                bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text="⚠ Il tuo account Telegram non è registrato a Royalnet!"
-                                               " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                bot.answer_callback_query(update.callback_query.id,
+                                          show_alert=True,
+                                          text=strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
-            if update.callback_query.data == "match_ready":
-                status = db.MatchmakingStatus.READY
-                text = "🔵 Hai detto che sei pronto per giocare!"
-            elif update.callback_query.data == "match_wait_for_me":
-                status = db.MatchmakingStatus.WAIT_FOR_ME
-                text = "🕒 Hai chiesto agli altri di aspettarti."
-            elif update.callback_query.data == "match_ignore":
-                status = db.MatchmakingStatus.IGNORED
-                text = "❌ Non ti interessa questa partita."
-            elif update.callback_query.data == "match_maybe":
-                status = db.MatchmakingStatus.MAYBE
-                text = "❔ Hai detto che forse ci sarai."
-            elif update.callback_query.data == "match_someone_else":
-                status = db.MatchmakingStatus.SOMEONE_ELSE
-                text = "💬 Hai detto che vuoi aspettare che venga qualcun altro."
-            elif update.callback_query.data == "match_close" or update.callback_query.data == "match_delete":
+            if update.callback_query.data == "match_close":
                 status = None
-                if match.creator == user:
-                    match.closed = True
-                    text = "🚩 Matchmaking chiuso!"
-                    if update.callback_query.data == "match_close":
-                        for player in match.players:
-                            if player.status == db.MatchmakingStatus.READY or player.status == db.MatchmakingStatus.WAIT_FOR_ME:
-                                try:
-                                    bot.send_message(player.user.telegram_id,
-                                                     f"🚩 Sei pronto? <b>{match.match_title}</b> sta iniziando!",
-                                                     parse_mode="HTML")
-                                except Exception as e:
-                                    logger.warning(f"Failed to notify {player.user.username}: {e}")
-                else:
-                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                              text="⚠ Non sei il creatore di questo match!")
+                if match.creator != user:
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
                     return
+                match.closed = True
+                for player in match.players:
+                    if player.status >= 1:
+                        bot.send_message(player.user.telegram_id,
+                                         s(strings.MATCHMAKING.GAME_START[player.status],
+                                           **match.format_dict()))
             else:
                 raise NotImplementedError()
             if status:
                 if match.closed:
-                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                              text="⚠ Il matchmaking è terminato!")
-                    return
-                if match.max_players and match.active_players_count() >= match.max_players:
-                    bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                              text="⚠ La partita è piena.")
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.MATCH_CLOSED)
                     return
                 player = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
                 if player is None:
@@ -450,22 +418,13 @@ def on_callback_query(bot: Bot, update: Update):
                 else:
                     player.status = status.value
             session.commit()
-            bot.answer_callback_query(update.callback_query.id, text=text, cache_time=1)
+            bot.answer_callback_query(update.callback_query.id,
+                                      text=s(strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data]),
+                                      cache_time=1)
             if not match.closed:
-                inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Possiamo iniziare!",
-                                                                              callback_data="match_ready")],
-                                                        [InlineKeyboardButton("🕒 Ci sarò, aspettatemi!",
-                                                                              callback_data="match_wait_for_me")],
-                                                        [InlineKeyboardButton("❔ Forse vengo, se non ci sono fate senza di me.",
-                                                                              callback_data="match_maybe")],
-                                                        [InlineKeyboardButton("💬 Solo se viene anche qualcun altro...",
-                                                                              callback_data="match_someone_else")],
-                                                        [InlineKeyboardButton("❌ Non ci sarò.",
-                                                                              callback_data="match_ignore")],
-                                                        [InlineKeyboardButton("🗑 [annulla la partita]",
-                                                                              callback_data="match_delete")],
-                                                        [InlineKeyboardButton("🚩 [avvia la partita]",
-                                                                              callback_data="match_close")]])
+                inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(strings.MATCHMAKING.BUTTONS[key],
+                                                                               callback_data=key)])
+                                                        for key in strings.MATCHMAKING.BUTTONS])
             else:
                 inline_keyboard = None
             bot.edit_message_text(message_id=update.callback_query.message.message_id,

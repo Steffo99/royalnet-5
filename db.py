@@ -1234,14 +1234,16 @@ class Match(Base):
     def active_players_count(self):
         count = 0
         for player in self.players:
-            if player.status == MatchmakingStatus.READY or player.status == MatchmakingStatus.WAIT_FOR_ME:
+            if player.status == MatchmakingStatus.READY \
+                    or player.status == MatchmakingStatus.WAIT_FOR_ME \
+                    or player.status == MatchmakingStatus.SOMEONE_ELSE:
                 count += 1
         return count
 
     def generate_text(self, session):
         player_list = session.query(MatchPartecipation).filter_by(match=self).all()
         title = f"<b>{self.match_title}</b>"
-        description = self.match_desc if self.match_desc else ""
+        description = f"{self.match_desc}\n" if self.match_desc else ""
         if self.min_players:
             minimum = f" <i>(minimo {self.min_players})</i>"
         else:
@@ -1264,14 +1266,14 @@ class Match(Base):
                 continue
             plist += f"{icon} {player.user.royal.username}\n"
         if ignore_count:
-            ignored = f"❌ <i>{ignore_count} persone non ne hanno voglia.</i>\n"
+            ignored = f"❌ <i>{ignore_count} persone non sono interessate.</i>\n"
         else:
             ignored = ""
         if self.max_players:
             players = f"[{self.active_players_count()}/{self.max_players}]"
         else:
             players = f"[{self.active_players_count()}]"
-        close = f"[matchmaking concluso]\n" if self.closed else ""
+        close = f"[matchmaking terminato]\n" if self.closed else ""
         message = f"{title} {players}\n" \
                   f"{description}\n" \
                   f"{plist}\n" \
@@ -1281,6 +1283,20 @@ class Match(Base):
 
     def __repr__(self):
         return f"<Match {self.match_title}>"
+
+    def format_dict(self) -> typing.Dict[str, str]:
+        return {
+            "id": self.id,
+            "timestamp": self.timestamp.isoformat(),
+            "creator_id": self.creator_id,
+            "creator_name": self.creator.mention(),
+            "match_title": self.match_title,
+            "match_desc": self.match_desc,
+            "min_players": self.min_players,
+            "max_players": self.max_players,
+            "active_players": self.active_players_count(),
+            "players": len(self.active_players_count())
+        }
 
 
 class MatchmakingStatus(enum.IntEnum):
