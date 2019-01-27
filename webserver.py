@@ -182,13 +182,12 @@ def page_password():
         return render_template("password.html")
     elif request.method == "POST":
         new_password = request.form.get("new", "")
-        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user_id).one()
+        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
         if user.password is None:
-            user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
             user.fiorygi += 1
-            fl_g.session.commit()
-            return redirect(url_for("page_main"))
-        abort(403)
+        user.password = bcrypt.hashpw(bytes(new_password, encoding="utf8"), bcrypt.gensalt())
+        fl_g.session.commit()
+        return redirect(url_for("page_main"))
 
 
 @app.route("/editprofile", methods=["GET", "POST"])
