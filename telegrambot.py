@@ -63,7 +63,7 @@ def catch_and_report(func: "function"):
             try:
                 bot.send_message(int(config["Telegram"]["main_group"]),
                                  s(strings.TELEGRAM.ERRORS.CRITICAL_ERROR, exc_info=sys.exc_info()),
-                                 parse_mode="Markdown")
+                                 parse_mode="HTML")
             except Exception:
                 logger.error(f"Double critical error: {sys.exc_info()}")
             sentry.user_context({
@@ -93,7 +93,8 @@ def cmd_register(bot: Bot, update: Update):
         try:
             username = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.INVALID_SYNTAX))
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.INVALID_SYNTAX),
+                             parse_mode="HTML")
             session.close()
             return
         try:
@@ -101,16 +102,19 @@ def cmd_register(bot: Bot, update: Update):
                                    royal_username=username,
                                    telegram_user=update.message.from_user)
         except errors.NotFoundError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.NOT_FOUND))
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.NOT_FOUND),
+                             parse_mode="HTML")
             session.close()
             return
         except errors.AlreadyExistingError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.ALREADY_EXISTING))
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.ALREADY_EXISTING),
+                             parse_mode="HTML")
             session.close()
             return
         session.add(t)
         session.commit()
-        bot.send_message(update.message.chat.id, s(strings.LINKING.SUCCESSFUL))
+        bot.send_message(update.message.chat.id, s(strings.LINKING.SUCCESSFUL),
+                         parse_mode="HTML")
     finally:
         session.close()
 
@@ -290,25 +294,29 @@ def cmd_vote(bot: Bot, update: Update):
     finally:
         session.close()
 
+
 @catch_and_report
 def cmd_search(bot: Bot, update: Update):
     session = db.Session()
     try:
-        text = update.message.text.split(" ", 1)[1]
-        if text is None:
+        try:
+            text = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
             return
-        text = text.replace('%','\\%').replace('_','\_')
+        text = text.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).all()
-        messageText = "Ecco i risultati della ricerca:\n"
+        msg = f"Risultati della ricerca di {text}:\n"
         for entry in entries[:5]:
-            messageText+=f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author if entry.author is not None else 'Anonimo'}\n{entry.text}\n\n"
-        if len(entries)>5:
-            messageText += "ci sono altre entrate del diario che corrispondono alla ricerca:\n"
+            msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
+        if len(entries) > 5:
+            msg += "I termini comapiono anche nelle righe:\n"
             for entry in entries[5:]:
-                messageText += f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) "
-        bot.send_message(update.message.chat.id, messageText, parse_mode="Markdown")
+                msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> '
+        bot.send_message(update.message.chat.id, msg, parse_mode="HTML")
     finally:
         session.close()
+
 
 @catch_and_report
 def cmd_mm(bot: Bot, update: Update):

@@ -69,7 +69,13 @@ class MATCHMAKING:
     }
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\n Sintassi: <pre>/mm [minplayers-][maxplayers] per <gamename> \\n[descrizione]</pre>"
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] per {gamename} \\n[descrizione]</pre>"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
-        UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}. \nPer piacere, {mention}, inviami un messaggio in privata!"
+        UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
+
+
+# Diario search
+class DIARIO_SEARCH:
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/search {termine}</pre>"
