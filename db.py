@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-import typing
 import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -14,17 +13,18 @@ import errors
 from errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
-# Both packages have different pip names
-# noinspection PyPackageRequirements
-# from discord import User as DiscordUser
-# noinspection PyPackageRequirements
-from telegram import User as TelegramUser
 import loldata
 from dirty import Dirty, DirtyDelta
 import sql_queries
 from flask import escape
 import libgravatar
 import configparser
+import typing
+if typing.TYPE_CHECKING:
+    # noinspection PyPackageRequirements
+    from discord import User as DiscordUser
+    # noinspection PyPackageRequirements
+    from telegram import User as TelegramUser
 
 # Init the config reader
 config = configparser.ConfigParser()
