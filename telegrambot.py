@@ -56,21 +56,16 @@ def catch_and_report(func: "function"):
         except TimedOut:
             logger.warning(f"Telegram timed out in {update}")
         except Exception:
+            if __debug__:
+                raise
             logger.error(f"Critical error: {sys.exc_info()}")
             # noinspection PyBroadException
             try:
                 bot.send_message(int(config["Telegram"]["main_group"]),
-                                 "☢ **ERRORE CRITICO!** \n"
-                                 f"Il bot ha ignorato il comando.\n"
-                                 f"Una segnalazione di errore è stata automaticamente mandata a @Steffo.\n\n"
-                                 f"Dettagli dell'errore:\n"
-                                 f"```\n"
-                                 f"{sys.exc_info()}\n"
-                                 f"```", parse_mode="Markdown")
+                                 s(strings.TELEGRAM.ERRORS.CRITICAL_ERROR, exc_info=sys.exc_info()),
+                                 parse_mode="Markdown")
             except Exception:
                 logger.error(f"Double critical error: {sys.exc_info()}")
-            if __debug__:
-                raise
             sentry.user_context({
                 "id": update.effective_user.id,
                 "telegram": {
@@ -88,32 +83,36 @@ def catch_and_report(func: "function"):
 
 @catch_and_report
 def cmd_ping(bot: Bot, update: Update):
-    bot.send_message(update.message.chat.id, "🏓 Pong!")
+    bot.send_message(update.message.chat.id, s(strings.PONG))
 
 
 @catch_and_report
 def cmd_register(bot: Bot, update: Update):
     session = db.Session()
     try:
-        username = update.message.text.split(" ", 1)[1]
-    except IndexError:
-        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato un username!")
+        try:
+            username = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.INVALID_SYNTAX))
+            session.close()
+            return
+        try:
+            t = db.Telegram.create(session,
+                                   royal_username=username,
+                                   telegram_user=update.message.from_user)
+        except errors.NotFoundError:
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.NOT_FOUND))
+            session.close()
+            return
+        except errors.AlreadyExistingError:
+            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.ALREADY_EXISTING))
+            session.close()
+            return
+        session.add(t)
+        session.commit()
+        bot.send_message(update.message.chat.id, s(strings.LINKING.SUCCESSFUL))
+    finally:
         session.close()
-        return
-    try:
-        t = db.Telegram.create(session,
-                               royal_username=username,
-                               telegram_user=update.message.from_user)
-    except errors.AlreadyExistingError:
-        bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram è già collegato a un account RYG o"
-                                                 " l'account RYG che hai specificato è già collegato a un account"
-                                                 " Telegram.")
-        session.close()
-        return
-    session.add(t)
-    session.commit()
-    bot.send_message(update.message.chat.id, "✅ Sincronizzazione completata!")
-    session.close()
 
 
 @catch_and_report
@@ -317,7 +316,7 @@ def cmd_mm(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED, parse_mode="Markdown")
+            bot.send_message(update.message.chat.id, strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED, parse_mode="Markdown")
             return
         match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
                          update.message.text)
@@ -365,7 +364,7 @@ def on_callback_query(bot: Bot, update: Update):
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text=strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED,
+                                          text=strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion)\
@@ -404,7 +403,7 @@ def on_callback_query(bot: Bot, update: Update):
             if user is None:
                 bot.answer_callback_query(update.callback_query.id,
                                           show_alert=True,
-                                          text=strings.ROYALNET.ERRORS.TELEGRAM_NOT_LINKED,
+                                          text=strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()

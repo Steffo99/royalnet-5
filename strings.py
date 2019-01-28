@@ -10,10 +10,24 @@ def safely_format_string(string, **kwargs):
     return string.format_map(SafeDict(**kwargs))
 
 
-# Generic errors
-class ROYALNET:
+# Generic telegram errors
+class TELEGRAM:
     class ERRORS:
+        CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
         TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con `/register@royalgamesbot <nomeutenteryg>`."
+
+
+PONG = "🏓 Pong!"
+
+
+# Royalnet linking
+class LINKING:
+    SUCCESSFUL = "✅ Collegamento riuscito!"
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi del comando: <code>/register {username}</code>"
+        NOT_FOUND = "⚠ Non esiste nessun account Royalnet con quel nome."
+        ALREADY_EXISTING = "⚠ Questo account è già collegato a un account Royalnet."
 
 
 # Markov strings
@@ -55,7 +69,7 @@ class MATCHMAKING:
     }
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\n Sintassi: `/mm [minplayers-][maxplayers] per <gamename> \\n[descrizione]`"
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\n Sintassi: <pre>/mm [minplayers-][maxplayers] per <gamename> \\n[descrizione]</pre>"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
         UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}. \nPer piacere, {mention}, inviami un messaggio in privata!"
