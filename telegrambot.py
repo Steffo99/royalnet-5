@@ -298,14 +298,14 @@ def cmd_search(bot: Bot, update: Update):
         text = update.message.text.split(" ", 1)[1]
         if text is None:
             return
-        entries = session.query(db.Diario).filter(db.Diario.text.like('%'+text+'%')).all()
+        entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).all()
         messageText = "Ecco i risulati della ricerca:\n"
         for entry in entries[:5]:
-            messageText+="[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author}\n{entry.text}\n\n"
+            messageText+=f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author}\n{entry.text}\n\n"
         if len(entries)>5:
             messageText += "ci sono altre entrate del diario che corrispondono alla ricerca:\n"
             for entry in entries[5:]:
-                messageText += "[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) "
+                messageText += f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) "
         bot.send_message(update.message.chat.id, messageText, parse_mode="Markdown")
     finally:
         session.close()
