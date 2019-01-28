@@ -162,7 +162,7 @@ class Telegram(Base, Mini):
     _mini_order = [telegram_id]
 
     @staticmethod
-    def create(session: Session, royal_username, telegram_user: TelegramUser):
+    def create(session: Session, royal_username, telegram_user: "TelegramUser"):
         t = session.query(Telegram).filter_by(telegram_id=telegram_user.id).first()
         if t is not None:
             raise AlreadyExistingError(repr(t))
