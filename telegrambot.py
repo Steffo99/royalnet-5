@@ -316,7 +316,7 @@ def cmd_mm(bot: Bot, update: Update):
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED, parse_mode="Markdown")
+            bot.send_message(update.message.chat.id, s(strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED), parse_mode="Markdown")
             return
         match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
                          update.message.text)
@@ -333,7 +333,7 @@ def cmd_mm(bot: Bot, update: Update):
                             creator=user)
         session.add(db_match)
         session.flush()
-        inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(strings.MATCHMAKING.BUTTONS[key],
+        inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(s(strings.MATCHMAKING.BUTTONS[key]),
                                                                        callback_data=key)])
                                                 for key in strings.MATCHMAKING.BUTTONS])
         message = bot.send_message(config["Telegram"]["announcement_group"], db_match.generate_text(session=session),
@@ -364,7 +364,7 @@ def on_callback_query(bot: Bot, update: Update):
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text=strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED,
+                                          text=s(strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED),
                                           parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion)\
