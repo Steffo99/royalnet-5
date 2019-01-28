@@ -716,11 +716,11 @@ class Discord(Base, Mini):
 
     @classmethod
     def mini_get_all(cls, session: Session):
-        return [dict(row) for row in session.execute(sql_queries.all_query)]
+        return [dict(row) for row in session.execute(sql_queries.all_music_query)]
 
     @classmethod
     def mini_get_single(cls, session: Session, **kwargs):
-        return session.execute(sql_queries.one_query, {"royal": kwargs["royal"].id}).fetchone()
+        return session.execute(sql_queries.one_music_query, {"royal": kwargs["royal"].id}).fetchone()
 
     @classmethod
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
