@@ -298,7 +298,7 @@ def cmd_search(bot: Bot, update: Update):
         text = update.message.text.split(" ", 1)[1]
         if text is None:
             return
-            text = text.replace('%','\\%').replace('_','\_')
+        text = text.replace('%','\\%').replace('_','\_')
         entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).all()
         messageText = "Ecco i risulati della ricerca:\n"
         for entry in entries[:5]:
