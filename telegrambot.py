@@ -653,25 +653,28 @@ def cmd_calendar(bot: Bot, update: Update):
 @catch_and_report
 def cmd_markov(bot: Bot, update: Update):
     if model is None:
-        bot.send_message(update.message.chat.id, "⚠️ Il modello Markov non è disponibile.")
+        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.NO_MODEL)
         return
     try:
-        _, first_word = update.message.text.split(" ", 1)
-    except ValueError:
+        first_word = update.message.text.split(" ")[1]
+    except IndexError:
+        # Any word
         sentence = model.make_sentence(tries=1000)
         if sentence is None:
-            bot.send_message(update.message.chat.id, "⚠ Complimenti! Hai vinto la lotteria di Markov!\n"
-                                                     "O forse l'hai persa.\n"
-                                                     "Non sono riuscito a generare una frase, riprova.")
+            bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.GENERATION_FAILED)
             return
         bot.send_message(update.message.chat.id, sentence)
-    else:
+        return
+    # Specific word
+    try:
         sentence = model.make_sentence_with_start(first_word, tries=1000)
-        if sentence is None:
-            bot.send_message(update.message.chat.id, "⚠ Non è stato possibile generare frasi partendo da questa"
-                                                     " parola.")
-            return
-        bot.send_message(update.message.chat.id, sentence)
+    except KeyError:
+        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.MISSING_WORD)
+        return
+    if sentence is None:
+        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.SPECIFIC_WORD_FAILED)
+        return
+    bot.send_message(update.message.chat.id, sentence)
 
 
 @catch_and_report

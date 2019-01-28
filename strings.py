@@ -10,9 +10,19 @@ def safely_format_string(string, **kwargs):
     return string.format_map(SafeDict(**kwargs))
 
 
+# Generic errors
 class ROYALNET:
     class ERRORS:
         TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con `/register@royalgamesbot <nomeutenteryg>`."
+
+
+# Markov strings
+class MARKOV:
+    class ERRORS:
+        NO_MODEL = "⚠ La catena di Markov non è disponibile."
+        GENERATION_FAILED = "⚠ <code>markovify</code> non è riuscito a generare una frase. Prova di nuovo?\n E' un'avvenimento sorprendentemente raro..."
+        SPECIFIC_WORD_FAILED = "⚠ <code>markovify</code> non è riuscito a generare una frase partendo da questa parola. Provane una diversa..."
+        MISSING_WORD = "⚠ La parola specificata non è presente nella catena di Markov. Provane una diversa..."
 
 
 # Matchmaking service strings
