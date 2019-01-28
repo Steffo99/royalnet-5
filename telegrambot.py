@@ -300,7 +300,7 @@ def cmd_search(bot: Bot, update: Update):
             return
         text = text.replace('%','\\%').replace('_','\_')
         entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).all()
-        messageText = "Ecco i risulati della ricerca:\n"
+        messageText = "Ecco i risultati della ricerca:\n"
         for entry in entries[:5]:
             messageText+=f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author}\n{entry.text}\n\n"
         if len(entries)>5:
