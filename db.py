@@ -16,7 +16,7 @@ import re
 import enum
 # Both packages have different pip names
 # noinspection PyPackageRequirements
-from discord import User as DiscordUser
+# from discord import User as DiscordUser
 # noinspection PyPackageRequirements
 from telegram import User as TelegramUser
 import loldata
@@ -689,7 +689,7 @@ class Discord(Base, Mini):
         return f"<db.Discord {self.discord_id}>"
 
     @staticmethod
-    def create(session: Session, royal_username, discord_user: DiscordUser):
+    def create(session: Session, royal_username, discord_user: "DiscordUser"):
         d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
         if d is not None:
             raise AlreadyExistingError(repr(d))
