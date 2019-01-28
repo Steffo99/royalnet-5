@@ -302,7 +302,7 @@ def cmd_search(bot: Bot, update: Update):
         entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).all()
         messageText = "Ecco i risultati della ricerca:\n"
         for entry in entries[:5]:
-            messageText+=f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author}\n{entry.text}\n\n"
+            messageText+=f"[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author if entry.author is not None else 'Anonimo'}\n{entry.text}\n\n"
         if len(entries)>5:
             messageText += "ci sono altre entrate del diario che corrispondono alla ricerca:\n"
             for entry in entries[5:]:
