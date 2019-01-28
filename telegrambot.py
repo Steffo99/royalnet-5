@@ -291,6 +291,24 @@ def cmd_vote(bot: Bot, update: Update):
     finally:
         session.close()
 
+@catch_and_report
+def cmd_search(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        text = update.message.text.split(" ", 1)[1]
+        if text is None:
+            return
+        entries = session.query(db.Diario).filter(db.Diario.text.like('%'+text+'%')).all()
+        messageText = "Ecco i risulati della ricerca:\n"
+        for entry in entries[:5]:
+            messageText+="[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) di {entry.author}\n{entry.text}\n\n"
+        if len(entries)>5:
+            messageText += "ci sono altre entrate del diario che corrispondono alla ricerca:\n"
+            for entry in entries[5:]:
+                messageText += "[#{entry.id}](https://ryg.steffo.eu/diario#entry-{entry.id}) "
+        bot.send_message(update.message.chat.id, messageText, parse_mode="Markdown")
+    finally:
+        session.close()
 
 @catch_and_report
 def cmd_mm(bot: Bot, update: Update):
@@ -716,6 +734,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
+    u.dispatcher.add_handler(CommandHandler("cerca", cmd_search))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
