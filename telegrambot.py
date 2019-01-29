@@ -306,7 +306,7 @@ def cmd_cerca(bot: Bot, update: Update):
             bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
             return
         queryText = queryText.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id).all()
+        entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id.desc()).all()
         cerca_message(bot, update, queryText, entries)
     finally:
         session.close()
@@ -321,7 +321,7 @@ def cmd_regex_diario(bot: Bot, update: Update):
             bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
             return
         queryText = queryText.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(text(f"text ~* '{queryText}'")).order_by(db.Diario.id).all()
+        entries = session.query(db.Diario).filter(text(f"text ~* '{queryText}'")).order_by(db.Diario.id.desc()).all()
         cerca_message(bot, update, queryText, entries)
     finally:
         session.close()
