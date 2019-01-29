@@ -307,17 +307,19 @@ def cmd_cerca(bot: Bot, update: Update):
             return
         queryText = queryText.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id).all()
-        msg = f"Risultati della ricerca di {queryText}:\n"
-        for entry in entries[:5]:
-            msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
+        cerca_message(bot, update, queryText, entries)
+    finally:
+        session.close()
+
+def cerca_message (bot: Bot, update: Update, queryText, entries):
+    msg = f"Risultati della ricerca di {queryText}:\n"
+    for entry in entries[:5]:
+        msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
         if len(entries) > 5:
             msg += "I termini comapiono anche nelle righe:\n"
             for entry in entries[5:]:
                 msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> '
-        bot.send_message(update.message.chat.id, msg, parse_mode="HTML")
-    finally:
-        session.close()
-
+    bot.send_message(update.message.chat.id, msg, parse_mode="HTML")
 
 @catch_and_report
 def cmd_mm(bot: Bot, update: Update):
