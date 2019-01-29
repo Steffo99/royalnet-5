@@ -4,6 +4,7 @@ import typing
 import db
 import errors
 import stagismo
+from sqlalchemy.sql import text
 # python-telegram-bot has a different name
 # noinspection PyPackageRequirements
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
@@ -305,7 +306,7 @@ def cmd_cerca(bot: Bot, update: Update):
             bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
             return
         queryText = queryText.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'").order_by(db.Diario.id).all()
+        entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id).all()
         msg = f"Risultati della ricerca di {queryText}:\n"
         for entry in entries[:5]:
             msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
