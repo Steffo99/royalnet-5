@@ -746,6 +746,8 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("cerca", cmd_cerca))
+    u.dispatcher.add_handler(CommandHandler("search", cmd_cerca))
+    u.dispatcher.add_handler(CommandHandler("diariosearch", cmd_cerca))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
