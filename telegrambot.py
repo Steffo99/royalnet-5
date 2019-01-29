@@ -300,13 +300,13 @@ def cmd_cerca(bot: Bot, update: Update):
     session = db.Session()
     try:
         try:
-            text = update.message.text.split(" ", 1)[1]
+            queryText = update.message.text.split(" ", 1)[1]
         except IndexError:
             bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
             return
-        text = text.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(db.Diario.text.ilike('%'+text+'%')).order_by(db.Diario.id).all()
-        msg = f"Risultati della ricerca di {text}:\n"
+        queryText = queryText.replace('%', '\\%').replace('_', '\\_')
+        entries = session.query(db.Diario).filter(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'").order_by(db.Diario.id).all()
+        msg = f"Risultati della ricerca di {queryText}:\n"
         for entry in entries[:5]:
             msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
         if len(entries) > 5:
