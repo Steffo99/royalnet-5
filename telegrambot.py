@@ -311,6 +311,21 @@ def cmd_cerca(bot: Bot, update: Update):
     finally:
         session.close()
 
+@catch_and_report
+def cmd_regex_diario(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        try:
+            queryText = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
+            return
+        queryText = queryText.replace('%', '\\%').replace('_', '\\_')
+        entries = session.query(db.Diario).filter(text(f"text ~* '{queryText}'")).order_by(db.Diario.id).all()
+        cerca_message(bot, update, queryText, entries)
+    finally:
+        session.close()
+
 def cerca_message (bot: Bot, update: Update, queryText, entries):
     msg = f"Risultati della ricerca di {queryText}:\n"
     for entry in entries[:5]:
@@ -751,6 +766,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("cerca", cmd_cerca))
     u.dispatcher.add_handler(CommandHandler("search", cmd_cerca))
     u.dispatcher.add_handler(CommandHandler("diariosearch", cmd_cerca))
+    u.dispatcher.add_handler(CommandHandler("regex", cmd_regex_diario))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
