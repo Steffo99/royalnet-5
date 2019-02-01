@@ -312,7 +312,7 @@ def cmd_cerca(bot: Bot, update: Update):
         session.close()
 
 @catch_and_report
-def cmd_regex_diario(bot: Bot, update: Update):
+def cmd_regex(bot: Bot, update: Update):
     session = db.Session()
     try:
         try:
@@ -772,9 +772,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("cerca", cmd_cerca))
-    u.dispatcher.add_handler(CommandHandler("search", cmd_cerca))
-    u.dispatcher.add_handler(CommandHandler("diariosearch", cmd_cerca))
-    u.dispatcher.add_handler(CommandHandler("regex", cmd_regex_diario))
+    u.dispatcher.add_handler(CommandHandler("regex", cmd_regex))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
