@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
-from telegram.error import TimedOut, Unauthorized
+from telegram.error import TimedOut, Unauthorized, BadRequest
 import dice
 import sys
 import os
@@ -303,7 +303,7 @@ def cmd_cerca(bot: Bot, update: Update):
         try:
             queryText = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
             return
         queryText = queryText.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id.desc()).all()
@@ -492,11 +492,14 @@ def on_callback_query(bot: Bot, update: Update):
                                                         for key in strings.MATCHMAKING.BUTTONS])
             else:
                 inline_keyboard = None
-            bot.edit_message_text(message_id=update.callback_query.message.message_id,
-                                  chat_id=config["Telegram"]["announcement_group"],
-                                  text=match.generate_text(session),
-                                  reply_markup=inline_keyboard,
-                                  parse_mode="HTML")
+            try:
+                bot.edit_message_text(message_id=update.callback_query.message.message_id,
+                                      chat_id=config["Telegram"]["announcement_group"],
+                                      text=match.generate_text(session),
+                                      reply_markup=inline_keyboard,
+                                      parse_mode="HTML")
+            except BadRequest:
+                pass
         finally:
             session.close()
 
@@ -730,6 +733,11 @@ def cmd_roll(bot: Bot, update: Update):
         bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
         return
     bot.send_message(update.message.chat.id, f"🎲 {result}")
+
+
+@catch_and_report
+def cmd_start(bot: Bot, update: Update):
+    bot.send_message(update.message.chat.id, s(strings.TELEGRAM.BOT_STARTED))
 
 
 def process(arg_discord_connection):

@@ -12,6 +12,8 @@ def safely_format_string(string, **kwargs):
 
 # Generic telegram errors
 class TELEGRAM:
+    BOT_STARTED = "✅ Hai autorizzato il bot ad inviarti messaggi privati."
+
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
         TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con `/register@royalgamesbot <nomeutenteryg>`."
@@ -76,6 +78,6 @@ class MATCHMAKING:
 
 
 # Diario search
-class DIARIO_SEARCH:
+class DIARIOSEARCH:
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/search {termine}</pre>"
