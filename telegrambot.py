@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
-from telegram.error import TimedOut, Unauthorized, BadRequest
+from telegram.error import TimedOut, Unauthorized, BadRequest, TelegramError
 import dice
 import sys
 import os
@@ -298,12 +298,18 @@ def cmd_vote(bot: Bot, update: Update):
 
 def generate_search_message(term, entries):
     msg = s(strings.DIARIOSEARCH.HEADER, term=term)
-    for entry in entries[:5]:
-        msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
+    if len(entries) < 100:
+        for entry in entries[:5]:
+            msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di <i>{entry.author or "Anonimo"}</i>\n{entry.text}\n\n'
         if len(entries) > 5:
             msg += "I termini comapiono anche nelle righe:\n"
             for entry in entries[5:]:
                 msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> '
+    else:
+        for entry in entries[:100]:
+            msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> '
+        for entry in entries[100:]:
+            msg += f"#{entry.id} "
     return msg
 
 
@@ -314,7 +320,7 @@ def cmd_search(bot: Bot, update: Update):
         try:
             query = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="search"), parse_mode="HTML")
             return
         query = query.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario)\
@@ -323,7 +329,7 @@ def cmd_search(bot: Bot, update: Update):
                                                          r"(?:[\s\.,:;!?\"'>\})\]]+|$)"))\
                          .order_by(db.Diario.id.desc())\
                          .all()
-        bot.send_message(update.message.chat.id, generate_search_message(f"<b>query</b>", entries))
+        bot.send_message(update.message.chat.id, generate_search_message(f"<b>{query}</b>", entries), parse_mode="HTML")
     finally:
         session.close()
 
@@ -335,11 +341,14 @@ def cmd_regex(bot: Bot, update: Update):
         try:
             query = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="regex"), parse_mode="HTML")
             return
         query = query.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario).filter(db.Diario.text.op("~*")(query)).order_by(db.Diario.id.desc()).all()
-        bot.send_message(update.message.chat.id, generate_search_message(f"<code>query</code>", entries))
+        try:
+            bot.send_message(update.message.chat.id, generate_search_message(f"<code>{query}</code>", entries), parse_mode="HTML")
+        except (BadRequest, TelegramError):
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.RESULTS_TOO_LONG))
     finally:
         session.close()
 
@@ -781,6 +790,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("search", cmd_search))
     u.dispatcher.add_handler(CommandHandler("regex", cmd_regex))
+    u.dispatcher.add_handler(CommandHandler("start", cmd_start))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()

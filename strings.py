@@ -3,7 +3,7 @@ from db import MatchmakingStatus
 
 class SafeDict(dict):
     def __missing__(self, key):
-        return '<code>' + key + '</code>'
+        return key
 
 
 def safely_format_string(string, **kwargs):
@@ -16,7 +16,7 @@ class TELEGRAM:
 
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
-        TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con `/register@royalgamesbot <nomeutenteryg>`."
+        TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con <code>/register (NomeUtenteRoyalnet)</code>."
 
 
 PONG = "🏓 Pong!"
@@ -27,7 +27,7 @@ class LINKING:
     SUCCESSFUL = "✅ Collegamento riuscito!"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi del comando: <code>/register {username}</code>"
+        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi del comando: <code>/register (NomeUtenteRoyalnet)</code>"
         NOT_FOUND = "⚠ Non esiste nessun account Royalnet con quel nome."
         ALREADY_EXISTING = "⚠ Questo account è già collegato a un account Royalnet."
 
@@ -71,7 +71,7 @@ class MATCHMAKING:
     }
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] per {gamename} \\n[descrizione]</pre>"
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] per (gamename) \\n[descrizione]</pre>"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
         UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
@@ -82,4 +82,5 @@ class DIARIOSEARCH:
     HEADER = "ℹ️ Risultati della ricerca di {term}:\n"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/search {termine}</pre>"
+        INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/{command} (termine)</pre>"
+        RESULTS_TOO_LONG = "⚠ Sono presenti troppi risultati da visualizzare! Prova a restringere la ricerca."
