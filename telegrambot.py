@@ -296,45 +296,53 @@ def cmd_vote(bot: Bot, update: Update):
         session.close()
 
 
-@catch_and_report
-def cmd_cerca(bot: Bot, update: Update):
-    session = db.Session()
-    try:
-        try:
-            queryText = update.message.text.split(" ", 1)[1]
-        except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
-            return
-        queryText = queryText.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(text(f"text ~* '(?:[^\w\d]+{queryText}[^\w\d]+|^{queryText}[^\w\d]+|^{queryText}$|[^\w\d]+{queryText}$)'")).order_by(db.Diario.id.desc()).all()
-        cerca_message(bot, update, queryText, entries)
-    finally:
-        session.close()
-
-@catch_and_report
-def cmd_regex(bot: Bot, update: Update):
-    session = db.Session()
-    try:
-        try:
-            queryText = update.message.text.split(" ", 1)[1]
-        except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIO_SEARCH.ERRORS.INVALID_SYNTAX))
-            return
-        queryText = queryText.replace('%', '\\%').replace('_', '\\_')
-        entries = session.query(db.Diario).filter(text(f"text ~* '{queryText}'")).order_by(db.Diario.id.desc()).all()
-        cerca_message(bot, update, queryText, entries)
-    finally:
-        session.close()
-
-def cerca_message (bot: Bot, update: Update, queryText, entries):
-    msg = f"Risultati della ricerca di {queryText}:\n"
+def generate_search_message(term, entries):
+    msg = s(strings.DIARIOSEARCH.HEADER, term=term)
     for entry in entries[:5]:
         msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di {entry.author or "Anonimo"}\n{entry.text}\n\n'
         if len(entries) > 5:
             msg += "I termini comapiono anche nelle righe:\n"
             for entry in entries[5:]:
                 msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> '
-    bot.send_message(update.message.chat.id, msg, parse_mode="HTML")
+    return msg
+
+
+@catch_and_report
+def cmd_search(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        try:
+            query = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
+            return
+        query = query.replace('%', '\\%').replace('_', '\\_')
+        entries = session.query(db.Diario)\
+                         .filter(db.Diario.text.op("~*")(r"(?:[\s\.,:;!?\"'<{([]+|^)"
+                                                         + query +
+                                                         r"(?:[\s\.,:;!?\"'>\})\]]+|$)"))\
+                         .order_by(db.Diario.id.desc())\
+                         .all()
+        bot.send_message(update.message.chat.id, generate_search_message(f"<b>query</b>", entries))
+    finally:
+        session.close()
+
+
+@catch_and_report
+def cmd_regex(bot: Bot, update: Update):
+    session = db.Session()
+    try:
+        try:
+            query = update.message.text.split(" ", 1)[1]
+        except IndexError:
+            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX))
+            return
+        query = query.replace('%', '\\%').replace('_', '\\_')
+        entries = session.query(db.Diario).filter(db.Diario.text.op("~*")(query)).order_by(db.Diario.id.desc()).all()
+        bot.send_message(update.message.chat.id, generate_search_message(f"<code>query</code>", entries))
+    finally:
+        session.close()
+
 
 @catch_and_report
 def cmd_mm(bot: Bot, update: Update):
@@ -771,7 +779,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))
     u.dispatcher.add_handler(CommandHandler("matchmaking", cmd_mm))
-    u.dispatcher.add_handler(CommandHandler("cerca", cmd_cerca))
+    u.dispatcher.add_handler(CommandHandler("search", cmd_search))
     u.dispatcher.add_handler(CommandHandler("regex", cmd_regex))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")

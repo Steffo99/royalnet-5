@@ -79,5 +79,7 @@ class MATCHMAKING:
 
 # Diario search
 class DIARIOSEARCH:
+    HEADER = "ℹ️ Risultati della ricerca di {term}:\n"
+
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/search {termine}</pre>"
