@@ -235,7 +235,7 @@ def page_wiki(key: str):
     wiki_latest_edit = fl_g.session.query(db.WikiLog).filter_by(edited_key=key) \
         .order_by(db.WikiLog.timestamp.desc()).first()
     if wiki_page is None:
-        return render_template("wikipage.html", key=key)
+        return render_template("wikipage.html", key=key, wiki_page=None)
     # Embed YouTube videos
     converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
                                       extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
