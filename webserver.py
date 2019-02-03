@@ -260,6 +260,9 @@ def page_wiki(key: str):
     elif request.method == "POST":
         if not fl_g.user:
             return redirect(url_for("page_login"))
+        if wiki_page.locked:
+            abort(403)
+            return
         user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
         new_content = request.form.get("content")
         # Create new page

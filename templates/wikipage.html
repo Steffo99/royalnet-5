@@ -43,7 +43,7 @@
                 Ultima modifica di <span class="last-author"><a href="/profile/{{ wiki_log.editor.username }}">{{ wiki_log.editor.username }}</a></span> alle <span class="last-timestamp">{{ wiki_log.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</span>{% if wiki_log.reason %}, motivo: <span class="last-reason">{{ wiki_log.reason }}</span>{% endif %}
             </div>
         {% endif %}
-        {% if g.user %}
+        {% if g.user and not wiki_page.locked %}
             <div class="wiki-edit">
                 <h4>Modifica</h4>
                 <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
