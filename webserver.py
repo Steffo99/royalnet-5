@@ -262,7 +262,7 @@ def page_wiki(key: str):
 @require_login
 def page_wiki_edit(key: str):
     wiki_page = fl_g.session.query(db.WikiEntry).filter_by(key=key).one_or_none()
-    if wiki_page.locked:
+    if wiki_page is not None and wiki_page.locked:
         abort(403)
         return
     new_content = request.form.get("content")
