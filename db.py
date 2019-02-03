@@ -994,6 +994,7 @@ class WikiEntry(Base):
 
     key = Column(String, primary_key=True)
     content = Column(Text, nullable=False)
+    locked = Column(Boolean, default=False)
 
     def __repr__(self):
         return f"<WikiEntry {self.key}>"
@@ -1012,6 +1013,17 @@ class WikiLog(Base):
 
     def __repr__(self):
         return f"<WikiLog {self.edit_id}>"
+
+
+class WikiAuthorization(Base):
+    __tablename__ = "wikiauthorization"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"))
+    royal = relationship("Royal", backref="profile_data", uselist=False, lazy="joined")
+    page_key = Column(String, ForeignKey("wikientries.key"), nullable=False)
+    page = relationship("WikiEntry", backref="edit_logs", lazy="joined")
+
+    __table_args__ = (PrimaryKeyConstraint("royal_id", "page_key"),)
 
 
 class Event(Base):
