@@ -84,3 +84,9 @@ class DIARIOSEARCH:
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/{command} (termine)</pre>"
         RESULTS_TOO_LONG = "⚠ Sono presenti troppi risultati da visualizzare! Prova a restringere la ricerca."
+
+
+# Wiki notifications
+class WIKI:
+    PAGE_LOCKED = '🔒 La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata bloccata da <b>{user}</b>.'
+    PAGE_UNLOCKED = '🔓 La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata sbloccata da <b>{user}</b>.'

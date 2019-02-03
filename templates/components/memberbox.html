@@ -5,7 +5,7 @@
     <div class="lower-box">
         <ul class="multicolumn">
             {% for royal in royals %}
-                <li class="{% if royal.role == "Admin" %}admin{% endif %}"><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
+                <li class="{% if royal.role == "Admin" %}list-admin{% endif %}"><a href="/profile/{{ royal.username }}">{{ royal.username }}</a></li>
             {% endfor %}
         </ul>
     </div>

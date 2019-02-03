@@ -47,7 +47,7 @@
             {% if g.user %}
                 <div class="wiki-edit">
                     <h4>Modifica</h4>
-                    <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
+                    <form action="{{ url_for('page_wiki_edit', key=key) }}" method="POST">
                         <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
                         <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
                         <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Invia">
@@ -58,6 +58,11 @@
             <div class="wiki-locked">
                 <span>🔒 Pagina bloccata: non possono essere effettuate ulteriori modifiche.</span>
             </div>
+        {% endif %}
+        {% if g.user.role == "Admin" %}
+            <form action="{{ url_for('page_wiki_lock', key=key) }}" method="POST">
+                <input class="submit" type="submit" value="Blocca/Sblocca pagina">
+            </form>
         {% endif %}
     </div>
 {% endblock %}

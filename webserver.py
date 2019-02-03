@@ -13,6 +13,7 @@ import sql_queries
 import random
 import re
 import functools
+import strings
 from sqlalchemy.orm.collections import InstrumentedList
 from raven.contrib.flask import Sentry
 
@@ -228,79 +229,111 @@ def page_game(name: str):
     return render_template("game.html", mini_type=game, mini_data=query)
 
 
-@app.route("/wiki/<key>", methods=["GET", "POST"])
+@app.route("/wiki/<key>")
 def page_wiki(key: str):
-    fl_g.session = db.Session()
     wiki_page = fl_g.session.query(db.WikiEntry).filter_by(key=key).one_or_none()
-    if request.method == "GET":
-        wiki_latest_edit = fl_g.session.query(db.WikiLog).filter_by(edited_key=key) \
-            .order_by(db.WikiLog.timestamp.desc()).first()
-        if wiki_page is None:
-            return render_template("wikipage.html", key=key)
-        # Embed YouTube videos
-        converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
-                                          extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
-        converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
-                              r'<div class="youtube-embed">'
-                              r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0"'
-                              r'           frameborder="0"'
-                              r'           allow="autoplay; encrypted-media"'
-                              r'           allowfullscreen'
-                              r'           width="640px"'
-                              r'           height="320px">'
-                              r'   </iframe>'
-                              r'</div>', converted_md)
-        converted_md = re.sub(r"{https?://clyp.it/([a-z0-9]+)}",
-                              r'<div class="clyp-embed">'
-                              r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
-                              r'    </iframe>'
-                              r'</div>', converted_md)
-        return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
-                               wiki_log=wiki_latest_edit)
-    elif request.method == "POST":
-        if not fl_g.user:
-            return redirect(url_for("page_login"))
-        if wiki_page.locked:
-            abort(403)
-            return
-        user = fl_g.session.query(db.Royal).filter_by(id=fl_g.user.id).one()
-        new_content = request.form.get("content")
-        # Create new page
-        if wiki_page is None:
-            difference = len(new_content)
-            wiki_page = db.WikiEntry(key=key, content=new_content)
-            fl_g.session.add(wiki_page)
-            fl_g.session.flush()
-        # Edit existing page
-        else:
-            difference = len(new_content) - len(wiki_page.content)
-            wiki_page.content = new_content
-        # Award fiorygi
-        if difference > 50:
-            fioryg_chance = -(5000/difference) + 100
-            fioryg_roll = random.randrange(0, 100)
-            if fioryg_roll > fioryg_chance:
-                user.fiorygi += 1
-        else:
-            fioryg_chance = -1
-            fioryg_roll = -2
-        edit_reason = request.form.get("reason")
-        new_log = db.WikiLog(editor=user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
-        fl_g.session.add(new_log)
-        fl_g.session.commit()
-        message = f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata' \
-                  f' modificata da' \
-                  f' <a href="https://ryg.steffo.eu/profile/{user.username}">{user.username}</a>' \
-                  f' {"(" + edit_reason + ")" if edit_reason else ""}' \
-                  f' [{"+" if difference > 0 else ""}{difference}]\n'
+    wiki_latest_edit = fl_g.session.query(db.WikiLog).filter_by(edited_key=key) \
+        .order_by(db.WikiLog.timestamp.desc()).first()
+    if wiki_page is None:
+        return render_template("wikipage.html", key=key)
+    # Embed YouTube videos
+    converted_md = markdown2.markdown(wiki_page.content.replace("<", "&lt;"),
+                                      extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
+    converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
+                          r'<div class="youtube-embed">'
+                          r'   <iframe src="https://www.youtube-nocookie.com/embed/\1?rel=0&amp;showinfo=0"'
+                          r'           frameborder="0"'
+                          r'           allow="autoplay; encrypted-media"'
+                          r'           allowfullscreen'
+                          r'           width="640px"'
+                          r'           height="320px">'
+                          r'   </iframe>'
+                          r'</div>', converted_md)
+    converted_md = re.sub(r"{https?://clyp.it/([a-z0-9]+)}",
+                          r'<div class="clyp-embed">'
+                          r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
+                          r'    </iframe>'
+                          r'</div>', converted_md)
+    return render_template("wikipage.html", key=key, wiki_page=wiki_page, converted_md=Markup(converted_md),
+                           wiki_log=wiki_latest_edit)
+
+
+@app.route("/wiki/<key>/edit", methods=["POST"])
+@require_login
+def page_wiki_edit(key: str):
+    wiki_page = fl_g.session.query(db.WikiEntry).filter_by(key=key).one_or_none()
+    if wiki_page.locked:
+        abort(403)
+        return
+    new_content = request.form.get("content")
+    # Create new page
+    if wiki_page is None:
+        difference = len(new_content)
+        wiki_page = db.WikiEntry(key=key, content=new_content)
+        fl_g.session.add(wiki_page)
+        fl_g.session.flush()
+    # Edit existing page
+    else:
+        difference = len(new_content) - len(wiki_page.content)
+        wiki_page.content = new_content
+    # Award fiorygi
+    if difference > 50:
+        fioryg_chance = -(5000/difference) + 100
+        fioryg_roll = random.randrange(0, 100)
         if fioryg_roll > fioryg_chance:
-            message += f"⭐️ {user.username} è stato premiato con 1 fioryg per la modifica!"
-        try:
-            telegram_bot.send_message(config["Telegram"]["main_group"], message,
-                                      parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
-        except Exception:
-            pass
-        return redirect(url_for("page_wiki", key=key))
+            fl_g.user.fiorygi += 1
+    else:
+        fioryg_chance = -1
+        fioryg_roll = -2
+    edit_reason = request.form.get("reason")
+    new_log = db.WikiLog(editor=fl_g.user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
+    fl_g.session.add(new_log)
+    fl_g.session.commit()
+    message = f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata' \
+              f' modificata da' \
+              f' <a href="https://ryg.steffo.eu/profile/{fl_g.user.username}">{fl_g.user.username}</a>' \
+              f' {"(" + edit_reason + ")" if edit_reason else ""}' \
+              f' [{"+" if difference > 0 else ""}{difference}]\n'
+    if fioryg_roll > fioryg_chance:
+        message += f"⭐️ {fl_g.user.username} è stato premiato con 1 fioryg per la modifica!"
+    try:
+        telegram_bot.send_message(config["Telegram"]["main_group"], message,
+                                  parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+    except Exception:
+        pass
+    return redirect(url_for("page_wiki", key=key))
+
+
+@app.route("/wiki/<key>/lock", methods=["POST"])
+@require_login
+def page_wiki_lock(key: str):
+    wiki_page = fl_g.session.query(db.WikiEntry).filter_by(key=key).one_or_none()
+    if wiki_page is None:
+        abort(404)
+        return
+    if fl_g.user.role != "Admin":
+        abort(403)
+        return
+    wiki_page.locked = not wiki_page.locked
+    try:
+        if wiki_page.locked:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      strings.safely_format_string(strings.WIKI.PAGE_LOCKED,
+                                                                   key=key,
+                                                                   user=fl_g.user.username),
+                                      parse_mode="HTML",
+                                      disable_notification=True)
+        else:
+            telegram_bot.send_message(config["Telegram"]["main_group"],
+                                      strings.safely_format_string(strings.WIKI.PAGE_UNLOCKED,
+                                                                   key=key,
+                                                                   user=fl_g.user.username),
+                                      parse_mode="HTML",
+                                      disable_notification=True)
+    except Exception:
+        pass
+    fl_g.session.commit()
+    return redirect(url_for("page_wiki", key=key))
 
 
 @app.route("/diario")
