@@ -322,6 +322,7 @@ def page_wiki_lock(key: str):
                                                                    key=key,
                                                                    user=fl_g.user.username),
                                       parse_mode="HTML",
+                                      disable_web_page_preview=True,
                                       disable_notification=True)
         else:
             telegram_bot.send_message(config["Telegram"]["main_group"],
@@ -329,6 +330,7 @@ def page_wiki_lock(key: str):
                                                                    key=key,
                                                                    user=fl_g.user.username),
                                       parse_mode="HTML",
+                                      disable_web_page_preview=True,
                                       disable_notification=True)
     except Exception:
         pass
