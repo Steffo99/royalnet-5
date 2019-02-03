@@ -68,10 +68,12 @@
                 <span>🔒 Pagina bloccata: non possono essere effettuate ulteriori modifiche.</span>
             </div>
         {% endif %}
-        {% if g.user.role == "Admin" %}
-            <form action="{{ url_for('page_wiki_lock', key=key) }}" method="POST">
-                <input class="submit" type="submit" value="Blocca/Sblocca pagina">
-            </form>
+        {% if wiki_page is not none %}
+            {% if g.user.role == "Admin" %}
+                <form action="{{ url_for('page_wiki_lock', key=key) }}" method="POST">
+                    <input class="submit" type="submit" value="Blocca/Sblocca pagina">
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}
