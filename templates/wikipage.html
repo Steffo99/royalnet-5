@@ -43,14 +43,23 @@
                 Ultima modifica di <span class="last-author"><a href="/profile/{{ wiki_log.editor.username }}">{{ wiki_log.editor.username }}</a></span> alle <span class="last-timestamp">{{ wiki_log.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</span>{% if wiki_log.reason %}, motivo: <span class="last-reason">{{ wiki_log.reason }}</span>{% endif %}
             </div>
         {% endif %}
-        {% if not wiki_page or not wiki_page.locked %}
+        {% if wiki_page is none %}
+            <div class="wiki-edit">
+                <h4>Crea</h4>
+                <form action="{{ url_for('page_wiki_edit', key=key) }}" method="POST">
+                    <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
+                    <input class="reason" name="reason" type="text" placeholder="Motivo per la creazione (facoltativo)"><br>
+                    <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Crea">
+                </form>
+            </div>
+        {% elif wiki_page.locked %}
             {% if g.user %}
                 <div class="wiki-edit">
                     <h4>Modifica</h4>
                     <form action="{{ url_for('page_wiki_edit', key=key) }}" method="POST">
-                        <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
-                        <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
-                        <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Invia">
+                        <textarea oninput="newEdit()" class="content" name="content" placeholder="Non eliminare pagine altrui. Steffo non la prenderà bene.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
+                        <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica (facoltativo)"><br>
+                        <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Salva">
                     </form>
                 </div>
             {% endif %}
