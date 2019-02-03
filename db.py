@@ -1015,17 +1015,6 @@ class WikiLog(Base):
         return f"<WikiLog {self.edit_id}>"
 
 
-class WikiAuthorization(Base):
-    __tablename__ = "wikiauthorization"
-
-    royal_id = Column(Integer, ForeignKey("royals.id"))
-    royal = relationship("Royal", backref="profile_data", uselist=False, lazy="joined")
-    page_key = Column(String, ForeignKey("wikientries.key"), nullable=False)
-    page = relationship("WikiEntry", backref="edit_logs", lazy="joined")
-
-    __table_args__ = (PrimaryKeyConstraint("royal_id", "page_key"),)
-
-
 class Event(Base):
     __tablename__ = "events"
 
