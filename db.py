@@ -1316,8 +1316,35 @@ class MatchPartecipation(Base):
         return f"<MatchPartecipation {self.user.username} in {self.match.match_title}>"
 
 
-class IsaacQuest(Base, Mini):
-    ...
+class BindingOfIsaac(Base, Mini):
+    __tablename__ = "bindingofisaac"
+
+    steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
+    steam = relationship("Steam", backref="binding_of_isaac", lazy="joined")
+
+    daily_victories = Column(Integer, default=0)
+
+    def __repr__(self):
+        return f"<db.BindingOfIsaac {self.steam_id}>"
+
+    def recalc_victories(self):
+        raise NotImplementedError()  # TODO
+
+
+class BindingOfIsaacRun(Base):
+    __tablename__ = "bindingofisaacruns"
+    __table_args__ = (PrimaryKeyConstraint("date", "player_id"),)
+
+    date = Column(Date)
+
+    player_id = Column(String, ForeignKey("bindingofisaac.steam_id"))
+    player = relationship("BindingOfIsaac", backref="runs", lazy="joined")
+
+    score = Column(BigInteger)
+    # time = Column(???)
+
+    def __repr__(self):
+        return f"<db.BindingOfIsaacRun {self.steam_id}: {self.score}>"
 
 
 # If run as script, create all the tables in the db
