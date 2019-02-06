@@ -46,7 +46,7 @@ for date in dates_generator(datetime.date(year=2017, month=1, day=3)):
         best.player.daily_victories += 1
         try:
             telegram_bot.send_message(config["Telegram"]["main_group"],
-                                      f"🏆 **{best.player.steam.persona_name}** ha vinto la Daily Run di Isaac del {date.isoformat()}!",
+                                      f"🏆 <b>{best.player.steam.persona_name}</b> ha vinto la Daily Run di Isaac del {date.isoformat()}!",
                                       parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
         except Exception:
             pass
