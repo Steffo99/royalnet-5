@@ -53,6 +53,10 @@
                 </form>
             </div>
         {% elif wiki_page.locked %}
+            <div class="wiki-locked">
+                <span>🔒 Pagina bloccata: non possono essere effettuate ulteriori modifiche.</span>
+            </div>
+        {% else %}
             {% if g.user %}
                 <div class="wiki-edit">
                     <h4>Modifica</h4>
@@ -63,10 +67,6 @@
                     </form>
                 </div>
             {% endif %}
-        {% else %}
-            <div class="wiki-locked">
-                <span>🔒 Pagina bloccata: non possono essere effettuate ulteriori modifiche.</span>
-            </div>
         {% endif %}
         {% if wiki_page is not none %}
             {% if g.user.role == "Admin" %}
