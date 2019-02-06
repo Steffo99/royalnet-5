@@ -24,7 +24,6 @@
                 {% endif %}
                 <span class="login-status">
                     {% if g.user %}
-                        <img src="{{ g.user.get_gravatar_url() }}" class="gravatar">
                         <a href="{{ url_for('page_profile', name=g.user.username) }}">{{ g.user.username }}</a>
                         <a class="btn" href="{{ url_for('page_logout') }}">Logout</a>
                     {% else %}

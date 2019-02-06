@@ -17,7 +17,6 @@ import loldata
 from dirty import Dirty, DirtyDelta
 import sql_queries
 from flask import escape
-import libgravatar
 import configparser
 import typing
 if typing.TYPE_CHECKING:
@@ -119,7 +118,6 @@ class Royal(Base, Mini):
     role = Column(String)
     fiorygi = Column(Integer, default=0)
     member_since = Column(Date)
-    email = Column(String)
 
     _mini_full_name = "Royalnet"
     _mini_name = "ryg"
@@ -134,12 +132,6 @@ class Royal(Base, Mini):
 
     def __repr__(self):
         return f"<db.Royal {self.username}>"
-
-    def get_gravatar_url(self):
-        if self.email is None:
-            return f"https://www.gravatar.com/avatar/{libgravatar.md5_hash(self.username)}?d=identicon&f=y"
-        gravatar = libgravatar.Gravatar(self.email)
-        return gravatar.get_image(default="identicon", use_ssl=True)
 
     @classmethod
     def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
@@ -1322,6 +1314,10 @@ class MatchPartecipation(Base):
 
     def __repr__(self):
         return f"<MatchPartecipation {self.user.username} in {self.match.match_title}>"
+
+
+class IsaacQuest(Base, Mini):
+    ...
 
 
 # If run as script, create all the tables in the db
