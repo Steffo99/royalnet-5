@@ -551,21 +551,6 @@ def cmd_ship(bot: telegram.Bot, update: telegram.Update):
 
 
 @catch_and_report
-def cmd_profile(bot: telegram.Bot, update: telegram.Update):
-    session = db.Session()
-    user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
-    session.close()
-    if user is None:
-        bot.send_message(update.message.chat.id, "⚠ Non sei connesso a Royalnet!\n"
-                                                 "Per registrarti, utilizza il comando /register.")
-        return
-    bot.send_message(update.message.chat.id, f"👤 [Profilo di {user.royal.username}]"
-                                             f"(http://ryg.steffo.eu/profile/{user.royal.username})\n"
-                                             f"Attualmente, hai **{user.royal.fiorygi}** fiorygi.",
-                     parse_mode="Markdown")
-
-
-@catch_and_report
 def cmd_bridge(bot: telegram.Bot, update: telegram.Update):
     try:
         data = update.message.text.split(" ", 1)[1]
@@ -767,7 +752,6 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("vote", cmd_vote))
     u.dispatcher.add_handler(CommandHandler("eat", cmd_eat))
     u.dispatcher.add_handler(CommandHandler("ship", cmd_ship))
-    u.dispatcher.add_handler(CommandHandler("profile", cmd_profile))
     u.dispatcher.add_handler(CommandHandler("bridge", cmd_bridge))
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
