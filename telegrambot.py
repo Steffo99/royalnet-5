@@ -7,7 +7,9 @@ import stagismo
 from sqlalchemy.sql import text
 # python-telegram-bot has a different name
 # noinspection PyPackageRequirements
-from telegram import Bot, Update, InlineKeyboardMarkup, InlineKeyboardButton
+import telegram
+IKMarkup = telegram.InlineKeyboardMarkup
+IKButton = telegram.InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from telegram.error import TimedOut, Unauthorized, BadRequest, TelegramError
@@ -22,7 +24,7 @@ import markovify
 import raven
 import coloredlogs
 import strings
-s = strings.safely_format_string
+import time
 
 # Markov model
 try:
@@ -39,6 +41,7 @@ coloredlogs.install(level="DEBUG", logger=logger)
 # Init the config reader
 config = configparser.ConfigParser()
 config.read("config.ini")
+main_group_id = int(config["Telegram"]["main_group"])
 
 discord_connection = None
 
@@ -49,8 +52,30 @@ sentry = raven.Client(config["Sentry"]["token"],
                       hook_libraries=[])
 
 
+def reply_msg(bot: telegram.Bot, chat_id: int, string: str, **kwargs) -> telegram.Message:
+    return bot.send_message(chat_id, strings.safely_format_string(string, words=kwargs),
+                            parse_mode="HTML",
+                            disable_web_page_preview=True)
+
+
+def reply(bot: telegram.Bot, update: telegram.Update, string: str, **kwargs) -> telegram.Message:
+    while True:
+        try:
+            return reply_msg(bot, update.message.chat.id, string, **kwargs)
+        except Unauthorized:
+            if update.message.chat.type == telegram.Chat.PRIVATE:
+                return reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.UNAUTHORIZED_USER,
+                                 mention=update.message.from_user.mention_html())
+            else:
+                return reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.UNAUTHORIZED_GROUP,
+                                 group=(update.message.chat.title or update.message.chat.id))
+        except TimedOut:
+            time.sleep(1)
+            pass
+
+
 def catch_and_report(func: "function"):
-    def new_func(bot: Bot, update: Update):
+    def new_func(bot: telegram.Bot, update: telegram.Update):
         # noinspection PyBroadException
         try:
             return func(bot, update)
@@ -62,9 +87,8 @@ def catch_and_report(func: "function"):
             logger.error(f"Critical error: {sys.exc_info()}")
             # noinspection PyBroadException
             try:
-                bot.send_message(int(config["Telegram"]["main_group"]),
-                                 s(strings.TELEGRAM.ERRORS.CRITICAL_ERROR, exc_info=sys.exc_info()),
-                                 parse_mode="HTML")
+                reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.CRITICAL_ERROR,
+                          exc_info=sys.exc_info())
             except Exception:
                 logger.error(f"Double critical error: {sys.exc_info()}")
             sentry.user_context({
@@ -83,19 +107,18 @@ def catch_and_report(func: "function"):
 
 
 @catch_and_report
-def cmd_ping(bot: Bot, update: Update):
-    bot.send_message(update.message.chat.id, s(strings.PONG))
+def cmd_ping(bot: telegram.Bot, update: telegram.Update):
+    reply(bot, update, strings.PONG)
 
 
 @catch_and_report
-def cmd_register(bot: Bot, update: Update):
+def cmd_link(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         try:
             username = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.INVALID_SYNTAX),
-                             parse_mode="HTML")
+            reply(bot, update, strings.LINK.ERRORS.INVALID_SYNTAX)
             session.close()
             return
         try:
@@ -103,27 +126,24 @@ def cmd_register(bot: Bot, update: Update):
                                    royal_username=username,
                                    telegram_user=update.message.from_user)
         except errors.NotFoundError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.NOT_FOUND),
-                             parse_mode="HTML")
+            reply(bot, update, strings.LINK.ERRORS.NOT_FOUND)
             session.close()
             return
         except errors.AlreadyExistingError:
-            bot.send_message(update.message.chat.id, s(strings.LINKING.ERRORS.ALREADY_EXISTING),
-                             parse_mode="HTML")
+            reply(bot, update, strings.LINK.ERRORS.ALREADY_EXISTING)
             session.close()
             return
         session.add(t)
         session.commit()
-        bot.send_message(update.message.chat.id, s(strings.LINKING.SUCCESSFUL),
-                         parse_mode="HTML")
+        reply(bot, update, strings.LINK.SUCCESS)
     finally:
         session.close()
 
 
 @catch_and_report
-def cmd_discord(bot: Bot, update: Update):
+def cmd_cv(bot: telegram.Bot, update: telegram.Update):
     if discord_connection is None:
-        bot.send_message(update.message.chat.id, "⚠ Il bot non è collegato a Discord al momento.")
+        reply(bot, update, strings.TELEGRAM.ERRORS.INACTIVE_BRIDGE)
         return
     # dirty hack as usual
     if update.message.text.endswith("full"):
@@ -135,7 +155,7 @@ def cmd_discord(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_cast(bot: Bot, update: Update):
+def cmd_cast(bot: telegram.Bot, update: telegram.Update):
     try:
         spell: str = update.message.text.split(" ", 1)[1]
     except IndexError:
@@ -156,19 +176,19 @@ def cmd_cast(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_color(bot: Bot, update: Update):
+def cmd_color(bot: telegram.Bot, update: telegram.Update):
     bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request,"
                                              " Admin were notified")
 
 
 @catch_and_report
-def cmd_smecds(bot: Bot, update: Update):
+def cmd_smecds(bot: telegram.Bot, update: telegram.Update):
     ds = random.sample(stagismo.listona, 1)[0]
     bot.send_message(update.message.chat.id, f"Secondo me, è colpa {ds}.")
 
 
 @catch_and_report
-def cmd_ciaoruozi(bot: Bot, update: Update):
+def cmd_ciaoruozi(bot: telegram.Bot, update: telegram.Update):
     if update.message.from_user.username.lstrip("@") == "MeStakes":
         bot.send_message(update.message.chat.id, "Ciao me!")
     else:
@@ -176,7 +196,7 @@ def cmd_ciaoruozi(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_ahnonlosoio(bot: Bot, update: Update):
+def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update):
     if update.message.reply_to_message is not None and update.message.reply_to_message.text in [
         "/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!", "Ah, non lo so neppure io!"
     ]:
@@ -186,7 +206,7 @@ def cmd_ahnonlosoio(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_balurage(bot: Bot, update: Update):
+def cmd_balurage(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
@@ -211,14 +231,12 @@ def cmd_balurage(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_diario(bot: Bot, update: Update):
+def cmd_diario(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, "⚠ Il tuo account Telegram non è registrato al RYGdb!"
-                                                     " Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
-                             parse_mode="Markdown")
+            reply(bot, update, strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED)
             return
         try:
             text = update.message.text.split(" ", 1)[1]
@@ -226,12 +244,7 @@ def cmd_diario(bot: Bot, update: Update):
             saver = author
         except IndexError:
             if update.message.reply_to_message is None:
-                bot.send_message(update.message.chat.id,
-                                 f"⚠ Non hai specificato cosa aggiungere al diario!\n\n"
-                                 f"Puoi rispondere `/diario@royalgamesbot` al messaggio che vuoi salvare nel diario"
-                                 f" oppure scrivere `/diario@royalgamesbot <messaggio>`"
-                                 f" per aggiungere quel messaggio nel diario.",
-                                 parse_mode="Markdown")
+                reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)
                 return
             text = update.message.reply_to_message.text
             author = session.query(db.Telegram)\
@@ -239,7 +252,7 @@ def cmd_diario(bot: Bot, update: Update):
                             .one_or_none()
             saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if text is None:
-            bot.send_message(update.message.chat.id, f"⚠ Il messaggio a cui hai risposto non contiene testo.")
+            reply(bot, update, strings.DIARIO.ERRORS.NO_TEXT)
             return
         diario = db.Diario(timestamp=datetime.datetime.now(),
                            saver=saver,
@@ -247,6 +260,7 @@ def cmd_diario(bot: Bot, update: Update):
                            text=text)
         session.add(diario)
         session.commit()
+        reply(bot, update, strings.DIARIO.SUCCESS, diario=diario.to_html())
         bot.send_message(update.message.chat.id,
                          f"✅ Riga [#{diario.id}](https://ryg.steffo.eu/diario#entry-{diario.id}) aggiunta al diario!",
                          parse_mode="Markdown", disable_web_page_preview=True)
@@ -257,7 +271,7 @@ def cmd_diario(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_vote(bot: Bot, update: Update):
+def cmd_vote(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
@@ -284,9 +298,9 @@ def cmd_vote(bot: Bot, update: Update):
             return
         session.add(vote)
         session.flush()
-        inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì", callback_data="vote_yes")],
-                                                [InlineKeyboardButton("🔴 No", callback_data="vote_no")],
-                                                [InlineKeyboardButton("⚫️ Astieniti", callback_data="vote_abstain")]])
+        inline_keyboard = IKMarkup([[IKButton("🔵 Sì", callback_data="vote_yes")],
+                                    [IKButton("🔴 No", callback_data="vote_no")],
+                                    [IKButton("⚫️ Astieniti", callback_data="vote_abstain")]])
         message = bot.send_message(update.message.chat.id, vote.generate_text(session=session),
                                    reply_markup=inline_keyboard,
                                    parse_mode="HTML")
@@ -297,7 +311,7 @@ def cmd_vote(bot: Bot, update: Update):
 
 
 def generate_search_message(term, entries):
-    msg = s(strings.DIARIOSEARCH.HEADER, term=term)
+    msg = strings.DIARIOSEARCH.HEADER.format(term=term)
     if len(entries) < 100:
         for entry in entries[:5]:
             msg += f'<a href="https://ryg.steffo.eu/diario#entry-{entry.id}">#{entry.id}</a> di <i>{entry.author or "Anonimo"}</i>\n{entry.text}\n\n'
@@ -314,13 +328,13 @@ def generate_search_message(term, entries):
 
 
 @catch_and_report
-def cmd_search(bot: Bot, update: Update):
+def cmd_search(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         try:
             query = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="search"), parse_mode="HTML")
+            reply(bot, update, strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="search")
             return
         query = query.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario)\
@@ -335,37 +349,36 @@ def cmd_search(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_regex(bot: Bot, update: Update):
+def cmd_regex(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         try:
             query = update.message.text.split(" ", 1)[1]
         except IndexError:
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="regex"), parse_mode="HTML")
+            reply(bot, update, strings.DIARIOSEARCH.ERRORS.INVALID_SYNTAX, command="regex")
             return
         query = query.replace('%', '\\%').replace('_', '\\_')
         entries = session.query(db.Diario).filter(db.Diario.text.op("~*")(query)).order_by(db.Diario.id.desc()).all()
         try:
             bot.send_message(update.message.chat.id, generate_search_message(f"<code>{query}</code>", entries), parse_mode="HTML")
         except (BadRequest, TelegramError):
-            bot.send_message(update.message.chat.id, s(strings.DIARIOSEARCH.ERRORS.RESULTS_TOO_LONG))
+            reply(bot, update, strings.DIARIOSEARCH.ERRORS.RESULTS_TOO_LONG)
     finally:
         session.close()
 
 
 @catch_and_report
-def cmd_mm(bot: Bot, update: Update):
+def cmd_mm(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     try:
         user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
         if user is None:
-            bot.send_message(update.message.chat.id, s(strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED), parse_mode="Markdown")
+            reply(bot, update, strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED)
             return
         match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
                          update.message.text)
         if match is None:
-            bot.send_message(update.message.chat.id,
-                             "")
+            reply(bot, update, strings.MATCHMAKING.ERRORS.INVALID_SYNTAX)
             return
         min_players, max_players, match_name, match_desc = match.group(1, 2, 3, 4)
         db_match = db.Match(timestamp=datetime.datetime.now(),
@@ -376,9 +389,7 @@ def cmd_mm(bot: Bot, update: Update):
                             creator=user)
         session.add(db_match)
         session.flush()
-        inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(s(strings.MATCHMAKING.BUTTONS[key]),
-                                                                       callback_data=key)])
-                                                for key in strings.MATCHMAKING.BUTTONS])
+        inline_keyboard = IKMarkup([([IKButton(strings.MATCHMAKING.BUTTONS[key], callback_data=key)]) for key in strings.MATCHMAKING.BUTTONS])
         message = bot.send_message(config["Telegram"]["announcement_group"], db_match.generate_text(session=session),
                                    parse_mode="HTML",
                                    reply_markup=inline_keyboard)
@@ -389,7 +400,7 @@ def cmd_mm(bot: Bot, update: Update):
 
 
 @catch_and_report
-def on_callback_query(bot: Bot, update: Update):
+def on_callback_query(bot: telegram.Bot, update: telegram.Update):
     if update.callback_query.data.startswith("vote_"):
         if update.callback_query.data == "vote_yes":
             status = db.VoteChoices.YES
@@ -407,7 +418,7 @@ def on_callback_query(bot: Bot, update: Update):
             user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
             if user is None:
                 bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                          text=s(strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED),
+                                          text=strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             question = session.query(db.VoteQuestion)\
@@ -426,12 +437,9 @@ def on_callback_query(bot: Bot, update: Update):
                 bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
                                           cache_time=1)
             session.commit()
-            inline_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔵 Sì",
-                                                                          callback_data="vote_yes")],
-                                                    [InlineKeyboardButton("🔴 No",
-                                                                          callback_data="vote_no")],
-                                                    [InlineKeyboardButton("⚫️ Astieniti",
-                                                                          callback_data="vote_abstain")]])
+            inline_keyboard = IKMarkup([[IKButton("🔵 Sì", callback_data="vote_yes")],
+                                        [IKButton("🔴 No", callback_data="vote_no")],
+                                        [IKButton("⚫️ Astieniti", callback_data="vote_abstain")]])
             bot.edit_message_text(message_id=update.callback_query.message.message_id,
                                   chat_id=update.callback_query.message.chat.id,
                                   text=question.generate_text(session),
@@ -446,7 +454,7 @@ def on_callback_query(bot: Bot, update: Update):
             if user is None:
                 bot.answer_callback_query(update.callback_query.id,
                                           show_alert=True,
-                                          text=strings.TELEGRAM.ERRORS.TELEGRAM_NOT_LINKED,
+                                          text=strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED,
                                           parse_mode="Markdown")
                 return
             match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
@@ -457,20 +465,9 @@ def on_callback_query(bot: Bot, update: Update):
                                               text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
                     return
                 match.closed = True
-                failed_send = []
                 for player in match.players:
                     if player.status >= 1:
-                        try:
-                            bot.send_message(player.user.telegram_id,
-                                             s(strings.MATCHMAKING.GAME_START[player.status],
-                                               **match.format_dict()),
-                                             parse_mode="HTML")
-                        except Unauthorized:
-                            failed_send.append(player)
-                if failed_send:
-                    for player in failed_send:
-                        bot.send_message(int(config["Telegram"]["main_group"]),
-                                         s(strings.MATCHMAKING.ERRORS.UNAUTHORIZED, mention=player.user.mention()))
+                        reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[player.status], **match.format_dict())
             elif update.callback_query.data == "match_cancel":
                 if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
@@ -504,9 +501,7 @@ def on_callback_query(bot: Bot, update: Update):
                                       text=strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data],
                                       cache_time=1)
             if not match.closed:
-                inline_keyboard = InlineKeyboardMarkup([([InlineKeyboardButton(strings.MATCHMAKING.BUTTONS[key],
-                                                                               callback_data=key)])
-                                                        for key in strings.MATCHMAKING.BUTTONS])
+                inline_keyboard = IKMarkup([([IKButton(strings.MATCHMAKING.BUTTONS[key], callback_data=key)]) for key in strings.MATCHMAKING.BUTTONS])
             else:
                 inline_keyboard = None
             try:
@@ -522,48 +517,41 @@ def on_callback_query(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_eat(bot: Bot, update: Update):
+def cmd_eat(bot: telegram.Bot, update: telegram.Update):
     try:
         food: str = update.message.text.split(" ", 1)[1].capitalize()
     except IndexError:
-        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato cosa mangiare!\n"
-                                                 "Sintassi corretta: `/eat <cibo>`", parse_mode="Markdown")
+        reply(bot, update, strings.EAT.ERRORS.INVALID_SYNTAX)
         return
     if "tonnuooooooro" in food.lower():
-        bot.send_message(update.message.chat.id, "👻 Il pesce che hai mangiato era posseduto.\n"
-                                                 "Spooky!")
+        reply(bot, update, strings.EAT.OUIJA, food=food)
         return
-    bot.send_message(update.message.chat.id, f"🍗 Hai mangiato {food}!")
+    reply(bot, update, strings.EAT.NORMAL, food=food)
 
 
 @catch_and_report
-def cmd_ship(bot: Bot, update: Update):
+def cmd_ship(bot: telegram.Bot, update: telegram.Update):
     try:
         _, name_one, name_two = update.message.text.split(" ", 2)
     except ValueError:
-        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato correttamente i due nomi!\n"
-                                                 "Sintassi corretta: `/ship <nome> <nome>`", parse_mode="Markdown")
+        reply(bot, update, strings.SHIP.ERRORS.INVALID_SYNTAX)
         return
     name_one = name_one.lower()
     name_two = name_two.lower()
     part_one = re.search(r"^[A-Za-z][^aeiouAEIOU]*[aeiouAEIOU]?", name_one)
     part_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
-    try:
-        mixed = part_one.group(0) + part_two.group(0)
-    except Exception:
-        bot.send_message(update.message.chat.id, "⚠ I nomi specificati non sono validi.\n"
-                                                 "Riprova con dei nomi diversi!")
-        return
+    mixed = part_one.group(0) + part_two.group(0)  # TODO: find out what exceptions this could possibly raise
     if part_one is None or part_two is None:
-        bot.send_message(update.message.chat.id, "⚠ I nomi specificati non sono validi.\n"
-                                                 "Riprova con dei nomi diversi!")
+        reply(bot, update, strings.SHIP.ERRORS.INVALID_NAMES)
         return
-    bot.send_message(update.message.chat.id, f"💕 {name_one.capitalize()} + {name_two.capitalize()} ="
-                                             f" {mixed.capitalize()}")
+    reply(bot, update, strings.SHIP.RESULT,
+          one=name_one.capitalize(),
+          two=name_two.capitalize(),
+          result=mixed.capitalize())
 
 
 @catch_and_report
-def cmd_profile(bot: Bot, update: Update):
+def cmd_profile(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).join(db.Royal).one_or_none()
     session.close()
@@ -578,7 +566,7 @@ def cmd_profile(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_bridge(bot: Bot, update: Update):
+def cmd_bridge(bot: telegram.Bot, update: telegram.Update):
     try:
         data = update.message.text.split(" ", 1)[1]
     except IndexError:
@@ -644,7 +632,7 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
 
 
 @catch_and_report
-def cmd_newevent(bot: Bot, update: Update):
+def cmd_newevent(bot: telegram.Bot, update: telegram.Update):
     try:
         _, timestring, name_desc = update.message.text.split(" ", 2)
     except ValueError:
@@ -698,7 +686,7 @@ def cmd_newevent(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_calendar(bot: Bot, update: Update):
+def cmd_calendar(bot: telegram.Bot, update: telegram.Update):
     session = db.Session()
     next_events = session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
     session.close()
@@ -715,7 +703,7 @@ def cmd_calendar(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_markov(bot: Bot, update: Update):
+def cmd_markov(bot: telegram.Bot, update: telegram.Update):
     if model is None:
         bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.NO_MODEL)
         return
@@ -742,7 +730,7 @@ def cmd_markov(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_roll(bot: Bot, update: Update):
+def cmd_roll(bot: telegram.Bot, update: telegram.Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
         result = dice.roll(f"{dice_string}t")
@@ -753,8 +741,8 @@ def cmd_roll(bot: Bot, update: Update):
 
 
 @catch_and_report
-def cmd_start(bot: Bot, update: Update):
-    bot.send_message(update.message.chat.id, s(strings.TELEGRAM.BOT_STARTED))
+def cmd_start(bot: telegram.Bot, update: telegram.Update):
+    reply(bot, update, strings.TELEGRAM.BOT_STARTED)
 
 
 def process(arg_discord_connection):
@@ -765,9 +753,9 @@ def process(arg_discord_connection):
     u = Updater(config["Telegram"]["bot_token"])
     logger.info("Registering handlers...")
     u.dispatcher.add_handler(CommandHandler("ping", cmd_ping))
-    u.dispatcher.add_handler(CommandHandler("register", cmd_register))
-    u.dispatcher.add_handler(CommandHandler("discord", cmd_discord))
-    u.dispatcher.add_handler(CommandHandler("cv", cmd_discord))
+    u.dispatcher.add_handler(CommandHandler("link", cmd_link))
+    u.dispatcher.add_handler(CommandHandler("discord", cmd_cv))
+    u.dispatcher.add_handler(CommandHandler("cv", cmd_cv))
     u.dispatcher.add_handler(CommandHandler("cast", cmd_cast))
     u.dispatcher.add_handler(CommandHandler("color", cmd_color))
     u.dispatcher.add_handler(CommandHandler("smecds", cmd_smecds))

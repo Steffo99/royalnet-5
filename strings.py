@@ -1,4 +1,5 @@
 from db import MatchmakingStatus
+import typing
 
 
 class SafeDict(dict):
@@ -6,8 +7,11 @@ class SafeDict(dict):
         return key
 
 
-def safely_format_string(string, **kwargs):
-    return string.format_map(SafeDict(**kwargs))
+def safely_format_string(string: str, words: typing.Dict[str, str]) -> str:
+    escaped = {}
+    for key in words:
+        escaped[key] = words[key].replace("<", "&lt;").replace(">", "&gt;")
+    return string.format_map(SafeDict(**escaped))
 
 
 # Generic telegram errors
@@ -16,15 +20,46 @@ class TELEGRAM:
 
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
-        TELEGRAM_NOT_LINKED = "⚠ Il tuo account Telegram non è registrato a Royalnet! Registrati con <code>/register (NomeUtenteRoyalnet)</code>."
+        ROYALNET_NOT_LINKED = "⚠ Il tuo account Telegram non è connesso a Royalnet! Connettilo con <code>/link (NomeUtenteRoyalnet)</code>."
+        UNAUTHORIZED_USER = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
+        UNAUTHORIZED_GROUP = "⚠ Non sono autorizzato a inviare messaggi in <i>{group}</i>.\n@Steffo, aggiungimi al gruppo o concedimi i permessi!"
+        INACTIVE_BRIDGE = "⚠ Il collegamento tra Telegram e Discord non è attivo al momento."
 
 
 PONG = "🏓 Pong!"
 
 
+# Diario
+class DIARIO:
+    SUCCESS = "✅ Riga aggiunta al diario:\n{diario}"
+    ENTRY = '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di <b>{author}</b>\n{text}'
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <code>/diario (frase)</code>, oppure rispondi a un messaggio con <code>/diario</code>."
+        NO_TEXT = "⚠ Il messaggio a cui hai risposto non contiene testo."
+
+
+# Diario search
+class DIARIOSEARCH:
+    HEADER = "ℹ️ Risultati della ricerca di {term}:\n"
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <code>/{command} (termine)</code>"
+        RESULTS_TOO_LONG = "⚠ Sono presenti troppi risultati da visualizzare! Prova a restringere la ricerca."
+
+
+# Eat!
+class EAT:
+    NORMAL = "🍗 Hai mangiato {food}!"
+    OUIJA = "👻 Il {food} che hai mangiato era posseduto.\nSpooky!"
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato cosa mangiare!\nSintassi: <code>/eat (cibo)</code>"
+
+
 # Royalnet linking
-class LINKING:
-    SUCCESSFUL = "✅ Collegamento riuscito!"
+class LINK:
+    SUCCESS = "✅ Collegamento riuscito!"
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi del comando: <code>/register (NomeUtenteRoyalnet)</code>"
@@ -74,16 +109,15 @@ class MATCHMAKING:
         INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] per (gamename) \\n[descrizione]</pre>"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
-        UNAUTHORIZED = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
 
 
-# Diario search
-class DIARIOSEARCH:
-    HEADER = "ℹ️ Risultati della ricerca di {term}:\n"
+# Ship creator
+class SHIP:
+    RESULT = "💕 {one} + {two} = <b>{result}</b>"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato un termine da cercare!\nSintassi: <pre>/{command} (termine)</pre>"
-        RESULTS_TOO_LONG = "⚠ Sono presenti troppi risultati da visualizzare! Prova a restringere la ricerca."
+        INVALID_SYNTAX = "⚠ Non hai specificato correttamente i due nomi!\nSintassi corretta: <code>/ship (nome) (nome)</code>"
+        INVALID_NAMES = "⚠ I nomi specificati non sono validi.\nRiprova con dei nomi diversi!"
 
 
 # Wiki notifications
