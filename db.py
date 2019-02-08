@@ -19,7 +19,6 @@ import sql_queries
 from flask import escape
 import configparser
 import typing
-import strings
 if typing.TYPE_CHECKING:
     # noinspection PyPackageRequirements
     from discord import User as DiscordUser
@@ -837,11 +836,10 @@ class Diario(Base):
         return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
 
     def to_telegram(self):
-        return strings.safely_format_string(strings.DIARIO.ENTRY, words={
-            "id": self.id,
-            "author": self.author,
-            "text": self.text
-        })
+        return '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di <b>{author}</b>\n{text}'.format(
+            id=self.id,
+            author=self.author,
+            text=escape(self.text))
 
     def to_html(self):
         return str(escape(self.text)).replace("\n", "<br>")

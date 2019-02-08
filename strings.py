@@ -32,7 +32,7 @@ PONG = "🏓 Pong!"
 # Diario
 class DIARIO:
     SUCCESS = "✅ Riga aggiunta al diario:\n{diario}"
-    ENTRY = '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di <b>{author}</b>\n{text}'
+    ENTRY =
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <code>/diario (frase)</code>, oppure rispondi a un messaggio con <code>/diario</code>."
