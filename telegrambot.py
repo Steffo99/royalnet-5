@@ -4,14 +4,12 @@ import typing
 import db
 import errors
 import stagismo
-from sqlalchemy.sql import text
 # python-telegram-bot has a different name
 # noinspection PyPackageRequirements
 import telegram
-IKMarkup = telegram.InlineKeyboardMarkup
-IKButton = telegram.InlineKeyboardButton
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+# noinspection PyPackageRequirements
 from telegram.error import TimedOut, Unauthorized, BadRequest, TelegramError
 import dice
 import sys
@@ -25,6 +23,8 @@ import raven
 import coloredlogs
 import strings
 import time
+IKMarkup = telegram.InlineKeyboardMarkup
+IKButton = telegram.InlineKeyboardButton
 
 # Markov model
 try:
