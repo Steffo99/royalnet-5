@@ -25,6 +25,7 @@ import coloredlogs
 import errors
 import math
 import enum
+import codecs
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -393,8 +394,8 @@ class RoyalDiscordBot(discord.Client):
             f"{self.command_prefix}l": self.cmd_mode,
             f"{self.command_prefix}mode": self.cmd_mode,
             f"{self.command_prefix}m": self.cmd_mode,
-            f"{self.command_prefix}{b'cvyyne'.decode('rot13')}": self.cmd_easter_egg_1,
-            f"{self.command_prefix}{b'xqn'.decode('rot13')}": self.cmd_easter_egg_2
+            f"{self.command_prefix}{codecs.decode('cvyyne', 'rot13')}": self.cmd_easter_egg_1,
+            f"{self.command_prefix}{codecs.decode('xqn', 'rot13')}": self.cmd_easter_egg_2
         }
         if self.sentry_token:
             self.sentry = raven.Client(self.sentry_token,
@@ -1203,7 +1204,7 @@ class RoyalDiscordBot(discord.Client):
     @command
     @requires_connected_voice_client
     async def cmd_easter_egg_1(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await self.add_video_from_url(b"uggcf://jjj.lbhghor.pbz/jngpu?i=KHuIPbGfOnZ".decode("rot13"), enqueuer=author)
+        await self.add_video_from_url(codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=KHuIPbGfOnZ", "rot13"), enqueuer=author)
         await channel.send(f"💪💪💪")
         logger.debug(f"Added muscles to the queue (EE1).")
 
@@ -1212,16 +1213,16 @@ class RoyalDiscordBot(discord.Client):
     @requires_connected_voice_client
     async def cmd_easter_egg_2(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         videos = [
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=NLwbqZwP7cN".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=UooSp-Op_RR".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=XwSnd2ehrXf".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=Jna2ERU1k9t".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=gRWp9YkccXf".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=XKr5QomUqKZ".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=tImSG-Dt2cp".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=u6cwSSOWjmH".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=Jss8WNpEduL".decode("rot13"),
-            b"uggcf://jjj.lbhghor.pbz/jngpu?i=m4tyB08HDj4".decode("rot13")
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=NLwbqZwP7cN", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=UooSp-Op_RR", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=XwSnd2ehrXf", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=Jna2ERU1k9t", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=gRWp9YkccXf", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=XKr5QomUqKZ", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=tImSG-Dt2cp", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=u6cwSSOWjmH", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=Jss8WNpEduL", "rot13"),
+            codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=m4tyB08HDj4", "rot13")
         ]
         await self.add_video_from_url(random.sample(videos, 1)[0], enqueuer=author)
         await channel.send(f"⚔️💀🤝")
