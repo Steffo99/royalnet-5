@@ -392,7 +392,8 @@ class RoyalDiscordBot(discord.Client):
             f"{self.command_prefix}loop": self.cmd_mode,
             f"{self.command_prefix}l": self.cmd_mode,
             f"{self.command_prefix}mode": self.cmd_mode,
-            f"{self.command_prefix}m": self.cmd_mode
+            f"{self.command_prefix}m": self.cmd_mode,
+            f"{self.command_prefix}{b'cvyyne'.decode('rot13')}": self.cmd_easter_egg_1
         }
         if self.sentry_token:
             self.sentry = raven.Client(self.sentry_token,
@@ -1196,6 +1197,14 @@ class RoyalDiscordBot(discord.Client):
         else:
             await channel.send("⚠️ Sintassi del comando non valida.\n"
                                "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
+
+    # noinspection PyUnusedLocal
+    @command
+    @requires_connected_voice_client
+    async def cmd_easter_egg_1(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        await self.add_video_from_url(b"uggcf://jjj.lbhghor.pbz/jngpu?i=KHuIPbGfOnZ".decode("rot13"), enqueuer=author)
+        await channel.send(f"💪💪💪")
+        logger.debug(f"Added muscles to the queue (EE1).")
 
 
 def process(users_connection=None):
