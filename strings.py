@@ -61,7 +61,7 @@ class LINK:
     SUCCESS = "✅ Collegamento riuscito!"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi del comando: <code>/register (NomeUtenteRoyalnet)</code>"
+        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi: <code>/link (NomeUtenteRoyalnet)</code>"
         NOT_FOUND = "⚠ Non esiste nessun account Royalnet con quel nome."
         ALREADY_EXISTING = "⚠ Questo account è già collegato a un account Royalnet."
 
