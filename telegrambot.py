@@ -260,10 +260,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update):
                            text=text)
         session.add(diario)
         session.commit()
-        reply(bot, update, strings.DIARIO.SUCCESS, diario=diario.to_html())
-        bot.send_message(update.message.chat.id,
-                         f"✅ Riga [#{diario.id}](https://ryg.steffo.eu/diario#entry-{diario.id}) aggiunta al diario!",
-                         parse_mode="Markdown", disable_web_page_preview=True)
+        reply(bot, update, strings.DIARIO.SUCCESS, diario=diario.to_telegram())
     except Exception:
         raise
     finally:
