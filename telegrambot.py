@@ -478,7 +478,6 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
             status = {
                 "match_ready": db.MatchmakingStatus.READY,
                 "match_wait_for_me": db.MatchmakingStatus.WAIT_FOR_ME,
-                "match_someone_else": db.MatchmakingStatus.SOMEONE_ELSE,
                 "match_maybe": db.MatchmakingStatus.MAYBE,
                 "match_ignore": db.MatchmakingStatus.IGNORED,
                 "match_close": None,
