@@ -517,12 +517,11 @@ class RoyalDiscordBot(discord.Client):
                     "super smash bros. ultimate": ":arrow_forward: Re-awaken the undying light with {song}!",
                     "powerwolf": ":arrow_forward: Spaggia, ma non ti sei un po' stancato di {song}?",
                     "eurobeat": ":arrow_forward: Nemesis approva la scelta di {song}. Ben fatto, amico.",
-                    "k/da": ":arrow_forward: Che noia...\n"
-                            "Non ci si può nemmeno divertire con {song} che c'è qualcuno che se ne lamenta.\n"
+                    "k/da": ":arrow_forward: {song} ⚔️💀🤝!\n"
                             "La prossima volta, metti qualcosa di diverso, per piacere.",
                     "youtube rewind": ":arrow_forward: Perchè ti vuoi così male?"
                                       " Sigh, ascolta, discutere con te è inutile."
-                                      " Ti lascio qui {song}. Richiamami quando sarà tutto finito."
+                                      " Ti lascio qui {song}."
                 }
             else:
                 self.song_text_easter_eggs = {}
