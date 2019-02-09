@@ -53,8 +53,7 @@ sentry = raven.Client(config["Sentry"]["token"],
 
 
 def reply_msg(bot: telegram.Bot, chat_id: int, string: str, ignore_escaping=False, **kwargs) -> telegram.Message:
-    if not ignore_escaping:
-        string = strings.safely_format_string(string, words=kwargs)
+    string = strings.safely_format_string(string, ignore_escaping=ignore_escaping, words=kwargs)
     return bot.send_message(chat_id, string,
                             parse_mode="HTML",
                             disable_web_page_preview=True)

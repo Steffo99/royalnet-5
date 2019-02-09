@@ -7,10 +7,13 @@ class SafeDict(dict):
         return key
 
 
-def safely_format_string(string: str, words: typing.Dict[str, str]) -> str:
-    escaped = {}
-    for key in words:
-        escaped[key] = words[key].replace("<", "&lt;").replace(">", "&gt;")
+def safely_format_string(string: str, words: typing.Dict[str, str], ignore_escaping=False) -> str:
+    if ignore_escaping:
+        escaped = words
+    else:
+        escaped = {}
+        for key in words:
+            escaped[key] = words[key].replace("<", "&lt;").replace(">", "&gt;")
     return string.format_map(SafeDict(**escaped))
 
 
