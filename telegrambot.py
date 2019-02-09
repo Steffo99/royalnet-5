@@ -52,16 +52,18 @@ sentry = raven.Client(config["Sentry"]["token"],
                       hook_libraries=[])
 
 
-def reply_msg(bot: telegram.Bot, chat_id: int, string: str, **kwargs) -> telegram.Message:
-    return bot.send_message(chat_id, strings.safely_format_string(string, words=kwargs),
+def reply_msg(bot: telegram.Bot, chat_id: int, string: str, ignore_escaping=False, **kwargs) -> telegram.Message:
+    if not ignore_escaping:
+        string = strings.safely_format_string(string, words=kwargs)
+    return bot.send_message(chat_id, string,
                             parse_mode="HTML",
                             disable_web_page_preview=True)
 
 
-def reply(bot: telegram.Bot, update: telegram.Update, string: str, **kwargs) -> telegram.Message:
+def reply(bot: telegram.Bot, update: telegram.Update, string: str, ignore_escaping=False, **kwargs) -> telegram.Message:
     while True:
         try:
-            return reply_msg(bot, update.message.chat.id, string, **kwargs)
+            return reply_msg(bot, update.message.chat.id, string, ignore_escaping=ignore_escaping, **kwargs)
         except Unauthorized:
             if update.message.chat.type == telegram.Chat.PRIVATE:
                 return reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.UNAUTHORIZED_USER,
@@ -256,11 +258,10 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update):
             return
         diario = db.Diario(timestamp=datetime.datetime.now(),
                            saver=saver,
-                           author=author,
                            text=text)
         session.add(diario)
         session.commit()
-        reply(bot, update, strings.DIARIO.SUCCESS, diario=diario.to_telegram())
+        reply(bot, update, strings.DIARIO.SUCCESS, ignore_escaping=True, diario=diario.to_telegram())
     except Exception:
         raise
     finally:
