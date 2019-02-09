@@ -80,6 +80,7 @@ def command(func: "function"):
     def new_func(bot: telegram.Bot, update: telegram.Update):
         # noinspection PyBroadException
         try:
+            bot.send_chat_action(update.message.chat.id, telegram.ChatAction.TYPING)
             session = db.Session()
             return func(bot, update, session)
         except TimedOut:
