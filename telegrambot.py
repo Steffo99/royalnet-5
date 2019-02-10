@@ -249,8 +249,8 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
         return
     try:
         text = update.message.text.split(" ", 1)[1]
-        author = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
-        saver = author
+        saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+        author = None
     except IndexError:
         if update.message.reply_to_message is None:
             reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)
@@ -265,6 +265,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
         return
     diario = db.Diario(timestamp=datetime.datetime.now(),
                        saver=saver,
+                       author=author,
                        text=text)
     session.add(diario)
     session.commit()
