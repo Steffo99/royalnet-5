@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, \
-                       UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
+                       UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date
 from sqlalchemy.inspection import inspect
 import requests
 import errors
@@ -14,11 +14,13 @@ from errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
 import loldata
-from dirty import Dirty, DirtyDelta
+from utils.dirty import Dirty, DirtyDelta
 import sql_queries
 from flask import escape
 import configparser
 import typing
+from utils import MatchmakingStatus
+import strings
 if typing.TYPE_CHECKING:
     # noinspection PyPackageRequirements
     from discord import User as DiscordUser
@@ -1250,18 +1252,9 @@ class Match(Base):
         plist = f"Giocatori{minimum}:\n"
         ignore_count = 0
         for player in player_list:
-            if player.status == MatchmakingStatus.READY:
-                icon = "🔵"
-            elif player.status == MatchmakingStatus.WAIT_FOR_ME:
-                icon = "🕒"
-            elif player.status == MatchmakingStatus.MAYBE:
-                icon = "❔"
-            elif player.status == MatchmakingStatus.SOMEONE_ELSE:
-                icon = "💬"
-            elif player.status == MatchmakingStatus.IGNORED:
+            icon = strings.MATCHMAKING.ENUM_TO_EMOJIS[player.status]
+            if player.status == MatchmakingStatus.IGNORED:
                 ignore_count += 1
-                continue
-            else:
                 continue
             plist += f"{icon} {player.user.royal.username}\n"
         if ignore_count:
@@ -1296,14 +1289,6 @@ class Match(Base):
             "active_players": self.active_players_count(),
             "players": len(self.players)
         }
-
-
-class MatchmakingStatus(enum.IntEnum):
-    WAIT_FOR_ME = 1
-    READY = 2
-    MAYBE = 3
-    SOMEONE_ELSE = 4
-    IGNORED = -1
 
 
 class MatchPartecipation(Base):

@@ -11,7 +11,7 @@ import telegram
 import sys
 import coloredlogs
 import requests
-from dirty import Dirty, DirtyDelta
+from utils import Dirty, DirtyDelta
 from sentry_sdk import configure_scope
 
 logging.getLogger().disabled = True

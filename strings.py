@@ -1,4 +1,4 @@
-from db import MatchmakingStatus
+import utils
 import dice
 import typing
 
@@ -118,28 +118,44 @@ class MARKOV:
 
 # Matchmaking service strings
 class MATCHMAKING:
-    TICKER_TEXT = {
-        "match_ready": "🔵 Hai detto che sei pronto per giocare!",
-        "match_wait_for_me": "🕒 Hai chiesto agli altri di aspettarti.",
-        "match_maybe": "❓ Hai detto che forse ci sarai.",
-        "match_ignore": "❌ Non hai intenzione di partecipare.",
-        "match_close": "🚩 Hai notificato tutti che la partita sta iniziando.",
-        "match_cancel": "🗑 Hai annullato la partita."
+    EMOJIS = {
+        "ready": "🔵",
+        "wait_for_me": "🕒",
+        "maybe": "❓",
+        "ignore": "❌",
+        "close": "🚩",
+        "cancel": "🗑"
     }
 
-    GAME_START = {
-        MatchmakingStatus.READY: "🔵 Che <b>{match_title}</b> abbia inizio!",
-        MatchmakingStatus.WAIT_FOR_ME: "🕒 Sbrigati! <b>{match_title}</b> sta per iniziare!",
-        MatchmakingStatus.MAYBE: "❓ <b>{match_title}</b> sta iniziando. Se vuoi partecipare, fai in fretta!",
+    ENUM_TO_EMOJIS = {
+        utils.MatchmakingStatus.READY: EMOJIS["ready"],
+        utils.MatchmakingStatus.WAIT_FOR_ME: EMOJIS["wait_for_me"],
+        utils.MatchmakingStatus.MAYBE: EMOJIS["maybe"],
+        utils.MatchmakingStatus.IGNORED: EMOJIS["ignore"],
     }
 
     BUTTONS = {
-        "match_ready": "🔵 Sono pronto per iniziare!",
-        "match_wait_for_me": "🕒 Ci sarò, aspettatemi!",
-        "match_maybe": "❓ Forse vengo, se non ci sono fate senza di me.",
-        "match_ignore": "❌ Non ci sarò.",
-        "match_close": "🚩 ADMIN: Avvia la partita",
-        "match_cancel": "🗑 ADMIN: Annulla la partita"
+        "match_ready": f"{EMOJIS['ready']} Sono pronto per iniziare!",
+        "match_wait_for_me": f"{EMOJIS['wait_for_me']} Ci sarò, aspettatemi!",
+        "match_maybe": f"{EMOJIS['maybe']} Forse vengo, se non ci sono fate senza di me.",
+        "match_ignore": f"{EMOJIS['ignore']} Non ci sarò.",
+        "match_close": f"{EMOJIS['close']} ADMIN: Avvia la partita",
+        "match_cancel": f"{EMOJIS['cancel']} ADMIN: Annulla la partita"
+    }
+
+    TICKER_TEXT = {
+        "match_ready": f"{EMOJIS['ready']} Hai detto che sei pronto per giocare!",
+        "match_wait_for_me": f"{EMOJIS['wait_for_me']} Hai chiesto agli altri di aspettarti.",
+        "match_maybe": f"{EMOJIS['maybe']} Hai detto che forse ci sarai.",
+        "match_ignore": f"{EMOJIS['ignore']} Non hai intenzione di partecipare.",
+        "match_close": f"{EMOJIS['close']} Hai notificato tutti che la partita sta iniziando.",
+        "match_cancel": f"{EMOJIS['cancel']} Hai annullato la partita."
+    }
+
+    GAME_START = {
+        utils.MatchmakingStatus.READY: "🔵 Che <b>{match_title}</b> abbia inizio!",
+        utils.MatchmakingStatus.WAIT_FOR_ME: "🕒 Sbrigati! <b>{match_title}</b> sta per iniziare!",
+        utils.MatchmakingStatus.MAYBE: "❓ <b>{match_title}</b> sta iniziando. Se vuoi partecipare, fai in fretta!",
     }
 
     class ERRORS:
