@@ -85,9 +85,6 @@ def command(func: "function"):
         except TimedOut:
             logger.warning(f"Telegram timed out in {update}")
         except Exception:
-            # noinspection PyUnreachableCode
-            if __debug__:
-                raise
             logger.error(f"Critical error: {sys.exc_info()}")
             # noinspection PyBroadException
             try:
@@ -117,9 +114,6 @@ def database_access(func: "function"):
             session = db.Session()
             return func(bot, update, session)
         except Exception:
-            # noinspection PyUnreachableCode
-            if __debug__:
-                raise
             logger.error(f"Database error: {sys.exc_info()}")
             sentry.captureException()
         finally:
@@ -708,15 +702,38 @@ def cmd_markov(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, sentence)
 
 
+def exec_roll(roll) -> str:
+    result = int(roll.evaluate())
+    string = ""
+    if isinstance(roll, dice.elements.Dice):
+        string += f"<b>{result}</b>"
+    else:
+        for index, operand in enumerate(roll.original_operands):
+            if operand != roll.operands[index]:
+                string += f"<i>{roll.operands[index]}</i>"
+            else:
+                string += f"{operand}"
+            if index + 1 != len(roll.original_operands):
+
+                string += strings.ROLL.SYMBOLS[roll.__class__]
+        string += f"=<b>{result}</b>"
+    return string
+
+
 @command
 def cmd_roll(bot: telegram.Bot, update: telegram.Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
-        result = dice.roll(f"{dice_string}t")
+        roll = dice.roll(f"{dice_string}", raw=True)
     except dice.DiceBaseException:
         reply(bot, update, strings.ROLL.ERRORS.INVALID_SYNTAX)
         return
-    reply(bot, update, strings.ROLL.SUCCESS, result=result)
+    try:
+        result = exec_roll(roll)
+    except dice.DiceFatalException:
+        reply(bot, update, strings.ROLL.ERRORS.DICE_ERROR)
+        return
+    reply(bot, update, strings.ROLL.SUCCESS, result=result, ignore_escaping=True)
 
 
 @command

@@ -1,4 +1,5 @@
 from db import MatchmakingStatus
+import dice
 import typing
 
 
@@ -151,8 +152,31 @@ class MATCHMAKING:
 class ROLL:
     SUCCESS = "🎲 {result}"
 
+    SYMBOLS = {
+        dice.elements.Div: "/",
+        dice.elements.Mul: "*",
+        dice.elements.Sub: "-",
+        dice.elements.Add: "+",
+        dice.elements.Modulo: "%",
+        dice.elements.AddEvenSubOdd: "+-",
+        dice.elements.Highest: "h",
+        dice.elements.Lowest: "l",
+        dice.elements.Middle: "m",
+        dice.elements.Again: "a",
+        dice.elements.Successes: "e",
+        dice.elements.SuccessFail: "f",
+        dice.elements.ArrayAdd: ".+",
+        dice.elements.ArraySub: ".-",
+        dice.elements.Array: ",",
+        dice.elements.Extend: "|",
+        dice.elements.Reroll: "r",
+        dice.elements.Explode: "x",
+        dice.elements.ForceReroll: "rr"
+    }
+
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!"
+        INVALID_SYNTAX = "⚠ Sintassi del tiro di dadi non valida."
+        DICE_ERROR = "⚠ Il tiro di dadi è fallito."
 
 
 # Ship creator
