@@ -172,7 +172,7 @@ def cmd_cv(bot: telegram.Bot, update: telegram.Update):
     else:
         discord_connection.send("get cv")
     message = discord_connection.recv()
-    bot.send_message(update.message.chat.id, message, disable_web_page_preview=True, parse_mode="HTML")
+    reply(bot, update, message)
 
 
 @command
