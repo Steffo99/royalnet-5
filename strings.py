@@ -23,13 +23,28 @@ class TELEGRAM:
 
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
-        ROYALNET_NOT_LINKED = "⚠ Il tuo account Telegram non è connesso a Royalnet! Connettilo con <code>/link (NomeUtenteRoyalnet)</code>."
         UNAUTHORIZED_USER = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
         UNAUTHORIZED_GROUP = "⚠ Non sono autorizzato a inviare messaggi in <i>{group}</i>.\n@Steffo, aggiungimi al gruppo o concedimi i permessi!"
         INACTIVE_BRIDGE = "⚠ Il collegamento tra Telegram e Discord non è attivo al momento."
 
 
 PONG = "🏓 Pong!"
+
+
+# Ah, non lo so io.
+class AHNONLOSOIO:
+    ONCE = "😐 Ah, non lo so io!"
+    AGAIN = "😐 Ah, non lo so nemmeno io..."
+
+
+# Ciao Ruozi!
+class CIAORUOZI:
+    THE_LEGEND_HIMSELF = "👋 Ciao me!"
+    SOMEBODY_ELSE = "👋 Ciao Ruozi!"
+
+
+# The /color meme, from Octeon
+COLOR = "<i>I am sorry, unknown error occured during working with your request, Admin were notified</i>"
 
 
 # Diario
@@ -64,9 +79,10 @@ class LINK:
     SUCCESS = "✅ Collegamento riuscito!"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi: <code>/link (NomeUtenteRoyalnet)</code>"
-        NOT_FOUND = "⚠ Non esiste nessun account Royalnet con quel nome."
+        INVALID_SYNTAX = "⚠ Non hai specificato un username!\nSintassi: <code>/link (username)</code>"
+        NOT_FOUND = "⚠ Non esiste nessun account Royalnet con quel nome.\nNota: gli username sono case-sensitive, e iniziano sempre con una maiuscola!"
         ALREADY_EXISTING = "⚠ Questo account è già collegato a un account Royalnet."
+        ROYALNET_NOT_LINKED = "⚠ Il tuo account Telegram non è connesso a Royalnet! Connettilo con <code>/link (username)</code>."
 
 
 # Markov strings
@@ -117,6 +133,10 @@ class SHIP:
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato correttamente i due nomi!\nSintassi corretta: <code>/ship (nome) (nome)</code>"
         INVALID_NAMES = "⚠ I nomi specificati non sono validi.\nRiprova con dei nomi diversi!"
+
+
+# Secondo me, è colpa delle stringhe.
+SMECDS = "🤔 Secondo me, è colpa {ds}."
 
 
 # Wiki notifications

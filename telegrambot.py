@@ -192,32 +192,31 @@ def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 @command
 def cmd_color(bot: telegram.Bot, update: telegram.Update):
-    bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request,"
-                                             " Admin were notified")
+    reply(bot, update, strings.COLOR)
 
 
 @command
 def cmd_smecds(bot: telegram.Bot, update: telegram.Update):
     ds = random.sample(stagismo.listona, 1)[0]
-    bot.send_message(update.message.chat.id, f"Secondo me, è colpa {ds}.")
+    reply(bot, update, strings.SMECDS, ds=ds)
 
 
 @command
 def cmd_ciaoruozi(bot: telegram.Bot, update: telegram.Update):
     if update.message.from_user.username.lstrip("@") == "MeStakes":
-        bot.send_message(update.message.chat.id, "Ciao me!")
+        reply(bot, update, strings.CIAORUOZI.THE_LEGEND_HIMSELF)
     else:
-        bot.send_message(update.message.chat.id, "Ciao Ruozi!")
+        reply(bot, update, strings.CIAORUOZI.SOMEBODY_ELSE)
 
 
 @command
 def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update):
     if update.message.reply_to_message is not None and update.message.reply_to_message.text in [
-        "/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!", "Ah, non lo so neppure io!"
+        "/ahnonlosoio", "/ahnonlosoio@royalgamesbot", strings.AHNONLOSOIO.ONCE, strings.AHNONLOSOIO.AGAIN
     ]:
-        bot.send_message(update.message.chat.id, "Ah, non lo so neppure io!")
+        reply(bot, update, strings.AHNONLOSOIO.AGAIN)
     else:
-        bot.send_message(update.message.chat.id, "Ah, non lo so io!")
+        reply(bot, update, strings.AHNONLOSOIO.ONCE)
 
 
 @command
@@ -225,10 +224,7 @@ def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update):
 def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
-        bot.send_message(update.message.chat.id,
-                         "⚠ Il tuo account Telegram non è registrato al RYGdb!\n\n"
-                         "Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
-                         parse_mode="Markdown")
+        reply(bot, update, strings.LINK.ERRORS.ROYALNET_NOT_LINKED)
         return
     try:
         reason = update.message.text.split(" ", 1)[1]
@@ -245,7 +241,7 @@ def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session
 def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
-        reply(bot, update, strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED)
+        reply(bot, update, strings.LINK.ERRORS.ROYALNET_NOT_LINKED)
         return
     try:
         text = update.message.text.split(" ", 1)[1]
@@ -365,7 +361,7 @@ def cmd_regex(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
-        reply(bot, update, strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED)
+        reply(bot, update, strings.LINK.ERRORS.ROYALNET_NOT_LINKED)
         return
     match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
                      update.message.text)
@@ -407,7 +403,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update, session: db.Se
         user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
         if user is None:
             bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                      text=strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED,
+                                      text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
                                       parse_mode="Markdown")
             return
         question = session.query(db.VoteQuestion)\
@@ -439,7 +435,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update, session: db.Se
         if user is None:
             bot.answer_callback_query(update.callback_query.id,
                                       show_alert=True,
-                                      text=strings.TELEGRAM.ERRORS.ROYALNET_NOT_LINKED,
+                                      text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
                                       parse_mode="Markdown")
             return
         match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
