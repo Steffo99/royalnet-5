@@ -6,6 +6,6 @@ diario.json
 libopus-0.dll
 music.opus
 opusfiles/
-ignored/*
+ignored/
 markovmodel.json
-prova.py
+logs/
