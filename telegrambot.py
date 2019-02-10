@@ -388,113 +388,128 @@ def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     session.commit()
 
 
-@command
-@database_access
-def on_callback_query(bot: telegram.Bot, update: telegram.Update, session: db.Session):
-    if update.callback_query.data.startswith("vote_"):
-        if update.callback_query.data == "vote_yes":
-            status = db.VoteChoices.YES
-            emoji = "🔵"
-        elif update.callback_query.data == "vote_no":
-            status = db.VoteChoices.NO
-            emoji = "🔴"
-        elif update.callback_query.data == "vote_abstain":
-            status = db.VoteChoices.ABSTAIN
-            emoji = "⚫️"
-        else:
-            raise NotImplementedError()
-        user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
-        if user is None:
-            bot.answer_callback_query(update.callback_query.id, show_alert=True,
-                                      text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
-                                      parse_mode="Markdown")
-            return
-        question = session.query(db.VoteQuestion)\
-                          .filter_by(message_id=update.callback_query.message.message_id)\
-                          .one()
-        answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
-        if answer is None:
-            answer = db.VoteAnswer(question=question, choice=status, user=user)
-            session.add(answer)
-            bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
-        elif answer.choice == status:
-            session.delete(answer)
-            bot.answer_callback_query(update.callback_query.id, text=f"Hai ritratto il tuo voto.", cache_time=1)
-        else:
-            answer.choice = status
-            bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
-                                      cache_time=1)
-        session.commit()
-        inline_keyboard = IKMarkup([[IKButton("🔵 Sì", callback_data="vote_yes")],
-                                    [IKButton("🔴 No", callback_data="vote_no")],
-                                    [IKButton("⚫️ Astieniti", callback_data="vote_abstain")]])
-        bot.edit_message_text(message_id=update.callback_query.message.message_id,
-                              chat_id=update.callback_query.message.chat.id,
-                              text=question.generate_text(session),
-                              reply_markup=inline_keyboard,
-                              parse_mode="HTML")
-    elif update.callback_query.data.startswith("match_"):
-        user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
-        if user is None:
-            bot.answer_callback_query(update.callback_query.id,
-                                      show_alert=True,
-                                      text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
-                                      parse_mode="Markdown")
-            return
-        match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
-        if update.callback_query.data == "match_close":
-            if match.creator != user:
-                bot.answer_callback_query(update.callback_query.id,
-                                          show_alert=True,
-                                          text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
-                return
-            match.closed = True
-            for player in match.players:
-                if player.status >= 1:
-                    reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[player.status], **match.format_dict())
-        elif update.callback_query.data == "match_cancel":
-            if not (match.creator == user or user.telegram_id == 25167391):
-                bot.answer_callback_query(update.callback_query.id,
-                                          show_alert=True,
-                                          text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
-                return
-            match.closed = True
-        status = {
-            "match_ready": db.MatchmakingStatus.READY,
-            "match_wait_for_me": db.MatchmakingStatus.WAIT_FOR_ME,
-            "match_maybe": db.MatchmakingStatus.MAYBE,
-            "match_ignore": db.MatchmakingStatus.IGNORED,
-            "match_close": None,
-            "match_cancel": None,
-        }.get(update.callback_query.data)
-        if status:
-            if match.closed:
-                bot.answer_callback_query(update.callback_query.id,
-                                          show_alert=True,
-                                          text=strings.MATCHMAKING.ERRORS.MATCH_CLOSED)
-                return
-            player = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
-            if player is None:
-                player = db.MatchPartecipation(match=match, status=status.value, user=user)
-                session.add(player)
+def on_callback_query(bot: telegram.Bot, update: telegram.Update):
+    try:
+        session = db.Session()
+        if update.callback_query.data.startswith("vote_"):
+            if update.callback_query.data == "vote_yes":
+                status = db.VoteChoices.YES
+                emoji = "🔵"
+            elif update.callback_query.data == "vote_no":
+                status = db.VoteChoices.NO
+                emoji = "🔴"
+            elif update.callback_query.data == "vote_abstain":
+                status = db.VoteChoices.ABSTAIN
+                emoji = "⚫️"
             else:
-                player.status = status.value
-        session.commit()
-        bot.answer_callback_query(update.callback_query.id,
-                                  text=strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data],
-                                  cache_time=1)
-        if not match.closed:
-            inline_keyboard = IKMarkup([([IKButton(strings.MATCHMAKING.BUTTONS[key], callback_data=key)]) for key in strings.MATCHMAKING.BUTTONS])
-        else:
-            inline_keyboard = None
-        try:
+                raise NotImplementedError()
+            user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
+            if user is None:
+                bot.answer_callback_query(update.callback_query.id, show_alert=True,
+                                          text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
+                                          parse_mode="Markdown")
+                return
+            question = session.query(db.VoteQuestion)\
+                              .filter_by(message_id=update.callback_query.message.message_id)\
+                              .one()
+            answer = session.query(db.VoteAnswer).filter_by(question=question, user=user).one_or_none()
+            if answer is None:
+                answer = db.VoteAnswer(question=question, choice=status, user=user)
+                session.add(answer)
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai votato {emoji}.", cache_time=1)
+            elif answer.choice == status:
+                session.delete(answer)
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai ritratto il tuo voto.", cache_time=1)
+            else:
+                answer.choice = status
+                bot.answer_callback_query(update.callback_query.id, text=f"Hai cambiato il tuo voto in {emoji}.",
+                                          cache_time=1)
+            session.commit()
+            inline_keyboard = IKMarkup([[IKButton("🔵 Sì", callback_data="vote_yes")],
+                                        [IKButton("🔴 No", callback_data="vote_no")],
+                                        [IKButton("⚫️ Astieniti", callback_data="vote_abstain")]])
             bot.edit_message_text(message_id=update.callback_query.message.message_id,
-                                  chat_id=config["Telegram"]["announcement_group"],
-                                  text=match.generate_text(session),
+                                  chat_id=update.callback_query.message.chat.id,
+                                  text=question.generate_text(session),
                                   reply_markup=inline_keyboard,
                                   parse_mode="HTML")
-        except BadRequest:
-            pass
+        elif update.callback_query.data.startswith("match_"):
+            user = session.query(db.Telegram).filter_by(telegram_id=update.callback_query.from_user.id).one_or_none()
+            if user is None:
+                bot.answer_callback_query(update.callback_query.id,
+                                          show_alert=True,
+                                          text=strings.LINK.ERRORS.ROYALNET_NOT_LINKED,
+                                          parse_mode="Markdown")
+                return
+            match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
+            if update.callback_query.data == "match_close":
+                if match.creator != user:
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
+                    return
+                match.closed = True
+                for player in match.players:
+                    if player.status >= 1:
+                        reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[player.status], **match.format_dict())
+            elif update.callback_query.data == "match_cancel":
+                if not (match.creator == user or user.telegram_id == 25167391):
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
+                    return
+                match.closed = True
+            status = {
+                "match_ready": db.MatchmakingStatus.READY,
+                "match_wait_for_me": db.MatchmakingStatus.WAIT_FOR_ME,
+                "match_maybe": db.MatchmakingStatus.MAYBE,
+                "match_ignore": db.MatchmakingStatus.IGNORED,
+                "match_close": None,
+                "match_cancel": None,
+            }.get(update.callback_query.data)
+            if status:
+                if match.closed:
+                    bot.answer_callback_query(update.callback_query.id,
+                                              show_alert=True,
+                                              text=strings.MATCHMAKING.ERRORS.MATCH_CLOSED)
+                    return
+                player = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
+                if player is None:
+                    player = db.MatchPartecipation(match=match, status=status.value, user=user)
+                    session.add(player)
+                else:
+                    player.status = status.value
+            session.commit()
+            bot.answer_callback_query(update.callback_query.id,
+                                      text=strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data],
+                                      cache_time=1)
+            if not match.closed:
+                inline_keyboard = IKMarkup([([IKButton(strings.MATCHMAKING.BUTTONS[key], callback_data=key)]) for key in strings.MATCHMAKING.BUTTONS])
+            else:
+                inline_keyboard = None
+            try:
+                bot.edit_message_text(message_id=update.callback_query.message.message_id,
+                                      chat_id=config["Telegram"]["announcement_group"],
+                                      text=match.generate_text(session),
+                                      reply_markup=inline_keyboard,
+                                      parse_mode="HTML")
+            except BadRequest:
+                pass
+    except Exception:
+        sentry.user_context({
+            "id": update.effective_user.id,
+            "telegram": {
+                "username": update.effective_user.username,
+                "first_name": update.effective_user.first_name,
+                "last_name": update.effective_user.last_name
+            }
+        })
+        sentry.extra_context({
+            "update": update.to_dict()
+        })
+        sentry.captureException()
+    finally:
+        session.close()
 
 
 @command
