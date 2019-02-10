@@ -164,7 +164,7 @@ def cmd_link(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 @command
 def cmd_cv(bot: telegram.Bot, update: telegram.Update):
     if discord_connection is None:
-        reply(bot, update, strings.TELEGRAM.ERRORS.INACTIVE_BRIDGE)
+        reply(bot, update, strings.BRIDGE.ERRORS.INACTIVE_BRIDGE)
         return
     # dirty hack as usual
     if update.message.text.endswith("full"):
@@ -523,10 +523,7 @@ def cmd_eat(bot: telegram.Bot, update: telegram.Update):
     except IndexError:
         reply(bot, update, strings.EAT.ERRORS.INVALID_SYNTAX)
         return
-    if "tonnuooooooro" in food.lower():
-        reply(bot, update, strings.EAT.OUIJA, food=food)
-        return
-    reply(bot, update, strings.EAT.NORMAL, food=food)
+    reply(bot, update, strings.EAT.FOODS.get(food.lower(), strings.EAT.FOODS["_default"]), food=food)
 
 
 @command
@@ -552,20 +549,20 @@ def cmd_ship(bot: telegram.Bot, update: telegram.Update):
 
 @command
 def cmd_bridge(bot: telegram.Bot, update: telegram.Update):
+    if discord_connection is None:
+        reply(bot, update, strings.BRIDGE.ERRORS.INACTIVE_BRIDGE)
+        return
     try:
         data = update.message.text.split(" ", 1)[1]
     except IndexError:
-        bot.send_message(update.message.chat.id,
-                         "⚠ Non hai specificato un comando!\n"
-                         "Sintassi corretta: `/bridge <comando> <argomenti>`",
-                         parse_mode="Markdown")
+        reply(bot, update, strings.BRIDGE.ERRORS.INVALID_SYNTAX)
         return
     discord_connection.send(f"!{data}")
     result = discord_connection.recv()
     if result == "error":
-        bot.send_message(update.message.chat.id, "⚠ Il comando specificato non esiste.")
+        reply(bot, update, strings.BRIDGE.FAILURE)
     if result == "success":
-        bot.send_message(update.message.chat.id, "⏩ Comando eseguito su Discord.")
+        reply(bot, update, strings.BRIDGE.SUCCESS)
 
 
 def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, datetime.datetime]:

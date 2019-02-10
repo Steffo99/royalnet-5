@@ -1350,7 +1350,7 @@ class BindingOfIsaacRun(Base):
     # time = Column(???)
 
     def __repr__(self):
-        return f"<db.BindingOfIsaacRun {self.steam_id}: {self.score}>"
+        return f"<db.BindingOfIsaacRun {self.player_id}: {self.score}>"
 
 
 # If run as script, create all the tables in the db

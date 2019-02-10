@@ -25,7 +25,6 @@ class TELEGRAM:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
         UNAUTHORIZED_USER = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
         UNAUTHORIZED_GROUP = "⚠ Non sono autorizzato a inviare messaggi in <i>{group}</i>.\n@Steffo, aggiungimi al gruppo o concedimi i permessi!"
-        INACTIVE_BRIDGE = "⚠ Il collegamento tra Telegram e Discord non è attivo al momento."
 
 
 PONG = "🏓 Pong!"
@@ -35,6 +34,16 @@ PONG = "🏓 Pong!"
 class AHNONLOSOIO:
     ONCE = "😐 Ah, non lo so io!"
     AGAIN = "😐 Ah, non lo so nemmeno io..."
+
+
+# Bridge commands between Discord and Telegram
+class BRIDGE:
+    SUCCESS = "✅ Comando inoltrato a Discord."
+    FAILURE = "❎ Errore nell'esecuzione del comando su Discord."
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato un comando!\nSintassi: <code>/bridge (comando)</code>"
+        INACTIVE_BRIDGE = "⚠ Il collegamento tra Telegram e Discord non è attivo al momento."
 
 
 # Ciao Ruozi!
@@ -67,8 +76,20 @@ class DIARIOSEARCH:
 
 # Eat!
 class EAT:
-    NORMAL = "🍗 Hai mangiato {food}!"
-    OUIJA = "👻 Il {food} che hai mangiato era posseduto.\nSpooky!"
+    FOODS = {
+        "_default": "🍗 Hai mangiato {food}!\n<i>Ma non succede nulla.</i>",
+        "tonnuooooooro": "👻 Il {food} che hai mangiato era posseduto.\n<i>Spooky!</i>",
+        "uranio": "☢️ L'{food} che hai mangiato era radioattivo.\n<i>Stai brillando di verde!</i>",
+        "pollo": '🍗 Il {food} che hai appena mangiato proveniva <a href="https://store.steampowered.com/app/353090/Chicken_Invaders_5/">dallo spazio</a>.\n<i>Coccodè?</i>',
+        "ragno": "🕸 Hai mangiato un {food}.\n<i>Ewww!</i>",
+        "curry": "🔥 BRUCIAAAAAAAAAA! Il {food} era piccantissimo!\n<i>Stai sputando fiamme!</i>",
+        "torta": "⬜️ Non hai mangiato niente.\n<i>La {food} è una menzogna!</i>",
+        "cake": "⬜️ Non hai mangiato niente.\n<i>The {food} is a lie!</i>",
+        "biscotto": "🍪 Hai mangiato un {food} di contrabbando.\n<i>L'Inquisizione non lo saprà mai!</i>",
+        "biscotti": "🍪 Hai mangiato tanti {food} di contrabbando.\n<i>Attento! L'Inquisizione è sulle tue tracce!</i>",
+        "tango": "🌳 Hai mangiato un {food}, e un albero insieme ad esso.\n<i>Senti il tuo corpo curare le tue ferite.</i>",
+        "sasso": "🥌 Il {food} che hai mangiato era duro come un {food}\n<i>Stai soffrendo di indigestione!</i>"
+    }
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato cosa mangiare!\nSintassi: <code>/eat (cibo)</code>"
@@ -121,9 +142,9 @@ class MATCHMAKING:
     }
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] per (gamename) \\n[descrizione]</pre>"
+        INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <pre>/mm [minplayers-][maxplayers] ['per'] (gamename) \\n[descrizione]</pre>"
         NOT_ADMIN = "⚠ Non sei il creatore di questo match!"
-        MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
+        MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato."
 
 
 # Dice roller
