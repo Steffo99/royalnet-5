@@ -81,8 +81,7 @@ def command(func: "function"):
         # noinspection PyBroadException
         try:
             bot.send_chat_action(update.message.chat.id, telegram.ChatAction.TYPING)
-            session = db.Session()
-            return func(bot, update, session)
+            return func(bot, update)
         except TimedOut:
             logger.warning(f"Telegram timed out in {update}")
         except Exception:
@@ -107,47 +106,60 @@ def command(func: "function"):
                 "update": update.to_dict()
             })
             sentry.captureException()
+    return new_func
+
+
+def database_access(func: "function"):
+    def new_func(bot: telegram.Bot, update: telegram.Update):
+        try:
+            session = db.Session()
+            return func(bot, update, session)
+        except Exception:
+            if __debug__:
+                raise
+            logger.error(f"Database error: {sys.exc_info()}")
+            sentry.captureException()
         finally:
-            session.close()
+            try:
+                session.close()
+            except Exception:
+                pass
     return new_func
 
 
 @command
-def cmd_ping(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_ping(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, strings.PONG)
 
 
 @command
+@database_access
 def cmd_link(bot: telegram.Bot, update: telegram.Update, session: db.Session):
-    session = db.Session()
     try:
-        try:
-            username = update.message.text.split(" ", 1)[1]
-        except IndexError:
-            reply(bot, update, strings.LINK.ERRORS.INVALID_SYNTAX)
-            session.close()
-            return
-        try:
-            t = db.Telegram.create(session,
-                                   royal_username=username,
-                                   telegram_user=update.message.from_user)
-        except errors.NotFoundError:
-            reply(bot, update, strings.LINK.ERRORS.NOT_FOUND)
-            session.close()
-            return
-        except errors.AlreadyExistingError:
-            reply(bot, update, strings.LINK.ERRORS.ALREADY_EXISTING)
-            session.close()
-            return
-        session.add(t)
-        session.commit()
-        reply(bot, update, strings.LINK.SUCCESS)
-    finally:
+        username = update.message.text.split(" ", 1)[1]
+    except IndexError:
+        reply(bot, update, strings.LINK.ERRORS.INVALID_SYNTAX)
         session.close()
+        return
+    try:
+        t = db.Telegram.create(session,
+                               royal_username=username,
+                               telegram_user=update.message.from_user)
+    except errors.NotFoundError:
+        reply(bot, update, strings.LINK.ERRORS.NOT_FOUND)
+        session.close()
+        return
+    except errors.AlreadyExistingError:
+        reply(bot, update, strings.LINK.ERRORS.ALREADY_EXISTING)
+        session.close()
+        return
+    session.add(t)
+    session.commit()
+    reply(bot, update, strings.LINK.SUCCESS)
 
 
 @command
-def cmd_cv(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_cv(bot: telegram.Bot, update: telegram.Update):
     if discord_connection is None:
         reply(bot, update, strings.TELEGRAM.ERRORS.INACTIVE_BRIDGE)
         return
@@ -161,7 +173,7 @@ def cmd_cv(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_cast(bot: telegram.Bot, update: telegram.Update):
     try:
         spell: str = update.message.text.split(" ", 1)[1]
     except IndexError:
@@ -182,19 +194,19 @@ def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_color(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_color(bot: telegram.Bot, update: telegram.Update):
     bot.send_message(update.message.chat.id, "I am sorry, unknown error occured during working with your request,"
                                              " Admin were notified")
 
 
 @command
-def cmd_smecds(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_smecds(bot: telegram.Bot, update: telegram.Update):
     ds = random.sample(stagismo.listona, 1)[0]
     bot.send_message(update.message.chat.id, f"Secondo me, è colpa {ds}.")
 
 
 @command
-def cmd_ciaoruozi(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_ciaoruozi(bot: telegram.Bot, update: telegram.Update):
     if update.message.from_user.username.lstrip("@") == "MeStakes":
         bot.send_message(update.message.chat.id, "Ciao me!")
     else:
@@ -202,7 +214,7 @@ def cmd_ciaoruozi(bot: telegram.Bot, update: telegram.Update, session: db.Sessio
 
 
 @command
-def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update):
     if update.message.reply_to_message is not None and update.message.reply_to_message.text in [
         "/ahnonlosoio", "/ahnonlosoio@royalgamesbot", "Ah, non lo so io!", "Ah, non lo so neppure io!"
     ]:
@@ -212,31 +224,27 @@ def cmd_ahnonlosoio(bot: telegram.Bot, update: telegram.Update, session: db.Sess
 
 
 @command
+@database_access
 def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session):
-    session = db.Session()
+    user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
+    if user is None:
+        bot.send_message(update.message.chat.id,
+                         "⚠ Il tuo account Telegram non è registrato al RYGdb!\n\n"
+                         "Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
+                         parse_mode="Markdown")
+        return
     try:
-        user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
-        if user is None:
-            bot.send_message(update.message.chat.id,
-                             "⚠ Il tuo account Telegram non è registrato al RYGdb!\n\n"
-                             "Registrati con `/register@royalgamesbot <nomeutenteryg>`.",
-                             parse_mode="Markdown")
-            return
-        try:
-            reason = update.message.text.split(" ", 1)[1]
-        except IndexError:
-            reason = None
-        br = db.BaluRage(royal_id=user.royal_id, reason=reason)
-        session.add(br)
-        session.commit()
-        bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
-    except Exception:
-        raise
-    finally:
-        session.close()
+        reason = update.message.text.split(" ", 1)[1]
+    except IndexError:
+        reason = None
+    br = db.BaluRage(royal_id=user.royal_id, reason=reason)
+    session.add(br)
+    session.commit()
+    bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
 
 
 @command
+@database_access
 def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
@@ -267,6 +275,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
+@database_access
 def cmd_vote(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
@@ -320,6 +329,7 @@ def generate_search_message(term, entries):
 
 
 @command
+@database_access
 def cmd_search(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         query = update.message.text.split(" ", 1)[1]
@@ -337,6 +347,7 @@ def cmd_search(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
+@database_access
 def cmd_regex(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         query = update.message.text.split(" ", 1)[1]
@@ -352,6 +363,7 @@ def cmd_regex(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
+@database_access
 def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     user = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if user is None:
@@ -380,6 +392,7 @@ def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
+@database_access
 def on_callback_query(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     if update.callback_query.data.startswith("vote_"):
         if update.callback_query.data == "vote_yes":
@@ -488,7 +501,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update, session: db.Se
 
 
 @command
-def cmd_eat(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_eat(bot: telegram.Bot, update: telegram.Update):
     try:
         food: str = update.message.text.split(" ", 1)[1].capitalize()
     except IndexError:
@@ -501,7 +514,7 @@ def cmd_eat(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_ship(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_ship(bot: telegram.Bot, update: telegram.Update):
     try:
         _, name_one, name_two = update.message.text.split(" ", 2)
     except ValueError:
@@ -522,7 +535,7 @@ def cmd_ship(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_bridge(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_bridge(bot: telegram.Bot, update: telegram.Update):
     try:
         data = update.message.text.split(" ", 1)[1]
     except IndexError:
@@ -640,6 +653,7 @@ def cmd_newevent(bot: telegram.Bot, update: telegram.Update, session: db.Session
 
 
 @command
+@database_access
 def cmd_calendar(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     next_events = session.query(db.Event).filter(db.Event.time > datetime.datetime.now()).order_by(db.Event.time).all()
     msg = "📆 Prossimi eventi\n"
@@ -655,7 +669,7 @@ def cmd_calendar(bot: telegram.Bot, update: telegram.Update, session: db.Session
 
 
 @command
-def cmd_markov(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_markov(bot: telegram.Bot, update: telegram.Update):
     if model is None:
         bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.NO_MODEL)
         return
@@ -682,7 +696,7 @@ def cmd_markov(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_roll(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_roll(bot: telegram.Bot, update: telegram.Update):
     dice_string = update.message.text.split(" ", 1)[1]
     try:
         result = dice.roll(f"{dice_string}t")
@@ -693,7 +707,7 @@ def cmd_roll(bot: telegram.Bot, update: telegram.Update, session: db.Session):
 
 
 @command
-def cmd_start(bot: telegram.Bot, update: telegram.Update, session: db.Session):
+def cmd_start(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, strings.TELEGRAM.BOT_STARTED)
 
 
