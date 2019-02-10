@@ -2,6 +2,7 @@
 # Requires SENTRY_AUTH_TOKEN and SENTRY_ORG set in .sentryclirc
 
 old=$(git rev-list HEAD -n 1)
+git stash
 git pull
 git lfs pull
 new=$(git rev-list HEAD -n 1)

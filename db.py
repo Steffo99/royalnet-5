@@ -5,8 +5,9 @@ import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+# noinspection PyUnresolvedReferences
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, \
-                       UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date
+                       UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
 from sqlalchemy.inspection import inspect
 import requests
 import errors
