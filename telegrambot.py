@@ -510,6 +510,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
         sentry.captureException()
     finally:
         try:
+            # noinspection PyUnboundLocalVariable
             session.close()
         except Exception:
             pass
