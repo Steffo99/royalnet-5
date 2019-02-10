@@ -173,19 +173,16 @@ def cmd_cv(bot: telegram.Bot, update: telegram.Update):
 
 
 @command
-def cmd_cast(bot: telegram.Bot, update: telegram.Update):
+@database_access
+def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         spell: str = update.message.text.split(" ", 1)[1]
     except IndexError:
         bot.send_message(update.message.chat.id, "⚠️ Non hai specificato nessun incantesimo!\n"
                                                  "Sintassi corretta: `/cast <nome_incantesimo>`", parse_mode="Markdown")
         return
-    # Open a new db session
-    session = db.Session()
     # Find a target for the spell
     target = random.sample(session.query(db.Telegram).all(), 1)[0]
-    # Close the session
-    session.close()
     # END
     bot.send_message(update.message.chat.id, cast.cast(spell_name=spell,
                                                        target_name=target.username if target.username is not None
