@@ -698,9 +698,9 @@ def cmd_roll(bot: telegram.Bot, update: telegram.Update):
     try:
         result = dice.roll(f"{dice_string}t")
     except dice.DiceBaseException:
-        bot.send_message(update.message.chat.id, "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!")
+        reply(bot, update, strings.ROLL.ERRORS.INVALID_SYNTAX)
         return
-    bot.send_message(update.message.chat.id, f"🎲 {result}")
+    reply(bot, update, strings.ROLL.SUCCESS, result=result)
 
 
 @command

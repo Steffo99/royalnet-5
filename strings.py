@@ -126,6 +126,14 @@ class MATCHMAKING:
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato!"
 
 
+# Dice roller
+class ROLL:
+    SUCCESS = "🎲 {result}"
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Il tiro dei dadi è fallito. Controlla la sintassi!"
+
+
 # Ship creator
 class SHIP:
     RESULT = "💕 {one} + {two} = <b>{result}</b>"
