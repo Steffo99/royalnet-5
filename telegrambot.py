@@ -509,7 +509,10 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
         })
         sentry.captureException()
     finally:
-        session.close()
+        try:
+            session.close()
+        except Exception:
+            pass
 
 
 @command
