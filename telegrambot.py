@@ -85,6 +85,7 @@ def command(func: "function"):
         except TimedOut:
             logger.warning(f"Telegram timed out in {update}")
         except Exception:
+            # noinspection PyUnreachableCode
             if __debug__:
                 raise
             logger.error(f"Critical error: {sys.exc_info()}")
@@ -109,12 +110,14 @@ def command(func: "function"):
     return new_func
 
 
+# noinspection PyUnresolvedReferences
 def database_access(func: "function"):
     def new_func(bot: telegram.Bot, update: telegram.Update):
         try:
             session = db.Session()
             return func(bot, update, session)
         except Exception:
+            # noinspection PyUnreachableCode
             if __debug__:
                 raise
             logger.error(f"Database error: {sys.exc_info()}")
@@ -363,7 +366,7 @@ def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     if user is None:
         reply(bot, update, strings.LINK.ERRORS.ROYALNET_NOT_LINKED)
         return
-    match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_\. ]+)(?:.*\n(.+))?",
+    match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_. ]+)(?:.*\n(.+))?",
                      update.message.text)
     if match is None:
         reply(bot, update, strings.MATCHMAKING.ERRORS.INVALID_SYNTAX)
@@ -665,7 +668,7 @@ def cmd_calendar(bot: telegram.Bot, update: telegram.Update, session: db.Session
 @command
 def cmd_markov(bot: telegram.Bot, update: telegram.Update):
     if model is None:
-        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.NO_MODEL)
+        reply(bot, update, strings.MARKOV.ERRORS.NO_MODEL)
         return
     try:
         first_word = update.message.text.split(" ")[1]
@@ -673,20 +676,20 @@ def cmd_markov(bot: telegram.Bot, update: telegram.Update):
         # Any word
         sentence = model.make_sentence(tries=1000)
         if sentence is None:
-            bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.GENERATION_FAILED)
+            reply(bot, update, strings.MARKOV.ERRORS.GENERATION_FAILED)
             return
-        bot.send_message(update.message.chat.id, sentence)
+        reply(bot, update, sentence)
         return
     # Specific word
     try:
         sentence = model.make_sentence_with_start(first_word, tries=1000)
     except KeyError:
-        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.MISSING_WORD)
+        reply(bot, update, strings.MARKOV.ERRORS.MISSING_WORD)
         return
     if sentence is None:
-        bot.send_message(update.message.chat.id, strings.MARKOV.ERRORS.SPECIFIC_WORD_FAILED)
+        reply(bot, update, strings.MARKOV.ERRORS.SPECIFIC_WORD_FAILED)
         return
-    bot.send_message(update.message.chat.id, sentence)
+    reply(bot, update, sentence)
 
 
 @command
