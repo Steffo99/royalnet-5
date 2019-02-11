@@ -855,7 +855,9 @@ class RoyalDiscordBot(discord.Client):
         async with self.main_channel.typing():
             with youtube_dl.YoutubeDL({"quiet": True,
                                        "ignoreerrors": True,
-                                       "simulate": True}) as ytdl:
+                                       "simulate": True,
+                                       "extract_flat": True,
+                                       "force_noplaylist": True}) as ytdl:
                 info = await loop.run_in_executor(executor,
                                                   functools.partial(ytdl.extract_info, url=url, download=False))
             if info is None:
@@ -866,7 +868,10 @@ class RoyalDiscordBot(discord.Client):
             if "entries" in info:
                 logger.debug(f"Playlist detected at {url}.")
                 for entry in info["entries"]:
-                    self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
+                    if entry["ie_key"] == "Youtube":
+                        self.video_queue.add(YoutubeDLVideo(f"https://youtu.be/{entry['id']}", enqueuer=enqueuer), index)
+                    else:
+                        self.video_queue.add(YoutubeDLVideo(entry["webpage_url"], enqueuer=enqueuer), index)
                 return
             logger.debug(f"Single video detected at {url}.")
             self.video_queue.add(YoutubeDLVideo(url, enqueuer=enqueuer), index)
@@ -1225,7 +1230,7 @@ class RoyalDiscordBot(discord.Client):
         ]
         await self.add_video_from_url(random.sample(videos, 1)[0], enqueuer=author)
         await channel.send(f"⚔️💀🤝")
-        logger.debug(f"Added random emojis? to the queue (EE2).")
+        logger.debug(f"Added randomkda to the queue (EE2).")
 
 
 def process(users_connection=None):
