@@ -32,7 +32,7 @@ sentry = raven.Client(config["Sentry"]["token"],
 telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
 
 
-def update_block(session: db.Session, block: list, delay: float=0, change_callback: typing.Callable=None):
+def update_block(session: db.Session, block: list, delay: float = 0, change_callback: typing.Callable = None):
     for item in block:
         logger.debug(f"Updating {repr(item)}.")
         t = time.clock()
