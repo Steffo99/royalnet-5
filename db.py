@@ -121,6 +121,7 @@ class Royal(Base, Mini):
     role = Column(String)
     fiorygi = Column(Integer, default=0)
     member_since = Column(Date)
+    special_title = Column(String)
 
     _mini_full_name = "Royalnet"
     _mini_name = "ryg"

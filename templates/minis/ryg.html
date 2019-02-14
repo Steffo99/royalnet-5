@@ -1,16 +1,64 @@
 <div class="game-panel">
-    <div class="game-grid ryg">
-        <div class="player">
-            <span class="player-name"><a href="https://ryg.steffo.eu/profile/{{ record.username }}">{{ record.username }}</a></span>
+    <div class="game-grid ryg role-{{ record.role }}">
+        <div class="username">
+            <a href="{{ url_for("page_profile", name=record.username) }}">{{ record.username }}</a>
         </div>
-        <div class="member-status">
-            <span class="role">{{ record.role }}</span> dal <span class="member-since">{% if record.member_since %}{{ record.member_since }}{% else %}????-??-??{% endif %}</span>
-        </div>
-        <div class="game-title fiorygi">
-            Fiorygi
-        </div>
-        <div class="game-score fiorygi">
-            {{ record.fiorygi }}
-        </div>
+        {% if record.special_title %}
+            <div class="special-title">
+                {{ record.special_title }}
+            </div>
+        {% endif %}
+        {% if record.username == "Steffo" %}
+            <div class="join-date-title steffo">
+                Admin dall'
+            </div>
+            <div class="join-date steffo">
+                inizio!
+            </div>
+        {% elif record.member_since %}
+            <div class="join-date-title member">
+                {{ record.role }} dal
+            </div>
+            <div class="join-date member">
+                {{ record.member_since.isoformat() }}
+            </div>
+        {% else %}
+            <div class="join-date-title unknown">
+                {{ record.role }} dal
+            </div>
+            <div class="join-date unknown" title="Data di unione sconosciuta.">
+                ---
+            </div>
+        {% endif %}
+        {% if record.wiki_edits|length > 0 %}
+            <div class="wiki-edits-title">
+                Contributi wiki
+            </div>
+            <div class="wiki-edits">
+                {{ record.wiki_edits|length }}
+            </div>
+        {% else %}
+            <div class="wiki-edits-title unknown">
+                Contributi wiki
+            </div>
+            <div class="wiki-edits unknown">
+                ---
+            </div>
+        {% endif %}
+        {% if record.fiorygi > 0 %}
+            <div class="fiorygi-title">
+                Fiorygi
+            </div>
+            <div class="fiorygi">
+                {{ record.fiorygi }}
+            </div>
+        {% else %}
+            <div class="fiorygi-title unknown">
+                Fiorygi
+            </div>
+            <div class="fiorygi unknown">
+                ---
+            </div>
+        {% endif %}
     </div>
 </div>
