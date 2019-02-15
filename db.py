@@ -1279,16 +1279,16 @@ class Match(Base):
 
     def format_dict(self) -> typing.Dict[str, str]:
         return {
-            "id": self.id,
+            "id": str(self.id),
             "timestamp": self.timestamp.isoformat(),
-            "creator_id": self.creator_id,
+            "creator_id": str(self.creator_id),
             "creator_name": self.creator.mention(),
             "match_title": self.match_title,
-            "match_desc": self.match_desc,
-            "min_players": self.min_players,
-            "max_players": self.max_players,
-            "active_players": self.active_players_count(),
-            "players": len(self.players)
+            "match_desc": self.match_desc if self.match_desc is not None else "",
+            "min_players": str(self.min_players) if self.min_players is not None else "",
+            "max_players": str(self.max_players) if self.max_players is not None else "",
+            "active_players": str(self.active_players_count()),
+            "players": str(len(self.players))
         }
 
 

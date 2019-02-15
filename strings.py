@@ -5,7 +5,7 @@ import typing
 
 class SafeDict(dict):
     def __missing__(self, key):
-        return key
+        return "{" + key + "}"
 
 
 def safely_format_string(string: str, words: typing.Dict[str, str] = None, ignore_escaping=False) -> str:
@@ -26,6 +26,7 @@ class TELEGRAM:
 
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
+        CRITICAL_ERROR_QUERY = "☢ ERRORE CRITICO!"
         UNAUTHORIZED_USER = "⚠ Non sono autorizzato a inviare messaggi a {mention}.\nPer piacere, {mention}, inviami un messaggio in privata!"
         UNAUTHORIZED_GROUP = "⚠ Non sono autorizzato a inviare messaggi in <i>{group}</i>.\n@Steffo, aggiungimi al gruppo o concedimi i permessi!"
 

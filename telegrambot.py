@@ -434,8 +434,8 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                     return
                 match.closed = True
                 for player in match.players:
-                    if player.status >= 1:
-                        reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[player.status], **match.format_dict())
+                    if int(player.status) >= 1:
+                        reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[int(player.status)], **match.format_dict())
             elif update.callback_query.data == "match_cancel":
                 if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
@@ -480,6 +480,13 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
             except BadRequest:
                 pass
     except Exception:
+        try:
+            bot.answer_callback_query(update.callback_query.id,
+                                      show_alert=True,
+                                      text=strings.TELEGRAM.ERRORS.CRITICAL_ERROR_QUERY)
+        except Exception:
+            pass
+        logger.error(f"Critical error: {sys.exc_info()}")
         sentry.user_context({
             "id": update.effective_user.id,
             "telegram": {
