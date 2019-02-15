@@ -8,7 +8,9 @@ class SafeDict(dict):
         return key
 
 
-def safely_format_string(string: str, words: typing.Dict[str, str], ignore_escaping=False) -> str:
+def safely_format_string(string: str, words: typing.Dict[str, str] = None, ignore_escaping=False) -> str:
+    if words is None:
+        words = {}
     if ignore_escaping:
         escaped = words
     else:
@@ -45,6 +47,12 @@ class BRIDGE:
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato un comando!\nSintassi: <code>/bridge (comando)</code>"
         INACTIVE_BRIDGE = "⚠ Il collegamento tra Telegram e Discord non è attivo al momento."
+
+
+# Random spellslinging
+class CAST:
+    class ERRORS:
+        NOT_YET_AVAILABLE = "⚠ Il nuovo cast non è ancora disponibile! Per un'anteprima sulle nuove funzioni, usa <code>/spell</code>."
 
 
 # Ciao Ruozi!
@@ -200,8 +208,20 @@ class SHIP:
     RESULT = "💕 {one} + {two} = <b>{result}</b>"
 
     class ERRORS:
-        INVALID_SYNTAX = "⚠ Non hai specificato correttamente i due nomi!\nSintassi corretta: <code>/ship (nome) (nome)</code>"
+        INVALID_SYNTAX = "⚠ Non hai specificato correttamente i due nomi!\nSintassi: <code>/ship (nome) (nome)</code>"
         INVALID_NAMES = "⚠ I nomi specificati non sono validi.\nRiprova con dei nomi diversi!"
+
+
+# Get information about a spell
+class SPELL:
+    HEADER = "🔍 La magia <b>{name}</b> ha le seguenti proprietà (v{version}):\n"
+    ACCURACY = "Precisione - <b>{accuracy}%</b>\n"
+    DAMAGE = "Danni - <b>{number}d{type}{constant}</b>\n"
+    TYPE = "Tipo - <b>{type}</b>\n"
+    REPEAT = "Multiattacco - <b>×{repeat}</b>\n"
+
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato la magia di cui vuoi conoscere i dettagli!\nSintassi: <code>/spell (nome)</code>"
 
 
 # Secondo me, è colpa delle stringhe.

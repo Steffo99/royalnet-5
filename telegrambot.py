@@ -92,7 +92,7 @@ def command(func: "function"):
             # noinspection PyBroadException
             try:
                 reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.CRITICAL_ERROR,
-                          exc_info=sys.exc_info())
+                          exc_info=repr(sys.exc_info()))
             except Exception:
                 logger.error(f"Double critical error: {sys.exc_info()}")
             sentry.user_context({
@@ -173,21 +173,8 @@ def cmd_cv(bot: telegram.Bot, update: telegram.Update):
 
 
 @command
-@database_access
-def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
-    try:
-        spell: str = update.message.text.split(" ", 1)[1]
-    except IndexError:
-        bot.send_message(update.message.chat.id, "⚠️ Non hai specificato nessun incantesimo!\n"
-                                                 "Sintassi corretta: `/cast <nome_incantesimo>`", parse_mode="Markdown")
-        return
-    # Find a target for the spell
-    target = random.sample(session.query(db.Telegram).all(), 1)[0]
-    # END
-    bot.send_message(update.message.chat.id, cast(spell_name=spell,
-                                                       target_name=target.username if target.username is not None
-                                                       else target.first_name, platform="telegram"),
-                     parse_mode="HTML")
+def cmd_cast(bot: telegram.Bot, update: telegram.Update):
+    reply(bot, update, strings.CAST.ERRORS.NOT_YET_AVAILABLE)
 
 
 @command
@@ -732,7 +719,6 @@ def cmd_dndmarkov(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, sentence)
 
 
-
 def exec_roll(roll) -> str:
     result = int(roll.evaluate())
     string = ""
@@ -772,6 +758,17 @@ def cmd_start(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, strings.TELEGRAM.BOT_STARTED)
 
 
+@command
+def cmd_spell(bot: telegram.Bot, update: telegram.Update):
+    try:
+        input: str = update.message.text.split(" ", 1)[1]
+    except IndexError:
+        reply(bot, update, strings.SPELL.ERRORS.INVALID_SYNTAX)
+        return
+    spell = cast.Spell(input)
+    reply(bot, update, spell.stringify())
+
+
 def process(arg_discord_connection):
     if arg_discord_connection is not None:
         global discord_connection
@@ -806,6 +803,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("search", cmd_search))
     u.dispatcher.add_handler(CommandHandler("regex", cmd_regex))
     u.dispatcher.add_handler(CommandHandler("start", cmd_start))
+    u.dispatcher.add_handler(CommandHandler("spell", cmd_spell))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
