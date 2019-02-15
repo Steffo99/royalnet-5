@@ -161,9 +161,9 @@ class MATCHMAKING:
     }
 
     GAME_START = {
-        utils.MatchmakingStatus.READY: "🔵 Che <b>{match_title}</b> abbia inizio!",
-        utils.MatchmakingStatus.WAIT_FOR_ME: "🕒 Sbrigati! <b>{match_title}</b> sta per iniziare!",
-        utils.MatchmakingStatus.MAYBE: "❓ <b>{match_title}</b> sta iniziando. Se vuoi partecipare, fai in fretta!",
+        int(utils.MatchmakingStatus.READY): "🔵 Che <b>{match_title}</b> abbia inizio!",
+        int(utils.MatchmakingStatus.WAIT_FOR_ME): "🕒 Sbrigati! <b>{match_title}</b> sta per iniziare!",
+        int(utils.MatchmakingStatus.MAYBE): "❓ <b>{match_title}</b> sta iniziando. Se vuoi partecipare, fai in fretta!",
     }
 
     class ERRORS:
