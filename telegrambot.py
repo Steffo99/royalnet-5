@@ -26,12 +26,17 @@ import time
 IKMarkup = telegram.InlineKeyboardMarkup
 IKButton = telegram.InlineKeyboardButton
 
-# Markov model
+# Markov models
 try:
-    with open("markovmodel.json") as file:
-        model = markovify.Text.from_json(file.read())
+    with open("markovmodels/default.json") as file:
+        default_model = markovify.Text.from_json(file.read())
 except Exception:
-    model = None
+    default_model = None
+try:
+    with open("markovmodels/dnd4.json") as file:
+        dnd4_model = markovify.Text.from_json(file.read())
+except Exception:
+    dnd4_model = None
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -677,14 +682,14 @@ def cmd_calendar(bot: telegram.Bot, update: telegram.Update, session: db.Session
 
 @command
 def cmd_markov(bot: telegram.Bot, update: telegram.Update):
-    if model is None:
+    if default_model is None:
         reply(bot, update, strings.MARKOV.ERRORS.NO_MODEL)
         return
     try:
         first_word = update.message.text.split(" ")[1]
     except IndexError:
         # Any word
-        sentence = model.make_sentence(tries=1000)
+        sentence = default_model.make_sentence(tries=1000)
         if sentence is None:
             reply(bot, update, strings.MARKOV.ERRORS.GENERATION_FAILED)
             return
@@ -692,7 +697,7 @@ def cmd_markov(bot: telegram.Bot, update: telegram.Update):
         return
     # Specific word
     try:
-        sentence = model.make_sentence_with_start(first_word, tries=1000)
+        sentence = default_model.make_sentence_with_start(first_word, tries=1000)
     except KeyError:
         reply(bot, update, strings.MARKOV.ERRORS.MISSING_WORD)
         return
@@ -700,6 +705,34 @@ def cmd_markov(bot: telegram.Bot, update: telegram.Update):
         reply(bot, update, strings.MARKOV.ERRORS.SPECIFIC_WORD_FAILED)
         return
     reply(bot, update, sentence)
+
+
+@command
+def cmd_dndmarkov(bot: telegram.Bot, update: telegram.Update):
+    if dnd4_model is None:
+        reply(bot, update, strings.MARKOV.ERRORS.NO_MODEL)
+        return
+    try:
+        first_word = update.message.text.split(" ")[1]
+    except IndexError:
+        # Any word
+        sentence = dnd4_model.make_sentence(tries=1000)
+        if sentence is None:
+            reply(bot, update, strings.MARKOV.ERRORS.GENERATION_FAILED)
+            return
+        reply(bot, update, sentence)
+        return
+    # Specific word
+    try:
+        sentence = dnd4_model.make_sentence_with_start(first_word, tries=1000)
+    except KeyError:
+        reply(bot, update, strings.MARKOV.ERRORS.MISSING_WORD)
+        return
+    if sentence is None:
+        reply(bot, update, strings.MARKOV.ERRORS.SPECIFIC_WORD_FAILED)
+        return
+    reply(bot, update, sentence)
+
 
 
 def exec_roll(roll) -> str:
@@ -767,6 +800,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("newevent", cmd_newevent))
     u.dispatcher.add_handler(CommandHandler("calendar", cmd_calendar))
     u.dispatcher.add_handler(CommandHandler("markov", cmd_markov))
+    u.dispatcher.add_handler(CommandHandler("dndmarkov", cmd_dndmarkov))
     u.dispatcher.add_handler(CommandHandler("roll", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("r", cmd_roll))
     u.dispatcher.add_handler(CommandHandler("mm", cmd_mm))

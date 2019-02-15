@@ -7,5 +7,5 @@ libopus-0.dll
 music.opus
 opusfiles/
 ignored/
-markovmodel.json
+markovmodels/
 logs/
