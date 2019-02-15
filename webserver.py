@@ -8,7 +8,6 @@ import markdown2
 import datetime
 # noinspection PyPackageRequirements
 import telegram
-import errors
 import sql_queries
 import random
 import re

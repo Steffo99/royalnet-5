@@ -10,8 +10,7 @@ from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey
                        UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
 from sqlalchemy.inspection import inspect
 import requests
-import errors
-from errors import NotFoundError, AlreadyExistingError, PrivateError
+from utils.errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
 import loldata
@@ -20,7 +19,7 @@ import sql_queries
 from flask import escape
 import configparser
 import typing
-from utils import MatchmakingStatus
+from utils import MatchmakingStatus, errors
 import strings
 if typing.TYPE_CHECKING:
     # noinspection PyPackageRequirements

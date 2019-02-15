@@ -2,8 +2,7 @@ import datetime
 import random
 import typing
 import db
-import errors
-import stagismo
+from utils import smecds, cast, errors
 # python-telegram-bot has a different name
 # noinspection PyPackageRequirements
 import telegram
@@ -14,7 +13,6 @@ from telegram.error import TimedOut, Unauthorized, BadRequest, TelegramError
 import dice
 import sys
 import os
-import cast
 import re
 import logging
 import configparser
@@ -199,7 +197,7 @@ def cmd_color(bot: telegram.Bot, update: telegram.Update):
 
 @command
 def cmd_smecds(bot: telegram.Bot, update: telegram.Update):
-    ds = random.sample(stagismo.listona, 1)[0]
+    ds = random.sample(smecds, 1)[0]
     reply(bot, update, strings.SMECDS, ds=ds)
 
 

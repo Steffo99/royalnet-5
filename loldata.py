@@ -1,4 +1,4 @@
-import errors
+from utils import errors
 
 champions = {"type": "champion", "format": "standAloneComplex", "version": "8.19.1", "data": {
     "Aatrox": {"version": "8.19.1", "id": "Aatrox", "key": "266", "name": "Aatrox", "title": "the Darkin Blade",
