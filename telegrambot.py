@@ -184,7 +184,7 @@ def cmd_cast(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     # Find a target for the spell
     target = random.sample(session.query(db.Telegram).all(), 1)[0]
     # END
-    bot.send_message(update.message.chat.id, cast.cast(spell_name=spell,
+    bot.send_message(update.message.chat.id, cast(spell_name=spell,
                                                        target_name=target.username if target.username is not None
                                                        else target.first_name, platform="telegram"),
                      parse_mode="HTML")
