@@ -427,7 +427,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                 return
             match = session.query(db.Match).filter_by(message_id=update.callback_query.message.message_id).one()
             if update.callback_query.data == "match_close":
-                if match.creator != user:
+                if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
                                               show_alert=True,
                                               text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
