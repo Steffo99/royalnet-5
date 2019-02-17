@@ -152,16 +152,13 @@ class Spell:
         # Spell name
         self.name = seed
         # Find the spell type
-        self.spell_type = None
+        self.spell_type = SpellType(0)
         if random.random() < self.damaging_spell_chance:
-            self.spell_type = SpellType.DAMAGING
+            self.spell_type |= SpellType.DAMAGING
         elif random.random() < self.healing_spell_chance:
-            self.spell_type = SpellType.HEALING
+            self.spell_type |= SpellType.HEALING
         if random.random() < self.additional_stats_chance:
-            if self.spell_type is None:
-                self.spell_type = SpellType.STATS
-            else:
-                self.spell_type |= SpellType.STATS
+            self.spell_type |= SpellType.STATS
         # Damaging spells
         if self.spell_type & SpellType.DAMAGING:
             self.damage_component = DamageComponent()
