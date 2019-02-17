@@ -133,8 +133,8 @@ class StatsComponent:
         string = ""
         for name in self.stat_changes:
             string += s(strings.SPELL.STAT, words={
-                "name": name, 
-                "change": self.stat_changes
+                "name": name,
+                "change": self.stat_changes[name]
             })
         return string
 
