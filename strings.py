@@ -220,6 +220,9 @@ class SPELL:
     DAMAGE = "Danni - <b>{number}d{type}{constant}</b>\n"
     TYPE = "Tipo - <b>{type}</b>\n"
     REPEAT = "Multiattacco - <b>×{repeat}</b>\n"
+    HEALING = "Cura - <b>{number}d{type}{constant}</b>\n"
+    STAT = "Statist. - <b>{name} {change}</b>\n"
+    NOTHING = "<i>Chi la usa sguazza nell'acqua, senza ottenere alcun effetto.</i>"
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato la magia di cui vuoi conoscere i dettagli!\nSintassi: <code>/spell (nome)</code>"
