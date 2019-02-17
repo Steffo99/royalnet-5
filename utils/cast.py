@@ -82,9 +82,9 @@ class Hit:
         while random.randrange(1, 21) == 20:
             self.crit_multiplier *= 2
 
-    def damage(self):
+    @property
+    def total_damage(self):
         return self.damage * self.crit_multiplier
-
 
 class Cast:
     def __init__(self, spell: Spell):
