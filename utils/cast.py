@@ -184,6 +184,6 @@ class Spell:
             string += self.healing_component.stringify()
         if self.spell_type & SpellType.STATS:
             string += self.stats_component.stringify()
-        if self.spell_type is None:
+        if self.spell_type == SpellType(0):
             string += s(strings.SPELL.NOTHING)
         return string
