@@ -66,6 +66,7 @@ class DamageComponent:
         string += s(strings.SPELL.ACCURACY, words={"accuracy": str(self.miss_chance)})
         if self.repeat > 1:
             string += s(strings.SPELL.REPEAT, words={"repeat": str(self.repeat)})
+        return string
 
 
 class HealingComponent:
