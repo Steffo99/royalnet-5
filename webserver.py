@@ -200,11 +200,9 @@ def page_editprofile():
     elif request.method == "POST":
         css = request.form.get("css", "")
         bio = request.form.get("bio", "")
-        email = request.form.get("email")
         if "</style" in css:
             abort(400)
             return
-        royal.email = email
         if profile_data is None:
             profile_data = db.ProfileData(royal=royal, css=css, bio=bio)
             fl_g.session.add(profile_data)
