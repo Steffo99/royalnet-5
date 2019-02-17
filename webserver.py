@@ -316,16 +316,20 @@ def page_wiki_lock(key: str):
         if wiki_page.locked:
             telegram_bot.send_message(config["Telegram"]["main_group"],
                                       strings.safely_format_string(strings.WIKI.PAGE_LOCKED,
-                                                                   key=key,
-                                                                   user=fl_g.user.username),
+                                                                   words={
+                                                                       "key": key,
+                                                                       "user": fl_g.user.username
+                                                                   }),
                                       parse_mode="HTML",
                                       disable_web_page_preview=True,
                                       disable_notification=True)
         else:
             telegram_bot.send_message(config["Telegram"]["main_group"],
                                       strings.safely_format_string(strings.WIKI.PAGE_UNLOCKED,
-                                                                   key=key,
-                                                                   user=fl_g.user.username),
+                                                                   words={
+                                                                       "key": key,
+                                                                       "user": fl_g.user.username
+                                                                   }),
                                       parse_mode="HTML",
                                       disable_web_page_preview=True,
                                       disable_notification=True)
