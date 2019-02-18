@@ -66,7 +66,7 @@ class DamageComponent:
                     words={"number": str(self.dice_number),
                            "type": str(self.dice_type),
                            "constant": constant,
-                           "avg": str(self.avg)})
+                           "avg": str(int(self.avg))})
         for dmg_type in self.damage_types:
             string += s(strings.SPELL.TYPE, words={"type": dmg_type})
         string += s(strings.SPELL.ACCURACY, words={"accuracy": str(self.miss_chance)})
@@ -106,7 +106,7 @@ class HealingComponent:
                     words={"number": str(self.dice_number),
                            "type": str(self.dice_type),
                            "constant": constant,
-                           "avg": str(self.avg)})
+                           "avg": str(int(self.avg))})
         return string
 
 
