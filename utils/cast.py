@@ -50,6 +50,10 @@ class DamageComponent:
         self.damage_types_qty = random.sample(self.damage_types_distribution, 1)[0]
         self.damage_types = random.sample(self.all_damage_types, self.damage_types_qty)
 
+    @property
+    def avg(self):
+        return self.dice_number * (self.dice_type + 1) / 2
+
     def stringify(self) -> str:
         string = ""
         if self.constant > 0:
