@@ -10,6 +10,7 @@ class SpellType(enum.Flag):
     DAMAGING = enum.auto()
     HEALING = enum.auto()
     STATS = enum.auto()
+    STATUS_EFFECT = enum.auto()
 
 
 class DamageComponent:
@@ -60,7 +61,8 @@ class DamageComponent:
         string += s(strings.SPELL.DAMAGE,
                     words={"number": str(self.dice_number),
                            "type": str(self.dice_type),
-                           "constant": constant})
+                           "constant": constant,
+                           "avg": str(self.avg)})
         for dmg_type in self.damage_types:
             string += s(strings.SPELL.TYPE, words={"type": dmg_type})
         string += s(strings.SPELL.ACCURACY, words={"accuracy": str(self.miss_chance)})
@@ -84,6 +86,10 @@ class HealingComponent:
         self.dice_type = random.sample(self.dice_type_distribution, 1)[0]
         self.constant = random.randrange(math.floor(-self.dice_type / 4), math.ceil(self.dice_type / 4) + 1)
 
+    @property
+    def avg(self):
+        return self.dice_number * (self.dice_type + 1) / 2
+
     def stringify(self) -> str:
         string = ""
         if self.constant > 0:
@@ -95,7 +101,8 @@ class HealingComponent:
         string += s(strings.SPELL.HEALING,
                     words={"number": str(self.dice_number),
                            "type": str(self.dice_type),
-                           "constant": constant})
+                           "constant": constant,
+                           "avg": str(self.avg)})
         return string
 
 
@@ -139,12 +146,33 @@ class StatsComponent:
         return string
 
 
+class StatusEffectComponent:
+    all_status_effects = ["Bruciatura", "Sanguinamento", "Paralisi", "Veleno",
+                          "Congelamento", "Iperveleno", "Sonno", "Stordimento",
+                          "Rallentamento", "Radicamento", "Rigenerazione", "Morte",
+                          "Affaticamento", "Glitch", "Accecamento", "Silenzio",
+                          "Esilio", "Invisibilità", "Rapidità", "Splendore"]
+
+    def __init__(self):
+        # ENSURE THE SEED IS ALREADY SET WHEN CREATING THIS COMPONENT!!!
+        self.chance = random.randrange(1, 101)
+        self.effect = random.sample(self.all_status_effects, 1)[0]
+
+    def stringify(self) -> str:
+        return s(strings.SPELL.STATUS_EFFECT, words={
+            "chance": str(self.chance),
+            "effect": self.effect
+        })
+
+
+
 class Spell:
     version = "3.2"
 
-    damaging_spell_chance = 0.8
-    healing_spell_chance = 0.8  # If not a damaging spell
-    additional_stats_chance = 0.2  # In addition to the damage/healing
+    damaging_spell_chance = 0.9
+    healing_spell_chance = 0.9  # If not a damaging spell
+    additional_stats_chance = 0.1  # In addition to the damage/healing
+    additional_status_effect_chance = 0.1  # In addition to the rest
 
     def __init__(self, name: str):
         seed = name.capitalize()
@@ -159,6 +187,8 @@ class Spell:
             self.spell_type |= SpellType.HEALING
         if random.random() < self.additional_stats_chance:
             self.spell_type |= SpellType.STATS
+        if random.random() < self.additional_status_effect_chance:
+            self.spell_type |= SpellType.STATUS_EFFECT
         # Damaging spells
         if self.spell_type & SpellType.DAMAGING:
             self.damage_component = DamageComponent()
@@ -169,11 +199,16 @@ class Spell:
             self.healing_component = HealingComponent()
         else:
             self.healing_component = None
-        # Status spells
+        # Stats spells
         if self.spell_type & SpellType.STATS:
             self.stats_component = StatsComponent()
         else:
             self.stats_component = None
+        # Status effect spells
+        if self.spell_type & SpellType.STATUS_EFFECT:
+            self.status_effect_component = StatusEffectComponent()
+        else:
+            self.status_effect_component = None
 
 
     def stringify(self) -> str:
@@ -184,6 +219,8 @@ class Spell:
             string += self.healing_component.stringify()
         if self.spell_type & SpellType.STATS:
             string += self.stats_component.stringify()
+        if self.spell_type & SpellType.STATUS_EFFECT:
+            string += self.status_effect_component.stringify()
         if self.spell_type == SpellType(0):
             string += s(strings.SPELL.NOTHING)
         return string

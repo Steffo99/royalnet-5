@@ -217,11 +217,12 @@ class SHIP:
 class SPELL:
     HEADER = "🔍 La magia <b>{name}</b> ha le seguenti proprietà (v{version}):\n"
     ACCURACY = "Precisione - <b>{accuracy}%</b>\n"
-    DAMAGE = "Danni - <b>{number}d{type}{constant}</b>\n"
+    DAMAGE = "Danni - <b>{number}d{type}{constant}</b> <i>(in media {avg})</i>\n"
     TYPE = "Tipo - <b>{type}</b>\n"
     REPEAT = "Multiattacco - <b>×{repeat}</b>\n"
-    HEALING = "Cura - <b>{number}d{type}{constant}</b>\n"
-    STAT = "Statist. - <b>{name} {change}</b>\n"
+    HEALING = "Cura - <b>{number}d{type}{constant}</b> <i>(in media {avg})</i>\n"
+    STAT = "Attrib. - <b>{name}{change}</b>\n"
+    STATUS_EFFECT = "Infligge - <b>{effect}</b> (<b>{chance}%</b> di probabilità)"
     NOTHING = "<i>Chi la usa sguazza nell'acqua, senza ottenere alcun effetto.</i>"
 
     class ERRORS:
