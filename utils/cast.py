@@ -80,7 +80,7 @@ class HealingComponent:
 
     def __init__(self):
         # ENSURE THE SEED IS ALREADY SET WHEN CREATING THIS COMPONENT!!!
-        self.dice_number = random.randrange(1, 21)
+        self.dice_number = random.randrange(1, 11)
         self.dice_type = random.sample(self.dice_type_distribution, 1)[0]
         self.constant = random.randrange(math.floor(-self.dice_type / 4), math.ceil(self.dice_type / 4) + 1)
 
@@ -140,7 +140,7 @@ class StatsComponent:
 
 
 class Spell:
-    version = "3.1"
+    version = "3.2"
 
     damaging_spell_chance = 0.8
     healing_spell_chance = 0.8  # If not a damaging spell
