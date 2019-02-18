@@ -108,12 +108,12 @@ class StatsComponent:
                  "Determinazione"]
 
     change_distribution = (["--"] * 1) +\
-                          (["-"] * 3) +\
-                          (["+"] * 3) +\
+                          (["-"] * 2) +\
+                          (["+"] * 2) +\
                           (["++"] * 1)
     
-    multistat_distribution = ([1] * 7) +\
-                             ([2] * 6) +\
+    multistat_distribution = ([1] * 16) +\
+                             ([2] * 8) +\
                              ([3] * 4) +\
                              ([5] * 2) +\
                              ([8] * 1)
