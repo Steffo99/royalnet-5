@@ -826,6 +826,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("regex", cmd_regex))
     u.dispatcher.add_handler(CommandHandler("start", cmd_start))
     u.dispatcher.add_handler(CommandHandler("spell", cmd_spell))
+    u.dispatcher.add_handler(CommandHandler("emojify", cmd_emojify))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
