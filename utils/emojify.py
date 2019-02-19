@@ -49,7 +49,7 @@ emojis = {
 }
 
 def emojify(string: str):
-    new_string = string
+    new_string = string.lower()
     for key in emojis:
         selected_emoji = random.sample(emojis[key], 1)[0]
         new_string = new_string.replace(key, selected_emoji)
