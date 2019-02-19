@@ -32,6 +32,7 @@ class TELEGRAM:
 
 
 PONG = "🏓 Pong!"
+ESCAPE = "{text}"
 
 
 # Ah, non lo so io.
@@ -103,6 +104,14 @@ class EAT:
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Non hai specificato cosa mangiare!\nSintassi: <code>/eat (cibo)</code>"
+
+
+# Emojify a string
+class EMOJIFY:
+    RESPONSE = "{emojified}"
+    
+    class ERRORS:
+        INVALID_SYNTAX = "⚠ Non hai specificato una frase!\nSintassi: <code>/emojify (testo)</code>"
 
 
 # Royalnet linking

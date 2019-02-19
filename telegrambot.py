@@ -2,7 +2,7 @@ import datetime
 import random
 import typing
 import db
-from utils import smecds, cast, errors
+from utils import smecds, cast, errors, emojify
 # python-telegram-bot has a different name
 # noinspection PyPackageRequirements
 import telegram
@@ -772,12 +772,23 @@ def cmd_start(bot: telegram.Bot, update: telegram.Update):
 @command
 def cmd_spell(bot: telegram.Bot, update: telegram.Update):
     try:
-        input: str = update.message.text.split(" ", 1)[1]
+        spell_name: str = update.message.text.split(" ", 1)[1]
     except IndexError:
         reply(bot, update, strings.SPELL.ERRORS.INVALID_SYNTAX)
         return
-    spell = cast.Spell(input)
+    spell = cast.Spell(spell_name)
     reply(bot, update, spell.stringify())
+
+
+@command
+def cmd_emojify(bot: telegram.Bot, update: telegram.Update):
+    try:
+        string: str = update.message.text.split(" ", 1)[1]
+    except IndexError:
+        reply(bot, update, strings.EMOJIFY.ERRORS.INVALID_SYNTAX)
+        return
+    msg = emojify(string)
+    reply(bot, update, strings.EMOJIFY.RESPONSE, emojified=msg)
 
 
 def process(arg_discord_connection):
