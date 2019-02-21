@@ -746,45 +746,14 @@ class Overwatch(Base, Mini):
 
     @staticmethod
     def create(session: Session, royal_id, battletag, discriminator=None):
-        if discriminator is None:
-            battletag, discriminator = battletag.split("#", 1)
-        o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
-        if o is not None:
-            raise AlreadyExistingError(repr(o))
-        o = Overwatch(royal_id=royal_id,
-                      battletag=battletag,
-                      discriminator=discriminator)
-        o.update()
-        return o
+        raise NotImplementedError()
 
     def icon_url(self):
         return f"https://d1u1mce87gyfbn.cloudfront.net/game/unlocks/{self.icon}.png"
 
     # noinspection PyUnusedLocal
     def update(self, session=None):
-        r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
-            "User-Agent": "Royal-Bot/4.1",
-            "From": "ste.pigozzi@gmail.com"
-        })
-        r.raise_for_status()
-        try:
-            j = r.json()["eu"]["stats"].get("competitive")
-            if j is None:
-                logger.debug(f"No stats for {repr(self)}, skipping...")
-                return
-            if not j["game_stats"]:
-                logger.debug(f"No stats for {repr(self)}, skipping...")
-                return
-            j = j["overall_stats"]
-        except TypeError:
-            logger.debug(f"No stats for {repr(self)}, skipping...")
-            return
-        try:
-            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
-        except AttributeError:
-            logger.debug(f"No icon available for {repr(self)}.")
-        self.level = j["prestige"] * 100 + j["level"]
-        self.rank = j["comprank"]
+        raise NotImplementedError()
 
     def rank_url(self):
         if self.rank < 1500:

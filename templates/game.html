@@ -13,6 +13,11 @@
     <h1>
         Royal Games su {{ mini_type._mini_full_name }}
     </h1>
+    {% if mini_type._mini_name == "ow" %}
+        <div>
+            Overwatch updates are currently disabled.
+        </div>
+    {% endif %}
     <div class="game">
         <div class="game-panels">
             {% for record in mini_data %}
