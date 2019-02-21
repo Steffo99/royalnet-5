@@ -528,18 +528,25 @@ def cmd_eat(bot: telegram.Bot, update: telegram.Update):
 @command
 def cmd_ship(bot: telegram.Bot, update: telegram.Update):
     try:
-        _, name_one, name_two = update.message.text.split(" ", 2)
+        names = update.message.text.split(" ")
+        name_one = names[1]
+        name_two = names[2]
     except ValueError:
         reply(bot, update, strings.SHIP.ERRORS.INVALID_SYNTAX)
         return
     name_one = name_one.lower()
     name_two = name_two.lower()
-    part_one = re.search(r"^[A-Za-z][^aeiouAEIOU]*[aeiouAEIOU]?", name_one)
-    part_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
-    if part_one is None or part_two is None:
-        reply(bot, update, strings.SHIP.ERRORS.INVALID_NAMES)
-        return
-    mixed = part_one.group(0) + part_two.group(0)  # TODO: find out what exceptions this could possibly raise
+    match_one = re.search(r"^[A-Za-z][^aeiouAEIOU]*[aeiouAEIOU]?", name_one)
+    if match_one is None:
+        part_one = name_one[:int(len(name_one) / 2)]
+    else:
+        part_one = match_one.group(0)
+    match_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
+    if match_two is None:
+        part_two = name_two[int(len(name_two) / 2):]
+    else:
+        part_two = match_two.group(0)
+    mixed = part_one + part_two  # TODO: find out what exceptions this could possibly raise
     reply(bot, update, strings.SHIP.RESULT,
           one=name_one.capitalize(),
           two=name_two.capitalize(),
