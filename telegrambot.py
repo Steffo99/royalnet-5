@@ -433,13 +433,13 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                                               text=strings.MATCHMAKING.ERRORS.NOT_ADMIN)
                     return
                 match.closed = True
-                for player in match.players:
-                    if int(player.status) >= 1:
+                for partecipation in match.players:
+                    if int(partecipation.status) >= 1:
                         try:
-                            reply_msg(bot, player.user.telegram_id, strings.MATCHMAKING.GAME_START[int(player.status)], **match.format_dict())
+                            reply_msg(bot, partecipation.user.telegram_id, strings.MATCHMAKING.GAME_START[int(partecipation.status)], **match.format_dict())
                         except Unauthorized:
                             reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.UNAUTHORIZED_USER,
-                                      mention=player.mention())
+                                      mention=partecipation.user.mention())
             elif update.callback_query.data == "match_cancel":
                 if not (match.creator == user or user.telegram_id == 25167391):
                     bot.answer_callback_query(update.callback_query.id,
@@ -461,12 +461,12 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                                               show_alert=True,
                                               text=strings.MATCHMAKING.ERRORS.MATCH_CLOSED)
                     return
-                player = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
-                if player is None:
-                    player = db.MatchPartecipation(match=match, status=status.value, user=user)
-                    session.add(player)
+                partecipation = session.query(db.MatchPartecipation).filter_by(match=match, user=user).one_or_none()
+                if partecipation is None:
+                    partecipation = db.MatchPartecipation(match=match, status=status.value, user=user)
+                    session.add(partecipation)
                 else:
-                    player.status = status.value
+                    partecipation.status = status.value
             session.commit()
             bot.answer_callback_query(update.callback_query.id,
                                       text=strings.MATCHMAKING.TICKER_TEXT[update.callback_query.data],
