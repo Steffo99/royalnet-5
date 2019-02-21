@@ -223,6 +223,20 @@ def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session
     bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
 
 
+def find_author(session: db.Session, text: str):
+    author_match = re.match(r".*(?:—|-{1,2}) ?@?([A-Za-z0-9_]+)$", text)
+    if author_match is None:
+        return None
+    author_string = author_match.group(1).lower()
+    author = session.query(db.Royal).filter(db.func.lower(db.Royal.username) == author_string).first().telegram[0]
+    if author is not None:
+        return author
+    author = session.query(db.Telegram).filter(db.func.lower(db.Telegram.username) == author_string).first()
+    if author is not None:
+        return author
+    return None
+
+
 @command
 @database_access
 def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
@@ -233,7 +247,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         text = update.message.text.split(" ", 1)[1]
         saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
-        author = None
+        author = find_author(session, text)
     except IndexError:
         if update.message.reply_to_message is None:
             reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)

@@ -70,6 +70,7 @@ COLOR = "<i>I am sorry, unknown error occured during working with your request, 
 # Diario
 class DIARIO:
     SUCCESS = "✅ Riga aggiunta al diario:\n{diario}"
+    ANONYMOUS = "Anonimo"
 
     class ERRORS:
         INVALID_SYNTAX = "⚠ Sintassi del comando errata.\nSintassi: <code>/diario (frase)</code>, oppure rispondi a un messaggio con <code>/diario</code>."

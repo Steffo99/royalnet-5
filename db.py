@@ -808,9 +808,9 @@ class Diario(Base):
         return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
 
     def to_telegram(self):
-        return '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di <b>{author}</b>\n{text}'.format(
+        return '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di {author}\n{text}'.format(
             id=self.id,
-            author=self.author,
+            author=f"<b>{self.author}</b>" if self.author is not None else strings.DIARIO.ANONYMOUS,
             text=escape(self.text))
 
     def to_html(self):
