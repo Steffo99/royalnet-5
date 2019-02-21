@@ -475,14 +475,18 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                 inline_keyboard = IKMarkup([([IKButton(strings.MATCHMAKING.BUTTONS[key], callback_data=key)]) for key in strings.MATCHMAKING.BUTTONS])
             else:
                 inline_keyboard = None
-            try:
-                bot.edit_message_text(message_id=update.callback_query.message.message_id,
-                                      chat_id=config["Telegram"]["announcement_group"],
-                                      text=match.generate_text(session),
-                                      reply_markup=inline_keyboard,
-                                      parse_mode="HTML")
-            except BadRequest:
-                pass
+            while True:
+                try:
+                    bot.edit_message_text(message_id=update.callback_query.message.message_id,
+                                          chat_id=config["Telegram"]["announcement_group"],
+                                          text=match.generate_text(session),
+                                          reply_markup=inline_keyboard,
+                                          parse_mode="HTML")
+                    break
+                except BadRequest:
+                    break
+                except TimedOut:
+                    pass
     except Exception:
         try:
             bot.answer_callback_query(update.callback_query.id,
