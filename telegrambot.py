@@ -532,10 +532,10 @@ def cmd_ship(bot: telegram.Bot, update: telegram.Update):
     name_two = name_two.lower()
     part_one = re.search(r"^[A-Za-z][^aeiouAEIOU]*[aeiouAEIOU]?", name_one)
     part_two = re.search(r"[^aeiouAEIOU]*[aeiouAEIOU]?[A-Za-z]$", name_two)
-    mixed = part_one.group(0) + part_two.group(0)  # TODO: find out what exceptions this could possibly raise
     if part_one is None or part_two is None:
         reply(bot, update, strings.SHIP.ERRORS.INVALID_NAMES)
         return
+    mixed = part_one.group(0) + part_two.group(0)  # TODO: find out what exceptions this could possibly raise
     reply(bot, update, strings.SHIP.RESULT,
           one=name_one.capitalize(),
           two=name_two.capitalize(),
