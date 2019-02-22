@@ -819,6 +819,9 @@ def cmd_emojify(bot: telegram.Bot, update: telegram.Update):
 
 @command
 def cmd_pug(bot: telegram.Bot, update: telegram.Update):
+    if update.effective_chat.type != telegram.Chat.PRIVATE:
+        reply(bot, update, strings.PUG.ERRORS.PRIVATE_CHAT_ONLY)
+        return
     j = requests.get("https://dog.ceo/api/breed/pug/images/random").json()
     reply(bot, update, strings.PUG.HERE_HAVE_A_PUG, disable_web_page_preview=False, image_url=j["message"])
 

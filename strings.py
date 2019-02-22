@@ -187,6 +187,9 @@ class MATCHMAKING:
 class PUG:
     HERE_HAVE_A_PUG = '🐶 Ecco, tieni un <a href="{image_url}">carlino</a>.'
 
+    class ERRORS:
+        PRIVATE_CHAT_ONLY = "⚠ Foto di carlini possono essere inviate esclusivamente in chat privata, in seguito al Disegno di Legge Intergalattico n. 5116."
+
 
 # Dice roller
 class ROLL:
