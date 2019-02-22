@@ -183,6 +183,11 @@ class MATCHMAKING:
         MATCH_CLOSED = "⚠ Il matchmaking per questa partita è terminato."
 
 
+# Pug sender
+class PUG:
+    HERE_HAVE_A_PUG = '🐶 Ecco, tieni un <a href="{image_url}">carlino</a>.'
+
+
 # Dice roller
 class ROLL:
     SUCCESS = "🎲 {result}"

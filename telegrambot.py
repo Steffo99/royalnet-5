@@ -21,6 +21,7 @@ import raven
 import coloredlogs
 import strings
 import time
+import requests
 IKMarkup = telegram.InlineKeyboardMarkup
 IKButton = telegram.InlineKeyboardButton
 
@@ -55,17 +56,17 @@ sentry = raven.Client(config["Sentry"]["token"],
                       hook_libraries=[])
 
 
-def reply_msg(bot: telegram.Bot, chat_id: int, string: str, ignore_escaping=False, **kwargs) -> telegram.Message:
+def reply_msg(bot: telegram.Bot, chat_id: int, string: str, ignore_escaping=False, disable_web_page_preview=True, **kwargs) -> telegram.Message:
     string = strings.safely_format_string(string, ignore_escaping=ignore_escaping, words=kwargs)
     return bot.send_message(chat_id, string,
                             parse_mode="HTML",
-                            disable_web_page_preview=True)
+                            disable_web_page_preview=disable_web_page_preview)
 
 
-def reply(bot: telegram.Bot, update: telegram.Update, string: str, ignore_escaping=False, **kwargs) -> telegram.Message:
+def reply(bot: telegram.Bot, update: telegram.Update, string: str, ignore_escaping=False, disable_web_page_preview=True, **kwargs) -> telegram.Message:
     while True:
         try:
-            return reply_msg(bot, update.message.chat.id, string, ignore_escaping=ignore_escaping, **kwargs)
+            return reply_msg(bot, update.message.chat.id, string, ignore_escaping=ignore_escaping, disable_web_page_preview=disable_web_page_preview, **kwargs)
         except Unauthorized:
             if update.message.chat.type == telegram.Chat.PRIVATE:
                 return reply_msg(bot, main_group_id, strings.TELEGRAM.ERRORS.UNAUTHORIZED_USER,
@@ -816,6 +817,12 @@ def cmd_emojify(bot: telegram.Bot, update: telegram.Update):
     reply(bot, update, strings.EMOJIFY.RESPONSE, emojified=msg)
 
 
+@command
+def cmd_pug(bot: telegram.Bot, update: telegram.Update):
+    j = requests.get("https://dog.ceo/api/breed/pug/images/random").json()
+    reply(bot, update, strings.PUG.HERE_HAVE_A_PUG, disable_web_page_preview=False, image_url=j["message"])
+
+
 def process(arg_discord_connection):
     if arg_discord_connection is not None:
         global discord_connection
@@ -852,6 +859,7 @@ def process(arg_discord_connection):
     u.dispatcher.add_handler(CommandHandler("start", cmd_start))
     u.dispatcher.add_handler(CommandHandler("spell", cmd_spell))
     u.dispatcher.add_handler(CommandHandler("emojify", cmd_emojify))
+    u.dispatcher.add_handler(CommandHandler("pug", cmd_pug))
     u.dispatcher.add_handler(CallbackQueryHandler(on_callback_query))
     logger.info("Handlers registered.")
     u.start_polling()
