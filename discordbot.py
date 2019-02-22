@@ -395,7 +395,8 @@ class RoyalDiscordBot(discord.Client):
             f"{self.command_prefix}mode": self.cmd_mode,
             f"{self.command_prefix}m": self.cmd_mode,
             f"{self.command_prefix}{codecs.decode('cvyyne', 'rot13')}": self.cmd_easter_egg_1,
-            f"{self.command_prefix}{codecs.decode('xqn', 'rot13')}": self.cmd_easter_egg_2
+            f"{self.command_prefix}{codecs.decode('xqn', 'rot13')}": self.cmd_easter_egg_2,
+            f"{self.command_prefix}{codecs.decode('pelfgnyyvmr', 'rot13')}": self.cmd_easter_egg_3
         }
         if self.sentry_token:
             self.sentry = raven.Client(self.sentry_token,
@@ -1211,7 +1212,7 @@ class RoyalDiscordBot(discord.Client):
     @requires_connected_voice_client
     async def cmd_easter_egg_1(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
         await self.add_video_from_url(codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=KHuIPbGfOnZ", "rot13"), enqueuer=author)
-        await channel.send(f"💪💪💪")
+        await channel.send(f"💪 I Pillar Men sono qui!")
         logger.debug(f"Added muscles to the queue (EE1).")
 
     # noinspection PyUnusedLocal
@@ -1231,8 +1232,15 @@ class RoyalDiscordBot(discord.Client):
             codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=m4tyB08HDj4", "rot13")
         ]
         await self.add_video_from_url(random.sample(videos, 1)[0], enqueuer=author)
-        await channel.send(f"⚔️💀🤝")
+        await channel.send(f"☠️ Le KDA sono qui... Forse?")
         logger.debug(f"Added randomkda to the queue (EE2).")
+
+    @command
+    @requires_connected_voice_client
+    async def cmd_easter_egg_3(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
+        await self.add_video_from_url(codecs.decode("uggcf://jjj.lbhghor.pbz/jngpu?i=Y0ZX7dm13oH", "rot13"), enqueuer=author)
+        await channel.send("❄️ Belli i cristalli di neve.")
+        logger.debug("Added crystals to the queue (EE3).")
 
 
 def process(users_connection=None):
