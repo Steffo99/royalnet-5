@@ -816,45 +816,6 @@ class Diario(Base):
     def to_html(self):
         return str(escape(self.text)).replace("\n", "<br>")
 
-    @staticmethod
-    def import_from_json(file):
-        import json
-        session = Session()
-        file = open(file, "r")
-        j = json.load(file)
-        author_ids = {
-            "@Steffo": 25167391,
-            "@GoodBalu": 19611986,
-            "@gattopandacorno": 200821462,
-            "@Albertino04": 131057096,
-            "@Francesco_Cuoghi": 48371848,
-            "@VenomousDoc": 48371848,
-            "@MaxSensei": 1258401,
-            "@Protoh": 125711787,
-            "@McspKap": 304117728,
-            "@FrankRekt": 31436195,
-            "@EvilBalu": 26842090,
-            "@Dailir": 135816455,
-            "@Paltri": 186843362,
-            "@Doom_darth_vader": 165792255,
-            "@httpIma": 292086686,
-            "@DavidoMessori": 509208316,
-            "@DavidoNiichan": 509208316,
-            "@Peraemela99": 63804599,
-            "@infopz": 20403805,
-            "@Baithoven": 121537369,
-            "@Tauei": 102833717
-        }
-        for n, entry in enumerate(j):
-            author = author_ids[entry["sender"]] if "sender" in entry and entry["sender"] in author_ids else None
-            d = Diario(timestamp=datetime.datetime.fromtimestamp(float(entry["timestamp"])),
-                       author_id=author,
-                       text=entry["text"])
-            print(f"{n} - {d}")
-            session.add(d)
-        session.commit()
-        session.close()
-
 
 class BaluRage(Base):
     __tablename__ = "balurage"
