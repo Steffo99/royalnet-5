@@ -147,7 +147,12 @@ activity_by_hour = """SELECT AVG(discord_members_online) online_members_avg,
        AVG(discord_members_cv) cv_members_avg,
        AVG(discord_channels_used) channels_used_avg,
        AVG(discord_cv) cv_avg,
-       extract(hour from timestamp) h 
-FROM activityreports 
-GROUP BY h 
+       extract(hour from timestamp) h
+FROM (
+            SELECT *,
+                   extract(month from timestamp) month_
+            FROM activityreports
+     ) withmonth
+WHERE withmonth.month_ = :current_month
+GROUP BY h
 ORDER BY h;"""

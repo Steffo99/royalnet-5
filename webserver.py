@@ -365,8 +365,19 @@ def page_music_individual(discord_id: str):
 @app.route("/activity")
 def page_activity():
     reports = list(fl_g.session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
-    hourly_avg = list(fl_g.session.execute(sql_queries.activity_by_hour))
-    return render_template("activity.html", activityreports=list(reversed(reports)), hourly_avg=hourly_avg)
+    hourly_avg = list(fl_g.session.execute(sql_queries.activity_by_hour, {"current_month": datetime.datetime.now().month}))
+    previous_month =  datetime.datetime.now().month - 1
+    if previous_month == 0:
+        previous_month = 12
+    hourly_comp = list(fl_g.session.execute(sql_queries.activity_by_hour, {"current_month": previous_month}))
+    even_before_month = previous_month - 1
+    if even_before_month == 0:
+        even_before_month = 12
+    hourly_before = list(fl_g.session.execute(sql_queries.activity_by_hour, {"current_month": even_before_month}))
+    return render_template("activity.html", activityreports=list(reversed(reports)),
+                           hourly_avg=hourly_avg,
+                           hourly_comp=hourly_comp,
+                           hourly_before=hourly_before)
 
 
 @app.route("/ses/identify")
