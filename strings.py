@@ -23,6 +23,7 @@ def safely_format_string(string: str, words: typing.Dict[str, str] = None, ignor
 # Generic telegram errors
 class TELEGRAM:
     BOT_STARTED = "✅ Hai autorizzato il bot ad inviarti messaggi privati."
+    FIORYGI_AWARDED = "⭐️ {mention} è stato premiato con <b>{number} {fiorygi}</b> per <i>{reason}</i>!"
 
     class ERRORS:
         CRITICAL_ERROR = "☢ <b>ERRORE CRITICO!</b>\nIl bot ha ignorato il comando.\nUna segnalazione di errore è stata automaticamente mandata a @Steffo.\n\nDettagli dell'errore:\n<pre>{exc_info}</pre>"
