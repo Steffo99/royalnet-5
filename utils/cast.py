@@ -52,7 +52,7 @@ class DamageComponent:
 
     @property
     def avg(self):
-        return self.dice_number * (self.dice_type + 1) / 2
+        return (self.dice_number * (self.dice_type + 1) / 2) + self.constant
 
     def stringify(self) -> str:
         string = ""
@@ -92,7 +92,7 @@ class HealingComponent:
 
     @property
     def avg(self):
-        return self.dice_number * (self.dice_type + 1) / 2
+        return (self.dice_number * (self.dice_type + 1) / 2) + self.constant
 
     def stringify(self) -> str:
         string = ""
