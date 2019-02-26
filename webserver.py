@@ -9,7 +9,6 @@ import datetime
 # noinspection PyPackageRequirements
 import telegram
 import sql_queries
-import random
 import re
 import functools
 import strings
@@ -298,7 +297,6 @@ def page_wiki_edit(key: str):
                       number=fiorygi,
                       fiorygi=fiorygi_word,
                       reason="aver contribuito alla wiki Royal Games")
-
     except Exception:
         pass
     return redirect(url_for("page_wiki", key=key))
@@ -369,7 +367,7 @@ def page_music_individual(discord_id: str):
 def page_activity():
     reports = list(fl_g.session.query(db.ActivityReport).order_by(db.ActivityReport.timestamp.desc()).limit(192).all())
     hourly_avg = list(fl_g.session.execute(sql_queries.activity_by_hour, {"current_month": datetime.datetime.now().month}))
-    previous_month =  datetime.datetime.now().month - 1
+    previous_month = datetime.datetime.now().month - 1
     if previous_month == 0:
         previous_month = 12
     hourly_comp = list(fl_g.session.execute(sql_queries.activity_by_hour, {"current_month": previous_month}))
