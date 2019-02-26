@@ -66,7 +66,7 @@ def require_login(f):
 
 @app.errorhandler(400)
 def error_400(_=None):
-    return render_template("400.html")
+    return render_template("400.html"), 400
 
 
 @app.route("/400")
@@ -76,7 +76,7 @@ def page_400():
 
 @app.errorhandler(403)
 def error_403(_=None):
-    return render_template("403.html")
+    return render_template("403.html"), 403
 
 
 @app.route("/403")
@@ -86,7 +86,7 @@ def page_403():
 
 @app.errorhandler(500)
 def error_500(_=None):
-    return render_template("500.html")
+    return render_template("500.html"), 500
 
 
 @app.route("/500")
