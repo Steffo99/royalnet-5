@@ -381,17 +381,6 @@ def page_activity():
                            hourly_before=hourly_before)
 
 
-@app.route("/ses/identify")
-def ses_identify():
-    response = jsonify({
-        "username": fl_session.get("username"),
-        "id": fl_session.get("user_id")
-    })
-    response.headers["Access-Control-Allow-Origin"] = "https://steffo.eu"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
-
-
 @app.route("/hooks/github", methods=["POST"])
 def hooks_github():
     try:
