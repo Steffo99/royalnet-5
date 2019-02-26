@@ -628,6 +628,7 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
 
 
 @command
+@database_access
 def cmd_newevent(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         _, timestring, name_desc = update.message.text.split(" ", 2)
