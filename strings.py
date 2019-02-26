@@ -256,3 +256,4 @@ SMECDS = "🤔 Secondo me, è colpa {ds}."
 class WIKI:
     PAGE_LOCKED = '🔒 La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata bloccata da <b>{user}</b>.'
     PAGE_UNLOCKED = '🔓 La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata sbloccata da <b>{user}</b>.'
+    PAGE_UPDATED = '📖 La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata modificata da <b>{user}</b>.\n{reason} [{change}]'

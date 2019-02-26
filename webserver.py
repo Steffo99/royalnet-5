@@ -15,6 +15,7 @@ import functools
 import strings
 from sqlalchemy.orm.collections import InstrumentedList
 from raven.contrib.flask import Sentry
+from utils import reply_msg
 
 app = Flask(__name__)
 
@@ -274,28 +275,30 @@ def page_wiki_edit(key: str):
         difference = len(new_content) - len(wiki_page.content)
         wiki_page.content = new_content
     # Award fiorygi
-    if difference > 50:
-        fioryg_chance = -(5000/difference) + 100
-        fioryg_roll = random.randrange(0, 100)
-        if fioryg_roll > fioryg_chance:
-            fl_g.user.fiorygi += 1
+    if difference > 500:
+        fiorygi = difference // 500
+        fiorygi_word = "fioryg" + ("i" if fiorygi != 1 else "")
+        fl_g.user.fiorygi += fiorygi
     else:
-        fioryg_chance = -1
-        fioryg_roll = -2
+        fiorygi = 0
+        fiorygi_word = ""
     edit_reason = request.form.get("reason")
     new_log = db.WikiLog(editor=fl_g.user, edited_key=key, timestamp=datetime.datetime.now(), reason=edit_reason)
     fl_g.session.add(new_log)
     fl_g.session.commit()
-    message = f'ℹ️ La pagina wiki <a href="https://ryg.steffo.eu/wiki/{key}">{key}</a> è stata' \
-              f' modificata da' \
-              f' <a href="https://ryg.steffo.eu/profile/{fl_g.user.username}">{fl_g.user.username}</a>' \
-              f' {"(" + edit_reason + ")" if edit_reason else ""}' \
-              f' [{"+" if difference > 0 else ""}{difference}]\n'
-    if fioryg_roll > fioryg_chance:
-        message += f"⭐️ {fl_g.user.username} è stato premiato con 1 fioryg per la modifica!"
     try:
-        telegram_bot.send_message(config["Telegram"]["main_group"], message,
-                                  parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+        reply_msg(telegram_bot, config["Telegram"]["main_group"], strings.WIKI.PAGE_UPDATED,
+                  key=key,
+                  user=fl_g.user.telegram.mention(),
+                  reason=edit_reason,
+                  change=f"+{str(difference)}" if difference > 0 else str(difference))
+        if fiorygi > 0:
+            reply_msg(telegram_bot, config["Telegram"]["main_group"], strings.TELEGRAM.FIORYGI_AWARDED,
+                      mention=fl_g.user.telegram.mention(),
+                      number=fiorygi,
+                      fiorygi=fiorygi_word,
+                      reason="aver contribuito alla wiki Royal Games")
+
     except Exception:
         pass
     return redirect(url_for("page_wiki", key=key))
