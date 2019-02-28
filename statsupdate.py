@@ -12,7 +12,6 @@ import sys
 import coloredlogs
 import requests
 from utils import Dirty, DirtyDelta
-from sentry_sdk import configure_scope
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -39,13 +38,7 @@ def update_block(session: db.Session, block: list, delay: float = 0, change_call
         try:
             change = item.update(session=session)
         except requests.exceptions.HTTPError as e:
-            with configure_scope() as scope:
-                if str(e.response.status_code).startswith("5"):
-                    scope.level = "warning"
-                    logger.warning(f"Server error {sys.exc_info()} while updating {repr(item)}.")
-                else:
-                    scope.level = "error"
-                    logger.error(f"Error {sys.exc_info()} while updating {repr(item)}.")
+            logger.error(f"Error {sys.exc_info()} while updating {repr(item)}.")
             sentry.extra_context({
                 "item": repr(item),
                 "response": {
