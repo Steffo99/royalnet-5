@@ -1,7 +1,7 @@
 python-telegram-bot
 flask
 sqlalchemy
-youtube-dl
+youtube_dl==2019.02.18
 requests
 psycopg2-binary
 PyNaCl

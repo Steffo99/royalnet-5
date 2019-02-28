@@ -6,7 +6,7 @@ git stash
 git pull
 git lfs pull
 new=$(git rev-list HEAD -n 1)
-if [ ${old} = ${new} ]; then
+if [[ ${old} = ${new} ]]; then
         version=$(sentry-cli releases propose-version)
         sentry-cli releases new -p royalnet ${version}
         sentry-cli releases set-commits --auto ${version}
