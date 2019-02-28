@@ -247,9 +247,14 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
             reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)
             return
         text = update.message.reply_to_message.text
-        author = session.query(db.Telegram)\
-                        .filter_by(telegram_id=update.message.reply_to_message.from_user.id)\
-                        .one_or_none()
+        if update.message.forward_from:
+            author = session.query(db.Telegram) \
+                .filter_by(telegram_id=update.message.forward_from.id) \
+                .one_or_none()
+        else:
+            author = session.query(db.Telegram)\
+                            .filter_by(telegram_id=update.message.reply_to_message.from_user.id)\
+                            .one_or_none()
         saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
     if text is None:
         reply(bot, update, strings.DIARIO.ERRORS.NO_TEXT)
