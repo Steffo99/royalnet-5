@@ -802,11 +802,13 @@ class RoyalDiscordBot(discord.Client):
                 self.inactivity_timer -= 1
                 continue
             for voice_client in self.voice_clients:
-                if voice_client.is_connected():
+                try:
                     logger.info("Disconnecting due to inactivity.")
                     await voice_client.disconnect()
                     await self.change_presence(status=discord.Status.online, activity=None)
                     await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
+                except Exception:
+                    raise Exception("Ciao! Sono un errore intenzionale di Steffo per testare il countdown inattività!")
 
     async def create_activityreport(self):
         logger.debug("Fetching Discord users...")
