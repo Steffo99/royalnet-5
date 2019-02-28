@@ -738,6 +738,11 @@ class RoyalDiscordBot(discord.Client):
                     del self.video_queue.list[index]
                     continue
 
+    async def clear_now_playing(self):
+        if self.video_queue.now_playing is not None:
+            self.video_queue.now_playing = None
+            await self.change_presence(status=discord.Status.online, activity=None)
+
     async def queue_play_next_video(self):
         await self.wait_until_ready()
         while True:
@@ -750,6 +755,8 @@ class RoyalDiscordBot(discord.Client):
                     continue
                 if voice_client.is_paused():
                     continue
+                # Clear the now playing video
+                await self.clear_now_playing()
                 # Ensure the next video is ready
                 next_video = self.video_queue.next_video()
                 if next_video is None or not next_video.is_ready:
@@ -805,7 +812,6 @@ class RoyalDiscordBot(discord.Client):
                 try:
                     logger.info("Disconnecting due to inactivity.")
                     await voice_client.disconnect()
-                    await self.change_presence(status=discord.Status.online, activity=None)
                     await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
                 except Exception:
                     raise Exception("Ciao! Sono un errore intenzionale di Steffo per testare il countdown inattività!")
