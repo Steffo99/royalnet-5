@@ -1342,8 +1342,11 @@ class Brawlhalla(Base, Mini):
         self.rating = rating.value
         best_team_data = Dirty((self.best_team_partner_id, self.best_team_rating))
         try:
-            current_best_team = max(j.get("2v2", []), key=lambda t: j.get("rating", 0))
-            self.best_team_partner_id = current_best_team["brawlhalla_id_two"]
+            current_best_team = max(j.get("2v2", []), key=lambda t: t.get("rating", 0))
+            if current_best_team["brawlhalla_id_one"] == self.brawlhalla_id:
+                self.best_team_partner_id = current_best_team["brawlhalla_id_two"]
+            else:
+                self.best_team_partner_id = current_best_team["brawlhalla_id_one"]
             self.best_team_rating = current_best_team["rating"]
             best_team_data.value = (self.best_team_partner_id, self.best_team_rating)
         except ValueError:
