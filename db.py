@@ -1,6 +1,8 @@
 import datetime
 import logging
 import os
+import time
+
 import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -1267,6 +1269,67 @@ class BindingOfIsaacRun(Base):
 
     def __repr__(self):
         return f"<db.BindingOfIsaacRun {self.player_id}: {self.score}>"
+
+
+class Brawlhalla(Base, Mini):
+    __tablename__ = "brawlhalla"
+
+    steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
+    steam = relationship("Steam", backref="brawlhalla", lazy="joined")
+    brawlhalla_id = Column(BigInteger)
+    name = Column(String)
+
+    level = Column(Integer)
+
+    main_legend_name = Column(String)
+    main_legend_level = Column(Integer)
+
+    ranked_plays = Column(Integer)
+    ranked_wins = Column(Integer)
+    rating = Column(Integer)
+
+    best_team_name = Column(String)
+    best_team_rating = Column(Integer)
+
+    def __repr__(self):
+        return f"<db.Brawlhalla {self.name}>"
+
+    @staticmethod
+    def init_table():
+        session = Session()
+        steam = session.query(Steam).all()
+        for user in steam:
+            j = requests.get("https://api.brawlhalla.com/search", params={
+                "steamid": user.steam_id,
+                "api_key": config["Brawlhalla"]["brawlhalla_api_key"]
+            }).json()
+            if not j:
+                continue
+            b = session.query(Brawlhalla).filter_by(steam=user).one_or_none()
+            if b is None:
+                b = Brawlhalla(steam_id=user.steam_id, brawlhalla_id=j["brawlhalla_id"], name=j["name"])
+            session.add(b)
+            time.sleep(1)
+        session.commit()
+
+    def update(self):
+        j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/stats?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
+        self.name = j["name"]
+        self.level = j["level"]
+        main_legend = max(j["legends"], key=lambda l: l["level"])
+        self.main_legend_level = main_legend["level"]
+        self.main_legend_name = main_legend["legend_name_key"]
+        j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/ranked?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
+        self.ranked_plays = j["games"]
+        self.ranked_wins = j["wins"]
+        rating = DirtyDelta(self.rating)
+        rating.value = j["rating"]
+        best_team_data = Dirty((self.best_team_name, self.best_team_rating))
+        current_best_team = max(j["2v2"], key=lambda t: t["rating"])
+        self.best_team_name = current_best_team["name"]
+        self.best_team_rating = current_best_team["rating"]
+        best_team_data.value = (self.best_team_name, self.best_team_rating)
+        return rating, best_team_data
 
 
 # If run as script, create all the tables in the db

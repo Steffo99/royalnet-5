@@ -248,6 +248,13 @@ class SPELL:
         INVALID_SYNTAX = "⚠ Non hai specificato la magia di cui vuoi conoscere i dettagli!\nSintassi: <code>/spell (nome)</code>"
 
 
+# Game stats updates
+class STATSUPDATE:
+    class BRAWLHALLA:
+        SOLO = "✳️ {username} ha ora <b>{rating}</b> ({delta}) Elo 1v1 su Brawlhalla!"
+        TEAM = "✳️ {username} ha ora <b>{rating}</b> Elo 2v2 con il team <i>{teamname}</i> di Brawlhalla!"
+
+
 # Secondo me, è colpa delle stringhe.
 SMECDS = "🤔 Secondo me, è colpa {ds}."
 

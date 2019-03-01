@@ -11,7 +11,8 @@ import telegram
 import sys
 import coloredlogs
 import requests
-from utils import Dirty, DirtyDelta
+import strings
+from utils import Dirty, DirtyDelta, reply_msg
 
 logging.getLogger().disabled = True
 logger = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ sentry = raven.Client(config["Sentry"]["token"],
                       hook_libraries=[])
 
 telegram_bot = telegram.Bot(config["Telegram"]["bot_token"])
+main_chat_id = config["Telegram"]["main_group"]
 
 
 def update_block(session: db.Session, block: list, delay: float = 0, change_callback: typing.Callable = None):
@@ -126,9 +128,30 @@ def osu_pp_change(item, change: typing.Tuple[DirtyDelta, DirtyDelta, DirtyDelta,
         sentry.captureException()
 
 
+def brawlhalla_rank_change(item, change: typing.Tuple[DirtyDelta, Dirty]):
+    solo, team = change
+    try:
+        if solo.delta >= 10:
+            reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.SOLO,
+                      username=item.steam.royal.username,
+                      rating=solo.value,
+                      delta=solo.delta)
+        if team.is_dirty():
+            reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.TEAM,
+                      username=item.steam.royal.username,
+                      rating=team[1],
+                      teamname=team[0])
+    except Exception:
+        logger.warning(f"Couldn't notify on Telegram: {item}")
+        sentry.captureException()
+
+
 def process():
     while True:
         session = db.Session()
+        logger.info("Now updating League of Legends data.")
+        update_block(session, session.query(db.Brawlhalla).all(), delay=5, change_callback=brawlhalla_rank_change)
+        session.commit()
         logger.info("Now updating osu! data.")
         update_block(session, session.query(db.Osu).all(), delay=5, change_callback=osu_pp_change)
         session.commit()
