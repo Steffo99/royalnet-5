@@ -1288,11 +1288,23 @@ class Brawlhalla(Base, Mini):
     ranked_wins = Column(Integer)
     rating = Column(Integer)
 
-    best_team_name = Column(String)
+    best_team_partner_id = Column(BigInteger)
     best_team_rating = Column(Integer)
+
+    _mini_full_name = "Brawlhalla"
+    _mini_name = "brawlhalla"
+    _mini_order = [rating.desc(), level.desc()]
 
     def __repr__(self):
         return f"<db.Brawlhalla {self.name}>"
+
+    @hybrid_property
+    def best_team_partner(self) -> typing.Optional["Brawlhalla"]:
+        # FIXME: dirty hack here
+        session = Session()
+        b = session.query(Brawlhalla).filter_by(brawlhalla_id=self.best_team_partner_id).one_or_none()
+        session.close()
+        return b
 
     @staticmethod
     def init_table():
@@ -1327,10 +1339,11 @@ class Brawlhalla(Base, Mini):
         self.ranked_wins = j.get("wins", 0)
         rating = DirtyDelta(self.rating)
         rating.value = j.get("rating")
+        self.rating = rating.value
         best_team_data = Dirty((self.best_team_name, self.best_team_rating))
         try:
             current_best_team = max(j.get("2v2", []), key=lambda t: j.get("rating", 0))
-            self.best_team_name = current_best_team["name"]
+            self.best_team_name = current_best_team["teamname"]
             self.best_team_rating = current_best_team["rating"]
             best_team_data.value = (self.best_team_name, self.best_team_rating)
         except ValueError:
