@@ -1340,12 +1340,12 @@ class Brawlhalla(Base, Mini):
         rating = DirtyDelta(self.rating)
         rating.value = j.get("rating")
         self.rating = rating.value
-        best_team_data = Dirty((self.best_team_name, self.best_team_rating))
+        best_team_data = Dirty((self.best_team_partner_id, self.best_team_rating))
         try:
             current_best_team = max(j.get("2v2", []), key=lambda t: j.get("rating", 0))
-            self.best_team_name = current_best_team["teamname"]
+            self.best_team_partner_id = current_best_team["brawlhalla_id_two"]
             self.best_team_rating = current_best_team["rating"]
-            best_team_data.value = (self.best_team_name, self.best_team_rating)
+            best_team_data.value = (self.best_team_partner_id, self.best_team_rating)
         except ValueError:
             pass
         return rating, best_team_data

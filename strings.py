@@ -252,7 +252,7 @@ class SPELL:
 class STATSUPDATE:
     class BRAWLHALLA:
         SOLO = "✳️ {username} ha ora <b>{rating}</b> ({delta}) Elo 1v1 su Brawlhalla!"
-        TEAM = "✳️ {username} ha ora <b>{rating}</b> Elo 2v2 con il team <i>{teamname}</i> di Brawlhalla!"
+        TEAM = "✳️ {username}+{other} hanno ora <b>{rating}</b> Elo 2v2 su Brawlhalla!"
 
 
 # Secondo me, è colpa delle stringhe.
