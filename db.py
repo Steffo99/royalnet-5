@@ -1314,21 +1314,27 @@ class Brawlhalla(Base, Mini):
 
     def update(self, session=None):
         j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/stats?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
-        self.name = j["name"]
-        self.level = j["level"]
-        main_legend = max(j["legends"], key=lambda l: l["level"])
-        self.main_legend_level = main_legend["level"]
-        self.main_legend_name = main_legend["legend_name_key"]
+        self.name = j.get("name", "unknown")
+        self.level = j.get("level", 0)
+        try:
+            main_legend = max(j.get("legends", []), key=lambda l: l.get("level", 0))
+            self.main_legend_level = main_legend.get("level", 0)
+            self.main_legend_name = main_legend.get("legend_name_key", "unknown")
+        except ValueError:
+            pass
         j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/ranked?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
-        self.ranked_plays = j["games"]
-        self.ranked_wins = j["wins"]
+        self.ranked_plays = j.get("games", 0)
+        self.ranked_wins = j.get("wins", 0)
         rating = DirtyDelta(self.rating)
-        rating.value = j["rating"]
+        rating.value = j.get("rating")
         best_team_data = Dirty((self.best_team_name, self.best_team_rating))
-        current_best_team = max(j["2v2"], key=lambda t: t["rating"])
-        self.best_team_name = current_best_team["name"]
-        self.best_team_rating = current_best_team["rating"]
-        best_team_data.value = (self.best_team_name, self.best_team_rating)
+        try:
+            current_best_team = max(j.get("2v2", []), key=lambda t: j.get("rating", 0))
+            self.best_team_name = current_best_team["name"]
+            self.best_team_rating = current_best_team["rating"]
+            best_team_data.value = (self.best_team_name, self.best_team_rating)
+        except ValueError:
+            pass
         return rating, best_team_data
 
 
