@@ -137,10 +137,15 @@ def brawlhalla_rank_change(item, change: typing.Tuple[DirtyDelta, Dirty]):
                       rating=solo.value,
                       delta=solo.delta)
         if team.is_dirty():
+            partner = item.best_team_partner
+            if partner is None:
+                other = "???"
+            else:
+                other = partner.steam.royal.username
             reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.TEAM,
                       username=item.steam.royal.username,
                       rating=team[1],
-                      teamname=team[0])
+                      other=other)
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
         sentry.captureException()
