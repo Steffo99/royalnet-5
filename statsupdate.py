@@ -144,7 +144,7 @@ def brawlhalla_rank_change(item, change: typing.Tuple[DirtyDelta, Dirty]):
                 other = partner.steam.royal.username
             reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.TEAM,
                       username=item.steam.royal.username,
-                      rating=team[1],
+                      rating=team.value[1],
                       other=other)
     except Exception:
         logger.warning(f"Couldn't notify on Telegram: {item}")
