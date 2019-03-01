@@ -1312,7 +1312,7 @@ class Brawlhalla(Base, Mini):
             time.sleep(1)
         session.commit()
 
-    def update(self):
+    def update(self, session=None):
         j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/stats?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
         self.name = j["name"]
         self.level = j["level"]
