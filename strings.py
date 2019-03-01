@@ -16,7 +16,7 @@ def safely_format_string(string: str, words: typing.Dict[str, str] = None, ignor
     else:
         escaped = {}
         for key in words:
-            escaped[key] = words[key].replace("<", "&lt;").replace(">", "&gt;")
+            escaped[key] = str(words[key]).replace("<", "&lt;").replace(">", "&gt;")
     return string.format_map(SafeDict(**escaped))
 
 
