@@ -16,8 +16,20 @@ class Dirty:
 class DirtyDelta(Dirty):
     @property
     def delta(self):
-        return self.value - self.initial_value
+        if self.initial_value is None:
+            initial_value = 0
+        else:
+            initial_value = self.initial_value
+        if self.value is None:
+            value = 0
+        else:
+            value = self.value
+        return value - initial_value
 
     @delta.setter
     def delta(self, value):
-        self.value = self.initial_value + value
+        if self.initial_value is None:
+            initial_value = 0
+        else:
+            initial_value = self.initial_value
+        self.value = initial_value + value
