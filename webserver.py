@@ -381,6 +381,11 @@ def page_activity():
                            hourly_before=hourly_before)
 
 
+@app.route("/brawlhalla")
+def page_brawlhalla():
+    return render_template("brawlhalla.html")
+
+
 @app.route("/hooks/github", methods=["POST"])
 def hooks_github():
     try:
