@@ -217,18 +217,20 @@ def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session
     bot.send_message(update.message.chat.id, f"😡 Stai sfogando la tua ira sul bot!")
 
 
-def find_author(session: db.Session, text: str):
-    author_match = re.match(r".*(?:—|-{1,2}) ?@?([A-Za-z0-9_]+)$", text)
-    if author_match is None:
+def parse_diario(session: db.Session, text: str):
+    match = re.match(r'"?(.*)"? (?:—|-{1,2}) ?@?([A-Za-z0-9_]+)$', text)
+    if match is None:
         return None
-    author_string = author_match.group(1).lower()
-    author = session.query(db.Royal).filter(db.func.lower(db.Royal.username) == author_string).first().telegram[0]
-    if author is not None:
-        return author
+    text_string = match.group(1)
+    author_string = match.group(2).lower()
+    royal = session.query(db.Royal).filter(db.func.lower(db.Royal.username) == author_string).first()
+    if royal is not None:
+        author = royal.telegram[0]
+        return author, text_string
     author = session.query(db.Telegram).filter(db.func.lower(db.Telegram.username) == author_string).first()
     if author is not None:
-        return author
-    return None
+        return author, text_string
+    return None, text_string
 
 
 @command
@@ -241,7 +243,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     try:
         text = update.message.text.split(" ", 1)[1]
         saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
-        author = find_author(session, text)
+        author, actual_text = parse_diario(session, text)
     except IndexError:
         if update.message.reply_to_message is None:
             reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)
@@ -262,7 +264,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     diario = db.Diario(timestamp=datetime.datetime.now(),
                        saver=saver,
                        author=author,
-                       text=text)
+                       text=actual_text)
     session.add(diario)
     session.commit()
     reply(bot, update, strings.DIARIO.SUCCESS, ignore_escaping=True, diario=diario.to_telegram())
