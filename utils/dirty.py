@@ -24,12 +24,9 @@ class DirtyDelta(Dirty):
             value = 0
         else:
             value = self.value
-        return value - initial_value
+        return abs(value - initial_value)
 
-    @delta.setter
-    def delta(self, value):
-        if self.initial_value is None:
-            initial_value = 0
-        else:
-            initial_value = self.initial_value
-        self.value = initial_value + value
+    def delta_string(self):
+        if self.delta > 0:
+            return f"+{self.delta}"
+        return self.delta
