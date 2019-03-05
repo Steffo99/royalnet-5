@@ -220,7 +220,7 @@ def cmd_balurage(bot: telegram.Bot, update: telegram.Update, session: db.Session
 def parse_diario(session: db.Session, text: str):
     match = re.match(r'"?(.*)"? (?:—|-{1,2}) ?@?([A-Za-z0-9_]+)$', text)
     if match is None:
-        return None
+        return None, text
     text_string = match.group(1)
     author_string = match.group(2).lower()
     royal = session.query(db.Royal).filter(db.func.lower(db.Royal.username) == author_string).first()
