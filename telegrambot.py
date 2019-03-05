@@ -501,7 +501,7 @@ def on_callback_query(bot: telegram.Bot, update: telegram.Update):
                 except BadRequest:
                     break
                 except TimedOut:
-                    pass
+                    time.sleep(1)
     except Exception:
         try:
             bot.answer_callback_query(update.callback_query.id,
