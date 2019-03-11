@@ -101,7 +101,9 @@ class EAT:
         "biscotto": "🍪 Hai mangiato un {food} di contrabbando.\n<i>L'Inquisizione non lo saprà mai!</i>",
         "biscotti": "🍪 Hai mangiato tanti {food} di contrabbando.\n<i>Attento! L'Inquisizione è sulle tue tracce!</i>",
         "tango": "🌳 Hai mangiato un {food}, e un albero insieme ad esso.\n<i>Senti il tuo corpo curare le tue ferite.</i>",
-        "sasso": "🥌 Il {food} che hai mangiato era duro come un {food}\n<i>Stai soffrendo di indigestione!</i>"
+        "sasso": "🥌 Il {food} che hai mangiato era duro come un {food}\n<i>Stai soffrendo di indigestione!</i>",
+        "gnocchetti": "🥘 Ullà, sono duri 'sti {food}!\n<i>Fai fatica a digerirli.</i>",
+        "tide pods": "☣️ I {food} che hai mangiato erano buonissimi.\n<i>Stai sbiancando!</i>"
     }
 
     class ERRORS:
