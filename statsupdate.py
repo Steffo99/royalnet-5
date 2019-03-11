@@ -133,17 +133,17 @@ def brawlhalla_rank_change(item, change: typing.Tuple[DirtyDelta, Dirty]):
     try:
         if solo.delta >= 10:
             reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.SOLO,
-                      username=item.steam.royal.username,
+                      username=item.steam.royal.telegram.mention(),
                       rating=solo.value,
-                      delta=solo.delta_string())
+                      delta=solo.difference_string())
         if team.is_dirty():
             partner = item.best_team_partner
             if partner is None:
-                other = "???"
+                other = "qualcun altro"
             else:
-                other = partner.steam.royal.username
+                other = partner.steam.royal.telegram.mention()
             reply_msg(telegram_bot, main_chat_id, strings.STATSUPDATE.BRAWLHALLA.TEAM,
-                      username=item.steam.royal.username,
+                      username=item.steam.royal.telegram.mention(),
                       rating=team.value[1],
                       other=other)
     except Exception:

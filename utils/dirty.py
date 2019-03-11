@@ -14,8 +14,9 @@ class Dirty:
 
 
 class DirtyDelta(Dirty):
+
     @property
-    def delta(self):
+    def difference(self):
         if self.initial_value is None:
             initial_value = 0
         else:
@@ -24,9 +25,13 @@ class DirtyDelta(Dirty):
             value = 0
         else:
             value = self.value
-        return abs(value - initial_value)
+        return value - initial_value
 
-    def delta_string(self):
-        if self.delta > 0:
-            return f"+{self.delta}"
-        return self.delta
+    @property
+    def delta(self):
+        return abs(self.difference)
+
+    def difference_string(self):
+        if self.difference > 0:
+            return f"+{self.difference}"
+        return self.difference
