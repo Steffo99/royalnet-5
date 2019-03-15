@@ -14,17 +14,15 @@ class Call:
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
-    def __init__(self, channel, command: Command, parameters: typing.List[str]=None):
+    def __init__(self, channel, command: Command, *args, **kwargs):
         self.channel = channel
         self.command = command
-        if parameters is None:
-            self.parameters = []
-        else:
-            self.parameters = parameters
+        self.args = args
+        self.kwargs = kwargs
 
-    async def run(self, *args, **kwargs):
+    async def run(self):
         try:
             coroutine = getattr(self.command, self.interface_name)
         except AttributeError:
             coroutine = getattr(self.command, "common")
-        return await coroutine(self.command, self, *args, **kwargs)
+        return await coroutine(self.command, self, *self.args, **self.kwargs)

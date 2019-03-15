@@ -61,4 +61,4 @@ class TelegramBot:
             # Skip inexistent commands
             command = self.missing_command
         # Call the command
-        return await self.Call(message.chat, command, parameters).run()
+        return await self.Call(message.chat, command, *parameters).run()
