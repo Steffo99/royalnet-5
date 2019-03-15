@@ -6,7 +6,7 @@ from ..utils import asyncify, Call, Command
 
 
 class TelegramBot:
-    def __init__(self, api_key: str, commands: typing.List[Command], *, missing_command: Command=NullCommand):
+    def __init__(self, api_key: str, commands: typing.List[typing.Type[Command]], *, missing_command: Command=NullCommand):
         self.bot = telegram.Bot(api_key)
         self.should_run = False
         self.offset = -100
