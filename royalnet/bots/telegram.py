@@ -1,21 +1,27 @@
 import telegram
 import asyncio
 import typing
+import multiprocessing
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 
 
 class TelegramBot:
-    def __init__(self, api_key: str, commands: typing.List[typing.Type[Command]], *, missing_command: Command=NullCommand):
-        self.bot = telegram.Bot(api_key)
-        self.should_run = False
-        self.offset = -100
-        self.commands = commands
+    def __init__(self,
+                 api_key: str,
+                 *,
+                 commands: typing.List[typing.Type[Command]],
+                 missing_command: Command = NullCommand,
+                 network: multiprocessing.connection.Connection):
+        self.bot: telegram.Bot = telegram.Bot(api_key)
+        self.should_run: bool = False
+        self.offset: int = -100
         self.missing_command: typing.Callable = missing_command
+        self.network: multiprocessing.connection.Connection = network
         # Generate commands
-        self._commands = {}
-        for command in self.commands:
-            self._commands[f"/{command.command_name}"] = command
+        self.commands = {}
+        for command in commands:
+            self.commands[f"/{command.command_name}"] = command
 
         class TelegramCall(Call):
             interface_name = "telegram"
@@ -23,6 +29,9 @@ class TelegramBot:
 
             async def reply(self, text: str):
                 await asyncify(self.channel.send_message, text, parse_mode="HTML")
+
+            async def network(self, data):
+                self.network.send
         self.Call = TelegramCall
 
     async def run(self):
