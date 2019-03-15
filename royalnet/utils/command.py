@@ -13,11 +13,31 @@ class InvalidInputError(Exception):
     pass
 
 
+class CommandArgs:
+    """The arguments of a command. Raises InvalidInputError if the requested argument does not exist."""
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            try:
+                return self.args[item]
+            except IndexError:
+                raise InvalidInputError(f'Tried to get missing [{item}] arg from CommandArgs')
+        elif isinstance(item, str):
+            try:
+                return self.kwargs[item]
+            except IndexError:
+                raise InvalidInputError(f'Tried to get missing ["{item}"] kwarg from CommandArgs')
+        raise ValueError(f"Invalid type passed to CommandArgs.__getattr__: {type(item)}")
+
+
 class Command:
     """A generic command, called from any source."""
 
     command_name: str = NotImplemented
     command_title: str = NotImplemented
 
-    async def common(self, call: "Call", *args, **kwargs):
+    async def common(self, call: "Call", args: CommandArgs):
         raise NotImplementedError()

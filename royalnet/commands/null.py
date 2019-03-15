@@ -1,4 +1,4 @@
-from ..utils import Command, Call
+from ..utils import Command, CommandArgs, Call
 
 
 class NullCommand(Command):
@@ -6,5 +6,5 @@ class NullCommand(Command):
     command_name = "null"
     command_title = "Do nothing"
 
-    async def common(self, call: Call, *args, **kwargs):
+    async def common(self, call: Call, args: CommandArgs):
         pass

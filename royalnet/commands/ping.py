@@ -1,4 +1,4 @@
-from ..utils import Command, Call
+from ..utils import Command, CommandArgs, Call
 
 
 class PingCommand(Command):
@@ -6,5 +6,5 @@ class PingCommand(Command):
     command_name = "ping"
     command_title = "Ping pong!"
 
-    async def common(self, call: Call, *args, **kwargs):
+    async def common(self, call: Call, args: CommandArgs):
         await call.reply("Pong!")

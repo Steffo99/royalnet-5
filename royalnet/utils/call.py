@@ -1,5 +1,4 @@
-import typing
-from .command import Command
+from .command import Command, CommandArgs
 
 
 class Call:
@@ -25,4 +24,4 @@ class Call:
             coroutine = getattr(self.command, self.interface_name)
         except AttributeError:
             coroutine = getattr(self.command, "common")
-        return await coroutine(self.command, self, *self.args, **self.kwargs)
+        return await coroutine(self.command, self, CommandArgs(*self.args, **self.kwargs))

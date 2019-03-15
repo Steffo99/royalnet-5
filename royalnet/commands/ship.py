@@ -1,5 +1,5 @@
 import re
-from ..utils import Command, Call, safeformat
+from ..utils import Command, CommandArgs, Call, safeformat
 
 
 SHIP_RESULT = "💕 {one} + {two} = <b>{result}</b>"
@@ -10,7 +10,7 @@ class ShipCommand(Command):
     command_name = "ship"
     command_title = "Create a ship between two items"
 
-    async def common(self, call: Call, *args, **kwargs):
+    async def common(self, call: Call, args: CommandArgs):
         name_one = args[0]
         name_two = args[1]
         if name_two == "+":
