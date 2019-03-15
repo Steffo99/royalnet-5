@@ -1,3 +1,4 @@
+import typing
 from .command import Command
 
 
@@ -8,14 +9,18 @@ class Call:
     interface_name = NotImplemented
     interface_obj = NotImplemented
 
-    async def reply(cls, text: str):
+    async def reply(self, text: str):
         """Send a text message to the channel the call was made."""
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
-    def __init__(self, channel, command: Command):
+    def __init__(self, channel, command: Command, parameters: typing.List[str]=None):
         self.channel = channel
         self.command = command
+        if parameters is None:
+            self.parameters = []
+        else:
+            self.parameters = parameters
 
     async def run(self, *args, **kwargs):
         try:

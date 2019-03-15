@@ -1,25 +1,28 @@
 import telegram
 import asyncio
 import typing
-from ..commands import PingCommand
-from ..utils import asyncify, Call
+from ..commands import NullCommand
+from ..utils import asyncify, Call, Command
 
 
 class TelegramBot:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, commands: typing.List[Command], *, missing_command: Command=NullCommand):
         self.bot = telegram.Bot(api_key)
         self.should_run = False
         self.offset = -100
-        self.commands = {
-            "/ping": PingCommand
-        }
+        self.commands = commands
+        self.missing_command: typing.Callable = missing_command
+        # Generate commands
+        self._commands = {}
+        for command in self.commands:
+            self._commands[f"/{command.command_name}"] = command
 
         class TelegramCall(Call):
             interface_name = "telegram"
             interface_obj = self
 
-            async def reply(call, text: str):
-                await asyncify(call.channel.send_message, text, parse_mode="HTML")
+            async def reply(self, text: str):
+                await asyncify(self.channel.send_message, text, parse_mode="HTML")
         self.Call = TelegramCall
 
     async def run(self):
@@ -53,9 +56,9 @@ class TelegramBot:
         command_text.replace(f"@{self.bot.username}", "")
         # Find the function
         try:
-            command = self.commands[command_text]
+            command = self._commands[command_text]
         except KeyError:
             # Skip inexistent commands
-            return
+            command = self.missing_command
         # Call the command
-        return await self.Call(message.chat, command).run()
+        return await self.Call(message.chat, command, parameters).run()
