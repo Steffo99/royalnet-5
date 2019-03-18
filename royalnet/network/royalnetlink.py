@@ -5,7 +5,7 @@ import uuid
 import functools
 import typing
 import pickle
-from .messages import Message, IdentifyMessage, ErrorMessage
+from .messages import Message, ErrorMessage
 from .packages import Package, TwoWayPackage
 loop = asyncio.get_event_loop()
 
@@ -35,8 +35,9 @@ class PendingRequest:
 
 
 class RoyalnetLink:
-    def __init__(self, master_uri: str, request_handler):
+    def __init__(self, master_uri: str, link_type: str, request_handler):
         self.master_uri: str = master_uri
+        self.link_type: str = link_type
         self.nid: str = str(uuid.uuid4())
         self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
         self.identified: bool = False

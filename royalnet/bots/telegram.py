@@ -4,20 +4,24 @@ import typing
 import multiprocessing
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
+from ..network import RoyalnetLink, Message
+
+
+async def null(message: Message):
+    pass
 
 
 class TelegramBot:
     def __init__(self,
                  api_key: str,
-                 *,
+                 master_server_uri: str,
                  commands: typing.List[typing.Type[Command]],
-                 missing_command: Command = NullCommand,
-                 network: multiprocessing.connection.Connection):
+                 missing_command: Command = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
         self.offset: int = -100
         self.missing_command: typing.Callable = missing_command
-        self.network: multiprocessing.connection.Connection = network
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, "Telegram", null)
         # Generate commands
         self.commands = {}
         for command in commands:
@@ -30,8 +34,10 @@ class TelegramBot:
             async def reply(self, text: str):
                 await asyncify(self.channel.send_message, text, parse_mode="HTML")
 
-            async def network(self, data):
-                self.network.send
+            async def net_request(self, message: Message, destination: str):
+                response = await self.network.request(message, destination)
+                return response
+
         self.Call = TelegramCall
 
     async def run(self):
