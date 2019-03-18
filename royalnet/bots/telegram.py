@@ -1,7 +1,6 @@
 import telegram
 import asyncio
 import typing
-import multiprocessing
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
@@ -71,7 +70,7 @@ class TelegramBot:
         command_text.replace(f"@{self.bot.username}", "")
         # Find the function
         try:
-            command = self._commands[command_text]
+            command = self.commands[command_text]
         except KeyError:
             # Skip inexistent commands
             command = self.missing_command
