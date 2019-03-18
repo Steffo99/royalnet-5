@@ -36,6 +36,7 @@ class PendingRequest:
 
 class RoyalnetLink:
     def __init__(self, master_uri: str, link_type: str, request_handler):
+        assert ":" not in link_type
         self.master_uri: str = master_uri
         self.link_type: str = link_type
         self.nid: str = str(uuid.uuid4())
@@ -70,7 +71,7 @@ class RoyalnetLink:
 
     @requires_connection
     async def identify(self, secret) -> None:
-        await self.websocket.send(f"Identify: {self.nid}:{secret}")
+        await self.websocket.send(f"Identify {self.nid}:{self.link_type}:{secret}")
         response_package = await self.receive()
         response = response_package.data
         if isinstance(response, ErrorMessage):

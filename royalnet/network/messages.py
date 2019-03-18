@@ -12,5 +12,9 @@ class ErrorMessage(Message):
         self.reason = reason
 
 
-class InvalidSecretErrorMessage(ErrorMessage):
+class BadMessage(ErrorMessage):
+    pass
+
+
+class InvalidSecretErrorMessage(BadMessage):
     pass

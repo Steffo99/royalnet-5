@@ -20,7 +20,7 @@ class TelegramBot:
         self.should_run: bool = False
         self.offset: int = -100
         self.missing_command: typing.Callable = missing_command
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, "Telegram", null)
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, "telegram", null)
         # Generate commands
         self.commands = {}
         for command in commands:
