@@ -2,8 +2,11 @@ import typing
 import websockets
 import re
 import datetime
-from .messages import Message, ErrorMessage, BadMessage, InvalidSecretErrorMessage, IdentifySuccessfulMessage
-from .packages import Package, TwoWayPackage
+import pickle
+import asyncio
+import uuid
+from .messages import Message, ErrorMessage, InvalidPackageEM, InvalidSecretEM, IdentifySuccessfulMessage
+from .packages import Package
 
 
 class ConnectedClient:
@@ -17,38 +20,83 @@ class ConnectedClient:
     def is_identified(self) -> bool:
         return bool(self.nid)
 
+    async def send(self, package: Package):
+        self.socket.send(package.pickle())
+
 
 class RoyalnetServer:
-    def __init__(self, required_secret: str):
+    def __init__(self, address: str, port: int, required_secret: str):
+        self.address: str = address
+        self.port: int = port
         self.required_secret: str = required_secret
-        self.connected_clients: typing.List[ConnectedClient] = {}
-        self.server: websockets.server.WebSocketServer = websockets.server
+        self.identified_clients: typing.List[ConnectedClient] = {}
 
-    def find_client_by_nid(self, nid: str):
-        return [client for client in self.connected_clients if client.nid == nid][0]
+    def find_client(self, *, nid: str=None, link_type: str=None) -> typing.List[ConnectedClient]:
+        assert not (nid and link_type)
+        if nid:
+            matching = [client for client in self.identified_clients if client.nid == nid]
+            assert len(matching) <= 1
+            return matching
+        if link_type:
+            matching = [client for client in self.identified_clients if client.link_type == link_type]
+            return matching or []
 
     async def listener(self, websocket: websockets.server.WebSocketServerProtocol, request_uri: str):
         connected_client = ConnectedClient(websocket)
         # Wait for identification
         identify_msg = websocket.recv()
         if not isinstance(identify_msg, str):
-            websocket.send(BadMessage("Invalid identification message (not a str)"))
+            websocket.send(InvalidPackageEM("Invalid identification message (not a str)"))
             return
         identification = re.match(r"Identify ([A-Za-z0-9\-]+):([a-z]+):([A-Za-z0-9\-])", identify_msg)
         if identification is None:
-            websocket.send(BadMessage("Invalid identification message (regex failed)"))
+            websocket.send(InvalidPackageEM("Invalid identification message (regex failed)"))
             return
         secret = identification.group(3)
         if secret != self.required_secret:
-            websocket.send(InvalidSecretErrorMessage("Invalid secret"))
+            websocket.send(InvalidSecretEM("Invalid secret"))
             return
         # Identification successful
         connected_client.nid = identification.group(1)
         connected_client.link_type = identification.group(2)
-        self.connected_clients.append(connected_client)
+        self.identified_clients.append(connected_client)
+        await connected_client.send(Package(IdentifySuccessfulMessage(), connected_client.nid, "__master__"))
         # Main loop
         while True:
+            # Receive packages
+            raw_pickle = await websocket.recv()
+            package: Package = pickle.loads(raw_pickle)
+            # Check if the package destination is the server itself.
+            if package.destination == "__master__":
+                # TODO: do stuff
+                pass
+            # Otherwise, route the package to its destination
+            asyncio.create_task(self.route_package(package))
+
+    def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
+        """Find a list of destinations for the sent packages"""
+        # Parse destination
+        # Is it nothing?
+        if package.destination == "NULL":
+            return []
+        # Is it the wildcard?
+        if package.destination == "*":
+            return self.identified_clients
+        # Is it a valid nid?
+        try:
+            destination = str(uuid.UUID(package.destination))
+        except ValueError:
             pass
+        else:
+            return self.find_client(nid=destination)
+        # Is it a link_type?
+        return self.find_client(link_type=package.destination)
 
+    async def route_package(self, package: Package) -> None:
+        """Executed every time a package is received and must be routed somewhere."""
+        destinations = self.find_destination(package)
+        for destination in destinations:
+            await destination.send(package)
 
-
+    async def run(self):
+        websockets.serve(self.listener, host=self.address, port=self.port)

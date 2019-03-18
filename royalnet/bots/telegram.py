@@ -14,13 +14,14 @@ class TelegramBot:
     def __init__(self,
                  api_key: str,
                  master_server_uri: str,
+                 master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
                  missing_command: Command = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
         self.offset: int = -100
-        self.missing_command: typing.Callable = missing_command
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, "telegram", null)
+        self.missing_command = missing_command
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", null)
         # Generate commands
         self.commands = {}
         for command in commands:

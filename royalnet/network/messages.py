@@ -12,9 +12,15 @@ class ErrorMessage(Message):
         self.reason = reason
 
 
-class BadMessage(ErrorMessage):
+class InvalidSecretEM(ErrorMessage):
     pass
 
 
-class InvalidSecretErrorMessage(BadMessage):
+class InvalidPackageEM(ErrorMessage):
     pass
+
+
+class InvalidDestinationEM(InvalidPackageEM):
+    pass
+
+

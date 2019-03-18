@@ -6,7 +6,7 @@ import functools
 import typing
 import pickle
 from .messages import Message, ErrorMessage
-from .packages import Package, TwoWayPackage
+from .packages import Package
 loop = asyncio.get_event_loop()
 
 
@@ -35,11 +35,12 @@ class PendingRequest:
 
 
 class RoyalnetLink:
-    def __init__(self, master_uri: str, link_type: str, request_handler):
+    def __init__(self, master_uri: str, secret: str, link_type: str, request_handler):
         assert ":" not in link_type
         self.master_uri: str = master_uri
         self.link_type: str = link_type
         self.nid: str = str(uuid.uuid4())
+        self.secret: str = secret
         self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
         self.identified: bool = False
         self.request_handler = request_handler
@@ -48,12 +49,12 @@ class RoyalnetLink:
     async def connect(self):
         self.websocket = await websockets.connect(self.master_uri)
 
-    def requires_connection(self, func):
+    def requires_connection(func):
         @functools.wraps(func)
-        def new_func(*args, **kwargs):
+        def new_func(self, *args, **kwargs):
             if self.websocket is None:
                 raise NotConnectedError("Tried to call a method which @requires_connection while not connected")
-            return func(*args, **kwargs)
+            return func(self, *args, **kwargs)
         return new_func
 
     @requires_connection
@@ -65,7 +66,7 @@ class RoyalnetLink:
             self.identified = False
             # What to do now? Let's just reraise.
             raise
-        package: typing.Union[Package, TwoWayPackage] = pickle.loads(raw_pickle)
+        package: typing.Union[Package, Package] = pickle.loads(raw_pickle)
         assert package.destination == self.nid
         return package
 
@@ -78,12 +79,12 @@ class RoyalnetLink:
             raise NetworkError(response, "Server returned error while identifying self")
         self.identified = True
 
-    def requires_identification(self, func):
+    def requires_identification(func):
         @functools.wraps(func)
-        def new_func(*args, **kwargs):
+        def new_func(self, *args, **kwargs):
             if not self.identified:
                 raise NotIdentifiedError("Tried to call a method which @requires_identification while not identified")
-            return func(*args, **kwargs)
+            return func(self, *args, **kwargs)
         return new_func
 
     @requires_identification
@@ -93,7 +94,7 @@ class RoyalnetLink:
 
     @requires_identification
     async def request(self, message, destination):
-        package = TwoWayPackage(message, destination, self.nid)
+        package = Package(message, destination, self.nid)
         request = PendingRequest()
         self._pending_requests[package.conversation_id] = request
         await self.send(package)
@@ -103,7 +104,7 @@ class RoyalnetLink:
             raise NetworkError(result, "Server returned error while requesting something")
         return result
 
-    async def run_link(self):
+    async def run(self):
         while True:
             if self.websocket is None:
                 await self.connect()
@@ -116,7 +117,8 @@ class RoyalnetLink:
                 request.set(package.data)
                 continue
             # Package is a request
-            assert isinstance(package, TwoWayPackage)
+            assert isinstance(package, Package)
             response = await self.request_handler(package.data)
-            response_package: Package = package.reply(response)
-            await self.send(response_package)
+            if response is not None:
+                response_package: Package = package.reply(response)
+                await self.send(response_package)
