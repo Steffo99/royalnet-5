@@ -138,9 +138,9 @@ class RoyalnetLink:
                 continue
             # Package is a request
             assert isinstance(package, Package)
-            log.debug(f"Received request: {package.source} -> {package.data}")
+            log.debug(f"Received request {package.conversation_id}: {package}")
             response = await self.request_handler(package.data)
             if response is not None:
                 response_package: Package = package.reply(response)
                 await self.send(response_package)
-                log.debug(f"Replied to request: {response_package.data} -> {response_package.destination}")
+                log.debug(f"Replied to request {response_package.conversation_id}: {response_package}")

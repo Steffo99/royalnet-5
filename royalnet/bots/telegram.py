@@ -6,10 +6,6 @@ from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
 
 
-async def null(message: Message):
-    pass
-
-
 class TelegramBot:
     def __init__(self,
                  api_key: str,
@@ -77,3 +73,6 @@ class TelegramBot:
             command = self.missing_command
         # Call the command
         return await self.Call(message.chat, command, *parameters).run()
+
+    async def handle_net_request(self, message: Message):
+        pass

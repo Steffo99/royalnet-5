@@ -88,9 +88,6 @@ class RoyalnetServer:
         # Is it nothing?
         if package.destination == "NULL":
             return []
-        # Is it the wildcard?
-        if package.destination == "*":
-            return self.identified_clients
         # Is it a valid nid?
         try:
             destination = str(uuid.UUID(package.destination))
