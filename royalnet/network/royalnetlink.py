@@ -68,7 +68,7 @@ class RoyalnetLink:
         self.request_handler = request_handler
         self._pending_requests: typing.Dict[typing.Optional[Message]] = {}
         self._connect_event: asyncio.Event = asyncio.Event()
-        self._identify_event: asyncio.Event = asyncio.Event()
+        self.identify_event: asyncio.Event = asyncio.Event()
 
     async def connect(self):
         log.info(f"Connecting to {self.master_uri}...")
@@ -83,7 +83,7 @@ class RoyalnetLink:
         except websockets.ConnectionClosed:
             self.websocket = None
             self._connect_event.clear()
-            self._identify_event.clear()
+            self.identify_event.clear()
             log.info(f"Connection to {self.master_uri} was closed.")
             # What to do now? Let's just reraise.
             raise
@@ -100,7 +100,7 @@ class RoyalnetLink:
         response = response_package.data
         if isinstance(response, ErrorMessage):
             raise NetworkError(response, "Server returned error while identifying self")
-        self._identify_event.set()
+        self.identify_event.set()
         log.info(f"Identified successfully!")
 
     @requires_identification
@@ -128,7 +128,7 @@ class RoyalnetLink:
         while True:
             if self.websocket is None:
                 await self.connect()
-            if not self._identify_event.is_set():
+            if not self.identify_event.is_set():
                 await self.identify()
             package: Package = await self.receive()
             # Package is a response

@@ -6,6 +6,10 @@ from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
 
 
+async def todo(message: Message):
+    pass
+
+
 class TelegramBot:
     def __init__(self,
                  api_key: str,
@@ -17,7 +21,7 @@ class TelegramBot:
         self.should_run: bool = False
         self.offset: int = -100
         self.missing_command = missing_command
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", null)
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         # Generate commands
         self.commands = {}
         for command in commands:
