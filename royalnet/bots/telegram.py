@@ -3,19 +3,29 @@ import asyncio
 import typing
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
+from ..network import RoyalnetLink, Message
+
+
+async def todo(message: Message):
+    pass
 
 
 class TelegramBot:
-    def __init__(self, api_key: str, commands: typing.List[typing.Type[Command]], *, missing_command: Command=NullCommand):
-        self.bot = telegram.Bot(api_key)
-        self.should_run = False
-        self.offset = -100
-        self.commands = commands
-        self.missing_command: typing.Callable = missing_command
+    def __init__(self,
+                 api_key: str,
+                 master_server_uri: str,
+                 master_server_secret: str,
+                 commands: typing.List[typing.Type[Command]],
+                 missing_command: Command = NullCommand):
+        self.bot: telegram.Bot = telegram.Bot(api_key)
+        self.should_run: bool = False
+        self.offset: int = -100
+        self.missing_command = missing_command
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         # Generate commands
-        self._commands = {}
-        for command in self.commands:
-            self._commands[f"/{command.command_name}"] = command
+        self.commands = {}
+        for command in commands:
+            self.commands[f"/{command.command_name}"] = command
 
         class TelegramCall(Call):
             interface_name = "telegram"
@@ -23,6 +33,11 @@ class TelegramBot:
 
             async def reply(self, text: str):
                 await asyncify(self.channel.send_message, text, parse_mode="HTML")
+
+            async def net_request(self, message: Message, destination: str):
+                response = await self.network.request(message, destination)
+                return response
+
         self.Call = TelegramCall
 
     async def run(self):
@@ -56,9 +71,12 @@ class TelegramBot:
         command_text.replace(f"@{self.bot.username}", "")
         # Find the function
         try:
-            command = self._commands[command_text]
+            command = self.commands[command_text]
         except KeyError:
             # Skip inexistent commands
             command = self.missing_command
         # Call the command
         return await self.Call(message.chat, command, *parameters).run()
+
+    async def handle_net_request(self, message: Message):
+        pass

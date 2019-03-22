@@ -1,3 +1,5 @@
+import typing
+from ..network.messages import Message
 from .command import Command, CommandArgs
 
 
@@ -10,6 +12,11 @@ class Call:
 
     async def reply(self, text: str):
         """Send a text message to the channel the call was made."""
+        raise NotImplementedError()
+
+    async def net_request(self, message: Message, destination: str):
+        """Send data to the rest of the Royalnet, and optionally wait for an answer.
+        The data must be pickleable."""
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
