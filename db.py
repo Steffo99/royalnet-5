@@ -571,11 +571,11 @@ class LeagueOfLegends(Base, Mini):
 
     def highest_mastery_champ_name(self):
         champ = loldata.get_champ_by_key(self.highest_mastery_champ)
-        return champ["name"]
+        return champ["id"]
 
     def highest_mastery_champ_image(self):
         champ = loldata.get_champ_by_key(self.highest_mastery_champ)
-        return loldata.get_champ_icon(champ["name"])
+        return loldata.get_champ_icon(champ["id"])
 
 
 class Osu(Base, Mini):
@@ -1139,6 +1139,25 @@ class Terraria13(Base, Mini):
 
     _mini_full_name = "Terraria 13"
     _mini_name = "terraria13"
+    _mini_order = [contribution.desc()]
+
+    def __repr__(self):
+        return f"<Terraria13 {self.character_name} {self.contribution}>"
+
+
+class Minecraft2019(Base, Mini):
+    __tablename__ = "minecraft2019"
+
+    game_name = "Minecraft 2019"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="minecraft2019", lazy="joined")
+
+    character_name = Column(String)
+    contribution = Column(Integer)
+
+    _mini_full_name = "Minecraft 2019"
+    _mini_name = "minecraft2019"
     _mini_order = [contribution.desc()]
 
     def __repr__(self):
