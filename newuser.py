@@ -6,7 +6,7 @@ user = session.query(db.Royal).filter_by(username=username).one_or_none()
 if user is None:
     user = db.Royal.create(session, username)
 session.add(user)
-session.commit()
+session.flush()
 try:
     steam = db.Steam.create(session, user.id, input("Steam ID 1: "))
 except Exception as e:
