@@ -392,7 +392,10 @@ def hooks_github():
         abort(400)
         return
     # TODO: add secret check
-    message = f"🐙 Nuovi aggiornamenti a Royalnet:\n"
+    if j["ref"] == "refs/heads/master":
+        message = f"🐙 Nuovi aggiornamenti a Royalnet <code>master</code>:\n"
+    if j["ref"] == "refs/heads/unity":
+        message = f"🐙 Progresso di Royalnet <code>unity</code>:\n"
     for commit in j.get("commits", []):
         if commit["distinct"]:
             message += f'<a href="{commit["url"]}">{commit["message"]}</a>' \
