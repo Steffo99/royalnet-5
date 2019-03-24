@@ -394,15 +394,18 @@ def hooks_github():
     # TODO: add secret check
     if j["ref"] == "refs/heads/master":
         message = f"🐙 Nuovi aggiornamenti a Royalnet <code>master</code>:\n"
-    if j["ref"] == "refs/heads/unity":
+    elif j["ref"] == "refs/heads/unity":
         message = f"🐙 Progresso di Royalnet <code>unity</code>:\n"
-    for commit in j.get("commits", []):
-        if commit["distinct"]:
-            message += f'<a href="{commit["url"]}">{commit["message"]}</a>' \
-                       f' di <b>{commit["author"].get("username", "anonimo")}</b>\n'
-    telegram_bot.send_message(config["Telegram"]["main_group"], message,
-                              parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
-    return "Done."
+    else:
+        return "Ignored."
+    if message:
+        for commit in j.get("commits", []):
+            if commit["distinct"]:
+                message += f'<a href="{commit["url"]}">{commit["message"]}</a>' \
+                           f' di <b>{commit["author"].get("username", "anonimo")}</b>\n'
+        telegram_bot.send_message(config["Telegram"]["main_group"], message,
+                                  parse_mode="HTML", disable_web_page_preview=True, disable_notification=True)
+        return "Done."
 
 
 @app.before_request
