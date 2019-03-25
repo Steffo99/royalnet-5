@@ -1,9 +1,14 @@
 import telegram
 import asyncio
 import typing
+import logging as _logging
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
+
+
+loop = asyncio.get_event_loop()
+log = _logging.getLogger(__name__)
 
 
 async def todo(message: Message):
