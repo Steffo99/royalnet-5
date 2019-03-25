@@ -5,12 +5,12 @@ import datetime
 import pickle
 import uuid
 import asyncio
-import logging
-from .messages import Message, ErrorMessage, InvalidPackageEM, InvalidSecretEM, IdentifySuccessfulMessage
+import logging as _logging
+from .messages import InvalidPackageEM, InvalidSecretEM, IdentifySuccessfulMessage
 from .packages import Package
 
 loop = asyncio.get_event_loop()
-log = logging.getLogger(__name__)
+log = _logging.getLogger(__name__)
 
 
 class ConnectedClient:

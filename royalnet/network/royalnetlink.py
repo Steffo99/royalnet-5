@@ -4,12 +4,12 @@ import uuid
 import functools
 import typing
 import pickle
-import logging
+import logging as _logging
 from .messages import Message, ErrorMessage
 from .packages import Package
 
 loop = asyncio.get_event_loop()
-log = logging.getLogger(__name__)
+log = _logging.getLogger(__name__)
 
 
 class NotConnectedError(Exception):
