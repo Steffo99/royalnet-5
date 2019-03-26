@@ -154,7 +154,7 @@ class YoutubeDLVideo(Video):
         """Generate the filename of the video."""
         if self.info is None:
             raise errors.VideoInfoUnknown()
-        return "./opusfiles/{}.opus".format(re.sub(r'[/\\?*"<>|!:]', "_", self.info.get("title", self.info["id"])))
+        return "./opusfiles/{}.mp4".format(re.sub(r'[/\\?*"<>|!:]', "_", self.info.get("title", self.info["id"])))
 
     def ready_up(self):
         """Download the video."""
@@ -171,10 +171,10 @@ class YoutubeDLVideo(Video):
         logger.info(f"Starting youtube_dl download of {repr(self)}")
         with youtube_dl.YoutubeDL({"noplaylist": True,
                                    "format": "best",
-                                   "postprocessors": [{
-                                       "key": 'FFmpegExtractAudio',
-                                       "preferredcodec": 'opus'
-                                   }],
+                                   # "postprocessors": [{
+                                   #     "key": 'FFmpegExtractAudio',
+                                   #     "preferredcodec": 'opus'
+                                   # }],
                                    "outtmpl": self.get_filename(),
                                    "quiet": True}) as ytdl:
             ytdl.download([self.url])
