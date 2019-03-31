@@ -1,4 +1,11 @@
+config.ini
 .idea/
 .vscode/
 __pycache__
-test.py
+diario.json
+libopus-0.dll
+music.opus
+opusfiles/
+ignored/
+markovmodels/
+logs/
