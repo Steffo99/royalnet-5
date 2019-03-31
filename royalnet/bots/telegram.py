@@ -5,12 +5,14 @@ import logging as _logging
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
+from ..database import Alchemy
 
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 
+# noinspection PyUnusedLocal
 async def todo(message: Message):
     pass
 
@@ -21,6 +23,7 @@ class TelegramBot:
                  master_server_uri: str,
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
+                 database_uri: str,
                  missing_command: Command = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
@@ -29,17 +32,23 @@ class TelegramBot:
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         # Generate commands
         self.commands = {}
+        required_tables = []
         for command in commands:
             self.commands[f"/{command.command_name}"] = command
+            required_tables += command.require_alchemy_tables
+        # Generate the Alchemy database
+        self.alchemy = Alchemy(database_uri, required_tables)
 
+        # noinspection PyMethodParameters
         class TelegramCall(Call):
             interface_name = "telegram"
             interface_obj = self
+            Session = self.alchemy.Session
 
-            async def reply(self, text: str):
-                await asyncify(self.channel.send_message, text, parse_mode="HTML")
+            async def reply(call, text: str):
+                await asyncify(call.channel.send_message, text, parse_mode="HTML")
 
-            async def net_request(self, message: Message, destination: str):
+            async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
                 return response
 
