@@ -9,6 +9,7 @@ class Call:
     # These parameters / methods should be overridden
     interface_name = NotImplemented
     interface_obj = NotImplemented
+    Session = NotImplemented
 
     async def reply(self, text: str):
         """Send a text message to the channel the call was made."""
