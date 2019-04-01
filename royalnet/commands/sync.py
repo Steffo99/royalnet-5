@@ -24,13 +24,25 @@ class SyncCommand(Command):
         royal = await asyncify(call.session.query(call.interface_alchemy.Royal).filter_by(username=args[0]).one_or_none)
         if royal is None:
             await call.reply("⚠️ Non esiste alcun account Royalnet con quel nome.")
-        # Create a Telegram to connect to the Royal
-        # Avatar is WIP
-        telegram = call.interface_alchemy.Telegram(royal=royal,
-                                                   tg_id=user.id,
-                                                   tg_first_name=user.first_name,
-                                                   tg_last_name=user.last_name,
-                                                   tg_username=user.username)
-        call.session.add(telegram)
+        # Find if the user is already synced
+        telegram = await asyncify(call.session.query(call.interface_alchemy.Telegram).filter_by(tg_id=user.id).one_or_none)
+        if telegram is None:
+            # Create a Telegram to connect to the Royal
+            # Avatar is WIP
+            telegram = call.interface_alchemy.Telegram(royal=royal,
+                                                       tg_id=user.id,
+                                                       tg_first_name=user.first_name,
+                                                       tg_last_name=user.last_name,
+                                                       tg_username=user.username)
+            call.session.add(telegram)
+            await call.reply(f"✅ Connessione completata: <code>{str(royal)}</code> ⬌ <code>{str(telegram)}</code>")
+        else:
+            # Update the Telegram data
+            # Avatar is WIP
+            telegram.tg_first_name = user.first_name
+            telegram.tg_last_name = user.last_name
+            telegram.tg_username = user.username
+            await call.reply(f"✅ Dati di <code>{str(telegram)}</code> aggiornati.")
         # Commit the session
         await asyncify(call.session.commit())
+        # Notify the user

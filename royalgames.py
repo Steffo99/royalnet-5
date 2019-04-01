@@ -10,7 +10,7 @@ loop = asyncio.get_event_loop()
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand]
 
 master = RoyalnetServer("localhost", 1234, "sas")
-tg_bot = TelegramBot(os.environ["TG_AK"], "localhost:1234", "sas", commands, "sqlite://")
+tg_bot = TelegramBot(os.environ["TG_AK"], "localhost:1234", "sas", commands, os.environ["DB_PATH"])
 loop.create_task(master.run())
 loop.create_task(tg_bot.run())
 print("Starting loop...")
