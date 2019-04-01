@@ -34,10 +34,10 @@ class TelegramBot:
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         # Generate commands
         self.commands = {}
-        required_tables = []
+        required_tables = set()
         for command in commands:
             self.commands[f"/{command.command_name}"] = command
-            required_tables += command.require_alchemy_tables
+            required_tables = required_tables.union(command.require_alchemy_tables)
         # Generate the Alchemy database
         self.alchemy = Alchemy(database_uri, required_tables)
 
@@ -45,7 +45,7 @@ class TelegramBot:
         class TelegramCall(Call):
             interface_name = "telegram"
             interface_obj = self
-            Session = self.alchemy.Session
+            interface_alchemy = self.alchemy
 
             async def reply(call, text: str):
                 await asyncify(call.channel.send_message, text, parse_mode="HTML")

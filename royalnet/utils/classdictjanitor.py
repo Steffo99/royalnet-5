@@ -1,4 +1,4 @@
-def classdictjanitor(class_) -> dict:
+def cdj(class_) -> dict:
     """Return the cleaned class attributes in a dict."""
     d = dict(class_.__dict__)
     del d["__module__"]
