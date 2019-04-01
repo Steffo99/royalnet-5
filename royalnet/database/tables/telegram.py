@@ -2,18 +2,22 @@ from sqlalchemy import Column, \
                        Integer, \
                        String, \
                        BigInteger, \
-                       LargeBinary
+                       LargeBinary, \
+                       ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Telegram:
     __tablename__ = "telegram"
 
-    royal_id = Column(Integer)
+    royal_id = Column(Integer, ForeignKey("royals.uid"))
     tg_id = Column(BigInteger, primary_key=True)
     tg_first_name = Column(String)
     tg_last_name = Column(String)
     tg_username = Column(String)
     tg_avatar = Column(LargeBinary)
+
+    royal = relationship("Royal")
 
     def __repr__(self):
         return f"<Telegram {str(self)}>"
