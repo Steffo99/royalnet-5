@@ -13,4 +13,4 @@ class DebugCreateCommand(Command):
         royal = call.interface_alchemy.Royal(username=args[0], role="Member")
         call.session.add(royal)
         call.session.commit()
-        await call.reply(f"✅ Utente {royal} creato!")
+        await call.reply(f"✅ Utente <code>{royal}</code> creato!")

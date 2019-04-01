@@ -10,7 +10,9 @@ loop = asyncio.get_event_loop()
 
 
 class Alchemy:
-    def __init__(self, database_uri: str = "sqlite://", tables: typing.Optional[typing.Set] = None):
+    def __init__(self, database_uri: str, tables: typing.Optional[typing.Set] = None):
+        if database_uri.startswith("sqlite"):
+            raise NotImplementedError("Support for sqlite databases is currently missing")
         self.engine = create_engine(database_uri)
         self.Base = declarative_base(bind=self.engine)
         self.Session = sessionmaker(bind=self.engine)
