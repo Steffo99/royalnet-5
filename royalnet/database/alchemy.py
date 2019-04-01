@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager, asynccontextmanager
-from ..utils import cdj
+from ..utils import cdj, asyncify
 
 loop = asyncio.get_event_loop()
 
@@ -41,7 +41,7 @@ class Alchemy:
 
     @asynccontextmanager
     async def session_acm(self):
-        session = await loop.run_in_executor(None, self.Session)
+        session = await asyncify(self.Session)
         try:
             yield session
         except Exception:
