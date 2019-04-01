@@ -1,7 +1,7 @@
 from ..utils import Command, CommandArgs, Call
 
 
-class PingCommand(Command):
+class ColorCommand(Command):
 
     command_name = "color"
     command_title = "Invia un colore in chat...?"

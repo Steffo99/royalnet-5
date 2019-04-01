@@ -39,7 +39,7 @@ class Command:
     command_name: str = NotImplemented
     command_title: str = NotImplemented
 
-    require_alchemy_tables: typing.List = []
+    require_alchemy_tables: typing.Set = set()
 
     async def common(self, call: "Call", args: CommandArgs):
         raise NotImplementedError()
