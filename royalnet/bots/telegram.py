@@ -95,7 +95,7 @@ class TelegramBot:
         try:
             return await self.Call(message.chat, command, *parameters, update=update).run()
         except Exception as exc:
-            return await self.Call(message.chat, self.error_command, *parameters, update=update).run()
+            return await self.Call(message.chat, self.error_command, *parameters, update=update, exception=exc).run()
 
     async def handle_net_request(self, message: Message):
         pass
