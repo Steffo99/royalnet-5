@@ -1,14 +1,7 @@
-from enum import Enum
 from sqlalchemy import Column, \
                        Integer, \
                        String, \
                        LargeBinary
-
-
-class Role(Enum):
-    Guest = "Guest"
-    Member = "Member"
-    Admin = "Admin"
 
 
 class Royal:
@@ -18,3 +11,10 @@ class Royal:
     username = Column(String, unique=True, nullable=False)
     password = Column(LargeBinary)
     role = Column(String, nullable=False)
+    avatar = Column(LargeBinary)
+
+    def __repr__(self):
+        return f"<Royal {self.username}>"
+
+    def __str__(self):
+        return self.username

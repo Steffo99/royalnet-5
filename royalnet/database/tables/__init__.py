@@ -1,3 +1,3 @@
-from .royals import Role, Royal
+from .royals import Royal
 
-__all__ = ["Role", "Royal"]
+__all__ = ["Royal"]

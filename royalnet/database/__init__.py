@@ -1,4 +1,4 @@
 from .alchemy import Alchemy
-from .tables import Role, Royal
+from .tables import Royal
 
-__all__ = ["Alchemy", "Role", "Royal"]
+__all__ = ["Alchemy", "Royal"]

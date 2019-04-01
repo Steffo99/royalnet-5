@@ -4,13 +4,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager, asynccontextmanager
-from ..utils import classdictjanitor
+from ..utils import cdj
 
 loop = asyncio.get_event_loop()
 
 
 class Alchemy:
-    def __init__(self, database_uri: str = "sqlite://", tables: typing.Optional[typing.List] = None):
+    def __init__(self, database_uri: str = "sqlite://", tables: typing.Optional[typing.Set] = None):
         self.engine = create_engine(database_uri)
         self.Base = declarative_base(bind=self.engine)
         self.Session = sessionmaker(bind=self.engine)
@@ -23,7 +23,7 @@ class Alchemy:
                 self.__getattribute__(name)
             except AttributeError:
                 # Actually the intended result
-                self.__setattr__(name, type(name, (self.Base,), classdictjanitor(table)))
+                self.__setattr__(name, type(name, (self.Base,), cdj(table)))
             else:
                 raise NameError(f"{name} is a reserved name and can't be used as a table name")
         self.Base.metadata.create_all()
