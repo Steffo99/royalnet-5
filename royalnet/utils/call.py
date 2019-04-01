@@ -2,7 +2,8 @@ import typing
 import asyncio
 from ..network.messages import Message
 from .command import Command, CommandArgs
-from ..database import Alchemy
+if typing.TYPE_CHECKING:
+    from ..database import Alchemy
 
 
 loop = asyncio.get_event_loop()
@@ -14,7 +15,7 @@ class Call:
     # These parameters / methods should be overridden
     interface_name = NotImplemented
     interface_obj = NotImplemented
-    interface_alchemy: Alchemy = NotImplemented
+    interface_alchemy: "Alchemy" = NotImplemented
 
     async def reply(self, text: str):
         """Send a text message to the channel the call was made."""
@@ -36,7 +37,7 @@ class Call:
     async def session_init(self):
         if not self.command.require_alchemy_tables:
             return
-        self.session = await loop.run_in_executor(self.interface_alchemy.Session)
+        self.session = await loop.run_in_executor(None, self.interface_alchemy.Session)
 
     async def session_end(self):
         if not self.session:
@@ -52,5 +53,5 @@ class Call:
         try:
             result = await coroutine(self.command, self, CommandArgs(*self.args, **self.kwargs))
         finally:
-            self.session.close()
+            await self.session_end()
         return result
