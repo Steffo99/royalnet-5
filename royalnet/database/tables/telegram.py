@@ -5,6 +5,7 @@ from sqlalchemy import Column, \
                        LargeBinary, \
                        ForeignKey
 from sqlalchemy.orm import relationship
+from .royals import Royal
 
 
 class Telegram:
@@ -23,6 +24,9 @@ class Telegram:
         return f"<Telegram {str(self)}>"
 
     def __str__(self):
+        return f"telegram:{self.mention()}"
+
+    def mention(self) -> str:
         if self.tg_username is not None:
             return f"@{self.tg_username}"
         elif self.tg_last_name is not None:
