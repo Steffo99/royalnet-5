@@ -24,11 +24,13 @@ class TelegramBot:
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
                  database_uri: str,
-                 missing_command: Command = NullCommand):
+                 missing_command: Command = NullCommand,
+                 error_command: Command = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
         self.offset: int = -100
         self.missing_command = missing_command
+        self.error_command = error_command
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         # Generate commands
         self.commands = {}
@@ -90,7 +92,10 @@ class TelegramBot:
             # Skip inexistent commands
             command = self.missing_command
         # Call the command
-        return await self.Call(message.chat, command, *parameters, update=update).run()
+        try:
+            return await self.Call(message.chat, command, *parameters, update=update).run()
+        except Exception as exc:
+            return await self.Call(message.chat, self.error_command, *parameters, update=update).run()
 
     async def handle_net_request(self, message: Message):
         pass
