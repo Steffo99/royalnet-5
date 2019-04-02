@@ -18,7 +18,7 @@ class Telegram:
     tg_username = Column(String)
     tg_avatar = Column(LargeBinary)
 
-    royal = relationship("Royal")
+    royal = relationship("Royal", backref="telegram")
 
     def __repr__(self):
         return f"<Telegram {str(self)}>"
