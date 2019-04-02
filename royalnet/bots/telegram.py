@@ -45,7 +45,7 @@ class TelegramBot:
         class TelegramCall(Call):
             interface_name = "telegram"
             interface_obj = self
-            interface_alchemy = self.alchemy
+            alchemy = self.alchemy
 
             async def reply(call, text: str):
                 await asyncify(call.channel.send_message, text, parse_mode="HTML")

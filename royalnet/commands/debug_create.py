@@ -10,7 +10,7 @@ class DebugCreateCommand(Command):
     require_alchemy_tables = {Royal}
 
     async def common(self, call: Call, args: CommandArgs):
-        royal = call.interface_alchemy.Royal(username=args[0], role="Member")
+        royal = call.alchemy.Royal(username=args[0], role="Member")
         call.session.add(royal)
         call.session.commit()
         await call.reply(f"✅ Utente <code>{royal}</code> creato!")
