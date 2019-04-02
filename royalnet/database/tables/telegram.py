@@ -17,6 +17,7 @@ class Telegram:
     tg_last_name = Column(String)
     tg_username = Column(String)
     tg_avatar = Column(LargeBinary)
+    # TODO: Add an index? https://www.citusdata.com/blog/2016/10/12/count-performance/
 
     royal = relationship("Royal", backref="telegram")
 
