@@ -47,7 +47,7 @@ DS_LIST = ["della secca", "del seccatore", "del secchiello", "del secchio", "del
            "di Stronghold", "di SOMA", "dei Saints", "di S.T.A.L.K.E.R.", "di Sanctum", "dei Sims", "di Sid",
            "delle Skullgirls", "di Sonic", "di Spiral (Knights)", "di Spore", "di Starbound", "di SimCity", "di Sensei",
            "di Ssssssssssssss... Boom! E' esploso il dizionario", "della scala", "di Sakura", "di Suzie", "di Shinji",
-           "del senpai", "del support", "di Superman"]
+           "del senpai", "del support", "di Superman", "di Sekiro"]
 SMECDS = "🤔 Secondo me, è colpa {ds}."
 
 
