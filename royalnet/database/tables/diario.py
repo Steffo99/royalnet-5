@@ -3,7 +3,8 @@ from sqlalchemy import Column, \
                        Text, \
                        Boolean, \
                        DateTime, \
-                       ForeignKey
+                       ForeignKey, \
+                       String
 from sqlalchemy.orm import relationship
 from .royals import Royal
 
@@ -15,9 +16,11 @@ class Diario:
 
     creator_id = Column(Integer, ForeignKey("royals.id"))
     quoted_id = Column(Integer, ForeignKey("royals.id"))
-    timestamp = Column(DateTime, nullable=False)
-    quote = Column(Text, nullable=False)
+    quoted_name = Column(String)
+    text = Column(Text, nullable=False)
     context = Column(Text)
+    timestamp = Column(DateTime, nullable=False)
+    media_url = Column(String)
     spoiler = Column(Boolean, default=False)
 
     creator = relationship("Royal", foreign_keys=creator_id, backref="diario_created")
