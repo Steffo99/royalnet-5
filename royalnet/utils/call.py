@@ -15,7 +15,7 @@ class Call:
     # These parameters / methods should be overridden
     interface_name = NotImplemented
     interface_obj = NotImplemented
-    interface_alchemy: "Alchemy" = NotImplemented
+    alchemy: "Alchemy" = NotImplemented
 
     async def reply(self, text: str):
         """Send a text message to the channel the call was made."""
@@ -37,7 +37,7 @@ class Call:
     async def session_init(self):
         if not self.command.require_alchemy_tables:
             return
-        self.session = await loop.run_in_executor(None, self.interface_alchemy.Session)
+        self.session = await loop.run_in_executor(None, self.alchemy.Session)
 
     async def session_end(self):
         if not self.session:
