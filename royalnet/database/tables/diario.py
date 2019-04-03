@@ -14,9 +14,9 @@ class Diario:
 
     diario_id = Column(Integer, primary_key=True)
 
-    creator_id = Column(Integer, ForeignKey("royals.id"))
-    quoted_id = Column(Integer, ForeignKey("royals.id"))
-    quoted_name = Column(String)
+    creator_id = Column(Integer, ForeignKey("royals.uid"))
+    quoted_account_id = Column(Integer, ForeignKey("royals.uid"))
+    quoted = Column(String)
     text = Column(Text, nullable=False)
     context = Column(Text)
     timestamp = Column(DateTime, nullable=False)
@@ -24,7 +24,7 @@ class Diario:
     spoiler = Column(Boolean, default=False)
 
     creator = relationship("Royal", foreign_keys=creator_id, backref="diario_created")
-    quoted = relationship("Royal", foreign_keys=quoted_id, backref="diario_quoted")
+    quoted_account = relationship("Royal", foreign_keys=quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
         return f"<Diario {self.diario_id}>"

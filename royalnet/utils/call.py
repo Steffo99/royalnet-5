@@ -26,6 +26,11 @@ class Call:
         The data must be pickleable."""
         raise NotImplementedError()
 
+    async def get_author(self):
+        """Try to find the universal identifier of the user that sent the message.
+        That probably means, the database row identifying the user."""
+        raise NotImplementedError()
+
     # These parameters / methods should be left alone
     def __init__(self, channel, command: Command, *args, **kwargs):
         self.channel = channel
