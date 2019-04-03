@@ -13,7 +13,6 @@ class Diario:
     __tablename__ = "diario"
 
     diario_id = Column(Integer, primary_key=True)
-
     creator_id = Column(Integer, ForeignKey("royals.uid"))
     quoted_account_id = Column(Integer, ForeignKey("royals.uid"))
     quoted = Column(String)
@@ -27,7 +26,4 @@ class Diario:
     quoted_account = relationship("Royal", foreign_keys=quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
-        return f"<Diario {self.diario_id}>"
-
-    def __str__(self):
-        return f"diario:{self.diario_id}"
+        return f"&lt;Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}&gt;"
