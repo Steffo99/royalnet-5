@@ -5,8 +5,7 @@ import logging as _logging
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
-from ..database import Alchemy
-
+from ..database import Alchemy, relationshiplinkchain
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -24,6 +23,9 @@ class TelegramBot:
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
                  database_uri: str,
+                 master_table,
+                 identity_table,
+                 identity_column_name: str,
                  missing_command: Command = NullCommand,
                  error_command: Command = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
@@ -40,6 +42,10 @@ class TelegramBot:
             required_tables = required_tables.union(command.require_alchemy_tables)
         # Generate the Alchemy database
         self.alchemy = Alchemy(database_uri, required_tables)
+        self.master_table = self.alchemy.__getattribute__(master_table.__name__)
+        self.identity_table = self.alchemy.__getattribute__(identity_table.__name__)
+        self.identity_column = self.identity_table.__getattribute__(self.identity_table, identity_column_name)
+        self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
 
         # noinspection PyMethodParameters
         class TelegramCall(Call):
@@ -53,6 +59,17 @@ class TelegramBot:
             async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
                 return response
+
+            async def get_author(call):
+                update: telegram.Update = call.kwargs["update"]
+                user: telegram.User = update.effective_user
+                if user is None:
+                    return None
+                query = call.session.query(self.master_table)
+                for link in self.identity_chain:
+                    query = query.join(link.mapper.class_)
+                query = query.filter(self.identity_column == user.id)
+                return await asyncify(query.one_or_none)
 
         self.Call = TelegramCall
 

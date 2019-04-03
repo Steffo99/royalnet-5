@@ -1,6 +1,6 @@
 import typing
 from telegram import Update, User
-from ..utils import Command, CommandArgs, Call, asyncify
+from ..utils import Command, CommandArgs, Call, asyncify, UnsupportedError
 from ..database.tables import Royal, Telegram
 
 
@@ -9,10 +9,10 @@ class SyncCommand(Command):
     command_name = "sync"
     command_title = "Connect your current account to Royalnet"
 
-    require_alchemy_tables = [Royal, Telegram]
+    require_alchemy_tables = {Royal, Telegram}
 
     async def common(self, call: Call, args: CommandArgs):
-        raise NotImplementedError()
+        raise UnsupportedError()
 
     async def telegram(self, call: Call, args: CommandArgs):
         update: Update = args.kwargs["update"]
@@ -24,6 +24,7 @@ class SyncCommand(Command):
         royal = await asyncify(call.session.query(call.alchemy.Royal).filter_by(username=args[0]).one_or_none)
         if royal is None:
             await call.reply("⚠️ Non esiste alcun account Royalnet con quel nome.")
+            return
         # Find if the user is already synced
         telegram = await asyncify(call.session.query(call.alchemy.Telegram).filter_by(tg_id=user.id).one_or_none)
         if telegram is None:
