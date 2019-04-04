@@ -26,8 +26,8 @@ class TelegramBot:
                  master_table,
                  identity_table,
                  identity_column_name: str,
-                 missing_command: Command = NullCommand,
-                 error_command: Command = NullCommand):
+                 missing_command: typing.Type[Command] = NullCommand,
+                 error_command: typing.Type[Command] = NullCommand):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
         self.offset: int = -100
@@ -54,7 +54,17 @@ class TelegramBot:
             alchemy = self.alchemy
 
             async def reply(call, text: str):
-                await asyncify(call.channel.send_message, text, parse_mode="HTML")
+                escaped_text = text.replace("<", "&lt;") \
+                                   .replace(">", "&gt;") \
+                                   .replace("[b]", "<b>") \
+                                   .replace("[/b]", "</b>") \
+                                   .replace("[i]", "<i>") \
+                                   .replace("[/i]", "</i>") \
+                                   .replace("[u]", "<b>") \
+                                   .replace("[/u]", "</b>") \
+                                   .replace("[c]", "<pre>") \
+                                   .replace("[/c]", "</pre>")
+                await asyncify(call.channel.send_message, escaped_text, parse_mode="HTML")
 
             async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
@@ -112,7 +122,7 @@ class TelegramBot:
         try:
             return await self.Call(message.chat, command, *parameters, update=update).run()
         except Exception as exc:
-            return await self.Call(message.chat, self.error_command, *parameters, update=update, exception=exc).run()
+            return await self.Call(message.chat, self.error_command, *parameters, update=update, exception=exc, previous_command=command).run()
 
     async def handle_net_request(self, message: Message):
         pass

@@ -38,6 +38,7 @@ class Command:
 
     command_name: str = NotImplemented
     command_title: str = NotImplemented
+    command_syntax: str = NotImplemented
 
     require_alchemy_tables: typing.Set = set()
 
