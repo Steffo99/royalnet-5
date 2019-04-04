@@ -12,17 +12,17 @@ class SyncCommand(Command):
 
     require_alchemy_tables = {Royal, Telegram}
 
-    async def common(self, call: Call, args: CommandArgs):
+    async def common(self, call: Call):
         raise UnsupportedError()
 
-    async def telegram(self, call: Call, args: CommandArgs):
-        update: Update = args.kwargs["update"]
+    async def telegram(self, call: Call):
+        update: Update = call.kwargs["update"]
         # Find the user
         user: typing.Optional[User] = update.effective_user
         if user is None:
             raise ValueError("Trying to sync a None user.")
         # Find the Royal
-        royal = await asyncify(call.session.query(call.alchemy.Royal).filter_by(username=args[0]).one_or_none)
+        royal = await asyncify(call.session.query(call.alchemy.Royal).filter_by(username=call.args[0]).one_or_none)
         if royal is None:
             await call.reply("⚠️ Non esiste alcun account Royalnet con quel nome.")
             return
@@ -46,4 +46,4 @@ class SyncCommand(Command):
             telegram.tg_username = user.username
             await call.reply(f"✅ Dati di [c]{str(telegram)}[/c] aggiornati.")
         # Commit the session
-        await asyncify(call.session.commit())
+        await asyncify(call.session.commit)

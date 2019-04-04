@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import Column, \
                        Integer, \
                        Text, \
@@ -13,7 +14,7 @@ class Diario:
     __tablename__ = "diario"
 
     diario_id = Column(Integer, primary_key=True)
-    creator_id = Column(Integer, ForeignKey("royals.uid"))
+    creator_id = Column(Integer, ForeignKey("royals.uid"), nullable=False)
     quoted_account_id = Column(Integer, ForeignKey("royals.uid"))
     quoted = Column(String)
     text = Column(Text, nullable=False)
@@ -27,3 +28,23 @@ class Diario:
 
     def __repr__(self):
         return f"<Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}>"
+
+    def __str__(self):
+        # TODO: support media_url
+        text = f"Riga #{self.diario_id}"
+        text += f" (salvata da {self.creator.username}"
+        text += f" alle {self.timestamp.strftime('%Y-%m-%d %H:%M')}):\n"
+        if self.spoiler:
+            hidden = re.sub("\w", "█", self.text)
+            text += f"\"{hidden}\"\n"
+        else:
+            text += f"[b]\"{self.text}\"[/b]\n"
+        if self.quoted_account is not None:
+            text += f" —{self.quoted_account.username}"
+        elif self.quoted is not None:
+            text += f" —{self.quoted}"
+        else:
+            text += f" —Anonimo"
+        if self.context:
+            text += f", [i]{self.context}[/i]"
+        return text

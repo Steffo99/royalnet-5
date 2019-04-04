@@ -11,11 +11,11 @@ class ShipCommand(Command):
     command_title = "Crea una ship tra due cose."
     command_syntax = "(uno) (due)"
 
-    async def common(self, call: Call, args: CommandArgs):
-        name_one = args[0]
-        name_two = args[1]
+    async def common(self, call: Call):
+        name_one = call.args[0]
+        name_two = call.args[1]
         if name_two == "+":
-            name_two = args[2]
+            name_two = call.args[2]
         name_one = name_one.lower()
         name_two = name_two.lower()
         # Get all letters until the first vowel, included

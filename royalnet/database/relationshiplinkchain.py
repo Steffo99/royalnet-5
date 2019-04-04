@@ -15,7 +15,7 @@ def relationshiplinkchain(starting_class, ending_class) -> typing.Optional[tuple
             if _relationship.mapper in inspected:
                 continue
             result = search(_relationship.mapper, chain + (_relationship,))
-            if len(result) == 0:
+            if len(result) != 0:
                 return result
         return ()
 

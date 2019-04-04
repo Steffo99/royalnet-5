@@ -2,6 +2,7 @@ import telegram
 import asyncio
 import typing
 import logging as _logging
+import sys
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
@@ -120,9 +121,17 @@ class TelegramBot:
             command = self.missing_command
         # Call the command
         try:
-            return await self.Call(message.chat, command, *parameters, update=update).run()
+            return await self.Call(message.chat, command, parameters,
+                                   update=update).run()
         except Exception as exc:
-            return await self.Call(message.chat, self.error_command, *parameters, update=update, exception=exc, previous_command=command).run()
+            try:
+                return await self.Call(message.chat, self.error_command, parameters,
+                                       update=update,
+                                       exception_info=sys.exc_info(),
+                                       previous_command=command,
+                                       log=log).run()
+            except Exception as exc2:
+                log.error(f"Exception in error handler command: {exc2}")
 
     async def handle_net_request(self, message: Message):
         pass

@@ -13,23 +13,20 @@ class InvalidInputError(Exception):
     pass
 
 
-class CommandArgs:
+class CommandArgs(list):
     """The arguments of a command. Raises InvalidInputError if the requested argument does not exist."""
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
 
     def __getitem__(self, item):
         if isinstance(item, int):
             try:
-                return self.args[item]
+                return super().__getitem__(item)
             except IndexError:
                 raise InvalidInputError(f'Tried to get missing [{item}] arg from CommandArgs')
-        elif isinstance(item, str):
+        if isinstance(item, slice):
             try:
-                return self.kwargs[item]
+                return super().__getitem__(item)
             except IndexError:
-                raise InvalidInputError(f'Tried to get missing ["{item}"] kwarg from CommandArgs')
+                raise InvalidInputError(f'Tried to get invalid [{item}] slice from CommandArgs')
         raise ValueError(f"Invalid type passed to CommandArgs.__getattr__: {type(item)}")
 
 
@@ -42,5 +39,5 @@ class Command:
 
     require_alchemy_tables: typing.Set = set()
 
-    async def common(self, call: "Call", args: CommandArgs):
+    async def common(self, call: "Call"):
         raise NotImplementedError()

@@ -32,10 +32,10 @@ class Call:
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
-    def __init__(self, channel, command: Command, *args, **kwargs):
+    def __init__(self, channel, command: typing.Type[Command], command_args: list, **kwargs):
         self.channel = channel
         self.command = command
-        self.args = args
+        self.args = CommandArgs(command_args)
         self.kwargs = kwargs
         self.session = None
 
@@ -56,7 +56,7 @@ class Call:
         except AttributeError:
             coroutine = getattr(self.command, "common")
         try:
-            result = await coroutine(self.command, self, CommandArgs(*self.args, **self.kwargs))
+            result = await coroutine(self.command, self)
         finally:
             await self.session_end()
         return result
