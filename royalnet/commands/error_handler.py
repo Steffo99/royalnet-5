@@ -1,5 +1,6 @@
-from ..utils import Command, CommandArgs, Call, InvalidInputError
-
+import traceback
+from logging import Logger
+from ..utils import Command, CommandArgs, Call, InvalidInputError, UnsupportedError
 
 class ErrorHandlerCommand(Command):
 
@@ -7,14 +8,20 @@ class ErrorHandlerCommand(Command):
     command_title = "Gestisce gli errori causati dagli altri comandi."
     command_syntax = ""
 
-    async def telegram(self, call: Call, args: CommandArgs):
+    async def common(self, call: Call):
+        raise UnsupportedError()
+
+    async def telegram(self, call: Call):
         try:
-            exc = args.kwargs["exception"]
+            e_type, e_value, e_tb = call.kwargs["exception_info"]
         except InvalidInputError:
             await call.reply("⚠️ Questo comando non può essere chiamato da solo.")
             return
-        if isinstance(exc, InvalidInputError):
-            command = args.kwargs["previous_command"]
+        if e_type == InvalidInputError:
+            command = call.kwargs["previous_command"]
             await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta:[c]/{command.command_name} {command.command_syntax}[/c]")
             return
-        await call.reply("❌ Eccezione non gestita durante l'esecuzione del comando.")
+        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{e_type.__name__}[/b]\n{e_value}")
+        log: Logger = call.kwargs["log"]
+        formatted_tb: str = '\n'.join(traceback.format_tb(e_tb))
+        log.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")

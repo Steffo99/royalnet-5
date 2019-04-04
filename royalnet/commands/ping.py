@@ -7,5 +7,5 @@ class PingCommand(Command):
     command_title = "Ping pong!"
     command_syntax = ""
 
-    async def common(self, call: Call, args: CommandArgs):
+    async def common(self, call: Call):
         await call.reply("🏓 Pong!")

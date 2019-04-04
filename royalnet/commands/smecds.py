@@ -57,6 +57,6 @@ class SmecdsCommand(Command):
     command_title = "Secondo me, è colpa dello stagista..."
     command_syntax = ""
 
-    async def common(self, call: Call, args: CommandArgs):
+    async def common(self, call: Call):
         ds = random.sample(DS_LIST, 1)[0]
         return await call.reply(safeformat(SMECDS, ds=ds))

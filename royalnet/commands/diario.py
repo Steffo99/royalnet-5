@@ -13,18 +13,28 @@ class DiarioCommand(Command):
 
     require_alchemy_tables = {Royal, Diario, Alias}
 
-    async def common(self, call: Call, args: CommandArgs):
+    async def common(self, call: Call):
+        # Find the creator of the quotes
+        creator = await call.get_author()
+        if creator is None:
+            await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")
+            return
         # Recreate the full sentence
-        text = " ".join(args.args)
+        raw_text = " ".join(call.args)
         # Pass the sentence through the diario regex
-        match = re.match(r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([\w ]+))?(?:, *([^ ].*))?', text)
+        match = re.match(r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([\w ]+))?(?:, *([^ ].*))?', raw_text)
         # Find the corresponding matches
-        if match is None:
-            raise InvalidInputError("No match found.")
-        spoiler = bool(match.group(1))
-        text = match.group(2)
-        quoted = match.group(3)
-        context = match.group(4)
+        if match is not None:
+            spoiler = bool(match.group(1))
+            text = match.group(2)
+            quoted = match.group(3)
+            context = match.group(4)
+        # Otherwise, consider everything part of the text
+        else:
+            spoiler = False
+            text = raw_text
+            quoted = None
+            context = None
         timestamp = datetime.datetime.now()
         # Find if there's a Royalnet account associated with the quoted name
         if quoted is not None:
@@ -32,8 +42,6 @@ class DiarioCommand(Command):
         else:
             quoted_alias = None
         quoted_account = quoted_alias.royal if quoted_alias is not None else None
-        # Find the creator of the quotes
-        creator = await call.get_author()
         # Create the diario quote
         diario = call.alchemy.Diario(creator=creator,
                                      quoted_account=quoted_account,
@@ -45,4 +53,4 @@ class DiarioCommand(Command):
                                      spoiler=spoiler)
         call.session.add(diario)
         await asyncify(call.session.commit)
-        await call.reply(f"✅ Aggiunto al diario!")
+        await call.reply(f"✅ {str(diario)}")
