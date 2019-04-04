@@ -7,7 +7,8 @@ from ..database.tables import Royal, Telegram
 class SyncCommand(Command):
 
     command_name = "sync"
-    command_title = "Connect your current account to Royalnet"
+    command_title = "Connetti il tuo account attuale a Royalnet!"
+    command_syntax = "(royalnetusername)"
 
     require_alchemy_tables = {Royal, Telegram}
 
@@ -36,13 +37,13 @@ class SyncCommand(Command):
                                              tg_last_name=user.last_name,
                                              tg_username=user.username)
             call.session.add(telegram)
-            await call.reply(f"✅ Connessione completata: <code>{str(royal)}</code> ⬌ <code>{str(telegram)}</code>")
+            await call.reply(f"✅ Connessione completata: [c]{str(royal)}[/c] ⬌ [c]{str(telegram)}[/c]")
         else:
             # Update the Telegram data
             # Avatar is WIP
             telegram.tg_first_name = user.first_name
             telegram.tg_last_name = user.last_name
             telegram.tg_username = user.username
-            await call.reply(f"✅ Dati di <code>{str(telegram)}</code> aggiornati.")
+            await call.reply(f"✅ Dati di [c]{str(telegram)}[/c] aggiornati.")
         # Commit the session
         await asyncify(call.session.commit())

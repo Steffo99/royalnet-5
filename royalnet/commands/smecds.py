@@ -55,6 +55,7 @@ class SmecdsCommand(Command):
 
     command_name = "smecds"
     command_title = "Secondo me, è colpa dello stagista..."
+    command_syntax = ""
 
     async def common(self, call: Call, args: CommandArgs):
         ds = random.sample(DS_LIST, 1)[0]

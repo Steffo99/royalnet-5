@@ -26,4 +26,4 @@ class Diario:
     quoted_account = relationship("Royal", foreign_keys=quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
-        return f"&lt;Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}&gt;"
+        return f"<Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}>"

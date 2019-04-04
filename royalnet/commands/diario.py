@@ -9,6 +9,7 @@ class DiarioCommand(Command):
 
     command_name = "diario"
     command_title = "Aggiungi una citazione al Diario."
+    command_syntax = "\"(testo)\" --[autore], [contesto]"
 
     require_alchemy_tables = {Royal, Diario, Alias}
 
@@ -19,7 +20,6 @@ class DiarioCommand(Command):
         match = re.match(r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([\w ]+))?(?:, *([^ ].*))?', text)
         # Find the corresponding matches
         if match is None:
-            await call.reply(f"✅ Comando skippato per frase non valida")
             raise InvalidInputError("No match found.")
         spoiler = bool(match.group(1))
         text = match.group(2)
@@ -45,4 +45,4 @@ class DiarioCommand(Command):
                                      spoiler=spoiler)
         call.session.add(diario)
         await asyncify(call.session.commit)
-        await call.reply(f"✅ Aggiunto al diario: <code>{repr(diario)}</code>")
+        await call.reply(f"✅ Aggiunto al diario!")

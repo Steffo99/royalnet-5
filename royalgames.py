@@ -4,6 +4,7 @@ from royalnet.bots import TelegramBot
 from royalnet.commands import PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, SyncCommand, DiarioCommand
 from royalnet.commands.debug_create import DebugCreateCommand
 from royalnet.commands.debug_author import DebugAuthorCommand
+from royalnet.commands.error_handler import ErrorHandlerCommand
 from royalnet.network import RoyalnetServer
 from royalnet.database.tables import Royal, Telegram
 
@@ -13,7 +14,7 @@ commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziComm
             DebugAuthorCommand, DiarioCommand]
 
 master = RoyalnetServer("localhost", 1234, "sas")
-tg_bot = TelegramBot(os.environ["TG_AK"], "localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Telegram, "tg_id")
+tg_bot = TelegramBot(os.environ["TG_AK"], "localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Telegram, "tg_id", error_command=ErrorHandlerCommand)
 loop.create_task(master.run())
 loop.create_task(tg_bot.run())
 print("Starting loop...")

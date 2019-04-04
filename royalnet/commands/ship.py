@@ -2,13 +2,14 @@ import re
 from ..utils import Command, CommandArgs, Call, safeformat
 
 
-SHIP_RESULT = "💕 {one} + {two} = <b>{result}</b>"
+SHIP_RESULT = "💕 {one} + {two} = [b]{result}[/b]"
 
 
 class ShipCommand(Command):
 
     command_name = "ship"
-    command_title = "Create a ship between two items"
+    command_title = "Crea una ship tra due cose."
+    command_syntax = "(uno) (due)"
 
     async def common(self, call: Call, args: CommandArgs):
         name_one = args[0]
