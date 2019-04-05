@@ -24,7 +24,7 @@ class Telegram:
         return f"<Telegram {str(self)}>"
 
     def __str__(self):
-        return f"telegram:{self.mention()}"
+        return f"[c]telegram:{self.mention()}[/c]"
 
     def mention(self) -> str:
         if self.tg_username is not None:

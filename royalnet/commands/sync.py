@@ -37,13 +37,13 @@ class SyncCommand(Command):
                                              tg_last_name=user.last_name,
                                              tg_username=user.username)
             call.session.add(telegram)
-            await call.reply(f"✅ Connessione completata: [c]{str(royal)}[/c] ⬌ [c]{str(telegram)}[/c]")
+            await call.reply(f"✅ Connessione completata: {str(royal)} ⬌ {str(telegram)}")
         else:
             # Update the Telegram data
             # Avatar is WIP
             telegram.tg_first_name = user.first_name
             telegram.tg_last_name = user.last_name
             telegram.tg_username = user.username
-            await call.reply(f"✅ Dati di [c]{str(telegram)}[/c] aggiornati.")
+            await call.reply(f"✅ Dati di {str(telegram)} aggiornati.")
         # Commit the session
         await asyncify(call.session.commit)

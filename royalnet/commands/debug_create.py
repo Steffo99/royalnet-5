@@ -13,7 +13,7 @@ class DebugCreateCommand(Command):
     async def common(self, call: Call):
         royal = call.alchemy.Royal(username=call.args[0], role="Member")
         call.session.add(royal)
-        alias = call.alchemy.Alias(royal=royal, alias=royal.username)
+        alias = call.alchemy.Alias(royal=royal, alias=royal.username.lower())
         call.session.add(alias)
         await asyncify(call.session.commit)
-        await call.reply(f"✅ Utente [c]{royal}[/c] creato!")
+        await call.reply(f"✅ Utente {royal} creato!")

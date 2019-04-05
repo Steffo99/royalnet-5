@@ -17,4 +17,4 @@ class Royal:
         return f"<Royal {self.username}>"
 
     def __str__(self):
-        return f"royalnet:{self.username}"
+        return f"[c]royalnet:{self.username}[/c]"
