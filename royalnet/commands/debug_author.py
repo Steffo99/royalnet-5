@@ -14,4 +14,4 @@ class DebugAuthorCommand(Command):
         author = await call.get_author()
         if author is None:
             await call.reply(f"☁️ L'autore di questa chiamata è sconosciuto.")
-        await call.reply(f"🌞 [c]{str(author)}[/c] è l'autore di questa chiamata.")
+        await call.reply(f"🌞 {str(author)} è l'autore di questa chiamata.")

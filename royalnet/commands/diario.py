@@ -9,7 +9,7 @@ class DiarioCommand(Command):
 
     command_name = "diario"
     command_title = "Aggiungi una citazione al Diario."
-    command_syntax = "\"(testo)\" --[autore], [contesto]"
+    command_syntax = "[!] \"(testo)\" --[autore], [contesto]"
 
     require_alchemy_tables = {Royal, Diario, Alias}
 
@@ -36,12 +36,23 @@ class DiarioCommand(Command):
             quoted = None
             context = None
         timestamp = datetime.datetime.now()
+        # Ensure there is some text
+        if not text:
+            raise InvalidInputError("Missing text.")
+        # Or a quoted
+        if not quoted:
+            quoted = None
+        if not context:
+            context = None
         # Find if there's a Royalnet account associated with the quoted name
         if quoted is not None:
             quoted_alias = await asyncify(call.session.query(call.alchemy.Alias).filter_by(alias=quoted.lower()).one_or_none)
         else:
             quoted_alias = None
         quoted_account = quoted_alias.royal if quoted_alias is not None else None
+        if quoted_alias is not None and quoted_account is None:
+            await call.reply("⚠️ Il nome dell'autore è ambiguo, quindi la riga non è stata aggiunta.\nPer piacere, ripeti il comando con un nome più specifico!")
+            return
         # Create the diario quote
         diario = call.alchemy.Diario(creator=creator,
                                      quoted_account=quoted_account,

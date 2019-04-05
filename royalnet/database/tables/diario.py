@@ -32,15 +32,15 @@ class Diario:
     def __str__(self):
         # TODO: support media_url
         text = f"Riga #{self.diario_id}"
-        text += f" (salvata da {self.creator.username}"
-        text += f" alle {self.timestamp.strftime('%Y-%m-%d %H:%M')}):\n"
+        text += f" (salvata da {str(self.creator)}"
+        text += f" il {self.timestamp.strftime('%Y-%m-%d %H:%M')}):\n"
         if self.spoiler:
             hidden = re.sub("\w", "█", self.text)
             text += f"\"{hidden}\"\n"
         else:
             text += f"[b]\"{self.text}\"[/b]\n"
         if self.quoted_account is not None:
-            text += f" —{self.quoted_account.username}"
+            text += f" —{str(self.quoted_account)}"
         elif self.quoted is not None:
             text += f" —{self.quoted}"
         else:
