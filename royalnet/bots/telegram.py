@@ -107,10 +107,13 @@ class TelegramBot:
         if update.message is None:
             return
         message: telegram.Message = update.message
-        # Skip no-text messages
-        if message.text is None:
-            return
         text: str = message.text
+        # Try getting the caption instead
+        if text is None:
+            text: str = message.caption
+        # No text or caption, ignore the message
+        if text is None:
+            return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
         command_text.replace(f"@{self.bot.username}", "")
