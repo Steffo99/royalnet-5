@@ -17,7 +17,7 @@ class Diario:
     creator_id = Column(Integer, ForeignKey("royals.uid"), nullable=False)
     quoted_account_id = Column(Integer, ForeignKey("royals.uid"))
     quoted = Column(String)
-    text = Column(Text, nullable=False)
+    text = Column(Text)
     context = Column(Text)
     timestamp = Column(DateTime, nullable=False)
     media_url = Column(String)
@@ -34,11 +34,14 @@ class Diario:
         text = f"Riga #{self.diario_id}"
         text += f" (salvata da {str(self.creator)}"
         text += f" il {self.timestamp.strftime('%Y-%m-%d %H:%M')}):\n"
-        if self.spoiler:
-            hidden = re.sub("\w", "█", self.text)
-            text += f"\"{hidden}\"\n"
-        else:
-            text += f"[b]\"{self.text}\"[/b]\n"
+        if self.media_url is not None:
+            text += f"{self.media_url}\n"
+        if self.text is not None:
+            if self.spoiler:
+                hidden = re.sub(r"\w", "█", self.text)
+                text += f"\"{hidden}\"\n"
+            else:
+                text += f"[b]\"{self.text}\"[/b]\n"
         if self.quoted_account is not None:
             text += f" —{str(self.quoted_account)}"
         elif self.quoted is not None:

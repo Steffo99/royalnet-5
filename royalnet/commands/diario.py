@@ -4,8 +4,7 @@ import telegram
 import typing
 import os
 import aiohttp
-from urllib.parse import quote
-from ..utils import Command, CommandArgs, Call, InvalidInputError, InvalidConfigError, ExternalError
+from ..utils import Command, Call, InvalidInputError, InvalidConfigError, ExternalError
 from ..database.tables import Royal, Diario, Alias
 from ..utils import asyncify
 
@@ -18,6 +17,29 @@ class DiarioCommand(Command):
     command_syntax = "[!] \"(testo)\" --[autore], [contesto]"
 
     require_alchemy_tables = {Royal, Diario, Alias}
+
+    async def _telegram_to_imgur(self, photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
+        # Select the largest photo
+        largest_photo = sorted(photosizes, key=lambda p: p.width * p.height)[-1]
+        # Get the photo url
+        photo_file: telegram.File = await asyncify(largest_photo.get_file)
+        # Forward the url to imgur, as an upload
+        try:
+            imgur_api_key = os.environ["IMGUR_CLIENT_ID"]
+        except KeyError:
+            raise InvalidConfigError("Missing IMGUR_CLIENT_ID envvar, can't upload images to imgur.")
+        async with aiohttp.request("post", "https://api.imgur.com/3/upload", data={
+            "image": photo_file.file_path,
+            "type": "URL",
+            "title": "Diario image",
+            "description": caption
+        }, headers={
+            "Authorization": f"Client-ID {imgur_api_key}"
+        }) as request:
+            response = await request.json()
+            if not response["success"]:
+                raise ExternalError("imgur returned an error in the image upload.")
+            return response["data"]["link"]
 
     async def common(self, call: Call):
         # Find the creator of the quotes
@@ -86,31 +108,13 @@ class DiarioCommand(Command):
             # Check if there's an image associated with the reply
             photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = reply.photo
             if photosizes:
-                # Select the largest photo
-                largest_photo = sorted(photosizes, key=lambda p: p.width*p.height)[-1]
-                # Get the photo url
-                photo_file: telegram.File = await asyncify(largest_photo.get_file)
-                # Forward the url to imgur, as an upload
-                try:
-                    imgur_api_key = os.environ["IMGUR_CLIENT_ID"]
-                except KeyError:
-                    raise InvalidConfigError("Missing IMGUR_CLIENT_ID envvar, can't upload images to imgur.")
-                async with aiohttp.request("post", "https://api.imgur.com/3/upload", params={
-                    "image": quote(photo_file.file_path),
-                    "type": "URL",
-                    "title": "Diario image",
-                    "description": reply.caption if reply.caption is not None else ""
-                }, headers={
-                    "Authorization": f"Client-ID {imgur_api_key}"
-                }) as request:
-                    response = await request.json()
-                    if not response["success"]:
-                        raise ExternalError("imgur returned an error in the image upload.")
-                    media_url = response["data"]["link"]
+                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
+                # noinspection PyArgumentList
+                media_url = await self._telegram_to_imgur(self, photosizes, text if text is not None else "")
             else:
                 media_url = None
             # Ensure there is a text or an image
-            if not text or media_url:
+            if not (text or media_url):
                 raise InvalidInputError("Missing text.")
             # Find the Royalnet account associated with the sender
             quoted_tg = await asyncify(call.session.query(call.alchemy.Telegram).filter_by(tg_id=reply.from_user.id).one_or_none)
@@ -166,27 +170,9 @@ class DiarioCommand(Command):
             # Check if there's an image associated with the reply
             photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = message.photo
             if photosizes:
-                # Select the largest photo
-                largest_photo = sorted(photosizes, key=lambda p: p.width * p.height)[-1]
-                # Get the photo url
-                photo_file: telegram.File = await asyncify(largest_photo.get_file)
-                # Forward the url to imgur, as an upload
-                try:
-                    imgur_api_key = os.environ["IMGUR_CLIENT_ID"]
-                except KeyError:
-                    raise InvalidConfigError("Missing IMGUR_CLIENT_ID envvar, can't upload images to imgur.")
-                async with aiohttp.request("post", "https://api.imgur.com/3/upload", params={
-                    "image": quote(photo_file.file_path),
-                    "type": "URL",
-                    "title": "Diario image",
-                    "description": message.caption
-                }, headers={
-                    "Authorization": f"Client-ID {imgur_api_key}"
-                }) as request:
-                    response = await request.json()
-                    if not response["success"]:
-                        raise ExternalError("imgur returned an error in the image upload.")
-                    media_url = response["data"]["link"]
+                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
+                # noinspection PyArgumentList
+                media_url = await self._telegram_to_imgur(self, photosizes, text if text is not None else "")
             else:
                 media_url = None
             # Ensure there is a text or an image
@@ -199,7 +185,7 @@ class DiarioCommand(Command):
                                      text=text,
                                      context=context,
                                      timestamp=timestamp,
-                                     media_url=None,
+                                     media_url=media_url,
                                      spoiler=spoiler)
         call.session.add(diario)
         await asyncify(call.session.commit)
