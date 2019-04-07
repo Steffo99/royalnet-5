@@ -3,6 +3,7 @@ import asyncio
 import typing
 import logging as _logging
 import sys
+import re
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
