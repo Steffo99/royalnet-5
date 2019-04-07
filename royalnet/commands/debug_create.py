@@ -5,7 +5,7 @@ from ..database.tables import Royal, Alias
 class DebugCreateCommand(Command):
 
     command_name = "debug_create"
-    command_title = "Crea un nuovo account Royalnet"
+    command_description = "Crea un nuovo account Royalnet"
     command_syntax = "(newusername)"
 
     require_alchemy_tables = {Royal, Alias}

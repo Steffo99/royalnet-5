@@ -4,7 +4,7 @@ from ..utils import Command, CommandArgs, Call
 class ColorCommand(Command):
 
     command_name = "color"
-    command_title = "Invia un colore in chat...?"
+    command_description = "Invia un colore in chat...?"
     command_syntax = ""
 
     async def common(self, call: Call):

@@ -6,7 +6,7 @@ from ..utils import Command, CommandArgs, Call, InvalidInputError, UnsupportedEr
 class ErrorHandlerCommand(Command):
 
     command_name = "error_handler"
-    command_title = "Gestisce gli errori causati dagli altri comandi."
+    command_description = "Gestisce gli errori causati dagli altri comandi."
     command_syntax = ""
 
     async def common(self, call: Call):
