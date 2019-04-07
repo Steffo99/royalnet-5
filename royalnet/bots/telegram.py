@@ -136,5 +136,12 @@ class TelegramBot:
             except Exception as exc2:
                 log.error(f"Exception in error handler command: {exc2}")
 
+    def generate_botfather_command_string(self):
+        string = ""
+        for command_key in self.commands:
+            command = self.commands[command_key]
+            string += f"{command.command_name} - {command.command_description}\n"
+        return string
+
     async def handle_net_request(self, message: Message):
         pass

@@ -5,7 +5,7 @@ from telegram import Update, User
 class CiaoruoziCommand(Command):
 
     command_name = "ciaoruozi"
-    command_title = "Saluta Ruozi, anche se non è più in RYG."
+    command_description = "Saluta Ruozi, anche se non è più in RYG."
     command_syntax = ""
 
     async def telegram(self, call: Call):

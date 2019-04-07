@@ -8,7 +8,7 @@ SHIP_RESULT = "💕 {one} + {two} = [b]{result}[/b]"
 class ShipCommand(Command):
 
     command_name = "ship"
-    command_title = "Crea una ship tra due cose."
+    command_description = "Crea una ship tra due cose."
     command_syntax = "(uno) (due)"
 
     async def common(self, call: Call):

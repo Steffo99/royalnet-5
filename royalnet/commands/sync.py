@@ -7,7 +7,7 @@ from ..database.tables import Royal, Telegram
 class SyncCommand(Command):
 
     command_name = "sync"
-    command_title = "Connetti il tuo account attuale a Royalnet!"
+    command_description = "Connetti il tuo account attuale a Royalnet!"
     command_syntax = "(royalnetusername)"
 
     require_alchemy_tables = {Royal, Telegram}

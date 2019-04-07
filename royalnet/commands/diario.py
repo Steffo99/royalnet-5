@@ -13,7 +13,7 @@ from ..utils import asyncify
 class DiarioCommand(Command):
 
     command_name = "diario"
-    command_title = "Aggiungi una citazione al Diario."
+    command_description = "Aggiungi una citazione al Diario."
     command_syntax = "[!] \"(testo)\" --[autore], [contesto]"
 
     require_alchemy_tables = {Royal, Diario, Alias}
