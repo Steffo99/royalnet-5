@@ -108,6 +108,8 @@ class DiarioCommand(Command):
             # Check if there's an image associated with the reply
             photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = reply.photo
             if photosizes:
+                # Text is a caption
+                text = reply.caption
                 # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
                 # noinspection PyArgumentList
                 media_url = await self._telegram_to_imgur(self, photosizes, text if text is not None else "")
@@ -132,6 +134,14 @@ class DiarioCommand(Command):
             timestamp = datetime.datetime.now()
             # Get the message text
             raw_text = " ".join(call.args)
+            # Check if there's an image associated with the reply
+            photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = message.photo
+            if photosizes:
+                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
+                # noinspection PyArgumentList
+                media_url = await self._telegram_to_imgur(self, photosizes, raw_text if raw_text is not None else "")
+            else:
+                media_url = None
             # Parse the text, if it exists
             if raw_text:
                 # Pass the sentence through the diario regex
@@ -167,16 +177,8 @@ class DiarioCommand(Command):
                 quoted_account = None
                 spoiler = False
                 context = None
-            # Check if there's an image associated with the reply
-            photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = message.photo
-            if photosizes:
-                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
-                # noinspection PyArgumentList
-                media_url = await self._telegram_to_imgur(self, photosizes, text if text is not None else "")
-            else:
-                media_url = None
             # Ensure there is a text or an image
-            if not text or media_url:
+            if not (text or media_url):
                 raise InvalidInputError("Missing text.")
         # Create the diario quote
         diario = call.alchemy.Diario(creator=creator,
