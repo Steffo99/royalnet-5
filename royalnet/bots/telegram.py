@@ -82,7 +82,7 @@ class TelegramBot:
                 query = query.filter(self.identity_column == user.id)
                 return await asyncify(query.one_or_none)
 
-        self.Call = TelegramCall
+        self.TelegramCall = TelegramCall
 
     async def run(self):
         self.should_run = True
@@ -121,15 +121,14 @@ class TelegramBot:
             command = self.missing_command
         # Call the command
         try:
-            return await self.Call(message.chat, command, parameters,
-                                   update=update).run()
+            return await self.TelegramCall(message.chat, command, parameters, log,
+                                           update=update).run()
         except Exception as exc:
             try:
-                return await self.Call(message.chat, self.error_command, parameters,
-                                       update=update,
-                                       exception_info=sys.exc_info(),
-                                       previous_command=command,
-                                       log=log).run()
+                return await self.TelegramCall(message.chat, self.error_command, parameters, log,
+                                               update=update,
+                                               exception_info=sys.exc_info(),
+                                               previous_command=command).run()
             except Exception as exc2:
                 log.error(f"Exception in error handler command: {exc2}")
 

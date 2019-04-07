@@ -5,12 +5,18 @@ if typing.TYPE_CHECKING:
 
 class UnsupportedError(Exception):
     """The command is not supported for the specified source."""
-    pass
 
 
 class InvalidInputError(Exception):
     """The command has received invalid input and cannot complete."""
-    pass
+
+
+class InvalidConfigError(Exception):
+    """The bot has not been configured correctly, therefore the command can not function."""
+
+
+class ExternalError(Exception):
+    """Something went wrong in a non-Royalnet component and the command cannot be executed fully."""
 
 
 class CommandArgs(list):
