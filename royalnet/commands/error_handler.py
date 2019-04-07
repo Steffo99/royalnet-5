@@ -2,6 +2,7 @@ import traceback
 from logging import Logger
 from ..utils import Command, CommandArgs, Call, InvalidInputError, UnsupportedError
 
+
 class ErrorHandlerCommand(Command):
 
     command_name = "error_handler"
@@ -22,6 +23,5 @@ class ErrorHandlerCommand(Command):
             await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta:[c]/{command.command_name} {command.command_syntax}[/c]")
             return
         await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{e_type.__name__}[/b]\n{e_value}")
-        log: Logger = call.kwargs["log"]
         formatted_tb: str = '\n'.join(traceback.format_tb(e_tb))
-        log.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")
+        call.logger.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")

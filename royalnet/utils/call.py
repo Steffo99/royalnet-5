@@ -1,5 +1,6 @@
 import typing
 import asyncio
+import logging
 from ..network.messages import Message
 from .command import Command, CommandArgs
 if typing.TYPE_CHECKING:
@@ -32,12 +33,13 @@ class Call:
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
-    def __init__(self, channel, command: typing.Type[Command], command_args: list, **kwargs):
+    def __init__(self, channel, command: typing.Type[Command], command_args: list, logger: logging.Logger, **kwargs):
         self.channel = channel
         self.command = command
         self.args = CommandArgs(command_args)
         self.kwargs = kwargs
         self.session = None
+        self.logger = logger
 
     async def session_init(self):
         if not self.command.require_alchemy_tables:
