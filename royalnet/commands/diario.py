@@ -102,6 +102,13 @@ class DiarioCommand(Command):
         message: telegram.Message = update.message
         reply: telegram.Message = message.reply_to_message
         creator = await call.get_author()
+        quoted_account: typing.Optional[call.alchemy.Telegram]
+        quoted: typing.Optional[str]
+        text: typing.Optional[str]
+        context: typing.Optional[str]
+        timestamp: datetime.datetime
+        media_url: typing.Optional[str]
+        spoiler: bool
         if creator is None:
             await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")
             return
@@ -124,7 +131,7 @@ class DiarioCommand(Command):
             quoted_account = quoted_tg.royal if quoted_tg is not None else None
             # Find the quoted name to assign
             quoted_user: telegram.User = reply.from_user
-            quoted: str = quoted_user.full_name
+            quoted = quoted_user.full_name
             # Get the timestamp
             timestamp = reply.date
             # Set the other properties
