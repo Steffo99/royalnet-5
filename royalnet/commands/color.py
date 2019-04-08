@@ -7,7 +7,8 @@ class ColorCommand(Command):
     command_description = "Invia un colore in chat...?"
     command_syntax = ""
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         await call.reply("""
         [i]I am sorry, unknown error occured during working with your request, Admin were notified[/i]
         """)

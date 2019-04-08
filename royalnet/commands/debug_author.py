@@ -10,7 +10,8 @@ class DebugAuthorCommand(Command):
 
     require_alchemy_tables = {Royal, Telegram}
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         author = await call.get_author()
         if author is None:
             await call.reply(f"☁️ L'autore di questa chiamata è sconosciuto.")

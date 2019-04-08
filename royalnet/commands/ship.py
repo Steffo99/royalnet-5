@@ -11,7 +11,8 @@ class ShipCommand(Command):
     command_description = "Crea una ship tra due cose."
     command_syntax = "(uno) (due)"
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         name_one = call.args[0]
         name_two = call.args[1]
         if name_two == "+":

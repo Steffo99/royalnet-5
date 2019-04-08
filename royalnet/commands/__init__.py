@@ -6,7 +6,8 @@ from .ciaoruozi import CiaoruoziCommand
 from .color import ColorCommand
 from .sync import SyncCommand
 from .diario import DiarioCommand
+from .rage import RageCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
-           "SyncCommand", "DiarioCommand"]
+           "SyncCommand", "DiarioCommand", "RageCommand"]

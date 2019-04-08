@@ -10,7 +10,8 @@ class DebugCreateCommand(Command):
 
     require_alchemy_tables = {Royal, Alias}
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         royal = call.alchemy.Royal(username=call.args[0], role="Member")
         call.session.add(royal)
         alias = call.alchemy.Alias(royal=royal, alias=royal.username.lower())

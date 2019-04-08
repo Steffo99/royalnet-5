@@ -7,5 +7,6 @@ class NullCommand(Command):
     command_description = "Non fa nulla."
     command_syntax = ""
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         pass
