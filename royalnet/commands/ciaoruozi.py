@@ -8,7 +8,12 @@ class CiaoruoziCommand(Command):
     command_description = "Saluta Ruozi, anche se non è più in RYG."
     command_syntax = ""
 
-    async def telegram(self, call: Call):
+    @classmethod
+    async def common(cls, call: "Call"):
+        await call.reply("👋 Ciao Ruozi!")
+
+    @classmethod
+    async def telegram(cls, call: Call):
         update: Update = call.kwargs["update"]
         user: User = update.effective_user
         if user.id == 112437036:

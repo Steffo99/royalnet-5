@@ -12,10 +12,12 @@ class SyncCommand(Command):
 
     require_alchemy_tables = {Royal, Telegram}
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         raise UnsupportedError()
 
-    async def telegram(self, call: Call):
+    @classmethod
+    async def telegram(cls, call: Call):
         update: Update = call.kwargs["update"]
         # Find the user
         user: typing.Optional[User] = update.effective_user

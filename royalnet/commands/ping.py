@@ -8,7 +8,8 @@ class PingCommand(Command):
     command_description = "Ping pong!"
     command_syntax = "[time_to_wait]"
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         try:
             time = int(call.args[0])
         except InvalidInputError:

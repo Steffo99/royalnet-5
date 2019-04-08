@@ -9,10 +9,12 @@ class ErrorHandlerCommand(Command):
     command_description = "Gestisce gli errori causati dagli altri comandi."
     command_syntax = ""
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         raise UnsupportedError()
 
-    async def telegram(self, call: Call):
+    @classmethod
+    async def telegram(cls, call: Call):
         try:
             e_type, e_value, e_tb = call.kwargs["exception_info"]
         except InvalidInputError:

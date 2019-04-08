@@ -18,7 +18,8 @@ class DiarioCommand(Command):
 
     require_alchemy_tables = {Royal, Diario, Alias}
 
-    async def _telegram_to_imgur(self, photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
+    @classmethod
+    async def _telegram_to_imgur(cls, photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
         # Select the largest photo
         largest_photo = sorted(photosizes, key=lambda p: p.width * p.height)[-1]
         # Get the photo url
@@ -41,7 +42,8 @@ class DiarioCommand(Command):
                 raise ExternalError("imgur returned an error in the image upload.")
             return response["data"]["link"]
 
-    async def common(self, call: Call):
+    @classmethod
+    async def common(cls, call: Call):
         # Find the creator of the quotes
         creator = await call.get_author()
         if creator is None:
@@ -94,7 +96,8 @@ class DiarioCommand(Command):
         await asyncify(call.session.commit)
         await call.reply(f"✅ {str(diario)}")
 
-    async def telegram(self, call: Call):
+    @classmethod
+    async def telegram(cls, call: Call):
         update: telegram.Update = call.kwargs["update"]
         message: telegram.Message = update.message
         reply: telegram.Message = message.reply_to_message
@@ -110,9 +113,7 @@ class DiarioCommand(Command):
             if photosizes:
                 # Text is a caption
                 text = reply.caption
-                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
-                # noinspection PyArgumentList
-                media_url = await self._telegram_to_imgur(self, photosizes, text if text is not None else "")
+                media_url = await cls._telegram_to_imgur(photosizes, text if text is not None else "")
             else:
                 media_url = None
             # Ensure there is a text or an image
@@ -137,9 +138,7 @@ class DiarioCommand(Command):
             # Check if there's an image associated with the reply
             photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = message.photo
             if photosizes:
-                # Python is doing some weird stuff here, self._telegram_to_imgur appears to be unbound?
-                # noinspection PyArgumentList
-                media_url = await self._telegram_to_imgur(self, photosizes, raw_text if raw_text is not None else "")
+                media_url = await cls._telegram_to_imgur(photosizes, raw_text if raw_text is not None else "")
             else:
                 media_url = None
             # Parse the text, if it exists

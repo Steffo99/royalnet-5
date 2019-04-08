@@ -58,7 +58,7 @@ class Call:
         except AttributeError:
             coroutine = getattr(self.command, "common")
         try:
-            result = await coroutine(self.command, self)
+            result = await coroutine(self)
         finally:
             await self.session_end()
         return result
