@@ -2,9 +2,9 @@ from ..utils import Command, Call
 from ..database.tables import Royal, Telegram
 
 
-class DebugAuthorCommand(Command):
+class AuthorCommand(Command):
 
-    command_name = "debug_author"
+    command_name = "author"
     command_description = "Ottieni informazioni sull'autore di questa chiamata."
     command_syntax = ""
 
