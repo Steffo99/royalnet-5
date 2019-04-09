@@ -43,11 +43,11 @@ class CommandArgs(list):
             raise InvalidInputError("Pattern didn't match")
         return match
 
-    def optional(self, index: int) -> typing.Optional:
+    def optional(self, index: int, default=None) -> typing.Optional:
         try:
             return self[index]
-        except IndexError:
-            return None
+        except InvalidInputError:
+            return default
 
 
 class Command:

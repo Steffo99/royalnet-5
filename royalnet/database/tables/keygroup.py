@@ -10,4 +10,3 @@ class Keygroup:
 
     def __repr__(self):
         return f"<Keygroup {self.group_name}>"
-
