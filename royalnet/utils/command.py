@@ -1,3 +1,4 @@
+import re
 import typing
 if typing.TYPE_CHECKING:
     from .call import Call
@@ -35,6 +36,18 @@ class CommandArgs(list):
                 raise InvalidInputError(f'Tried to get invalid [{item}] slice from CommandArgs')
         raise ValueError(f"Invalid type passed to CommandArgs.__getattr__: {type(item)}")
 
+    def match(self, pattern: typing.Pattern) -> typing.Match:
+        text = " ".join(self)
+        match = re.match(pattern, text)
+        if match is None:
+            raise InvalidInputError("Pattern didn't match")
+        return match
+
+    def optional(self, index: int) -> typing.Optional:
+        try:
+            return self[index]
+        except IndexError:
+            return None
 
 class Command:
     """A generic command, called from any source."""
