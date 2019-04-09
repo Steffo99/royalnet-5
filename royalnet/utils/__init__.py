@@ -3,6 +3,7 @@ from .call import Call
 from .command import Command, CommandArgs, InvalidInputError, UnsupportedError, InvalidConfigError, ExternalError
 from .safeformat import safeformat
 from .classdictjanitor import cdj
+from .sleepuntil import sleep_until
 
 __all__ = ["asyncify", "Call", "Command", "safeformat", "InvalidInputError", "UnsupportedError", "CommandArgs",
-           "cdj", "InvalidConfigError", "ExternalError"]
+           "cdj", "InvalidConfigError", "ExternalError", "sleep_until"]
