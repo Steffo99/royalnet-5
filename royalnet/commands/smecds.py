@@ -1,5 +1,5 @@
 import random
-from ..utils import Command, CommandArgs, Call, safeformat
+from ..utils import Command, Call, safeformat
 
 
 DS_LIST = ["della secca", "del seccatore", "del secchiello", "del secchio", "del secchione", "del secondino",
