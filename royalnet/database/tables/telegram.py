@@ -33,4 +33,3 @@ class Telegram:
             return f"{self.tg_first_name} {self.tg_last_name}"
         else:
             return self.tg_first_name
-

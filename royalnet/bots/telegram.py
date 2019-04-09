@@ -3,7 +3,6 @@ import asyncio
 import typing
 import logging as _logging
 import sys
-import re
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..network import RoyalnetLink, Message
@@ -89,7 +88,10 @@ class TelegramBot:
         self.should_run = True
         while self.should_run:
             # Get the latest 100 updates
-            last_updates: typing.List[telegram.Update] = await asyncify(self.bot.get_updates, offset=self.offset)
+            try:
+                last_updates: typing.List[telegram.Update] = await asyncify(self.bot.get_updates, offset=self.offset, timeout=60)
+            except telegram.error.TimedOut:
+                continue
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall
@@ -99,8 +101,6 @@ class TelegramBot:
                 self.offset = last_updates[-1].update_id + 1
             except IndexError:
                 pass
-            # Wait for a while  TODO: use long polling
-            await asyncio.sleep(1)
 
     async def handle_update(self, update: telegram.Update):
         # Skip non-message updates
