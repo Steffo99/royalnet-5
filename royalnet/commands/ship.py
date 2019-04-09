@@ -1,5 +1,5 @@
 import re
-from ..utils import Command, CommandArgs, Call, safeformat
+from ..utils import Command, Call, safeformat
 
 
 SHIP_RESULT = "💕 {one} + {two} = [b]{result}[/b]"

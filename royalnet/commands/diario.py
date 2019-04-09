@@ -45,10 +45,7 @@ class DiarioCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         # Find the creator of the quotes
-        creator = await call.get_author()
-        if creator is None:
-            await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")
-            return
+        creator = await call.get_author(error_if_none=True)
         # Recreate the full sentence
         raw_text = " ".join(call.args)
         # Pass the sentence through the diario regex

@@ -1,6 +1,6 @@
 import traceback
 from logging import Logger
-from ..utils import Command, CommandArgs, Call, InvalidInputError, UnsupportedError
+from ..utils import Command, CommandArgs, Call, InvalidInputError, UnsupportedError, UnregisteredError
 
 
 class ErrorHandlerCommand(Command):
@@ -22,7 +22,10 @@ class ErrorHandlerCommand(Command):
             return
         if e_type == InvalidInputError:
             command = call.kwargs["previous_command"]
-            await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta:[c]/{command.command_name} {command.command_syntax}[/c]")
+            await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta: [c]/{command.command_name} {command.command_syntax}[/c]")
+            return
+        if e_type == UnregisteredError:
+            await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")
             return
         await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{e_type.__name__}[/b]\n{e_value}")
         formatted_tb: str = '\n'.join(traceback.format_tb(e_tb))

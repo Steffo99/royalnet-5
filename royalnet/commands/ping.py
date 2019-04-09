@@ -1,5 +1,5 @@
 import asyncio
-from ..utils import Command, CommandArgs, Call, InvalidInputError
+from ..utils import Command, Call, InvalidInputError
 
 
 class PingCommand(Command):

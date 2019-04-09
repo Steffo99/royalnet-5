@@ -1,6 +1,6 @@
 import typing
 from telegram import Update, User
-from ..utils import Command, CommandArgs, Call, asyncify, UnsupportedError
+from ..utils import Command, Call, asyncify, UnsupportedError
 from ..database.tables import Royal, Telegram
 
 
