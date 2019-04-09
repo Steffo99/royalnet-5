@@ -49,6 +49,7 @@ class CommandArgs(list):
         except IndexError:
             return None
 
+
 class Command:
     """A generic command, called from any source."""
 
