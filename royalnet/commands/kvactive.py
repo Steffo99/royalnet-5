@@ -8,7 +8,7 @@ class KvactiveCommand(Command):
     command_description = "Seleziona un gruppo di valori kv."
     command_syntax = "(nomegruppo)"
 
-    require_alchemy_tables = {ActiveKvGroup, Royal}
+    require_alchemy_tables = {ActiveKvGroup, Royal, Keygroup}
 
     @classmethod
     async def common(cls, call: Call):
