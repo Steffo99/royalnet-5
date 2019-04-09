@@ -82,7 +82,10 @@ class TelegramBot:
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
-                return await asyncify(query.one_or_none)
+                result = await asyncify(query.one_or_none)
+                if result is None and error_if_none:
+                    raise UnregisteredError("Author is not registered!")
+                return result
 
         self.TelegramCall = TelegramCall
 
