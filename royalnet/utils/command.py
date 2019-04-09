@@ -43,6 +43,11 @@ class CommandArgs(list):
             raise InvalidInputError("Pattern didn't match")
         return match
 
+    def optional(self, index: int) -> typing.Optional:
+        try:
+            return self[index]
+        except IndexError:
+            return None
 
 class Command:
     """A generic command, called from any source."""
