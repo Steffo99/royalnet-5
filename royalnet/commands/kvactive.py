@@ -1,4 +1,4 @@
-from ..database.tables import ActiveKvGroup, Royal
+from ..database.tables import ActiveKvGroup, Royal, Keygroup
 from ..utils import Command, Call, asyncify
 
 
@@ -16,9 +16,17 @@ class KvactiveCommand(Command):
         author = await call.get_author(error_if_none=True)
         active = await asyncify(call.session.query(call.alchemy.ActiveKvGroup).filter_by(royal=author).one_or_none)
         if active is None:
-            active = call.alchemy.ActiveKvGroup(royal=author, group=group_name)
+            group = await asyncify(call.session.query(call.alchemy.Keygroup).filter_by(group_name=group_name).one_or_none)
+            if group is None:
+                group = call.alchemy.Keygroup(group_name=group_name)
+                call.session.add(group)
+            active = call.alchemy.ActiveKvGroup(royal=author, group=group)
             call.session.add(active)
         else:
-            active.group = group_name
+            group = await asyncify(call.session.query(call.alchemy.Keygroup).filter_by(group_name=group_name).one_or_none)
+            if group is None:
+                group = call.alchemy.Keygroup(group_name=group_name)
+                call.session.add(group)
+            active.group = group
         await asyncify(call.session.commit)
         await call.reply(f"✅ Hai attivato il gruppo [b]{group_name}[/b].")
