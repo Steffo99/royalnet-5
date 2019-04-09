@@ -22,6 +22,7 @@ class ReminderCommand(Command):
             date = None
         if date is None:
             await call.reply("⚠️ La data che hai inserito non è valida.")
+            return
         await call.reply(f"✅ Promemoria impostato per [b]{date.strftime('%Y-%m-%d %H:%M:%S')}[/b]")
         await sleep_until(date)
         await call.reply(f"❗️ Promemoria: [b]{reminder_text}[/b]")
