@@ -4,7 +4,7 @@ import typing
 import logging as _logging
 import sys
 from ..commands import NullCommand
-from ..utils import asyncify, Call, Command
+from ..utils import asyncify, Call, Command, UnregisteredError
 from ..network import RoyalnetLink, Message
 from ..database import Alchemy, relationshiplinkchain
 
@@ -71,10 +71,12 @@ class TelegramBot:
                 response = await self.network.request(message, destination)
                 return response
 
-            async def get_author(call):
+            async def get_author(call, error_if_none=False):
                 update: telegram.Update = call.kwargs["update"]
                 user: telegram.User = update.effective_user
                 if user is None:
+                    if error_if_none:
+                        raise UnregisteredError("Author is not registered!")
                     return None
                 query = call.session.query(self.master_table)
                 for link in self.identity_chain:

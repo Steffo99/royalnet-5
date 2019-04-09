@@ -10,6 +10,10 @@ if typing.TYPE_CHECKING:
 loop = asyncio.get_event_loop()
 
 
+class UnregisteredError(Exception):
+    pass
+
+
 class Call:
     """A command call. Still an abstract class, subbots should create a new call from this."""
 
@@ -27,9 +31,10 @@ class Call:
         The data must be pickleable."""
         raise NotImplementedError()
 
-    async def get_author(self):
+    async def get_author(self, error_if_none=False):
         """Try to find the universal identifier of the user that sent the message.
-        That probably means, the database row identifying the user."""
+        That probably means, the database row identifying the user.
+        Raise a UnregisteredError if error_if_none is set to True and no author is found."""
         raise NotImplementedError()
 
     # These parameters / methods should be left alone
