@@ -1,4 +1,4 @@
-from ..utils import Command, CommandArgs, Call, asyncify
+from ..utils import Command, Call, asyncify
 from ..database.tables import Royal, Alias
 
 

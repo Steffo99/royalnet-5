@@ -3,3 +3,4 @@ websockets>=7.0
 pytest>=4.3.1
 psycopg2-binary>=2.8
 aiohttp>=3.5.4
+Markdown>=3.1
