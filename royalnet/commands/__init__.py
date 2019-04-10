@@ -10,7 +10,11 @@ from .rage import RageCommand
 from .dateparser import DateparserCommand
 from .author import AuthorCommand
 from .reminder import ReminderCommand
+from .kvactive import KvactiveCommand
+from .kv import KvCommand
+from .kvroll import KvrollCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
-           "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand"]
+           "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
+           "KvactiveCommand", "KvCommand", "KvrollCommand"]

@@ -10,7 +10,8 @@ from royalnet.database.tables import Royal, Telegram
 loop = asyncio.get_event_loop()
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
-            AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand]
+            AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
+            KvrollCommand]
 
 master = RoyalnetServer("localhost", 1234, "sas")
 tg_bot = TelegramBot(os.environ["TG_AK"], "localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Telegram, "tg_id", error_command=ErrorHandlerCommand)
