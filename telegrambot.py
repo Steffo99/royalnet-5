@@ -365,7 +365,7 @@ def cmd_mm(bot: telegram.Bot, update: telegram.Update, session: db.Session):
     if user is None:
         reply(bot, update, strings.LINK.ERRORS.ROYALNET_NOT_LINKED)
         return
-    match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_. ]+)(?:.*\n(.+))?",
+    match = re.match(r"/(?:mm|matchmaking)(?:@royalgamesbot)?(?: (?:([0-9]+)-)?([0-9]+))? (?:per )?([A-Za-z0-9!\-_.:/\\+()[\]{} ]+)(?:.*\n(.+))?",
                      update.message.text)
     if match is None:
         reply(bot, update, strings.MATCHMAKING.ERRORS.INVALID_SYNTAX)
