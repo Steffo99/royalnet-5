@@ -586,6 +586,8 @@ def cmd_bridge(bot: telegram.Bot, update: telegram.Update):
         reply(bot, update, strings.BRIDGE.SUCCESS)
 
 
+# Pycharm does weird stuff ep 3
+# noinspection PyTypeChecker
 def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, datetime.datetime]:
     # Unix time
     try:
@@ -634,6 +636,8 @@ def parse_timestring(timestring: str) -> typing.Union[datetime.timedelta, dateti
     raise ValueError("Nothing was found.")
 
 
+# Pycharm does weird stuff ep 3
+# noinspection PyTypeChecker
 @command
 @database_access
 def cmd_newevent(bot: telegram.Bot, update: telegram.Update, session: db.Session):
