@@ -12,9 +12,8 @@ loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 
-# noinspection PyUnusedLocal
 async def todo(message: Message):
-    pass
+    log.warning(f"Skipped {message} because handling isn't supported yet.")
 
 
 class TelegramBot:
