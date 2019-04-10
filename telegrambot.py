@@ -107,8 +107,8 @@ def command(func: "function"):
 # noinspection PyUnresolvedReferences
 def database_access(func: "function"):
     def new_func(bot: telegram.Bot, update: telegram.Update):
+        session = db.Session()
         try:
-            session = db.Session()
             return func(bot, update, session)
         except Exception:
             logger.error(f"Database error: {sys.exc_info()}")
@@ -248,7 +248,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
         if update.message.reply_to_message is None:
             reply(bot, update, strings.DIARIO.ERRORS.INVALID_SYNTAX)
             return
-        text = update.message.reply_to_message.text
+        actual_text = update.message.reply_to_message.text
         if update.message.forward_from:
             author = session.query(db.Telegram) \
                 .filter_by(telegram_id=update.message.forward_from.id) \
@@ -258,7 +258,7 @@ def cmd_diario(bot: telegram.Bot, update: telegram.Update, session: db.Session):
                             .filter_by(telegram_id=update.message.reply_to_message.from_user.id)\
                             .one_or_none()
         saver = session.query(db.Telegram).filter_by(telegram_id=update.message.from_user.id).one_or_none()
-    if text is None:
+    if actual_text is None:
         reply(bot, update, strings.DIARIO.ERRORS.NO_TEXT)
         return
     diario = db.Diario(timestamp=datetime.datetime.now(),
