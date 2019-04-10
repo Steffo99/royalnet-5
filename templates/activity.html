@@ -18,7 +18,7 @@
         <h1>
             Attività su Discord negli ultimi 7 giorni
         </h1>
-        <canvas class="graph members-graph-7d" id="discord-members-graph-7d" height="240px"></canvas>
+        <canvas class="graph members-graph-7d" id="discord-members-graph-7d" height="60px"></canvas>
         <script>
             new Chart("discord-members-graph-7d",
                 {
@@ -77,7 +77,7 @@
                     }
                 });
         </script>
-        <canvas class="graph cv-graph-7d" id="discord-cv-graph-7d" height="240px"></canvas>
+        <canvas class="graph cv-graph-7d" id="discord-cv-graph-7d" height="60px"></canvas>
         <script>
             new Chart("discord-cv-graph-7d",
                 {
@@ -122,7 +122,7 @@
                     }
                 });
         </script>
-        <canvas class="graph channels-graph-7d" id="discord-channels-graph-7d" height="240px"></canvas>
+        <canvas class="graph channels-graph-7d" id="discord-channels-graph-7d" height="60px"></canvas>
         <script>
             new Chart("discord-channels-graph-7d",
                 {
@@ -144,6 +144,129 @@
                                 "data": [
                                     {% for point in activityreports %}
                                         {{ point.discord_channels_used }},
+                                    {% endfor %}
+                                ]
+                            }
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
+        <h1>
+            Attività per ogni ora nell'ultimo mese
+        </h1>
+        <canvas class="graph members-graph-hour-bucket" id="discord-members-hour-bucket" height="60px"></canvas>
+        <script>
+            new Chart("discord-members-hour-bucket",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in hourly_avg %}
+                                "{{ point.h|int }}:00",
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "In cv",
+                                "borderColor": "#fe7f00",
+                                "backgroundColor": "#fe7f0022",
+                                "borderWidth": 4,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.cv_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "In game",
+                                "borderColor": "#9ae915",
+                                "backgroundColor": "#9ae91511",
+                                "borderWidth": 1,
+                                "borderDash": [2],
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "disabled",
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.ingame_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "Online",
+                                "borderColor": "#6dcff6",
+                                "backgroundColor": "#6dcff611",
+                                "borderWidth": 1,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": 0,
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.online_members_avg }},
+                                    {% endfor %}
+                                ]
+                            }
+                        ]
+                    },
+                    "options":{
+
+                    }
+                });
+        </script>
+        <h1>
+            Confronto cv con il mese scorso
+        </h1>
+        <canvas class="graph members-graph-hour-comp" id="discord-members-hour-comp" height="60px"></canvas>
+        <script>
+            new Chart("discord-members-hour-comp",
+                {
+                    "type": "line",
+                    "data": {
+                        "labels": [
+                            {% for point in hourly_avg %}
+                                "{{ point.h|int }}:00",
+                            {% endfor %}
+                        ],
+                        "datasets": [
+                            {
+                                "label": "Adesso",
+                                "borderColor": "#a0ccff",
+                                "backgroundColor": "#a0ccff22",
+                                "borderWidth": 4,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in hourly_avg %}
+                                        {{ point.cv_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "Il mese scorso",
+                                "borderColor": "#d3a1ff",
+                                "backgroundColor": "#d3a1ff11",
+                                "borderWidth": 1,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in hourly_comp %}
+                                        {{ point.cv_members_avg }},
+                                    {% endfor %}
+                                ]
+                            },
+                            {
+                                "label": "Il mese prima",
+                                "borderColor": "#ffa3d0",
+                                "backgroundColor": "#ffa3d011",
+                                "borderWidth": 1,
+                                "cubicInterpolationMode": "monotone",
+                                "fill": "origin",
+                                "data": [
+                                    {% for point in hourly_before %}
+                                        {{ point.cv_members_avg }},
                                     {% endfor %}
                                 ]
                             }

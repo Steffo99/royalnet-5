@@ -21,11 +21,14 @@
             <span>{{ record.wins }}</span>
         </div>
         <div class="rank">
-            {% if record.rank_tier is none %}
-                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
+            {% if (record.wins + record.losses) < 100 %}
+                <img class="medal locked" src="{{ url_for("static", filename="rank_icon_locked.png") }}" alt="">
+                <span class="text">{{ 100 - record.wins - record.losses }} partite rimaste</span>
+            {% elif record.rank_tier is none %}
+                <img class="medal unranked" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
                 <span class="text">Non classificato</span>
             {% elif record.rank_tier < 10 %}
-                <img class="medal" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
+                <img class="medal unranked" src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_0.png" alt="">
                 <span class="text">{{ record.rank_tier }} piazzamenti completati</span>
             {% else %}
                 <img class="medal" src="{{ record.get_rank_icon_url() }}" alt="">{% if record.get_rank_stars_url() %}<img class="stars" src="{{ record.get_rank_stars_url() }}" alt="">{% endif %}

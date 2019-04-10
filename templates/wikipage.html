@@ -43,15 +43,37 @@
                 Ultima modifica di <span class="last-author"><a href="/profile/{{ wiki_log.editor.username }}">{{ wiki_log.editor.username }}</a></span> alle <span class="last-timestamp">{{ wiki_log.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</span>{% if wiki_log.reason %}, motivo: <span class="last-reason">{{ wiki_log.reason }}</span>{% endif %}
             </div>
         {% endif %}
-        {% if session.get('user_id', '') %}
+        {% if wiki_page is none %}
             <div class="wiki-edit">
-                <h4>Modifica</h4>
-                <form action="{{ url_for('page_wiki', key=key) }}" method="POST">
+                <h4>Crea</h4>
+                <form action="{{ url_for('page_wiki_edit', key=key) }}" method="POST">
                     <textarea oninput="newEdit()" class="content" name="content" placeholder="Inserisci il Markdown per la pagina qui.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
-                    <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica"><br>
-                    <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Invia">
+                    <input class="reason" name="reason" type="text" placeholder="Motivo per la creazione (facoltativo)"><br>
+                    <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Crea">
                 </form>
             </div>
+        {% elif wiki_page.locked %}
+            <div class="wiki-locked">
+                <span>🔒 Pagina bloccata: non possono essere effettuate ulteriori modifiche.</span>
+            </div>
+        {% else %}
+            {% if g.user %}
+                <div class="wiki-edit">
+                    <h4>Modifica</h4>
+                    <form action="{{ url_for('page_wiki_edit', key=key) }}" method="POST">
+                        <textarea oninput="newEdit()" class="content" name="content" placeholder="Non eliminare pagine altrui. Steffo non la prenderà bene.">{% if wiki_page %}{{ wiki_page.content }}{% endif %}</textarea><br>
+                        <input class="reason" name="reason" type="text" placeholder="Motivo per la modifica (facoltativo)"><br>
+                        <input class="submit" type="submit" onmouseenter="onEnter()" onmouseleave="onExit()" value="Salva">
+                    </form>
+                </div>
+            {% endif %}
+        {% endif %}
+        {% if wiki_page is not none %}
+            {% if g.user.role == "Admin" %}
+                <form action="{{ url_for('page_wiki_lock', key=key) }}" method="POST">
+                    <input class="submit" type="submit" value="Blocca/Sblocca pagina">
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

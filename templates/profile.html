@@ -23,63 +23,23 @@
     <h1>
         Profilo di {{ ryg.username }} {% if session.get('user_id', '') == ryg.id %}<a href="{{ url_for('page_editprofile') }}" id="edit-css">Modifica</a>{% endif %}
     </h1>
-    <div class="omnicontainer">
-        <div class="profile">
-            {% if css.bio %}
-                <div class="box bio">
-                    <div class="upper-box">
-                        Bio
-                    </div>
-                    <div class="lower-box">
-                        {{ bio }}
-                    </div>
+    <div class="profile">
+        {% if css.bio %}
+            <div class="box bio">
+                <div class="upper-box">
+                    Bio
                 </div>
-            {% endif %}
-            <div class="game-panels">
-                {% with record = ryg %}
-                    {% include "minis/ryg.html" %}
-                {% endwith %}
-                {% if halloween %}
-                    {% with record = halloween %}
-                        {% include "minis/halloween2018.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if tg %}
-                    {% with record = tg %}
-                        {% include "minis/tg.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if discord %}
-                    {% with record = discord %}
-                        {% include "minis/discord.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if steam %}
-                    {% with record = steam %}
-                        {% include "minis/steam.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if dota %}
-                    {% with record = dota %}
-                        {% include "minis/dota.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if osu %}
-                    {% with record = osu %}
-                        {% include "minis/osu.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if lol %}
-                    {% with record = lol %}
-                        {% include "minis/lol.html" %}
-                    {% endwith %}
-                {% endif %}
-                {% if ow %}
-                    {% with record = ow %}
-                        {% include "minis/ow.html" %}
-                    {% endwith %}
-                {% endif %}
+                <div class="lower-box">
+                    {{ bio }}
+                </div>
             </div>
+        {% endif %}
+        <div class="game-panels">
+            {% for mini in mini_data %}
+                {% with record = mini["data"] %}
+                    {% include "minis/" + mini["name"] + ".html" %}
+                {% endwith %}
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

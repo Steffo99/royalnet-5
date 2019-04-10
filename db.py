@@ -1,29 +1,35 @@
 import datetime
 import logging
 import os
-import typing
+import time
+
 import coloredlogs
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+# noinspection PyUnresolvedReferences
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey, Float, Enum, create_engine, \
                        UniqueConstraint, PrimaryKeyConstraint, Boolean, LargeBinary, Text, Date, func
+from sqlalchemy.inspection import inspect
 import requests
-from errors import NotFoundError, AlreadyExistingError, PrivateError
+from utils.errors import NotFoundError, AlreadyExistingError, PrivateError
 import re
 import enum
-# Both packages have different pip names
-# noinspection PyPackageRequirements
-from discord import User as DiscordUser
-# noinspection PyPackageRequirements
-from telegram import User as TelegramUser
 import loldata
-from dirty import Dirty
-import query_discord_music
+from utils.dirty import Dirty, DirtyDelta
+import sql_queries
 from flask import escape
+import configparser
+import typing
+from utils import MatchmakingStatus, errors
+import strings
+if typing.TYPE_CHECKING:
+    # noinspection PyPackageRequirements
+    from discord import User as DiscordUser
+    # noinspection PyPackageRequirements
+    from telegram import User as TelegramUser
 
 # Init the config reader
-import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
@@ -38,7 +44,76 @@ os.environ["COLOREDLOGS_LOG_FORMAT"] = "%(asctime)s %(levelname)s %(name)s %(mes
 coloredlogs.install(level="DEBUG", logger=logger)
 
 
-class Royal(Base):
+def relationship_name_search(_class, keyword) -> typing.Optional[tuple]:
+    """Recursively find a relationship with a given name."""
+    inspected = set()
+
+    def search(_mapper, chain):
+        inspected.add(_mapper)
+        relationships = _mapper.relationships
+        try:
+            return chain + (relationships[keyword],)
+        except KeyError:
+            for _relationship in set(relationships):
+                if _relationship.mapper in inspected:
+                    continue
+                result = search(_relationship.mapper, chain + (_relationship,))
+                if result is not None:
+                    return result
+            return None
+
+    return search(inspect(_class), tuple())
+
+
+def relationship_link_chain(starting_class, ending_class) -> typing.Optional[tuple]:
+    """Find the path to follow to get from the starting table to the ending table."""
+    inspected = set()
+
+    def search(_mapper, chain):
+        inspected.add(_mapper)
+        if _mapper.class_ == ending_class:
+            return chain
+        relationships = _mapper.relationships
+        for _relationship in set(relationships):
+            if _relationship.mapper in inspected:
+                continue
+            try:
+                return search(_relationship.mapper, chain + (_relationship,))
+            except errors.NotFoundError:
+                continue
+        raise errors.NotFoundError()
+
+    return search(inspect(starting_class), tuple())
+
+
+class Mini(object):
+    """Mixin for every table that has an associated mini."""
+    _mini_full_name = NotImplemented
+    _mini_name = NotImplemented
+    _mini_order = NotImplemented
+
+    @classmethod
+    def mini_get_all(cls, session: Session) -> list:
+        return session.query(cls).order_by(*cls._mini_order).all()
+
+    @classmethod
+    def mini_get_single(cls, session: Session, **kwargs):
+        return session.query(cls).filter_by(**kwargs).one_or_none()
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        chain = relationship_link_chain(cls, Royal)
+        if chain is None:
+            chain = tuple()
+        start = session.query(cls)
+        for connection in chain:
+            start = start.join(connection.mapper.class_)
+        start = start.filter(Royal.id == royal.id)
+        mini = start.one()
+        return mini
+
+
+class Royal(Base, Mini):
     __tablename__ = "royals"
 
     id = Column(Integer, primary_key=True)
@@ -47,6 +122,11 @@ class Royal(Base):
     role = Column(String)
     fiorygi = Column(Integer, default=0)
     member_since = Column(Date)
+    special_title = Column(String)
+
+    _mini_full_name = "Royalnet"
+    _mini_name = "ryg"
+    _mini_order = [fiorygi.desc()]
 
     @staticmethod
     def create(session: Session, username: str):
@@ -58,8 +138,12 @@ class Royal(Base):
     def __repr__(self):
         return f"<db.Royal {self.username}>"
 
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal
 
-class Telegram(Base):
+
+class Telegram(Base, Mini):
     __tablename__ = "telegram"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
@@ -70,8 +154,12 @@ class Telegram(Base):
     last_name = Column(String)
     username = Column(String)
 
+    _mini_full_name = "Telegram"
+    _mini_name = "tg"
+    _mini_order = [telegram_id]
+
     @staticmethod
-    def create(session: Session, royal_username, telegram_user: TelegramUser):
+    def create(session: Session, royal_username, telegram_user: "TelegramUser"):
         t = session.query(Telegram).filter_by(telegram_id=telegram_user.id).first()
         if t is not None:
             raise AlreadyExistingError(repr(t))
@@ -104,8 +192,12 @@ class Telegram(Base):
         else:
             return self.first_name
 
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal.telegram
 
-class Steam(Base):
+
+class Steam(Base, Mini):
     __tablename__ = "steam"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
@@ -116,6 +208,10 @@ class Steam(Base):
     avatar_hex = Column(String)
     trade_token = Column(String)
     most_played_game_id = Column(BigInteger)
+
+    _mini_full_name = "Steam"
+    _mini_name = "steam"
+    _mini_order = [steam_id]
 
     def __repr__(self):
         if not self.persona_name:
@@ -192,8 +288,12 @@ class Steam(Base):
             return
         self.most_played_game_id = j["response"]["games"][0]["appid"]
 
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return royal.steam
 
-class RocketLeague(Base):
+
+class RocketLeague(Base, Mini):
     __tablename__ = "rocketleague"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
@@ -218,6 +318,13 @@ class RocketLeague(Base):
     solo_std_mmr = Column(Integer)
 
     wins = Column(Integer)
+
+    _mini_full_name = "Rocket League"
+    _mini_name = "rl"
+    _mini_order = [solo_std_mmr.desc().nullslast(),
+                   doubles_mmr.desc().nullslast(),
+                   standard_mmr.desc().nullslast(),
+                   single_mmr.desc().nullslast()]
 
     def __repr__(self):
         return f"<db.RocketLeague {self.steam_id}>"
@@ -254,18 +361,20 @@ class RocketLeague(Base):
         return f"https://rocketleaguestats.com/assets/img/rocket_league/ranked/season_four/{rank}.png"
 
 
-class Dota(Base):
+class Dota(Base, Mini):
     __tablename__ = "dota"
 
     steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
     steam = relationship("Steam", backref="dota", lazy="joined")
 
     rank_tier = Column(Integer)
-
     wins = Column(Integer)
     losses = Column(Integer)
-
     most_played_hero = Column(Integer)
+
+    _mini_full_name = "DOTA 2"
+    _mini_name = "dota"
+    _mini_order = [rank_tier.desc().nullslast(), wins.desc().nullslast()]
 
     def __repr__(self):
         return f"<db.Dota {self.steam_id}>"
@@ -365,7 +474,7 @@ class RomanNumerals(enum.Enum):
         return self.name
 
 
-class LeagueOfLegends(Base):
+class LeagueOfLegends(Base, Mini):
     __tablename__ = "leagueoflegends"
 
     royal_id = Column(Integer, ForeignKey("royals.id"))
@@ -375,7 +484,6 @@ class LeagueOfLegends(Base):
     summoner_id = Column(String, primary_key=True)
     account_id = Column(String)
     summoner_name = Column(String)
-
     level = Column(Integer)
     solo_division = Column(Enum(LeagueOfLegendsRanks))
     solo_rank = Column(Enum(RomanNumerals))
@@ -383,8 +491,16 @@ class LeagueOfLegends(Base):
     flex_rank = Column(Enum(RomanNumerals))
     twtr_division = Column(Enum(LeagueOfLegendsRanks))
     twtr_rank = Column(Enum(RomanNumerals))
-
     highest_mastery_champ = Column(Integer)
+
+    _mini_full_name = "League of Legends"
+    _mini_name = "lol"
+    _mini_order = [solo_division.desc().nullslast(),
+                   solo_rank.desc().nullslast(),
+                   flex_division.desc().nullslast(),
+                   flex_rank.desc().nullslast(),
+                   twtr_division.desc().nullslast(),
+                   twtr_rank.desc().nullslast()]
 
     def __repr__(self):
         if not self.summoner_name:
@@ -455,14 +571,14 @@ class LeagueOfLegends(Base):
 
     def highest_mastery_champ_name(self):
         champ = loldata.get_champ_by_key(self.highest_mastery_champ)
-        return champ["name"]
+        return champ["id"]
 
     def highest_mastery_champ_image(self):
         champ = loldata.get_champ_by_key(self.highest_mastery_champ)
-        return loldata.get_champ_icon(champ["name"])
+        return loldata.get_champ_icon(champ["id"])
 
 
-class Osu(Base):
+class Osu(Base, Mini):
     __tablename__ = "osu"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
@@ -470,11 +586,21 @@ class Osu(Base):
 
     osu_id = Column(Integer, primary_key=True)
     osu_name = Column(String)
+    std_pp = Column(Float, default=0)
+    std_best_song = Column(BigInteger)
+    taiko_pp = Column(Float, default=0)
+    taiko_best_song = Column(BigInteger)
+    catch_pp = Column(Float, default=0)
+    catch_best_song = Column(BigInteger)
+    mania_pp = Column(Float, default=0)
+    mania_best_song = Column(BigInteger)
 
-    std_pp = Column(Float)
-    taiko_pp = Column(Float)
-    catch_pp = Column(Float)
-    mania_pp = Column(Float)
+    _mini_full_name = "osu!"
+    _mini_name = "osu"
+    _mini_order = [mania_pp.desc().nullslast(),
+                   std_pp.desc().nullslast(),
+                   taiko_pp.desc().nullslast(),
+                   catch_pp.desc().nullslast()]
 
     @staticmethod
     def create(session: Session, royal_id, osu_name):
@@ -504,23 +630,32 @@ class Osu(Base):
 
     # noinspection PyUnusedLocal
     def update(self, session=None):
+        std = DirtyDelta(self.std_pp)
+        taiko = DirtyDelta(self.taiko_pp)
+        catch = DirtyDelta(self.catch_pp)
+        mania = DirtyDelta(self.mania_pp)
         r0 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=0")
         r0.raise_for_status()
+        j0 = r0.json()[0]
         r1 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=1")
         r1.raise_for_status()
+        j1 = r1.json()[0]
         r2 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=2")
         r2.raise_for_status()
+        j2 = r2.json()[0]
         r3 = requests.get(f"https://osu.ppy.sh/api/get_user?k={config['Osu!']['ppy_api_key']}&u={self.osu_name}&m=3")
         r3.raise_for_status()
-        j0 = r0.json()[0]
-        j1 = r1.json()[0]
-        j2 = r2.json()[0]
         j3 = r3.json()[0]
         self.osu_name = j0["username"]
-        self.std_pp = j0["pp_raw"]
-        self.taiko_pp = j1["pp_raw"]
-        self.catch_pp = j2["pp_raw"]
-        self.mania_pp = j3["pp_raw"]
+        std.value = float(j0["pp_raw"] or 0)
+        taiko.value = float(j1["pp_raw"] or 0)
+        catch.value = float(j2["pp_raw"] or 0)
+        mania.value = float(j3["pp_raw"] or 0)
+        self.std_pp = std.value
+        self.taiko_pp = taiko.value
+        self.catch_pp = catch.value
+        self.mania_pp = mania.value
+        return std, taiko, catch, mania
 
     def __repr__(self):
         if not self.osu_name:
@@ -528,7 +663,7 @@ class Osu(Base):
         return f"<db.Osu {self.osu_name}>"
 
 
-class Discord(Base):
+class Discord(Base, Mini):
     __tablename__ = "discord"
     __table_args__ = tuple(UniqueConstraint("name", "discriminator"))
 
@@ -540,6 +675,10 @@ class Discord(Base):
     discriminator = Column(Integer)
     avatar_hex = Column(String)
 
+    _mini_full_name = "Discord"
+    _mini_name = "discord"
+    _mini_order = [discord_id]
+
     def __str__(self):
         return f"{self.name}#{self.discriminator}"
 
@@ -547,7 +686,7 @@ class Discord(Base):
         return f"<db.Discord {self.discord_id}>"
 
     @staticmethod
-    def create(session: Session, royal_username, discord_user: DiscordUser):
+    def create(session: Session, royal_username, discord_user: "DiscordUser"):
         d = session.query(Discord).filter(Discord.discord_id == discord_user.id).first()
         if d is not None:
             raise AlreadyExistingError(repr(d))
@@ -572,8 +711,20 @@ class Discord(Base):
             return "https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png"
         return f"https://cdn.discordapp.com/avatars/{self.discord_id}/{self.avatar_hex}.png?size={size}"
 
+    @classmethod
+    def mini_get_all(cls, session: Session):
+        return [dict(row) for row in session.execute(sql_queries.all_music_query)]
 
-class Overwatch(Base):
+    @classmethod
+    def mini_get_single(cls, session: Session, **kwargs):
+        return session.execute(sql_queries.one_music_query, {"royal": kwargs["royal"].id}).fetchone()
+
+    @classmethod
+    def mini_get_single_from_royal(cls, session: Session, royal: "Royal"):
+        return cls.mini_get_single(session, royal=royal)
+
+
+class Overwatch(Base, Mini):
     __tablename__ = "overwatch"
 
     royal_id = Column(Integer, ForeignKey("royals.id"), nullable=False)
@@ -582,9 +733,12 @@ class Overwatch(Base):
     battletag = Column(String, primary_key=True)
     discriminator = Column(Integer, primary_key=True)
     icon = Column(String)
-
     level = Column(Integer)
     rank = Column(Integer)
+
+    _mini_full_name = "Overwatch"
+    _mini_name = "ow"
+    _mini_order = [rank.desc().nullslast(), level.desc()]
 
     def __str__(self, separator="#"):
         return f"{self.battletag}{separator}{self.discriminator}"
@@ -594,45 +748,14 @@ class Overwatch(Base):
 
     @staticmethod
     def create(session: Session, royal_id, battletag, discriminator=None):
-        if discriminator is None:
-            battletag, discriminator = battletag.split("#", 1)
-        o = session.query(Overwatch).filter_by(battletag=battletag, discriminator=discriminator).first()
-        if o is not None:
-            raise AlreadyExistingError(repr(o))
-        o = Overwatch(royal_id=royal_id,
-                      battletag=battletag,
-                      discriminator=discriminator)
-        o.update()
-        return o
+        raise NotImplementedError()
 
     def icon_url(self):
         return f"https://d1u1mce87gyfbn.cloudfront.net/game/unlocks/{self.icon}.png"
 
     # noinspection PyUnusedLocal
     def update(self, session=None):
-        r = requests.get(f"https://owapi.net/api/v3/u/{self.battletag}-{self.discriminator}/stats", headers={
-            "User-Agent": "Royal-Bot/4.1",
-            "From": "ste.pigozzi@gmail.com"
-        })
-        r.raise_for_status()
-        try:
-            j = r.json()["eu"]["stats"].get("competitive")
-            if j is None:
-                logger.debug(f"No stats for {repr(self)}, skipping...")
-                return
-            if not j["game_stats"]:
-                logger.debug(f"No stats for {repr(self)}, skipping...")
-                return
-            j = j["overall_stats"]
-        except TypeError:
-            logger.debug(f"No stats for {repr(self)}, skipping...")
-            return
-        try:
-            self.icon = re.search(r"https://.+\.cloudfront\.net/game/unlocks/(0x[0-9A-F]+)\.png", j["avatar"]).group(1)
-        except AttributeError:
-            logger.debug(f"No icon available for {repr(self)}.")
-        self.level = j["prestige"] * 100 + j["level"]
-        self.rank = j["comprank"]
+        raise NotImplementedError()
 
     def rank_url(self):
         if self.rank < 1500:
@@ -686,47 +809,14 @@ class Diario(Base):
     def __str__(self):
         return f"{self.id} - {self.timestamp} - {self.author}: {self.text}"
 
+    def to_telegram(self):
+        return '<a href="https://ryg.steffo.eu/diario#entry-{id}">#{id}</a> di {author}\n{text}'.format(
+            id=self.id,
+            author=f"<b>{self.author}</b>" if self.author is not None else strings.DIARIO.ANONYMOUS,
+            text=escape(self.text))
+
     def to_html(self):
         return str(escape(self.text)).replace("\n", "<br>")
-
-    @staticmethod
-    def import_from_json(file):
-        import json
-        session = Session()
-        file = open(file, "r")
-        j = json.load(file)
-        author_ids = {
-            "@Steffo": 25167391,
-            "@GoodBalu": 19611986,
-            "@gattopandacorno": 200821462,
-            "@Albertino04": 131057096,
-            "@Francesco_Cuoghi": 48371848,
-            "@VenomousDoc": 48371848,
-            "@MaxSensei": 1258401,
-            "@Protoh": 125711787,
-            "@McspKap": 304117728,
-            "@FrankRekt": 31436195,
-            "@EvilBalu": 26842090,
-            "@Dailir": 135816455,
-            "@Paltri": 186843362,
-            "@Doom_darth_vader": 165792255,
-            "@httpIma": 292086686,
-            "@DavidoMessori": 509208316,
-            "@DavidoNiichan": 509208316,
-            "@Peraemela99": 63804599,
-            "@infopz": 20403805,
-            "@Baithoven": 121537369,
-            "@Tauei": 102833717
-        }
-        for n, entry in enumerate(j):
-            author = author_ids[entry["sender"]] if "sender" in entry and entry["sender"] in author_ids else None
-            d = Diario(timestamp=datetime.datetime.fromtimestamp(float(entry["timestamp"])),
-                       author_id=author,
-                       text=entry["text"])
-            print(f"{n} - {d}")
-            session.add(d)
-        session.commit()
-        session.close()
 
 
 class BaluRage(Base):
@@ -770,7 +860,7 @@ class VoteQuestion(Base):
         text = f"<b>{self.question}</b>\n\n"
         none, yes, no, abstain = 0, 0, 0, 0
         if self.message_id is not None:
-            query = session.execute(query_discord_music.vote_answers, {"message_id": self.message_id})
+            query = session.execute(sql_queries.vote_answers, {"message_id": self.message_id})
             for record in query:
                 if record["username"] == "royalgamesbot":
                     continue
@@ -837,6 +927,7 @@ class WikiEntry(Base):
 
     key = Column(String, primary_key=True)
     content = Column(Text, nullable=False)
+    locked = Column(Boolean, default=False)
 
     def __repr__(self):
         return f"<WikiEntry {self.key}>"
@@ -894,23 +985,6 @@ class Reddit(Base):
         return f"<Reddit u/{self.username}>"
 
 
-class GameLog(Base):
-    __tablename__ = "gamelog"
-
-    royal_id = Column(Integer, ForeignKey("royals.id"))
-    royal = relationship("Royal", backref="gamelog", lazy="joined")
-
-    username = Column(String, primary_key=True)
-    owned_games = Column(Integer)
-    unfinished_games = Column(Integer)
-    beaten_games = Column(Integer)
-    completed_games = Column(Integer)
-    mastered_games = Column(Integer)
-
-    def __repr__(self):
-        return f"<GameLog {self.username}>"
-
-
 class ParsedRedditPost(Base):
     __tablename__ = "parsedredditposts"
 
@@ -935,7 +1009,7 @@ class LoginToken(Base):
         return f"<LoginToken for {self.royal.username}>"
 
 
-class Halloween(Base):
+class Halloween(Base, Mini):
     """This is some nice spaghetti, don't you think?"""
     __tablename__ = "halloween"
 
@@ -943,7 +1017,6 @@ class Halloween(Base):
     royal = relationship("Royal", backref="halloween", lazy="joined")
 
     first_trigger = Column(DateTime)
-
     puzzle_piece_a = Column(DateTime)
     puzzle_piece_b = Column(DateTime)
     puzzle_piece_c = Column(DateTime)
@@ -951,8 +1024,11 @@ class Halloween(Base):
     puzzle_piece_e = Column(DateTime)
     puzzle_piece_f = Column(DateTime)
     puzzle_piece_g = Column(DateTime)
-
     boss_battle = Column(DateTime)
+
+    _mini_full_name = "Halloween 2018"
+    _mini_name = "halloween2018"
+    _mini_order = [first_trigger]
 
     def __getitem__(self, item):
         if not isinstance(item, int):
@@ -1034,6 +1110,267 @@ class ActivityReport(Base):
 
     def __repr__(self):
         return f"<ActivityReport at {self.timestamp.isoformat()}>"
+
+
+class Quest(Base):
+    __tablename__ = "quests"
+
+    id = Column(Integer, primary_key=True)
+
+    title = Column(String)
+    description = Column(Text)
+    reward = Column(Integer)
+    expiration_date = Column(DateTime)
+
+    def __repr__(self):
+        return f"<Quest {self.id}: {self.title}>"
+
+
+class Terraria13(Base, Mini):
+    __tablename__ = "terraria13"
+
+    game_name = "Terraria 13"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="terraria13", lazy="joined")
+
+    character_name = Column(String)
+    contribution = Column(Integer)
+
+    _mini_full_name = "Terraria 13"
+    _mini_name = "terraria13"
+    _mini_order = [contribution.desc()]
+
+    def __repr__(self):
+        return f"<Terraria13 {self.character_name} {self.contribution}>"
+
+
+class Minecraft2019(Base, Mini):
+    __tablename__ = "minecraft2019"
+
+    game_name = "Minecraft 2019"
+
+    royal_id = Column(Integer, ForeignKey("royals.id"), primary_key=True)
+    royal = relationship("Royal", backref="minecraft2019", lazy="joined")
+
+    character_name = Column(String)
+    contribution = Column(Integer)
+
+    _mini_full_name = "Minecraft 2019"
+    _mini_name = "minecraft2019"
+    _mini_order = [contribution.desc()]
+
+    def __repr__(self):
+        return f"<Terraria13 {self.character_name} {self.contribution}>"
+
+
+mini_list = [Royal, Telegram, Steam, Dota, LeagueOfLegends, Osu, Discord, Overwatch, Halloween,
+             Terraria13]
+
+
+class Match(Base):
+    __tablename__ = "matches"
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime)
+    creator_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
+    creator = relationship("Telegram", backref="matches_created", lazy="joined")
+
+    match_title = Column(String)
+    match_desc = Column(Text)
+    min_players = Column(Integer)
+    max_players = Column(Integer)
+    closed = Column(Boolean, default=False)
+
+    message_id = Column(BigInteger)
+
+    def active_players_count(self):
+        count = 0
+        for player in self.players:
+            if player.status == MatchmakingStatus.READY \
+                    or player.status == MatchmakingStatus.WAIT_FOR_ME \
+                    or player.status == MatchmakingStatus.SOMEONE_ELSE:
+                count += 1
+        return count
+
+    def generate_text(self, session):
+        player_list = session.query(MatchPartecipation).filter_by(match=self).all()
+        title = f"<b>{self.match_title}</b>"
+        description = f"{self.match_desc}\n" if self.match_desc else ""
+        if self.min_players:
+            minimum = f" <i>(minimo {self.min_players})</i>"
+        else:
+            minimum = ""
+        plist = f"Giocatori{minimum}:\n"
+        ignore_count = 0
+        for player in player_list:
+            icon = strings.MATCHMAKING.ENUM_TO_EMOJIS[player.status]
+            if player.status == MatchmakingStatus.IGNORED:
+                ignore_count += 1
+                continue
+            plist += f"{icon} {player.user.royal.username}\n"
+        if ignore_count:
+            ignored = f"❌ <i>{ignore_count} persone non sono interessate.</i>\n"
+        else:
+            ignored = ""
+        if self.max_players:
+            players = f"[{self.active_players_count()}/{self.max_players}]"
+        else:
+            players = f"[{self.active_players_count()}]"
+        close = f"[matchmaking terminato]\n" if self.closed else ""
+        message = f"{title} {players}\n" \
+                  f"{description}\n" \
+                  f"{plist}\n" \
+                  f"{ignored}" \
+                  f"{close}"
+        return message
+
+    def __repr__(self):
+        return f"<Match {self.match_title}>"
+
+    def format_dict(self) -> typing.Dict[str, str]:
+        return {
+            "id": str(self.id),
+            "timestamp": self.timestamp.isoformat(),
+            "creator_id": str(self.creator_id),
+            "creator_name": self.creator.mention(),
+            "match_title": self.match_title,
+            "match_desc": self.match_desc if self.match_desc is not None else "",
+            "min_players": str(self.min_players) if self.min_players is not None else "",
+            "max_players": str(self.max_players) if self.max_players is not None else "",
+            "active_players": str(self.active_players_count()),
+            "players": str(len(self.players))
+        }
+
+
+class MatchPartecipation(Base):
+    __tablename__ = "matchpartecipations"
+    __table_args__ = (PrimaryKeyConstraint("user_id", "match_id"),)
+
+    user_id = Column(BigInteger, ForeignKey("telegram.telegram_id"))
+    user = relationship("Telegram", backref="match_partecipations", lazy="joined")
+
+    match_id = Column(Integer, ForeignKey("matches.id"))
+    match = relationship("Match", backref="players", lazy="joined")
+
+    status = Column(Integer)
+
+    def __repr__(self):
+        return f"<MatchPartecipation {self.user.username} in {self.match.match_title}>"
+
+
+class BindingOfIsaac(Base, Mini):
+    __tablename__ = "bindingofisaac"
+
+    steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
+    steam = relationship("Steam", backref="binding_of_isaac", lazy="joined")
+
+    daily_victories = Column(Integer, default=0)
+
+    def __repr__(self):
+        return f"<db.BindingOfIsaac {self.steam_id}>"
+
+    def recalc_victories(self):
+        raise NotImplementedError()  # TODO
+
+
+class BindingOfIsaacRun(Base):
+    __tablename__ = "bindingofisaacruns"
+    __table_args__ = (PrimaryKeyConstraint("date", "player_id"),)
+
+    date = Column(Date)
+
+    player_id = Column(String, ForeignKey("bindingofisaac.steam_id"))
+    player = relationship("BindingOfIsaac", backref="runs", lazy="joined")
+
+    score = Column(BigInteger)
+    # time = Column(???)
+
+    def __repr__(self):
+        return f"<db.BindingOfIsaacRun {self.player_id}: {self.score}>"
+
+
+class Brawlhalla(Base, Mini):
+    __tablename__ = "brawlhalla"
+
+    steam_id = Column(String, ForeignKey("steam.steam_id"), primary_key=True)
+    steam = relationship("Steam", backref="brawlhalla", lazy="joined")
+    brawlhalla_id = Column(BigInteger)
+    name = Column(String)
+
+    level = Column(Integer)
+
+    main_legend_name = Column(String)
+    main_legend_level = Column(Integer)
+
+    ranked_plays = Column(Integer)
+    ranked_wins = Column(Integer)
+    rating = Column(Integer)
+
+    best_team_partner_id = Column(BigInteger)
+    best_team_rating = Column(Integer)
+
+    _mini_full_name = "Brawlhalla"
+    _mini_name = "brawlhalla"
+    _mini_order = [rating.desc(), level.desc()]
+
+    def __repr__(self):
+        return f"<db.Brawlhalla {self.name}>"
+
+    @hybrid_property
+    def best_team_partner(self) -> typing.Optional["Brawlhalla"]:
+        # FIXME: dirty hack here
+        session = Session()
+        b = session.query(Brawlhalla).filter_by(brawlhalla_id=self.best_team_partner_id).one_or_none()
+        session.close()
+        return b
+
+    @staticmethod
+    def init_table():
+        session = Session()
+        steam = session.query(Steam).all()
+        for user in steam:
+            j = requests.get("https://api.brawlhalla.com/search", params={
+                "steamid": user.steam_id,
+                "api_key": config["Brawlhalla"]["brawlhalla_api_key"]
+            }).json()
+            if not j:
+                continue
+            b = session.query(Brawlhalla).filter_by(steam=user).one_or_none()
+            if b is None:
+                b = Brawlhalla(steam_id=user.steam_id, brawlhalla_id=j["brawlhalla_id"], name=j["name"])
+            session.add(b)
+            time.sleep(1)
+        session.commit()
+
+    def update(self, session=None):
+        j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/stats?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
+        self.name = j.get("name", "unknown")
+        self.level = j.get("level", 0)
+        try:
+            main_legend = max(j.get("legends", []), key=lambda l: l.get("level", 0))
+            self.main_legend_level = main_legend.get("level", 0)
+            self.main_legend_name = main_legend.get("legend_name_key", "unknown")
+        except ValueError:
+            pass
+        j = requests.get(f"https://api.brawlhalla.com/player/{self.brawlhalla_id}/ranked?api_key={config['Brawlhalla']['brawlhalla_api_key']}").json()
+        self.ranked_plays = j.get("games", 0)
+        self.ranked_wins = j.get("wins", 0)
+        rating = DirtyDelta(self.rating)
+        rating.value = j.get("rating")
+        self.rating = rating.value
+        best_team_data = Dirty((self.best_team_partner_id, self.best_team_rating))
+        try:
+            current_best_team = max(j.get("2v2", []), key=lambda t: t.get("rating", 0))
+            if current_best_team["brawlhalla_id_one"] == self.brawlhalla_id:
+                self.best_team_partner_id = current_best_team["brawlhalla_id_two"]
+            else:
+                self.best_team_partner_id = current_best_team["brawlhalla_id_one"]
+            self.best_team_rating = current_best_team["rating"]
+            best_team_data.value = (self.best_team_partner_id, self.best_team_rating)
+        except ValueError:
+            pass
+        return rating, best_team_data
 
 
 # If run as script, create all the tables in the db

@@ -1,0 +1,14 @@
+<div class="quest">
+    <div class="title">
+        {{ quest.title }}
+    </div>
+    <div class="description">
+        {{ quest.description | markdown }}
+    </div>
+        <div class="reward">
+            {% if quest.reward %}
+                <div class="number">{{ quest.reward }}</div>
+                <div class="subtext">fioryg{% if quest.reward != 1 %}i{% endif %}</div>
+            {% endif %}
+        </div>
+</div>

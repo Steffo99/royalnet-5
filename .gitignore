@@ -1,9 +1,11 @@
 config.ini
 .idea/
+.vscode/
 __pycache__
 diario.json
 libopus-0.dll
 music.opus
 opusfiles/
-ignored/*
-markovmodel.json
+ignored/
+markovmodels/
+logs/

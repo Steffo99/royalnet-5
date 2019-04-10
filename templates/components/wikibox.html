@@ -9,11 +9,13 @@
         Pagine Wiki
     </div>
     <div class="lower-box">
-        <ul>
+        <ul class="multicolumn">
             {% for page in wiki_pages %}
-                <li><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
+                <li class="{% if page.locked %}list-locked{% endif %}"><a href="/wiki/{{ page.key }}">{{ page.key }}</a></li>
             {% endfor %}
         </ul>
-        oppure... <input id="input-key" name="key" type="text" placeholder="Nome pagina" class="half"><button onclick="createpage()">Crea</button>
+        {% if g.user %}
+            oppure... <input id="input-key" name="key" type="text" placeholder="Nome pagina" class="half"><button onclick="createpage()">Crea</button>
+        {% endif %}
     </div>
 </div>

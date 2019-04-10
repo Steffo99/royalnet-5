@@ -1,0 +1,10 @@
+<div class="box">
+        <div class="upper-box">
+            Prossimi eventi
+        </div>
+        <div class="lower-box">
+            {% for event in events %}
+                {% include "components/event.html" %}
+            {% endfor %}
+        </div>
+</div>

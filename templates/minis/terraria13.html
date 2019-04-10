@@ -1,0 +1,21 @@
+<style>
+    @font-face {
+        font-family: "Andy";
+        src: url("{{ url_for('static', filename='terrariafont.ttf') }}");
+        font-style: normal;
+        font-weight: bold;
+    }
+</style>
+<div class="game-panel">
+    <div class="game-grid terraria13">
+        <div class="character">
+            {{ record.character_name }}
+        </div>
+        <div class="contribution-status">
+            <span class="contribution {% if record.contribution >= 8 %}orange{% elif record.contribution >= 5 %}green{% elif record.contribution >= 3 %}blue{% endif %}">
+                {{ record.contribution }}
+            </span>
+            fioryg{% if record.contribution != 1 %}i{% endif %} ottenut{% if record.contribution != 1 %}i{% else %}o{% endif %} per la partecipazione a Terraria 13!
+        </div>
+    </div>
+</div>

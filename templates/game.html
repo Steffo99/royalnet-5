@@ -6,22 +6,23 @@
 {% endblock %}
 
 {% block pagetitle %}
-    {{ game_name }}
+    {{ mini_type._mini_full_name }}
 {% endblock %}
 
 {% block body %}
     <h1>
-        Royal Games su {{ game_name }}
+        Royal Games su {{ mini_type._mini_full_name }}
     </h1>
-    <div class="omnicontainer">
-        <div class="game">
-            <div class="game-panels">
-                {% for mini in minis %}
-                    {% with record = mini %}
-                        {% include "minis/" + game_short_name + ".html" %}
-                    {% endwith %}
-                {% endfor %}
-            </div>
+    {% if mini_type._mini_name == "ow" %}
+        <div>
+            Overwatch updates are currently disabled.
+        </div>
+    {% endif %}
+    <div class="game">
+        <div class="game-panels">
+            {% for record in mini_data %}
+                {% include "minis/" + mini_type._mini_name + ".html" %}
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

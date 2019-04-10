@@ -18,10 +18,6 @@ h1, h2, h3, h4, h5, h6 {
     color: @accent-color;
 }
 
-h1 .whatsthis {
-    font-size: large;
-}
-
 a {
     color: @link-color;
     text-decoration: none;
@@ -75,7 +71,7 @@ code {
     font-family: "Consolas", "Source Code Pro", monospace;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"], input[type="email"] {
     background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
     color: @text-color;
     border: none;
@@ -213,20 +209,59 @@ table {
     }
 }
 
+ul {
+    list-style: none;
+
+    &.multicolumn {
+        column-width: 192px;
+        word-wrap: break-word;
+    }
+
+    li {
+        &::before {
+            content: "•";
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        &.list-admin {
+            &::before {
+                color: #ffff00;
+            }
+        }
+
+        &.list-locked {
+            &::before {
+                color: #555555;
+            }
+        }
+    }
+}
+
+img {
+    max-width: 100%;
+
+    @media (max-width:792px) {
+        max-width: initial;
+    }
+}
+
+.gravatar {
+    border-radius: 16px;
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.whatsthis {
+    font-size: large;
+}
+
 .omnicontainer {
-    width: 380px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-
-    @media (min-width: 792px)
-    {
-        width: 776px;
-    }
-
-    @media (min-width: 1180px)
-    {
-        width: 1164px;
-    }
 
     @media (min-width: 1568px) {
         width: 1552px;
@@ -267,18 +302,6 @@ table {
 
     input {
         grid-column: 2;
-    }
-}
-
-@media (min-width:601px) {
-    .mobile-only {
-        display: none;
-    }
-}
-
-@media (max-width:600px) {
-    .desktop-only {
-        display: none;
     }
 }
 
@@ -511,6 +534,10 @@ table {
 
             img.medal {
                 height: 60px;
+
+                &.locked {
+                    opacity: 0.3;
+                }
             }
         }
     }
@@ -696,30 +723,78 @@ table {
     .ryg {
         background-color: rgba(red(@text-color), green(@text-color), blue(@text-color), 0.1);
         padding: 18px;
-        grid-template-columns: 80% 20%;
+        grid-template-rows: 32px 16px 16px 36px;
+        grid-template-columns: 33.3% 33.3% 33.3%;
 
-        .player {
+        .username {
             grid-row: 1;
-            grid-column-start: 1;
-            grid-column-end: 3;
-            font-weight: bold;
+            grid-column: 1 / 3;
+            font-size: x-large;
+            align-self: center;
+            justify-self: flex-start;
         }
 
-        .member-status {
+        .special-title {
+            grid-row: 1;
+            grid-column: 3;
+            font-size: small;
+            align-self: center;
+            justify-self: flex-end;
+            font-style: italic;
+            color: @accent-color;
+        }
+
+        .join-date-title {
+            grid-row: 3;
             grid-column: 1;
-            grid-row-start: 2;
-            grid-row-end: 4;
-            font-size: x-large;
-            margin-top: auto;
-            margin-bottom: auto;
+            font-size: xx-small;
+            align-self: center;
+            justify-self: center;
+        }
+
+        .join-date {
+            grid-row: 4;
+            grid-column: 1;
+            font-size: large;
+            align-self: center;
+            justify-self: center;
+
+        }
+
+        .wiki-edits-title {
+            grid-row: 3;
+            grid-column: 2;
+            font-size: xx-small;
+            align-self: center;
+            justify-self: center;
+        }
+
+        .wiki-edits {
+            grid-row: 4;
+            grid-column: 2;
+            font-size: large;
+            align-self: center;
+            justify-self: center;
+        }
+
+        .fiorygi-title {
+            grid-row: 3;
+            grid-column: 3;
+            font-size: xx-small;
+            align-self: center;
+            justify-self: center;
         }
 
         .fiorygi {
-            grid-column: 2;
+            grid-row: 4;
+            grid-column: 3;
+            font-size: large;
+            align-self: center;
+            justify-self: center;
         }
 
-        .fiorygi.game-score {
-            font-size: x-large;
+        .unknown {
+            opacity: 0.3;
         }
     }
 
@@ -809,13 +884,50 @@ table {
             }
         }
     }
+
+    .terraria13 {
+        border: 3px solid black;
+        padding: 15px;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("/static/stoneslab.png");
+        font-family: "Andy", sans-serif;
+        font-weight: bold;
+        color: white;
+        grid-row-gap: 5px;
+
+        .character {
+            grid-row: 1;
+            font-size: x-large;
+        }
+
+        .contribution-status {
+            grid-row: 2;
+
+            .contribution {
+                font-size: xx-large;
+
+                &.blue {
+                    color: #8686e5;
+                }
+
+                &.green {
+                    color: #92f892;
+                }
+
+                &.orange {
+                    color: #e9b688;
+                }
+            }
+        }
+    }
 }
 
 .wiki {
 
-    .wiki-log {
+    .wiki-log, .wiki-locked {
         font-family: "Consolas", "Source Code Pro", monospace;
+        font-size: small;
         margin-bottom: 12px;
+        opacity: 0.4;
 
         .last-reason {
             font-style: italic;
@@ -837,7 +949,7 @@ table {
     }
 }
 
-.entry {
+.diario {
     display: grid;
 
     .left {
@@ -854,15 +966,15 @@ table {
         font-size: smaller;
     }
 
-    .entry-id {
+    .diario-id {
         text-align: right;
     }
 }
 
-.main-page {
+.two-columns {
     display: grid;
 
-    @media (min-width:601px) {
+    @media (min-width:791px) {
         //Desktop
 
         grid-template-columns: 50% 50%;
@@ -876,7 +988,7 @@ table {
         }
     }
 
-    @media (max-width:600px) {
+    @media (max-width:792px) {
         //Mobile
 
         grid-template-columns: 100%;
@@ -893,11 +1005,6 @@ table {
             grid-row-start: 1;
             grid-row-end: 3;
         }
-    }
-
-    ul {
-        column-width: 200px;
-        word-wrap: break-word;
     }
 }
 
@@ -939,6 +1046,65 @@ table {
 
     &.done {
         color: rgba(255, 255, 0, 1);
+    }
+}
+
+.quest {
+    padding: 8px;
+    color: @accent-color;
+    font-family: "Verdana", sans-serif;
+    background-image: url("/static/plank.jpg");
+    display: grid;
+    grid-template-columns: auto 64px;
+    grid-row-gap: 2px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+    border-radius: 4px;
+
+    .title {
+        grid-row: 1;
+        grid-column: 1;
+        font-weight: bold;
+    }
+
+    .description {
+        grid-row: 2;
+        grid-column: 1;
+
+        p {
+            margin: 0;
+        }
+    }
+
+    .reward {
+        grid-row-start: 1;
+        grid-row-end: 3;
+        grid-column: 2;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+
+        .number {
+            font-size: xx-large;
+        }
+
+        .subtext {
+            font-size: smaller;
+        }
+    }
+}
+
+#royal-games {
+    font-size: 64px;
+    text-align: center;
+
+    @media (max-width:792px) {
+        font-size: 32px;
+    }
+
+    img {
+        height: 128px;
+        vertical-align: middle;
     }
 }
 
