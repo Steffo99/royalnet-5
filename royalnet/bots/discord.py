@@ -53,7 +53,18 @@ class DiscordBot:
             alchemy = self.alchemy
 
             async def reply(call, text: str):
-                raise NotImplementedError()
+                escaped_text = text.replace("*", "\\*") \
+                                   .replace("_", "\\_") \
+                                   .replace("`", "\\`") \
+                                   .replace("[b]", "**") \
+                                   .replace("[/b]", "**") \
+                                   .replace("[i]", "_") \
+                                   .replace("[/i]", "_") \
+                                   .replace("[u]", "__") \
+                                   .replace("[/u]", "__") \
+                                   .replace("[c]", "`") \
+                                   .replace("[/c]", "`")
+                await call.channel.send(escaped_text)
 
             async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
