@@ -869,65 +869,65 @@ class RoyalDiscordBot(discord.Client):
     # noinspection PyUnusedLocal
     @command
     async def cmd_cv(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_play(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_skip(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_remove(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     async def cmd_queue(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_shuffle(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_clear(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_resume(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_mode(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica non sarà disponibile fino alla release di **Royalnet Unity**...")
 
 
 def process(users_connection=None):
