@@ -21,7 +21,7 @@ class DiscordBot:
         pass
 
     def __init__(self,
-                 api_key: str,
+                 token: str,
                  master_server_uri: str,
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
@@ -31,6 +31,7 @@ class DiscordBot:
                  identity_column_name: str,
                  missing_command: typing.Type[Command] = NullCommand,
                  error_command: typing.Type[Command] = NullCommand):
+        self.token = token
         self.bot = self.DiscordClient()
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", todo)
         # Generate commands
@@ -70,10 +71,21 @@ class DiscordBot:
                 response = await self.network.request(message, destination)
                 return response
 
-            async def get_author(self, error_if_none=False):
-                raise NotImplementedError()
+            async def get_author(call, error_if_none=False):
+                message: discord.Message = call.kwargs["message"]
+                user: discord.Member = message.author
+                query = call.session.query(self.master_table)
+                for link in self.identity_chain:
+                    query = query.join(link.mapper.class_)
+                query = query.filter(self.identity_column == user.id)
+                result = await asyncify(query.one_or_none)
+                if result is None and error_if_none:
+                    raise UnregisteredError("Author is not registered")
+                return result
 
         self.DiscordCall = DiscordCall
 
     async def run(self):
-        raise NotImplementedError()
+        await self.bot.login(self.token)
+        await self.bot.connect()
+        # TODO: how to stop?
