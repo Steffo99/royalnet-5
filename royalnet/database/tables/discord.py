@@ -16,7 +16,7 @@ class Discord:
     discriminator = Column(String)
     avatar_hash = Column(String)
 
-    royal = relationship("Royal", backref="telegram")
+    royal = relationship("Royal", backref="discord")
 
     def __repr__(self):
         return f"<Discord {str(self)}>"
