@@ -75,7 +75,7 @@ class TelegramBot:
                 user: telegram.User = update.effective_user
                 if user is None:
                     if error_if_none:
-                        raise UnregisteredError("Author is not registered!")
+                        raise UnregisteredError("No author for this message")
                     return None
                 query = call.session.query(self.master_table)
                 for link in self.identity_chain:
@@ -83,7 +83,7 @@ class TelegramBot:
                 query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
-                    raise UnregisteredError("Author is not registered!")
+                    raise UnregisteredError("Author is not registered")
                 return result
 
         self.TelegramCall = TelegramCall
