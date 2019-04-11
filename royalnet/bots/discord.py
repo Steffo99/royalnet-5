@@ -2,6 +2,7 @@ import discord
 import asyncio
 import typing
 import logging as _logging
+import sys
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command, UnregisteredError
 from ..network import RoyalnetLink, Message
@@ -16,10 +17,6 @@ async def todo(message: Message):
 
 
 class DiscordBot:
-    # noinspection PyMethodParameters
-    class DiscordClient(discord.Client):
-        pass
-
     def __init__(self,
                  token: str,
                  master_server_uri: str,
@@ -32,13 +29,14 @@ class DiscordBot:
                  missing_command: typing.Type[Command] = NullCommand,
                  error_command: typing.Type[Command] = NullCommand):
         self.token = token
-        self.bot = self.DiscordClient()
+        self.missing_command = missing_command
+        self.error_command = error_command
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", todo)
         # Generate commands
         self.commands = {}
         required_tables = set()
         for command in commands:
-            self.commands[f"/{command.command_name}"] = command
+            self.commands[f"!{command.command_name}"] = command
             required_tables = required_tables.union(command.require_alchemy_tables)
         # Generate the Alchemy database
         self.alchemy = Alchemy(database_uri, required_tables)
@@ -51,6 +49,7 @@ class DiscordBot:
         class DiscordCall(Call):
             interface_name = "discord"
             interface_obj = self
+            interface_prefix = "!"
             alchemy = self.alchemy
 
             async def reply(call, text: str):
@@ -84,6 +83,37 @@ class DiscordBot:
                 return result
 
         self.DiscordCall = DiscordCall
+
+        # noinspection PyMethodParameters
+        class DiscordClient(discord.Client):
+            async def on_message(cli, message: discord.Message):
+                text = message.content
+                # Skip non-text messages
+                if not text:
+                    return
+                # Find and clean parameters
+                command_text, *parameters = text.split(" ")
+                # Find the function
+                try:
+                    selected_command = self.commands[command_text]
+                except KeyError:
+                    # Skip inexistent commands
+                    selected_command = self.missing_command
+                # Call the command
+                try:
+                    return await self.DiscordCall(message.channel, selected_command, parameters, log,
+                                                  message=message).run()
+                except Exception as exc:
+                    try:
+                        return await self.DiscordCall(message.channel, self.error_command, parameters, log,
+                                                      message=message,
+                                                      exception_info=sys.exc_info(),
+                                                      previous_command=selected_command).run()
+                    except Exception as exc2:
+                        log.error(f"Exception in error handler command: {exc2}")
+
+        self.DiscordClient = DiscordClient
+        self.bot = self.DiscordClient()
 
     async def run(self):
         await self.bot.login(self.token)

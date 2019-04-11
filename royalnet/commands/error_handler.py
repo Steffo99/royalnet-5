@@ -11,10 +11,6 @@ class ErrorHandlerCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        raise UnsupportedError()
-
-    @classmethod
-    async def telegram(cls, call: Call):
         try:
             e_type, e_value, e_tb = call.kwargs["exception_info"]
         except InvalidInputError:
@@ -22,7 +18,7 @@ class ErrorHandlerCommand(Command):
             return
         if e_type == InvalidInputError:
             command = call.kwargs["previous_command"]
-            await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta: [c]/{command.command_name} {command.command_syntax}[/c]")
+            await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta: [c]{call.interface_prefix}{command.command_name} {command.command_syntax}[/c]")
             return
         if e_type == UnregisteredError:
             await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")

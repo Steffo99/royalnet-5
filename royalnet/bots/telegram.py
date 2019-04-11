@@ -51,6 +51,7 @@ class TelegramBot:
         class TelegramCall(Call):
             interface_name = "telegram"
             interface_obj = self
+            interface_prefix = "/"
             alchemy = self.alchemy
 
             async def reply(call, text: str):
