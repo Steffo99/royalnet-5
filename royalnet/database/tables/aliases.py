@@ -3,16 +3,24 @@ from sqlalchemy import Column, \
                        String, \
                        ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 from .royals import Royal
 
 
 class Alias:
     __tablename__ = "aliases"
 
-    royal_id = Column(Integer, ForeignKey("royals.uid"))
-    alias = Column(String, primary_key=True)
+    @declared_attr
+    def royal_id(self):
+        return Column(Integer, ForeignKey("royals.uid"))
 
-    royal = relationship("Royal", backref="aliases")
+    @declared_attr
+    def alias(self):
+        return Column(String, primary_key=True)
+
+    @declared_attr
+    def royal(self):
+        return relationship("Royal", backref="aliases")
 
     def __repr__(self):
         return f"<Alias {str(self)}>"

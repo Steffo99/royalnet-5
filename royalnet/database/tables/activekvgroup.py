@@ -3,16 +3,29 @@ from sqlalchemy import Column, \
                        Integer, \
                        ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
+from .royals import Royal
+from .keygroup import Keygroup
 
 
 class ActiveKvGroup:
     __tablename__ = "activekvgroups"
 
-    royal_id = Column(Integer, ForeignKey("royals.uid"), primary_key=True)
-    group_name = Column(String, ForeignKey("keygroups.group_name"), nullable=False)
+    @declared_attr
+    def royal_id(self):
+        return Column(Integer, ForeignKey("royals.uid"), primary_key=True)
 
-    royal = relationship("Royal", backref="active_kv_group")
-    group = relationship("Keygroup", backref="users_with_this_active")
+    @declared_attr
+    def group_name(self):
+        return Column(String, ForeignKey("keygroups.group_name"), nullable=False)
+
+    @declared_attr
+    def royal(self):
+        return relationship("Royal", backref="active_kv_group")
+
+    @declared_attr
+    def group(self):
+        return relationship("Keygroup", backref="users_with_this_active")
 
     def __repr__(self):
         return f"<ActiveKvGroup royal={self.royal} group={self.group_name}>"

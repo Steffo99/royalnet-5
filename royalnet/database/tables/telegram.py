@@ -5,19 +5,36 @@ from sqlalchemy import Column, \
                        LargeBinary, \
                        ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 from .royals import Royal
 
 
 class Telegram:
     __tablename__ = "telegram"
 
-    royal_id = Column(Integer, ForeignKey("royals.uid"))
-    tg_id = Column(BigInteger, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    username = Column(String)
+    @declared_attr
+    def royal_id(self):
+        return Column(Integer, ForeignKey("royals.uid"))
 
-    royal = relationship("Royal", backref="telegram")
+    @declared_attr
+    def tg_id(self):
+        return Column(BigInteger, primary_key=True)
+
+    @declared_attr
+    def first_name(self):
+        return Column(String)
+
+    @declared_attr
+    def last_name(self):
+        return Column(String)
+
+    @declared_attr
+    def username(self):
+        return Column(String)
+
+    @declared_attr
+    def royal(self):
+        return relationship("Royal", backref="telegram")
 
     def __repr__(self):
         return f"<Telegram {str(self)}>"

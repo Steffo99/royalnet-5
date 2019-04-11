@@ -20,6 +20,7 @@ class Call:
     # These parameters / methods should be overridden
     interface_name = NotImplemented
     interface_obj = NotImplemented
+    interface_prefix = NotImplemented
     alchemy: "Alchemy" = NotImplemented
 
     async def reply(self, text: str):

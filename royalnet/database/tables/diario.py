@@ -7,24 +7,56 @@ from sqlalchemy import Column, \
                        ForeignKey, \
                        String
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 from .royals import Royal
 
 
 class Diario:
     __tablename__ = "diario"
 
-    diario_id = Column(Integer, primary_key=True)
-    creator_id = Column(Integer, ForeignKey("royals.uid"), nullable=False)
-    quoted_account_id = Column(Integer, ForeignKey("royals.uid"))
-    quoted = Column(String)
-    text = Column(Text)
-    context = Column(Text)
-    timestamp = Column(DateTime, nullable=False)
-    media_url = Column(String)
-    spoiler = Column(Boolean, default=False)
+    @declared_attr
+    def diario_id(self):
+        return Column(Integer, primary_key=True)
 
-    creator = relationship("Royal", foreign_keys=creator_id, backref="diario_created")
-    quoted_account = relationship("Royal", foreign_keys=quoted_account_id, backref="diario_quoted")
+    @declared_attr
+    def creator_id(self):
+        return Column(Integer, ForeignKey("royals.uid"), nullable=False)
+
+    @declared_attr
+    def quoted_account_id(self):
+        return Column(Integer, ForeignKey("royals.uid"))
+
+    @declared_attr
+    def quoted(self):
+        return Column(String)
+
+    @declared_attr
+    def text(self):
+        return Column(Text)
+
+    @declared_attr
+    def context(self):
+        return Column(Text)
+
+    @declared_attr
+    def timestamp(self):
+        return Column(DateTime, nullable=False)
+
+    @declared_attr
+    def media_url(self):
+        return Column(String)
+
+    @declared_attr
+    def spoiler(self):
+        return Column(Boolean, default=False)
+
+    @declared_attr
+    def creator(self):
+        return relationship("Royal", foreign_keys=self.creator_id, backref="diario_created")
+
+    @declared_attr
+    def quoted_account(self):
+        return relationship("Royal", foreign_keys=self.quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
         return f"<Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}>"
