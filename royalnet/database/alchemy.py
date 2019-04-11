@@ -25,6 +25,7 @@ class Alchemy:
                 self.__getattribute__(name)
             except AttributeError:
                 # Actually the intended result
+                # TODO: here is the problem!
                 self.__setattr__(name, type(name, (self.Base,), cdj(table)))
             else:
                 raise NameError(f"{name} is a reserved name and can't be used as a table name")
