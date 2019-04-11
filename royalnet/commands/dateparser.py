@@ -18,4 +18,4 @@ class DateparserCommand(Command):
         if date is None:
             await call.reply("🕕 La data inserita non è valida.")
             return
-        await call.reply(f"🕐 La data inserita è {date.isoformat()}")
+        await call.reply(f"🕐 La data inserita è {date.strftime('%Y-%m-%d %H:%M:%S')}")
