@@ -13,10 +13,9 @@ class Telegram:
 
     royal_id = Column(Integer, ForeignKey("royals.uid"))
     tg_id = Column(BigInteger, primary_key=True)
-    tg_first_name = Column(String)
-    tg_last_name = Column(String)
-    tg_username = Column(String)
-    tg_avatar = Column(LargeBinary)
+    first_name = Column(String)
+    last_name = Column(String)
+    username = Column(String)
 
     royal = relationship("Royal", backref="telegram")
 
@@ -27,9 +26,9 @@ class Telegram:
         return f"[c]telegram:{self.mention()}[/c]"
 
     def mention(self) -> str:
-        if self.tg_username is not None:
-            return f"@{self.tg_username}"
-        elif self.tg_last_name is not None:
-            return f"{self.tg_first_name} {self.tg_last_name}"
+        if self.username is not None:
+            return f"@{self.username}"
+        elif self.last_name is not None:
+            return f"{self.first_name} {self.last_name}"
         else:
-            return self.tg_first_name
+            return self.first_name
