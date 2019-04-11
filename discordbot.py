@@ -22,7 +22,7 @@ import logging
 import datetime
 import sqlalchemy.exc
 import coloredlogs
-import errors
+from utils import errors
 import math
 import enum
 import requests
