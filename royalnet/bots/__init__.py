@@ -1,4 +1,4 @@
 from .telegram import TelegramBot
 from .discord import DiscordBot
 
-__all__ = ["TelegramBot"]
+__all__ = ["TelegramBot", "DiscordBot"]
