@@ -16,11 +16,9 @@ import typing
 import os
 import asyncio
 import configparser
-import async_timeout
 import raven
 import logging
 import datetime
-import sqlalchemy.exc
 import coloredlogs
 from utils import errors
 import math
@@ -646,9 +644,6 @@ class RoyalDiscordBot(discord.Client):
         await self.change_presence(status=discord.Status.online, activity=None)
         logger.info("Bot is ready!")
         # Start the bot tasks
-        asyncio.ensure_future(self.queue_predownload_videos())
-        asyncio.ensure_future(self.queue_play_next_video())
-        asyncio.ensure_future(self.inactivity_countdown())
         asyncio.ensure_future(self.activity_task())
 
     async def on_message(self, message: discord.Message):
@@ -795,123 +790,6 @@ class RoyalDiscordBot(discord.Client):
                                              params=data)
                 connection.send("success")
 
-    async def queue_predownload_videos(self):
-        while True:
-            await asyncio.sleep(1)
-            # Might have some problems with del
-            not_ready_videos = await self.video_queue.async_not_ready_videos(self.max_videos_to_predownload)
-            for index, video in enumerate(not_ready_videos):
-                try:
-                    with async_timeout.timeout(self.max_video_ready_time):
-                        await loop.run_in_executor(executor, video.ready_up)
-                except asyncio.TimeoutError:
-                    logger.warning(
-                        f"Video {repr(video)} took more than {self.max_video_ready_time} to download, skipping...")
-                    await self.main_channel.send(
-                        f"⚠️ La preparazione di {video} ha richiesto più di {self.max_video_ready_time} secondi,"
-                        f" pertanto è stato rimosso dalla coda.")
-                    del self.video_queue.list[index]
-                    continue
-                except Exception as e:
-                    self.sentry.user_context({
-                        "discord": {
-                            "discord_id": video.enqueuer.id,
-                            "name": video.enqueuer.name,
-                            "discriminator": video.enqueuer.discriminator
-                        }
-                    })
-                    self.sentry.extra_context({
-                        "video": video.plain_text()
-                    })
-                    self.sentry.captureException()
-                    logger.error(f"Uncaught video download error: {e}")
-                    if self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS or \
-                       self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE or \
-                       self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
-                        await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
-                                                     f"{str(video)}, quindi la coda è stata svuotata.\n\n"
-                                                     f"```python\n"
-                                                     f"{str(e.args)}"
-                                                     f"```")
-                        self.video_queue.clear()
-                    else:
-                        await self.main_channel.send(f"⚠️ E' stato incontrato un errore durante il download di "
-                                                     f"{str(video)}, quindi è stato rimosso dalla coda.\n\n"
-                                                     f"```python\n"
-                                                     f"{str(e.args)}"
-                                                     f"```")
-                        del self.video_queue[index]
-                    continue
-
-    async def queue_play_next_video(self):
-        await self.wait_until_ready()
-        while True:
-            await asyncio.sleep(1)
-            for voice_client in self.voice_clients:
-                # Do not add play videos if something else is playing!
-                if not voice_client.is_connected():
-                    continue
-                # Find the "now_playing" video
-                try:
-                    current_video = await self.video_queue.async_getitem(0)
-                except IndexError:
-                    continue
-                # Try to generate an AudioSource
-                try:
-                    audio_source = current_video.make_audio_source()
-                except errors.VideoIsNotReady:
-                    continue
-                # Start playing the AudioSource
-                logger.info(f"Started playing {current_video.plain_text()}.")
-                voice_client.play(audio_source)
-                # Update the voice_client activity
-                activity = discord.Activity(name=current_video.plain_text(),
-                                            type=discord.ActivityType.listening)
-                logger.debug("Updating bot presence...")
-                await self.change_presence(status=discord.Status.online, activity=activity)
-                # Record the played song in the database
-                if current_video.enqueuer is not None:
-                    logger.debug(f"Adding {current_video.plain_text()} to db.PlayedMusic...")
-                    try:
-                        session = db.Session()
-                        enqueuer = await loop.run_in_executor(executor, session.query(db.Discord)
-                                                              .filter_by(discord_id=current_video.enqueuer.id)
-                                                              .one_or_none)
-                        played_music = db.PlayedMusic(enqueuer=enqueuer,
-                                                      filename=current_video.database_text(),
-                                                      timestamp=datetime.datetime.now())
-                        session.add(played_music)
-                        await loop.run_in_executor(executor, session.commit)
-                        await loop.run_in_executor(executor, session.close)
-                    except sqlalchemy.exc.OperationalError:
-                        pass
-                # Send a message in chat
-                for key in self.song_text_easter_eggs:
-                    if key in current_video.name.lower():
-                        await self.main_channel.send(
-                            self.song_text_easter_eggs[key].format(song=str(current_video)))
-                        break
-                else:
-                    await self.main_channel.send(
-                        f":arrow_forward: Ora in riproduzione: {str(current_video)}")
-                # Wait until the song is finished
-                while voice_client.is_playing() or voice_client.is_paused():
-                    await asyncio.sleep(1)
-                self.video_queue.advance_queue()
-
-    async def inactivity_countdown(self):
-        while True:
-            await asyncio.sleep(1)
-            if self.inactivity_timer > 0:
-                self.inactivity_timer -= 1
-                continue
-            for voice_client in self.voice_clients:
-                if voice_client.is_connected():
-                    logger.info("Disconnecting due to inactivity.")
-                    await voice_client.disconnect()
-                    await self.change_presence(status=discord.Status.online, activity=None)
-                    await self.main_channel.send("💤 Mi sono disconnesso dalla cv per inattività.")
-
     async def create_activityreport(self):
         logger.debug("Fetching Discord users...")
         discord_users = list(self.main_guild.members)
@@ -956,32 +834,6 @@ class RoyalDiscordBot(discord.Client):
             logger.debug(f"Waiting {self.activity_report_sample_time} seconds before the next record.")
             await asyncio.sleep(self.activity_report_sample_time)
 
-    async def add_video_from_url(self, url: str, index: typing.Optional[int] = None, enqueuer: discord.Member = None):
-        # Retrieve info
-        logger.debug(f"Retrieving info for {url}.")
-        async with self.main_channel.typing():
-            with youtube_dl.YoutubeDL({"quiet": True,
-                                       "ignoreerrors": True,
-                                       "simulate": True}) as ytdl:
-                info = await loop.run_in_executor(executor,
-                                                  functools.partial(ytdl.extract_info, url=url, download=False))
-            if info is None:
-                logger.debug(f"No video found at {url}.")
-                await self.main_channel.send(f"⚠️ Non è stato trovato nessun video all'URL `{url}`,"
-                                             f" pertanto non è stato aggiunto alla coda.")
-                return
-            if "entries" in info:
-                logger.debug(f"Playlist detected at {url}.")
-                for entry in info["entries"]:
-                    self.video_queue.add(YoutubeDLVideo(entry["webpage_url"],
-                                                        enqueuer=enqueuer,
-                                                        youtube_api_key=self.youtube_api_key), index)
-                return
-            logger.debug(f"Single video detected at {url}.")
-            self.video_queue.add(YoutubeDLVideo(url,
-                                                enqueuer=enqueuer,
-                                                youtube_api_key=self.youtube_api_key), index)
-
     # noinspection PyUnusedLocal
     @command
     async def null(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
@@ -1017,263 +869,65 @@ class RoyalDiscordBot(discord.Client):
     # noinspection PyUnusedLocal
     @command
     async def cmd_cv(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        """Summon the bot in the author's voice channel."""
-        if author is None:
-            await channel.send("⚠️ Questo comando richiede un autore.")
-            return
-        if author.voice is None:
-            await channel.send("⚠️ Non sei in nessun canale!")
-            return
-        if author.voice.channel == self.main_guild.afk_channel:
-            await channel.send("⚠️ Non posso connettermi al canale AFK!")
-            return
-        if author.voice.channel.bitrate < 64000:
-            await channel.send("ℹ️ Sei in un canale con un bitrate ridotto.\n"
-                               "L'utilizzo del bot in quel canale ignorerà il limite di bitrate e potrebbe causare lag"
-                               " o eccessivo consumo di dati.\n"
-                               "Se vuoi procedere comunque, scrivi `!yes`.")
-            try:
-                await self.wait_for("message", check=lambda m: m.content == "!yes", timeout=10.0)
-            except asyncio.TimeoutError:
-                return
-        # Check if there's already a connected client
-        for voice_client in self.voice_clients:
-            if voice_client.channel in self.main_guild.channels and voice_client.is_connected():
-                logger.info(f"Moving to {author.voice.channel.name}.")
-                await voice_client.move_to(author.voice.channel)
-                await channel.send(f"⤵️ Mi sono spostato in <#{author.voice.channel.id}>.")
-                break
-        else:
-            logger.info(f"Connecting to {author.voice.channel.name}.")
-            await author.voice.channel.connect()
-            await channel.send(f"⤵️ Mi sono connesso in <#{author.voice.channel.id}>.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_play(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if len(params) < 2:
-            await channel.send("⚠️ Non hai specificato una canzone da riprodurre!\n"
-                               "Sintassi: `!play <url|ricercayoutube|nomefile>`")
-            return
-        self.radio_messages_next_in -= 1
-        if self.radio_messages_next_in <= 0:
-            radio_message = random.sample(self.radio_messages, 1)[0]
-            # pycharm are you drunk
-            # noinspection PyAttributeOutsideInit
-            self.radio_messages_next_in = self.radio_messages_every
-            await self.add_video_from_url(radio_message)
-            await channel.send(f"📻 Aggiunto un messaggio radio, disattiva con `!radiomessages off`.")
-            logger.info(f"Radio message added to the queue.")
-        # Parse the parameter as URL
-        url = re.match(r"(?:https?://|ytsearch[0-9]*:|scsearch[0-9]*:).*", " ".join(params[1:]).strip("<>"))
-        if url is not None:
-            # This is a url
-            await self.add_video_from_url(url.group(0), enqueuer=author)
-            await channel.send(f"✅ Video aggiunto alla coda.")
-            logger.debug(f"Added {url} to the queue as URL.")
-            return
-        # Search the parameter on youtube
-        search = " ".join(params[1:])
-        # This is a search
-        await self.add_video_from_url(url=f"ytsearch:{search}", enqueuer=author)
-        await channel.send(f"✅ Video aggiunto alla coda.")
-        logger.debug(f"Added ytsearch:{search} to the queue.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_skip(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        for voice_client in self.voice_clients:
-            if voice_client.is_playing():
-                voice_client.stop()
-                await channel.send(f"⏩ Video saltato.")
-                logger.debug(f"A song was skipped.")
-                break
-        else:
-            await channel.send("⚠️ Non c'è nessun video in riproduzione.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_remove(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if len(self.video_queue) == 0:
-            await channel.send("⚠️ Non c'è nessun video in coda.")
-            return
-        if len(params) == 1:
-            index = len(self.video_queue) - 1
-        else:
-            try:
-                index = int(params[1]) - 1
-            except ValueError:
-                await channel.send("⚠️ Il numero inserito non è valido.\n"
-                                   "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-                return
-        if len(params) < 3:
-            if abs(index) >= len(self.video_queue):
-                await channel.send("⚠️ Il numero inserito non corrisponde a nessun video nella playlist.\n"
-                                   "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-                return
-            video = self.video_queue.pop(index)
-            await channel.send(f":regional_indicator_x: {str(video)} è stato rimosso dalla coda.")
-            logger.debug(f"Removed from queue: {video.plain_text()}")
-            return
-        try:
-            start = int(params[1]) - 1
-        except ValueError:
-            await channel.send("⚠️ Il numero iniziale inserito non è valido.\n"
-                               "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-            return
-        if start >= len(self.video_queue):
-            await channel.send("⚠️ Il numero iniziale inserito non corrisponde a nessun video nella"
-                               " playlist.\n"
-                               "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-            return
-        try:
-            end = int(params[2]) - 2
-        except ValueError:
-            await channel.send("⚠️ Il numero finale inserito non è valido.\n"
-                               "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-            return
-        if end >= len(self.video_queue):
-            await channel.send("⚠️ Il numero finale inserito non corrisponde a nessun video nella"
-                               " playlist.\n"
-                               "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-            return
-        if start > end:
-            await channel.send("⚠️ Il numero iniziale è maggiore del numero finale.\n"
-                               "Sintassi: `!remove [numerovideoiniziale] [numerovideofinale]`")
-            return
-        del self.video_queue[start:end]
-        await channel.send(f":regional_indicator_x: {end - start} video rimossi dalla coda.")
-        logger.debug(f"Removed from queue {end - start} videos.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     async def cmd_queue(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        msg = ""
-        if self.video_queue.loop_mode == LoopMode.NORMAL:
-            msg += "Modalità attuale: :arrow_right: **Nessuna ripetizione**\n"
-        elif self.video_queue.loop_mode == LoopMode.LOOP_QUEUE:
-            msg += "Modalità attuale: :repeat: **Ripeti intera coda**\n"
-        elif self.video_queue.loop_mode == LoopMode.LOOP_SINGLE:
-            msg += "Modalità attuale: :repeat_one: **Ripeti canzone singola**\n"
-        elif self.video_queue.loop_mode == LoopMode.FOLLOW_SUGGESTIONS:
-            msg += "Modalità attuale: :sparkles: **Continua con video suggeriti**\n"
-        elif self.video_queue.loop_mode == LoopMode.AUTO_SHUFFLE:
-            msg += "Modalità attuale: :twisted_rightwards_arrows: **Video casuale dalla coda**\n"
-        elif self.video_queue.loop_mode == LoopMode.LOOPING_SHUFFLE:
-            msg += "Modalità attuale: :arrows_counterclockwise: **Video casuali infiniti dalla coda**\n"
-        msg += "**Video in coda:**\n"
-        if len(self.video_queue) == 0:
-            msg += ":cloud: _nessuno_\n"
-        for index in range(11):
-            try:
-                video = await self.video_queue.async_getitem(index)
-            except IndexError:
-                break
-            msg += f"{number_emojis[index]} {str(video)}\n"
-        await channel.send(msg)
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_shuffle(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if len(self.video_queue) == 0:
-            await channel.send("⚠ Non ci sono video in coda!")
-            return
-        logger.info(f"The queue was shuffled by {author.name}#{author.discriminator}.")
-        self.video_queue.shuffle()
-        await channel.send("🔀 Shuffle completo!")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_clear(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if len(self.video_queue) == 0:
-            await channel.send("⚠ Non ci sono video in coda!")
-            return
-        logger.info(f"The queue was cleared by {author.name}#{author.discriminator}.")
-        self.video_queue.clear()
-        await channel.send(":regional_indicator_x: Tutti i video in coda rimossi.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     async def cmd_radiomessages(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if not self.radio_messages:
-            await channel.send("⚠ I messaggi radio sono stati disabilitati dall'amministratore del bot.")
-            return
-        if len(params) < 2:
-            await channel.send("⚠ Sintassi del comando non valida.\n"
-                               "Sintassi: `!radiomessages <on|off>`")
-        else:
-            if params[1].lower() == "on":
-                self.radio_messages_next_in = self.radio_messages_every
-            elif params[1].lower() == "off":
-                # noinspection PyAttributeOutsideInit wtf
-                self.radio_messages_next_in = math.inf
-            else:
-                await channel.send("⚠ Sintassi del comando non valida.\n"
-                                   "Sintassi: `!radiomessages <on|off>`")
-                return
-        logger.info(f"Radio messages status to {'enabled' if self.radio_messages_next_in < math.inf else 'disabled'}.")
-        await channel.send(
-            f"📻 Messaggi radio **{'attivati' if self.radio_messages_next_in < math.inf else 'disattivati'}**.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_pause(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        for voice_client in self.voice_clients:
-            if voice_client.is_playing():
-                voice_client.pause()
-                logger.debug(f"The audio stream was paused.")
-                await channel.send(f"⏸ Riproduzione messa in pausa.\n"
-                                   f"Riprendi con `!resume`.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_resume(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        for voice_client in self.voice_clients:
-            if voice_client.is_paused():
-                voice_client.resume()
-                logger.debug(f"The audio stream was resumed.")
-                await channel.send(f"⏯ Riproduzione ripresa.")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
     # noinspection PyUnusedLocal
     @command
     @requires_connected_voice_client
     async def cmd_mode(self, channel: discord.TextChannel, author: discord.Member, params: typing.List[str]):
-        if len(params) < 2:
-            await channel.send("⚠ Sintassi del comando non valida.\n"
-                               "Sintassi: `!mode <normal|repeat|loop|random|endless>`")
-            return
-        if params[1] == "normal":
-            self.video_queue.loop_mode = LoopMode.NORMAL
-            await channel.send("➡️ Modalità di coda impostata: **Nessuna ripetizione**")
-        elif params[1] == "repeat":
-            self.video_queue.loop_mode = LoopMode.LOOP_SINGLE
-            await channel.send("🔂 Modalità di coda impostata: **Ripeti canzone singola**")
-        elif params[1] == "loop":
-            self.video_queue.loop_mode = LoopMode.LOOP_QUEUE
-            await channel.send("🔁 Modalità di coda impostata: **Ripeti intera coda**")
-        elif params[1] == "suggest":
-            if self.youtube_api_key is None:
-                await channel.send("⚠️ La modalità **Continua con video suggeriti**"
-                                   " non è configurata correttamente ed è stata disattivata.")
-                return
-            self.video_queue.loop_mode = LoopMode.FOLLOW_SUGGESTIONS
-            await channel.send("✨ Modalità di coda impostata: **Continua con video suggeriti**")
-        elif params[1] == "random":
-            self.video_queue.loop_mode = LoopMode.AUTO_SHUFFLE
-            await channel.send("🔀 Modalità di coda impostata: **Video casuale dalla coda**")
-        elif params[1] == "endless":
-            self.video_queue.loop_mode = LoopMode.LOOPING_SHUFFLE
-            await channel.send("🔄 Modalità di coda impostata: **Video casuali infiniti dalla coda**")
-        else:
-            await channel.send("⚠️ Sintassi del comando non valida.\n"
-                               "Sintassi: `!loop <off|loop1|loopall|suggest|shuffle|loopshuffle>`")
+        await channel.send("⚠️ discord.py è stato aggiornato e non è più compatibile con questa versione del bot. La musica sarà disponibile fino al release di Royalnet Unity...")
 
 
 def process(users_connection=None):
