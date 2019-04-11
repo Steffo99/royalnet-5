@@ -1,5 +1,6 @@
 import typing
 from telegram import Update, User
+from discord import Message, Member
 from ..utils import Command, Call, asyncify, UnsupportedError
 from ..database.tables import Royal, Telegram
 
@@ -35,9 +36,9 @@ class SyncCommand(Command):
             # Avatar is WIP
             telegram = call.alchemy.Telegram(royal=royal,
                                              tg_id=user.id,
-                                             tg_first_name=user.first_name,
-                                             tg_last_name=user.last_name,
-                                             tg_username=user.username)
+                                             first_name=user.first_name,
+                                             last_name=user.last_name,
+                                             username=user.username)
             call.session.add(telegram)
             await call.reply(f"✅ Connessione completata: {str(royal)} ⬌ {str(telegram)}")
         else:
