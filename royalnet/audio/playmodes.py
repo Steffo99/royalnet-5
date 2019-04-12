@@ -51,6 +51,9 @@ class Pool(PlayMode):
 
     async def next(self):
         while True:
+            if self.pool:
+                yield None
+                continue
             self._pool_copy = self.pool.copy()
             random.shuffle(self._pool_copy)
             while self._pool_copy:
