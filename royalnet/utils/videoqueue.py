@@ -1,0 +1,2 @@
+class RoyalQueue:
+    raise NotImplementedError()
