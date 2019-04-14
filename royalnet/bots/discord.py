@@ -4,6 +4,7 @@ import typing
 import logging as _logging
 import sys
 from ..commands import NullCommand
+from ..commands.summon import SummonMessage, SummonSuccessful, SummonError
 from ..utils import asyncify, Call, Command, UnregisteredError
 from ..network import RoyalnetLink, Message
 from ..database import Alchemy, relationshiplinkchain
@@ -11,9 +12,9 @@ from ..database import Alchemy, relationshiplinkchain
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
-
-async def todo(message: Message):
-    log.warning(f"Skipped {message} because handling isn't supported yet.")
+# TODO: Load the opus library
+if not discord.opus.is_loaded():
+    log.error("Opus is not loaded. Weird behaviour might emerge.")
 
 
 class DiscordBot:
@@ -31,7 +32,6 @@ class DiscordBot:
         self.token = token
         self.missing_command = missing_command
         self.error_command = error_command
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", todo)
         # Generate commands
         self.commands = {}
         required_tables = set()
@@ -44,6 +44,25 @@ class DiscordBot:
         self.identity_table = self.alchemy.__getattribute__(identity_table.__name__)
         self.identity_column = self.identity_table.__getattribute__(self.identity_table, identity_column_name)
         self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
+
+        async def network_handler(message: Message) -> Message:
+            if isinstance(message, SummonMessage):
+                channels: typing.List[discord.abc.GuildChannel] = self.bot.get_all_channels()
+                matching_channels: typing.List[discord.VoiceChannel] = []
+                for channel in channels:
+                    if isinstance(channel, discord.VoiceChannel):
+                        if channel.name == message.channel_name:
+                            matching_channels.append(channel)
+                if len(matching_channels) == 0:
+                    return SummonError("No channels with a matching name found")
+                elif len(matching_channels) > 1:
+                    return SummonError("Multiple channels with a matching name found")
+                matching_channel = matching_channels[0]
+                await matching_channel.connect()
+                return SummonSuccessful()
+
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", network_handler)
+        loop.create_task(self.network.run())
 
         # noinspection PyMethodParameters
         class DiscordCall(Call):

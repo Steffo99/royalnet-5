@@ -34,6 +34,7 @@ class TelegramBot:
         self.missing_command = missing_command
         self.error_command = error_command
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
+        loop.create_task(self.network.run())
         # Generate commands
         self.commands = {}
         required_tables = set()

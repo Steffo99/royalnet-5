@@ -16,8 +16,8 @@ log = _logging.getLogger(__name__)
 class ConnectedClient:
     def __init__(self, socket: websockets.WebSocketServerProtocol):
         self.socket: websockets.WebSocketServerProtocol = socket
-        self.nid: str = None
-        self.link_type: str = None
+        self.nid: typing.Optional[str] = None
+        self.link_type: typing.Optional[str] = None
         self.connection_datetime: datetime.datetime = datetime.datetime.now()
 
     @property
