@@ -6,8 +6,8 @@ from ..audio import YtdlInfo
 class VideoinfoCommand(Command):
 
     command_name = "videoinfo"
-    command_description = "Scarica e visualizza le informazioni di un video."
-    command_syntax = ""
+    command_description = "Visualizza le informazioni di un video."
+    command_syntax = "(url)"
 
     @classmethod
     async def common(cls, call: Call):

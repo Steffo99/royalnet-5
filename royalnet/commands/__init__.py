@@ -14,8 +14,9 @@ from .kvactive import KvactiveCommand
 from .kv import KvCommand
 from .kvroll import KvrollCommand
 from .videoinfo import VideoinfoCommand
+from .summon import SummonCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
-           "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand"]
+           "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand"]

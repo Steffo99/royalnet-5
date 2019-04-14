@@ -52,7 +52,7 @@ def requires_connection(func):
 def requires_identification(func):
     @functools.wraps(func)
     async def new_func(self, *args, **kwargs):
-        await self._identify_event.wait()
+        await self.identify_event.wait()
         return await func(self, *args, **kwargs)
     return new_func
 
