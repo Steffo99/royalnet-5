@@ -11,10 +11,14 @@ class DownloaderError(Exception):
 
 
 class YtdlFile:
-    """A wrapper around a youtube_dl downloaded file. Should be created by the YtdlInfo class!"""
-    def __init__(self, info: "YtdlInfo", outtmpl, extra_progress_hooks=None, **ytdl_args):
+    """A wrapper around a youtube_dl downloaded file."""
+    def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args):
+        if progress_hooks is None:
+            progress_hooks = []
         self.info: "YtdlInfo" = info
         self.filename: str
+        self.downloaded_bytes: typing.Optional[int]
+        self.elapsed: typing.Optional[float]
         # Download the file
         ytdl = YoutubeDL({
             "logger": log,  # Log messages to a logging.Logger instance.
@@ -22,10 +26,10 @@ class YtdlFile:
             "noplaylist": True,  # Download single video instead of a playlist if in doubt.
             "no_warnings": True,  # Do not print out anything for warnings.
             "outtmpl": outtmpl,
-            "progress_hooks": [self._progress_hook, *extra_progress_hooks],
+            "progress_hooks": [self._progress_hook, *progress_hooks],
             **ytdl_args
         })
-        ytdl.download(self.info.webpage_url)
+        ytdl.download([self.info.webpage_url])
 
     def _progress_hook(self, data: dict):
         # Check the status
@@ -37,6 +41,13 @@ class YtdlFile:
         if status == "finished":
             # Filename is always present
             self.filename = data["filename"]
+            self.downloaded_bytes = data.get("downloaded_bytes")
+            self.elapsed = data.get("elapsed")
+
+    @staticmethod
+    def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> typing.List["YtdlFile"]:
+        info_list = YtdlInfo.create_from_url(url)
+        return [info.download(outtmpl, progress_hooks, **ytdl_args) for info in info_list]
 
 
 class YtdlInfo:
@@ -116,5 +127,5 @@ class YtdlInfo:
             return [YtdlInfo(second_info) for second_info in first_info["entries"]]
         return [YtdlInfo(first_info)]
 
-    def download(self, outtmpl, downloader_class, **ytdl_args) -> YtdlFile:
-        return YtdlFile(self, outtmpl)
+    def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> YtdlFile:
+        return YtdlFile(self, outtmpl, progress_hooks=progress_hooks)
