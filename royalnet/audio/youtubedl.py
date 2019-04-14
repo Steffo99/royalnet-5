@@ -129,3 +129,17 @@ class YtdlInfo:
 
     def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> YtdlFile:
         return YtdlFile(self, outtmpl, progress_hooks=progress_hooks)
+
+    def __repr__(self):
+        if self.title:
+            return f"<YtdlInfo of {self.title}>"
+        if self.webpage_url:
+            return f"<YtdlInfo for {self.webpage_url}>"
+        return f"<YtdlInfo id={self.id} ...>"
+
+    def __str__(self):
+        if self.title:
+            return self.title
+        if self.webpage_url:
+            return self.webpage_url
+        return self.id
