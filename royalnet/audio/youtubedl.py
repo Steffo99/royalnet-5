@@ -10,6 +10,10 @@ class DownloaderError(Exception):
     pass
 
 
+class InterruptDownload(DownloaderError):
+    """Raised from a progress_hook to interrupt the video download."""
+
+
 class YtdlFile:
     """A wrapper around a youtube_dl downloaded file."""
     def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args):
@@ -43,6 +47,9 @@ class YtdlFile:
             self.filename = data["filename"]
             self.downloaded_bytes = data.get("downloaded_bytes")
             self.elapsed = data.get("elapsed")
+
+    def _stop_download(self):
+        raise InterruptDownload()
 
     @staticmethod
     def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> typing.List["YtdlFile"]:
