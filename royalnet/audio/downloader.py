@@ -1,12 +1,42 @@
 import typing
 import logging as _logging
 from youtube_dl import YoutubeDL
+from contextlib import contextmanager
 
 log = _logging.getLogger(__name__)
 
 
 class DownloaderError(Exception):
     pass
+
+
+class YtdlFile:
+    """A wrapper around a youtube_dl downloaded file. Should be created by the YtdlInfo class!"""
+    def __init__(self, info: "YtdlInfo", outtmpl, extra_progress_hooks=None, **ytdl_args):
+        self.info: "YtdlInfo" = info
+        self.filename: str
+        # Download the file
+        ytdl = YoutubeDL({
+            "logger": log,  # Log messages to a logging.Logger instance.
+            "quiet": True,  # Do not print messages to stdout.
+            "noplaylist": True,  # Download single video instead of a playlist if in doubt.
+            "no_warnings": True,  # Do not print out anything for warnings.
+            "outtmpl": outtmpl,
+            "progress_hooks": [self._progress_hook, *extra_progress_hooks],
+            **ytdl_args
+        })
+        ytdl.download(self.info.webpage_url)
+
+    def _progress_hook(self, data: dict):
+        # Check the status
+        status = data.get("status")
+        # Ignore unknown values
+        if status not in ["downloading", "error", "finished"]:
+            return
+        # If the download is finished, set the filename
+        if status == "finished":
+            # Filename is always present
+            self.filename = data["filename"]
 
 
 class YtdlInfo:
@@ -71,16 +101,20 @@ class YtdlInfo:
         self.ext: typing.Optional[str] = info.get("ext")
 
     @staticmethod
-    def create_from_url(url) -> typing.List["YtdlInfo"]:
+    def create_from_url(url, **ytdl_args) -> typing.List["YtdlInfo"]:
         # So many redundant options!
         ytdl = YoutubeDL({
             "logger": log,  # Log messages to a logging.Logger instance.
             "quiet": True,  # Do not print messages to stdout.
             "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-            "no_warnings": True  # Do not print out anything for warnings."
+            "no_warnings": True,  # Do not print out anything for warnings.
+            **ytdl_args
         })
         first_info = ytdl.extract_info(url=url, download=False)
         # If it is a playlist, create multiple videos!
         if "entries" in first_info:
             return [YtdlInfo(second_info) for second_info in first_info["entries"]]
         return [YtdlInfo(first_info)]
+
+    def download(self, outtmpl, downloader_class, **ytdl_args) -> YtdlFile:
+        return YtdlFile(self, outtmpl)
