@@ -25,6 +25,9 @@ class VideoinfoCommand(Command):
                     continue
                 if key == "requested_formats":
                     continue
+                # Skip subtitles
+                if key == "subtitles":
+                    continue
                 # Skip empty keys
                 if info_dict[key] is None:
                     continue
