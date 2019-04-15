@@ -80,6 +80,7 @@ class RoyalnetServer:
                 # TODO: do stuff
                 pass
             # Otherwise, route the package to its destination
+            # noinspection PyAsyncCall
             loop.create_task(self.route_package(package))
 
     def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
@@ -103,9 +104,15 @@ class RoyalnetServer:
         destinations = self.find_destination(package)
         log.debug(f"Routing package: {package} -> {destinations}")
         for destination in destinations:
-            specific_package = Package(package.data, destination.nid, package.source, conversation_id=package.conversation_id)
+            specific_package = Package(package.data, destination.nid, package.source,
+                                       source_conv_id=package.source_conv_id,
+                                       destination_conv_id=package.destination_conv_id)
             await destination.send(specific_package)
+
+    async def serve(self):
+        await websockets.serve(self.listener, host=self.address, port=self.port)
 
     async def run(self):
         log.debug(f"Running main server loop for __master__ on ws://{self.address}:{self.port}")
-        await websockets.serve(self.listener, host=self.address, port=self.port)
+        # noinspection PyAsyncCall
+        loop.create_task(self.serve())
