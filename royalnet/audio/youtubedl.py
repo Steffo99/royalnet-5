@@ -1,5 +1,6 @@
 import typing
 import logging as _logging
+import os
 from youtube_dl import YoutubeDL
 from contextlib import contextmanager
 
@@ -21,32 +22,21 @@ class YtdlFile:
             progress_hooks = []
         self.info: "YtdlInfo" = info
         self.filename: str
-        self.downloaded_bytes: typing.Optional[int]
-        self.elapsed: typing.Optional[float]
-        # Download the file
         ytdl = YoutubeDL({
             "logger": log,  # Log messages to a logging.Logger instance.
             "quiet": True,  # Do not print messages to stdout.
             "noplaylist": True,  # Download single video instead of a playlist if in doubt.
             "no_warnings": True,  # Do not print out anything for warnings.
             "outtmpl": outtmpl,
-            "progress_hooks": [self._progress_hook, *progress_hooks],
+            "progress_hooks": progress_hooks,
             **ytdl_args
         })
+        # Find the file name
+        self.filename = ytdl.prepare_filename(self.info.__dict__)
+        # Download the file
         ytdl.download([self.info.webpage_url])
-
-    def _progress_hook(self, data: dict):
-        # Check the status
-        status = data.get("status")
-        # Ignore unknown values
-        if status not in ["downloading", "error", "finished"]:
-            return
-        # If the download is finished, set the filename
-        if status == "finished":
-            # Filename is always present
-            self.filename = data["filename"]
-            self.downloaded_bytes = data.get("downloaded_bytes")
-            self.elapsed = data.get("elapsed")
+        # Final checks
+        assert os.path.exists(self.filename)
 
     def _stop_download(self):
         raise InterruptDownload()
@@ -55,6 +45,10 @@ class YtdlFile:
     def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> typing.List["YtdlFile"]:
         info_list = YtdlInfo.create_from_url(url)
         return [info.download(outtmpl, progress_hooks, **ytdl_args) for info in info_list]
+
+    def delete_file(self):
+        # TODO: _might_ be unsafe, test this
+        os.remove(self.filename)
 
 
 class YtdlInfo:
@@ -150,3 +144,7 @@ class YtdlInfo:
         if self.webpage_url:
             return self.webpage_url
         return self.id
+
+
+if __name__ == "__main__":
+    f = YtdlFile.create_from_url("https://www.youtube.com/watch?v=BaW_jenozKc&v=UxxajLWwzqY", "./lovely.mp4")
