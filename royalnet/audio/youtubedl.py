@@ -39,13 +39,13 @@ class YtdlFile:
         # Final checks
         assert os.path.exists(self.video_filename)
 
+    @staticmethod
+    def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> typing.List["YtdlFile"]:
+        info_list = YtdlInfo.create_from_url(url)
+        return [info.download(outtmpl, **ytdl_args) for info in info_list]
+
     def _stop_download(self):
         raise InterruptDownload()
-
-    @staticmethod
-    def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> typing.List["YtdlFile"]:
-        info_list = YtdlInfo.create_from_url(url)
-        return [info.download(outtmpl, progress_hooks, **ytdl_args) for info in info_list]
 
     def delete_video_file(self):
         # TODO: _might_ be unsafe, test this
