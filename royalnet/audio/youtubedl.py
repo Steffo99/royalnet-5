@@ -16,27 +16,28 @@ class InterruptDownload(DownloaderError):
 
 
 class YtdlFile:
+    ytdl_args = {
+        "logger": log,  # Log messages to a logging.Logger instance.
+        "quiet": True,  # Do not print messages to stdout.
+        "noplaylist": True,  # Download single video instead of a playlist if in doubt.
+        "no_warnings": True,  # Do not print out anything for warnings.
+    }
+
     """A wrapper around a youtube_dl downloaded file."""
-    def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args):
-        if progress_hooks is None:
-            progress_hooks = []
+    def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args):
         self.info: "YtdlInfo" = info
-        self.filename: str
-        ytdl = YoutubeDL({
-            "logger": log,  # Log messages to a logging.Logger instance.
-            "quiet": True,  # Do not print messages to stdout.
-            "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-            "no_warnings": True,  # Do not print out anything for warnings.
-            "outtmpl": outtmpl,
-            "progress_hooks": progress_hooks,
-            **ytdl_args
-        })
+        self.video_filename: str
+        # Create a local args copy
+        ytdl_args["outtmpl"] = outtmpl
+        self.ytdl_args = {**self.ytdl_args, **ytdl_args}
+        # Create the ytdl
+        ytdl = YoutubeDL(ytdl_args)
         # Find the file name
-        self.filename = ytdl.prepare_filename(self.info.__dict__)
+        self.video_filename = ytdl.prepare_filename(self.info.__dict__)
         # Download the file
         ytdl.download([self.info.webpage_url])
         # Final checks
-        assert os.path.exists(self.filename)
+        assert os.path.exists(self.video_filename)
 
     def _stop_download(self):
         raise InterruptDownload()
@@ -46,9 +47,9 @@ class YtdlFile:
         info_list = YtdlInfo.create_from_url(url)
         return [info.download(outtmpl, progress_hooks, **ytdl_args) for info in info_list]
 
-    def delete_file(self):
+    def delete_video_file(self):
         # TODO: _might_ be unsafe, test this
-        os.remove(self.filename)
+        os.remove(self.video_filename)
 
 
 class YtdlInfo:
@@ -128,8 +129,8 @@ class YtdlInfo:
             return [YtdlInfo(second_info) for second_info in first_info["entries"]]
         return [YtdlInfo(first_info)]
 
-    def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", progress_hooks=None, **ytdl_args) -> YtdlFile:
-        return YtdlFile(self, outtmpl, progress_hooks=progress_hooks)
+    def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> YtdlFile:
+        return YtdlFile(self, outtmpl)
 
     def __repr__(self):
         if self.title:
