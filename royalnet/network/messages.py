@@ -7,17 +7,17 @@ class IdentifySuccessfulMessage(Message):
     pass
 
 
-class ErrorMessage(Message):
+class ServerErrorMessage(Message):
     def __init__(self, reason):
         super().__init__()
         self.reason = reason
 
 
-class InvalidSecretEM(ErrorMessage):
+class InvalidSecretEM(ServerErrorMessage):
     pass
 
 
-class InvalidPackageEM(ErrorMessage):
+class InvalidPackageEM(ServerErrorMessage):
     pass
 
 
