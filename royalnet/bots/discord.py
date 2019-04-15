@@ -5,9 +5,11 @@ import logging as _logging
 import sys
 from ..commands import NullCommand
 from ..commands.summon import SummonMessage, SummonSuccessful, SummonError
+from ..commands.play import PlayMessage, PlaySuccessful, PlayError
 from ..utils import asyncify, Call, Command, UnregisteredError
 from ..network import RoyalnetLink, Message
 from ..database import Alchemy, relationshiplinkchain
+from ..audio import RoyalAudioFile
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -45,23 +47,7 @@ class DiscordBot:
         self.identity_column = self.identity_table.__getattribute__(self.identity_table, identity_column_name)
         self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
 
-        async def network_handler(message: Message) -> Message:
-            if isinstance(message, SummonMessage):
-                channels: typing.List[discord.abc.GuildChannel] = self.bot.get_all_channels()
-                matching_channels: typing.List[discord.VoiceChannel] = []
-                for channel in channels:
-                    if isinstance(channel, discord.VoiceChannel):
-                        if channel.name == message.channel_name:
-                            matching_channels.append(channel)
-                if len(matching_channels) == 0:
-                    return SummonError("No channels with a matching name found")
-                elif len(matching_channels) > 1:
-                    return SummonError("Multiple channels with a matching name found")
-                matching_channel = matching_channels[0]
-                await self.bot.vc_connect_or_move(matching_channel)
-                return SummonSuccessful()
-
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", network_handler)
+        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", self.network_handler)
         loop.create_task(self.network.run())
 
         # noinspection PyMethodParameters
@@ -145,6 +131,39 @@ class DiscordBot:
 
         self.DiscordClient = DiscordClient
         self.bot = self.DiscordClient()
+
+    async def network_handler(self, message: Message) -> Message:
+        if isinstance(message, SummonMessage):
+            return await self.nh_summon(message)
+        elif isinstance(message, PlayMessage):
+            return await self.nh_play(message)
+
+    async def nh_summon(self, message: SummonMessage):
+        channels: typing.List[discord.abc.GuildChannel] = self.bot.get_all_channels()
+        matching_channels: typing.List[discord.VoiceChannel] = []
+        for channel in channels:
+            if isinstance(channel, discord.VoiceChannel):
+                if channel.name == message.channel_name:
+                    matching_channels.append(channel)
+        if len(matching_channels) == 0:
+            return SummonError("No channels with a matching name found")
+        elif len(matching_channels) > 1:
+            return SummonError("Multiple channels with a matching name found")
+        matching_channel = matching_channels[0]
+        await self.bot.vc_connect_or_move(matching_channel)
+        return SummonSuccessful()
+
+    async def nh_play(self, message: PlayMessage):
+        # TODO: actually do what's intended to do
+        # Download the audio
+        file = await asyncify(RoyalAudioFile.create_from_url, message.url)
+        # Get the audio source
+        audio_source = file[0].as_audio_source()
+        # Play the audio source
+        for voice_client in self.bot.voice_clients:
+            voice_client: discord.VoiceClient
+            voice_client.play(audio_source)
+        return PlaySuccessful()
 
     async def run(self):
         await self.bot.login(self.token)
