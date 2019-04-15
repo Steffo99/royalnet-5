@@ -130,6 +130,7 @@ class TelegramBot:
             # Skip inexistent commands
             command = self.missing_command
         # Call the command
+        # noinspection PyBroadException
         try:
             return await self.TelegramCall(message.chat, command, parameters, log,
                                            update=update).run()

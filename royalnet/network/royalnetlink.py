@@ -113,7 +113,7 @@ class RoyalnetLink:
     async def request(self, message, destination):
         package = Package(message, destination, self.nid)
         request = PendingRequest()
-        self._pending_requests[package.conversation_id] = request
+        self._pending_requests[package.source_conv_id] = request
         await self.send(package)
         log.debug(f"Sent request: {message} -> {destination}")
         await request.event.wait()
@@ -132,15 +132,15 @@ class RoyalnetLink:
                 await self.identify()
             package: Package = await self.receive()
             # Package is a response
-            if package.conversation_id in self._pending_requests:
-                request = self._pending_requests[package.conversation_id]
+            if package.destination_conv_id in self._pending_requests:
+                request = self._pending_requests[package.destination_conv_id]
                 request.set(package.data)
                 continue
             # Package is a request
             assert isinstance(package, Package)
-            log.debug(f"Received request {package.conversation_id}: {package}")
+            log.debug(f"Received request {package.source_conv_id}: {package}")
             response = await self.request_handler(package.data)
             if response is not None:
                 response_package: Package = package.reply(response)
                 await self.send(response_package)
-                log.debug(f"Replied to request {response_package.conversation_id}: {response_package}")
+                log.debug(f"Replied to request {response_package.source_conv_id}: {response_package}")
