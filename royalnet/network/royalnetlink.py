@@ -5,7 +5,7 @@ import functools
 import typing
 import pickle
 import logging as _logging
-from .messages import Message, ErrorMessage
+from .messages import Message, ServerErrorMessage
 from .packages import Package
 
 loop = asyncio.get_event_loop()
@@ -21,9 +21,9 @@ class NotIdentifiedError(Exception):
 
 
 class NetworkError(Exception):
-    def __init__(self, error_msg: ErrorMessage, *args):
+    def __init__(self, error_msg: ServerErrorMessage, *args):
         super().__init__(*args)
-        self.error_msg: ErrorMessage = error_msg
+        self.error_msg: ServerErrorMessage = error_msg
 
 
 class PendingRequest:
@@ -98,7 +98,7 @@ class RoyalnetLink:
         await self.websocket.send(f"Identify {self.nid}:{self.link_type}:{self.secret}")
         response_package = await self.receive()
         response = response_package.data
-        if isinstance(response, ErrorMessage):
+        if isinstance(response, ServerErrorMessage):
             raise NetworkError(response, "Server returned error while identifying self")
         self.identify_event.set()
         log.info(f"Identified successfully!")
@@ -119,7 +119,7 @@ class RoyalnetLink:
         await request.event.wait()
         result: Message = request.data
         log.debug(f"Received response: {request} -> {result}")
-        if isinstance(result, ErrorMessage):
+        if isinstance(result, ServerErrorMessage):
             raise NetworkError(result, "Server returned error while requesting something")
         return result
 

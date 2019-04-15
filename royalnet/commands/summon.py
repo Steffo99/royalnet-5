@@ -1,6 +1,6 @@
 import typing
 from ..utils import Command, Call
-from ..network import Message, ErrorMessage
+from ..network import Message
 
 
 class SummonMessage(Message):
@@ -12,8 +12,9 @@ class SummonSuccessful(Message):
     pass
 
 
-class SummonError(ErrorMessage):
-    pass
+class SummonError(Message):
+    def __init__(self, reason: str):
+        self.reason: str = reason
 
 
 class SummonCommand(Command):
@@ -32,4 +33,4 @@ class SummonCommand(Command):
         elif isinstance(response, SummonSuccessful):
             await call.reply(f"✅ Mi sono connesso in [c]#{channel_name}[/c].")
             return
-        raise Exception(f"wtf is this: {response}")
+        raise TypeError(f"Received unexpected response type while summoning the bot: {response.__class__.__name__}")
