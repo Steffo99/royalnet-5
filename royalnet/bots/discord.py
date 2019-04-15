@@ -58,15 +58,7 @@ class DiscordBot:
                 elif len(matching_channels) > 1:
                     return SummonError("Multiple channels with a matching name found")
                 matching_channel = matching_channels[0]
-                try:
-                    await matching_channel.connect()
-                except discord.errors.ClientException:
-                    # Move to the selected channel, instead of connecting
-                    for voice_client in self.bot.voice_clients:
-                        voice_client: discord.VoiceClient
-                        if voice_client.guild != matching_channel.guild:
-                            continue
-                        await voice_client.move_to(matching_channel)
+                await self.bot.vc_connect_or_move(matching_channel)
                 return SummonSuccessful()
 
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord", network_handler)
@@ -113,6 +105,18 @@ class DiscordBot:
 
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
+            @staticmethod
+            async def vc_connect_or_move(channel: discord.VoiceChannel):
+                try:
+                    await channel.connect()
+                except discord.errors.ClientException:
+                    # Move to the selected channel, instead of connecting
+                    for voice_client in self.bot.voice_clients:
+                        voice_client: discord.VoiceClient
+                        if voice_client.guild != channel.guild:
+                            continue
+                        await voice_client.move_to(channel)
+
             async def on_message(cli, message: discord.Message):
                 text = message.content
                 # Skip non-text messages
