@@ -1,23 +1,10 @@
 import re
 import typing
+
+from royalnet.error import InvalidInputError
+
 if typing.TYPE_CHECKING:
     from .call import Call
-
-
-class UnsupportedError(Exception):
-    """The command is not supported for the specified source."""
-
-
-class InvalidInputError(Exception):
-    """The command has received invalid input and cannot complete."""
-
-
-class InvalidConfigError(Exception):
-    """The bot has not been configured correctly, therefore the command can not function."""
-
-
-class ExternalError(Exception):
-    """Something went wrong in a non-Royalnet component and the command cannot be executed fully."""
 
 
 class CommandArgs(list):
@@ -36,8 +23,13 @@ class CommandArgs(list):
                 raise InvalidInputError(f'Tried to get invalid [{item}] slice from CommandArgs')
         raise ValueError(f"Invalid type passed to CommandArgs.__getattr__: {type(item)}")
 
+    def joined(self, *, require_at_least=0):
+        if len(self) < require_at_least:
+            raise InvalidInputError("Not enough arguments")
+        return " ".join(self)
+
     def match(self, pattern: typing.Pattern) -> typing.Match:
-        text = " ".join(self)
+        text = self.joined()
         match = re.match(pattern, text)
         if match is None:
             raise InvalidInputError("Pattern didn't match")

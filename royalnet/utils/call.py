@@ -10,10 +10,6 @@ if typing.TYPE_CHECKING:
 loop = asyncio.get_event_loop()
 
 
-class UnregisteredError(Exception):
-    pass
-
-
 class Call:
     """A command call. Still an abstract class, subbots should create a new call from this."""
 

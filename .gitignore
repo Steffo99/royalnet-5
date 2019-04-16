@@ -2,10 +2,7 @@ config.ini
 .idea/
 .vscode/
 __pycache__
-diario.json
-libopus-0.dll
-music.opus
-opusfiles/
+downloads/
 ignored/
 markovmodels/
 logs/

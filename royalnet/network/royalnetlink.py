@@ -5,7 +5,7 @@ import functools
 import typing
 import pickle
 import logging as _logging
-from .messages import Message, ServerErrorMessage
+from .messages import Message, ServerErrorMessage, RequestError
 from .packages import Package
 
 loop = asyncio.get_event_loop()
@@ -29,7 +29,7 @@ class NetworkError(Exception):
 class PendingRequest:
     def __init__(self):
         self.event: asyncio.Event = asyncio.Event()
-        self.data: Message = None
+        self.data: typing.Optional[Message] = None
 
     def __repr__(self):
         if self.event.is_set():
@@ -139,8 +139,11 @@ class RoyalnetLink:
             # Package is a request
             assert isinstance(package, Package)
             log.debug(f"Received request {package.source_conv_id}: {package}")
-            response = await self.request_handler(package.data)
-            if response is not None:
-                response_package: Package = package.reply(response)
-                await self.send(response_package)
-                log.debug(f"Replied to request {response_package.source_conv_id}: {response_package}")
+            try:
+                response = await self.request_handler(package.data)
+            except Exception as exc:
+                response = RequestError(exc=exc)
+                return
+            response_package: Package = package.reply(response)
+            await self.send(response_package)
+            log.debug(f"Replied to request {response_package.source_conv_id}: {response_package}")

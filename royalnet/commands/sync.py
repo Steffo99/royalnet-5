@@ -1,7 +1,8 @@
 import typing
 from telegram import Update, User
 from discord import Message, Member
-from ..utils import Command, Call, asyncify, UnsupportedError
+from ..utils import Command, Call, asyncify
+from royalnet.error import UnsupportedError
 from ..database.tables import Royal, Telegram, Discord
 
 
