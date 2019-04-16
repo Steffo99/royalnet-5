@@ -12,9 +12,7 @@ class ReminderCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        match = call.args.match(r"\[ *(.+?) *] *(.+?) *$")
-        date_str = match.group(1)
-        reminder_text = match.group(2)
+        date_str, reminder_text = call.args.match(r"\[ *(.+?) *] *(.+?) *$")
         date: typing.Optional[datetime.datetime]
         try:
             date = dateparser.parse(date_str)

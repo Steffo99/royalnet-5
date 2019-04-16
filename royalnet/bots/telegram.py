@@ -5,8 +5,8 @@ import logging as _logging
 import sys
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
-from royalnet.error import UnregisteredError
-from ..network import RoyalnetLink, Message
+from ..error import UnregisteredError
+from ..network import RoyalnetLink, Message, RequestError
 from ..database import Alchemy, relationshiplinkchain
 
 loop = asyncio.get_event_loop()
@@ -71,6 +71,8 @@ class TelegramBot:
 
             async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
+                if isinstance(response, RequestError):
+                    raise response.exc
                 return response
 
             async def get_author(call, error_if_none=False):
