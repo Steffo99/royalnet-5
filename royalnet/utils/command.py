@@ -28,12 +28,12 @@ class CommandArgs(list):
             raise InvalidInputError("Not enough arguments")
         return " ".join(self)
 
-    def match(self, pattern: typing.Pattern) -> typing.Match:
+    def match(self, pattern: typing.Pattern) -> typing.Sequence[typing.AnyStr]:
         text = self.joined()
         match = re.match(pattern, text)
         if match is None:
             raise InvalidInputError("Pattern didn't match")
-        return match
+        return match.groups()
 
     def optional(self, index: int, default=None) -> typing.Optional:
         try:

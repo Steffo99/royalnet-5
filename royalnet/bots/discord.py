@@ -6,9 +6,9 @@ import sys
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError
-from ..network import RoyalnetLink, Message, RequestSuccessful
+from ..network import RoyalnetLink, Message, RequestSuccessful, RequestError
 from ..database import Alchemy, relationshiplinkchain
-from ..audio import RoyalAudioFile
+from ..audio import RoyalAudioFile, PlayMode, Playlist, Pool
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -19,9 +19,9 @@ if not discord.opus.is_loaded():
 
 
 class PlayMessage(Message):
-    def __init__(self, url: str, channel_identifier: typing.Optional[typing.Union[int, str]] = None):
+    def __init__(self, url: str, guild_identifier: typing.Optional[str] = None):
         self.url: str = url
-        self.channel_identifier: typing.Optional[typing.Union[int, str]] = channel_identifier
+        self.guild_identifier: typing.Optional[str] = guild_identifier
 
 
 class SummonMessage(Message):
@@ -62,6 +62,8 @@ class DiscordBot:
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord",
                                                   self.network_handler)
         loop.create_task(self.network.run())
+        # Create the PlayModes dictionary
+        self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
 
         # noinspection PyMethodParameters
         class DiscordCall(Call):
@@ -86,6 +88,8 @@ class DiscordBot:
 
             async def net_request(call, message: Message, destination: str):
                 response = await self.network.request(message, destination)
+                if isinstance(response, RequestError):
+                    raise response.exc
                 return response
 
             async def get_author(call, error_if_none=False):
@@ -106,6 +110,7 @@ class DiscordBot:
         class DiscordClient(discord.Client):
             @staticmethod
             async def vc_connect_or_move(channel: discord.VoiceChannel):
+                # Connect to voice chat
                 try:
                     await channel.connect()
                 except discord.errors.ClientException:
@@ -116,6 +121,9 @@ class DiscordBot:
                         if voice_client.guild != channel.guild:
                             continue
                         await voice_client.move_to(channel)
+                # Create a music_data entry, if it doesn't exist; default is a Playlist
+                if not self.music_data.get(channel.guild):
+                    self.music_data[channel.guild] = Playlist()
 
             async def on_message(cli, message: discord.Message):
                 text = message.content
@@ -146,7 +154,7 @@ class DiscordBot:
         self.DiscordClient = DiscordClient
         self.bot = self.DiscordClient()
 
-    def find_guild(self, identifier: typing.Union[str, int]):
+    def find_guild(self, identifier: typing.Union[str, int]) -> discord.Guild:
         """Find the Guild with the specified identifier. Names are case-insensitive."""
         if isinstance(identifier, str):
             all_guilds: typing.List[discord.Guild] = self.bot.guilds
@@ -163,7 +171,9 @@ class DiscordBot:
             return self.bot.get_guild(identifier)
         raise TypeError("Invalid identifier type, should be str or int")
 
-    def find_channel(self, identifier: typing.Union[str, int], guild: typing.Optional[discord.Guild] = None):
+    def find_channel(self,
+                     identifier: typing.Union[str, int],
+                     guild: typing.Optional[discord.Guild] = None) -> discord.abc.GuildChannel:
         """Find the GuildChannel with the specified identifier. Names are case-insensitive."""
         if isinstance(identifier, str):
             if guild is not None:
@@ -193,6 +203,13 @@ class DiscordBot:
             return channel
         raise TypeError("Invalid identifier type, should be str or int")
 
+    def find_voice_client(self, guild: discord.Guild):
+        for voice_client in self.bot.voice_clients:
+            voice_client: discord.VoiceClient
+            if voice_client.guild == guild:
+                return voice_client
+        raise NoneFoundError("No voice clients found")
+
     async def network_handler(self, message: Message) -> Message:
         """Handle a Royalnet request."""
         if isinstance(message, SummonMessage):
@@ -208,9 +225,39 @@ class DiscordBot:
         loop.create_task(self.bot.vc_connect_or_move(channel))
         return RequestSuccessful()
 
+    async def add_to_music_data(self, url: str, guild: discord.Guild):
+        """Add a file to the corresponding music_data object."""
+        files: typing.List[RoyalAudioFile] = await asyncify(RoyalAudioFile.create_from_url, url)
+        guild_music_data = self.music_data[guild]
+        for file in files:
+            guild_music_data.add(file)
+        if guild_music_data.now_playing is None:
+            await self.advance_music_data(guild)
+
+    async def advance_music_data(self, guild: discord.Guild):
+        guild_music_data = self.music_data[guild]
+        next_file = await guild_music_data.next()
+        if next_file is None:
+            return
+        voice_client = self.find_voice_client(guild)
+        voice_client.play(next_file.as_audio_source(), after=lambda: loop.create_task(self.advance_music_data(guild)))
+
     async def nh_play(self, message: PlayMessage):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
-        raise
+        # Find the matching guild
+        if message.guild_identifier:
+            guild = self.find_guild(message.guild_identifier)
+        else:
+            if len(self.music_data) != 1:
+                raise TooManyFoundError("Multiple guilds found")
+            guild = list(self.music_data)[0]
+        # Ensure the guild has a PlayMode before adding the file to it
+        if not self.music_data.get(guild):
+            # TODO: change Exception
+            raise Exception("No music_data for this guild")
+        # Start downloading
+        loop.create_task(self.add_to_music_data(message.url, guild))
+        return RequestSuccessful()
 
     async def run(self):
         await self.bot.login(self.token)
