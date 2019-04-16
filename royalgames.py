@@ -12,14 +12,13 @@ loop = asyncio.get_event_loop()
 
 log = logging.root
 log.addHandler(logging.StreamHandler())
-log.setLevel(logging.DEBUG)
 logging.getLogger("royalnet.bots.telegram").setLevel(logging.DEBUG)
 logging.getLogger("royalnet.bots.discord").setLevel(logging.DEBUG)
 logging.getLogger("royalnet.network.royalnetserver").setLevel(logging.DEBUG)
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
-            KvrollCommand, VideoinfoCommand, SummonCommand]
+            KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand]
 
 master = RoyalnetServer("localhost", 1234, "sas")
 tg_bot = TelegramBot(os.environ["TG_AK"], "ws://localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Telegram, "tg_id", error_command=ErrorHandlerCommand)
