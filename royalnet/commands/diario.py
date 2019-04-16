@@ -4,7 +4,8 @@ import telegram
 import typing
 import os
 import aiohttp
-from ..utils import Command, Call, InvalidInputError, InvalidConfigError, ExternalError
+from ..utils import Command, Call
+from ..error import InvalidInputError, InvalidConfigError, ExternalError
 from ..database.tables import Royal, Diario, Alias
 from ..utils import asyncify
 

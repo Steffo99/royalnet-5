@@ -4,7 +4,8 @@ import typing
 import logging as _logging
 import sys
 from ..commands import NullCommand
-from ..utils import asyncify, Call, Command, UnregisteredError
+from ..utils import asyncify, Call, Command
+from royalnet.error import UnregisteredError
 from ..network import RoyalnetLink, Message
 from ..database import Alchemy, relationshiplinkchain
 

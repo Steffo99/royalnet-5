@@ -1,5 +1,6 @@
 import asyncio
-from ..utils import Command, Call, InvalidInputError
+from ..utils import Command, Call
+from royalnet.error import InvalidInputError
 
 
 class PingCommand(Command):

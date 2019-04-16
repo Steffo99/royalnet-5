@@ -23,3 +23,12 @@ class InvalidPackageEM(ServerErrorMessage):
 
 class InvalidDestinationEM(InvalidPackageEM):
     pass
+
+
+class RequestSuccessful(Message):
+    pass
+
+
+class RequestError(Message):
+    def __init__(self, exc: Exception):
+        self.exc = exc

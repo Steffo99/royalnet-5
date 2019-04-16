@@ -1,6 +1,7 @@
 import datetime
 import dateparser
-from ..utils import Command, Call, InvalidInputError
+from ..utils import Command, Call
+from ..error import InvalidInputError
 
 
 class DateparserCommand(Command):
@@ -11,9 +12,7 @@ class DateparserCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        if len(call.args) == 0:
-            raise InvalidInputError("Missing arg")
-        text = " ".join(call.args)
+        text = call.args.joined(require_at_least=1)
         date: datetime.datetime = dateparser.parse(text)
         if date is None:
             await call.reply("🕕 La data inserita non è valida.")

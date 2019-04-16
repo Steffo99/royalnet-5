@@ -4,10 +4,11 @@ import typing
 import logging as _logging
 import sys
 from ..commands import NullCommand
-from ..commands.summon import SummonMessage, SummonSuccessful, SummonError
-from ..commands.play import PlayMessage, PlaySuccessful, PlayError
-from ..utils import asyncify, Call, Command, UnregisteredError
-from ..network import RoyalnetLink, Message
+from ..commands.summon import SummonMessage
+from ..commands.play import PlayMessage
+from ..utils import asyncify, Call, Command
+from royalnet.error import UnregisteredError
+from ..network import RoyalnetLink, Message, RequestSuccessful, RequestError
 from ..database import Alchemy, relationshiplinkchain
 from ..audio import RoyalAudioFile
 
@@ -146,12 +147,12 @@ class DiscordBot:
                 if channel.name == message.channel_name:
                     matching_channels.append(channel)
         if len(matching_channels) == 0:
-            return SummonError("No channels with a matching name found")
+            return RequestError("No channels with a matching name found")
         elif len(matching_channels) > 1:
-            return SummonError("Multiple channels with a matching name found")
+            return RequestError("Multiple channels with a matching name found")
         matching_channel = matching_channels[0]
         await self.bot.vc_connect_or_move(matching_channel)
-        return SummonSuccessful()
+        return RequestSuccessful()
 
     async def nh_play(self, message: PlayMessage):
         # TODO: actually do what's intended to do
@@ -163,7 +164,7 @@ class DiscordBot:
         for voice_client in self.bot.voice_clients:
             voice_client: discord.VoiceClient
             voice_client.play(audio_source)
-        return PlaySuccessful()
+        return RequestError()
 
     async def run(self):
         await self.bot.login(self.token)
