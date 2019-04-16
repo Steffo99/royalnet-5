@@ -2,11 +2,7 @@ import typing
 import discord
 from ..utils import Command, Call
 from ..network import Message, RequestSuccessful, RequestError
-
-
-class SummonMessage(Message):
-    def __init__(self, channel_name: str):
-        self.channel_name: str = channel_name
+from ..bots.discord import SummonMessage
 
 
 class SummonCommand(Command):
@@ -19,13 +15,8 @@ class SummonCommand(Command):
     async def common(cls, call: Call):
         channel_name: str = call.args[0].lstrip("#")
         response: typing.Union[RequestSuccessful, RequestError] = await call.net_request(SummonMessage(channel_name), "discord")
-        if isinstance(response, RequestError):
-            await call.reply(f"⚠️ Si è verificato un'errore nella richiesta di connessione:\n[c]{response.exc}[/c]")
-            return
-        elif isinstance(response, RequestSuccessful):
-            await call.reply(f"✅ Mi sono connesso in [c]#{channel_name}[/c].")
-            return
-        raise TypeError(f"Received unexpected response type while summoning the bot: {response.__class__.__name__}")
+        response.raise_on_error()
+        await call.reply(f"✅ Mi sono connesso in [c]#{channel_name}[/c].")
 
     @classmethod
     async def discord(cls, call: Call):

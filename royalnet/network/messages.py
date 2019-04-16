@@ -2,6 +2,9 @@ class Message:
     def __repr__(self):
         return f"<{self.__class__.__name__}>"
 
+    def raise_on_error(self):
+        pass
+
 
 class IdentifySuccessfulMessage(Message):
     pass
@@ -32,3 +35,6 @@ class RequestSuccessful(Message):
 class RequestError(Message):
     def __init__(self, exc: Exception):
         self.exc = exc
+
+    def raise_on_error(self):
+        raise self.exc
