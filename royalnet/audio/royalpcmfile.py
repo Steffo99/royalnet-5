@@ -27,7 +27,7 @@ class RoyalPCMFile(YtdlFile):
         log.info(f"Preparing {self.video_filename}...")
         # Convert the video to pcm
         ffmpeg.input(f"./{self.video_filename}") \
-              .output(self.audio_filename, format="s16le", acodec="pcm_s16le", ac=2, ar="48000") \
+              .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
               .overwrite_output() \
               .run(quiet=not __debug__)
         # Delete the video file
