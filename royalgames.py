@@ -12,9 +12,7 @@ loop = asyncio.get_event_loop()
 
 log = logging.root
 log.addHandler(logging.StreamHandler())
-logging.getLogger("royalnet.bots.telegram").setLevel(logging.DEBUG)
 logging.getLogger("royalnet.bots.discord").setLevel(logging.DEBUG)
-logging.getLogger("royalnet.network.royalnetserver").setLevel(logging.DEBUG)
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,

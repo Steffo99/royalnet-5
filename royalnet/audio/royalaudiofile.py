@@ -19,15 +19,19 @@ class RoyalAudioFile(YtdlFile):
     def __init__(self, info: "YtdlInfo", **ytdl_args):
         # Overwrite the new ytdl_args
         self.ytdl_args = {**self.ytdl_args, **ytdl_args}
+        log.info(f"Now downloading {info.webpage_url}")
         super().__init__(info, outtmpl="./opusfiles/%(title)s-%(id)s.%(ext)s", **self.ytdl_args)
         # Find the audio_filename with a regex (should be video.opus)
+        log.info(f"Starting conversion of {self.video_filename}")
         self.audio_filename = re.sub(rf"\.{self.info.ext}$", ".opus", self.video_filename)
         # Convert the video to opus
         # Actually not needed, but we do this anyways for compression reasons
         converter = ffmpeg.input(self.video_filename) \
                           .output(self.audio_filename)
-        converter.run()
+        converter.run(quiet=True)
+        log.info(f"Converted to {self.audio_filename}")
         # Delete the video file
+        log.info(f"Deleting {self.video_filename}")
         self.delete_video_file()
 
     @staticmethod
