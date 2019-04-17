@@ -39,6 +39,9 @@ class YtdlFile:
         # Final checks
         assert os.path.exists(self.video_filename)
 
+    def __repr__(self):
+        return f"<YtdlFile {self.video_filename}>"
+
     @staticmethod
     def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> typing.List["YtdlFile"]:
         info_list = YtdlInfo.create_from_url(url)

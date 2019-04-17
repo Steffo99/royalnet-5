@@ -9,7 +9,7 @@ from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError
 from ..network import RoyalnetLink, Message, RequestSuccessful, RequestError
 from ..database import Alchemy, relationshiplinkchain
-from ..audio import RoyalAudioFile, PlayMode, Playlist, Pool
+from ..audio import RoyalPCMFile, PlayMode, Playlist, Pool
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -213,7 +213,7 @@ class DiscordBot:
 
     async def network_handler(self, message: Message) -> Message:
         """Handle a Royalnet request."""
-        log.debug(f"Received a {message.__class__.__name__}")
+        log.debug(f"Received {message} from Royalnet")
         if isinstance(message, SummonMessage):
             return await self.nh_summon(message)
         elif isinstance(message, PlayMessage):
@@ -229,27 +229,34 @@ class DiscordBot:
 
     async def add_to_music_data(self, url: str, guild: discord.Guild):
         """Add a file to the corresponding music_data object."""
-        files: typing.List[RoyalAudioFile] = await asyncify(RoyalAudioFile.create_from_url, url)
+        log.debug(f"Downloading {url} to add to music_data")
+        files: typing.List[RoyalPCMFile] = await asyncify(RoyalPCMFile.create_from_url, url)
         guild_music_data = self.music_data[guild]
         for file in files:
+            log.debug(f"Adding {file} to music_data")
             guild_music_data.add(file)
         if guild_music_data.now_playing is None:
+            log.debug(f"Starting playback chain")
             await self.advance_music_data(guild)
 
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
         guild_music_data = self.music_data[guild]
         voice_client = self.find_voice_client(guild)
-        next_file: RoyalAudioFile = await guild_music_data.next()
+        next_file: RoyalPCMFile = await guild_music_data.next()
         if next_file is None:
+            log.debug(f"Ending playback chain")
             return
 
         def advance(error=None):
+            log.debug(f"Deleting {next_file}")
             next_file.delete_audio_file()
             loop.create_task(self.advance_music_data(guild))
 
-        log.info(f"Starting playback of {next_file.info.title}")
-        voice_client.play(next_file.as_audio_source(), after=advance)
+        log.debug(f"Creating AudioSource of {next_file}")
+        next_source = next_file.create_audio_source()
+        log.debug(f"Starting playback of {next_source}")
+        voice_client.play(next_source, after=advance)
 
     async def nh_play(self, message: PlayMessage):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
