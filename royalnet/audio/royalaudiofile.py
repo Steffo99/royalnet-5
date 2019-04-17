@@ -47,5 +47,6 @@ class RoyalAudioFile(YtdlFile):
         return discord.PCMAudio(file)
 
     def delete_audio_file(self):
-        # TODO: _might_ be unsafe, test this
-        os.remove(self.audio_filename)
+        # TODO: can't delete it yet, see as_audio_source()
+        # os.remove(self.audio_filename)
+        pass
