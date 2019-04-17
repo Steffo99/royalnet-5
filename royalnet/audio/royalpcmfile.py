@@ -29,7 +29,7 @@ class RoyalPCMFile(YtdlFile):
         ffmpeg.input(f"./{self.video_filename}") \
               .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
               .overwrite_output() \
-              .run(quiet=not __debug__)
+              .run(quiet=True)
         # Delete the video file
         log.info(f"Deleting {self.video_filename}")
         self.delete_video_file()
