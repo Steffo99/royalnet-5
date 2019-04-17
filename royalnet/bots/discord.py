@@ -3,6 +3,7 @@ import asyncio
 import typing
 import logging as _logging
 import sys
+import functools
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError
@@ -235,12 +236,18 @@ class DiscordBot:
             await self.advance_music_data(guild)
 
     async def advance_music_data(self, guild: discord.Guild):
+        """Try to play the next song, while it exists. Otherwise, just return."""
         guild_music_data = self.music_data[guild]
-        next_file = await guild_music_data.next()
+        voice_client = self.find_voice_client(guild)
+        next_file: RoyalAudioFile = await guild_music_data.next()
         if next_file is None:
             return
-        voice_client = self.find_voice_client(guild)
-        voice_client.play(next_file.as_audio_source(), after=lambda: loop.create_task(self.advance_music_data(guild)))
+
+        def advance(error=None):
+            loop.create_task(self.advance_music_data(guild))
+
+        log.info(f"Starting to play {next_file.audio_filename}")
+        voice_client.play(next_file.as_audio_source(), after=advance)
 
     async def nh_play(self, message: PlayMessage):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
