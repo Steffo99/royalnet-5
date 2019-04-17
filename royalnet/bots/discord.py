@@ -245,6 +245,7 @@ class DiscordBot:
             return
 
         def advance(error=None):
+            next_file.delete_audio_file()
             loop.create_task(self.advance_music_data(guild))
 
         log.info(f"Starting playback of {next_file.info.title}")
