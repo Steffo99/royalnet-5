@@ -213,6 +213,7 @@ class DiscordBot:
 
     async def network_handler(self, message: Message) -> Message:
         """Handle a Royalnet request."""
+        log.debug(f"Received a {message.__class__.__name__}")
         if isinstance(message, SummonMessage):
             return await self.nh_summon(message)
         elif isinstance(message, PlayMessage):
@@ -246,7 +247,7 @@ class DiscordBot:
         def advance(error=None):
             loop.create_task(self.advance_music_data(guild))
 
-        log.info(f"Starting to play {next_file.audio_filename}")
+        log.info(f"Starting playback of {next_file.info.title}")
         voice_client.play(next_file.as_audio_source(), after=advance)
 
     async def nh_play(self, message: PlayMessage):

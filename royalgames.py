@@ -12,6 +12,7 @@ loop = asyncio.get_event_loop()
 
 log = logging.root
 log.addHandler(logging.StreamHandler())
+logging.getLogger("royalnet.audio.royalaudiofile").setLevel(logging.DEBUG)
 logging.getLogger("royalnet.bots.discord").setLevel(logging.DEBUG)
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
