@@ -3,7 +3,6 @@ import asyncio
 import typing
 import logging as _logging
 import sys
-import functools
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError
