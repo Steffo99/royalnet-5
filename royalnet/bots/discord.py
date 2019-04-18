@@ -4,11 +4,11 @@ import typing
 import logging as _logging
 import sys
 from ..commands import NullCommand
-from ..utils import asyncify, Call, Command
-from ..error import UnregisteredError, NoneFoundError, TooManyFoundError
+from ..utils import asyncify, Call, Command, NetworkHandler
+from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
 from ..network import RoyalnetLink, Message, RequestSuccessful, RequestError
-from ..database import Alchemy, relationshiplinkchain
-from ..audio import RoyalPCMFile, PlayMode, Playlist, Pool
+from ..database import Alchemy, relationshiplinkchain, DatabaseConfig
+from ..audio import RoyalPCMFile, PlayMode, Playlist
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -18,31 +18,15 @@ if not discord.opus.is_loaded():
     log.error("Opus is not loaded. Weird behaviour might emerge.")
 
 
-class PlayMessage(Message):
-    def __init__(self, url: str, guild_identifier: typing.Optional[str] = None):
-        self.url: str = url
-        self.guild_identifier: typing.Optional[str] = guild_identifier
-
-
-class SummonMessage(Message):
-    def __init__(self, channel_identifier: typing.Union[int, str],
-                 guild_identifier: typing.Optional[typing.Union[int, str]]):
-        self.channel_identifier = channel_identifier
-        self.guild_identifier = guild_identifier
-
-
 class DiscordBot:
     def __init__(self,
                  token: str,
                  master_server_uri: str,
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
-                 database_uri: str,
-                 master_table,
-                 identity_table,
-                 identity_column_name: str,
                  missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand):
+                 error_command: typing.Type[Command] = NullCommand,
+                 database_config: typing.Optional[DatabaseConfig] = None):
         self.token = token
         # Generate commands
         self.missing_command = missing_command
@@ -52,12 +36,25 @@ class DiscordBot:
         for command in commands:
             self.commands[f"!{command.command_name}"] = command
             required_tables = required_tables.union(command.require_alchemy_tables)
+        # Generate network handlers
+        self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
+        for command in commands:
+            self.network_handlers = {**self.network_handlers, **command.network_handler_dict()}
         # Generate the Alchemy database
-        self.alchemy = Alchemy(database_uri, required_tables)
-        self.master_table = self.alchemy.__getattribute__(master_table.__name__)
-        self.identity_table = self.alchemy.__getattribute__(identity_table.__name__)
-        self.identity_column = self.identity_table.__getattribute__(self.identity_table, identity_column_name)
-        self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
+        if database_config:
+            self.alchemy = Alchemy(database_config.database_uri, required_tables)
+            self.master_table = self.alchemy.__getattribute__(database_config.master_table.__name__)
+            self.identity_table = self.alchemy.__getattribute__(database_config.identity_table.__name__)
+            self.identity_column = self.identity_table.__getattribute__(self.identity_table, database_config.identity_column_name)
+            self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
+        else:
+            if required_tables:
+                raise InvalidConfigError("Tables are required by the commands, but Alchemy is not configured")
+            self.alchemy = None
+            self.master_table = None
+            self.identity_table = None
+            self.identity_column = None
+            self.identity_chain = None
         # Connect to Royalnet
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord",
                                                   self.network_handler)
@@ -70,6 +67,7 @@ class DiscordBot:
             interface_name = "discord"
             interface_obj = self
             interface_prefix = "!"
+
             alchemy = self.alchemy
 
             async def reply(call, text: str):
@@ -213,18 +211,7 @@ class DiscordBot:
     async def network_handler(self, message: Message) -> Message:
         """Handle a Royalnet request."""
         log.debug(f"Received {message} from Royalnet")
-        if isinstance(message, SummonMessage):
-            return await self.nh_summon(message)
-        elif isinstance(message, PlayMessage):
-            return await self.nh_play(message)
-
-    async def nh_summon(self, message: SummonMessage):
-        """Handle a summon Royalnet request. That is, join a voice channel, or move to a different one if that is not possible."""
-        channel = self.find_channel(message.channel_identifier)
-        if not isinstance(channel, discord.VoiceChannel):
-            raise NoneFoundError("Channel is not a voice channel")
-        loop.create_task(self.bot.vc_connect_or_move(channel))
-        return RequestSuccessful()
+        return await self.network_handlers[message.__class__].discord(message)
 
     async def add_to_music_data(self, url: str, guild: discord.Guild):
         """Add a file to the corresponding music_data object."""
@@ -256,23 +243,6 @@ class DiscordBot:
         next_source = next_file.create_audio_source()
         log.debug(f"Starting playback of {next_source}")
         voice_client.play(next_source, after=advance)
-
-    async def nh_play(self, message: PlayMessage):
-        """Handle a play Royalnet request. That is, add audio to a PlayMode."""
-        # Find the matching guild
-        if message.guild_identifier:
-            guild = self.find_guild(message.guild_identifier)
-        else:
-            if len(self.music_data) != 1:
-                raise TooManyFoundError("Multiple guilds found")
-            guild = list(self.music_data)[0]
-        # Ensure the guild has a PlayMode before adding the file to it
-        if not self.music_data.get(guild):
-            # TODO: change Exception
-            raise Exception("No music_data for this guild")
-        # Start downloading
-        loop.create_task(self.add_to_music_data(message.url, guild))
-        return RequestSuccessful()
 
     async def run(self):
         await self.bot.login(self.token)

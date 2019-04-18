@@ -1,6 +1,9 @@
 import typing
+from ..error import UnsupportedError
+from ..network import Message
 if typing.TYPE_CHECKING:
     from .call import Call
+    from ..utils import NetworkHandler
 
 
 class Command:
@@ -12,5 +15,21 @@ class Command:
 
     require_alchemy_tables: typing.Set = set()
 
-    async def common(self, call: "Call"):
-        raise NotImplementedError()
+    network_handlers: typing.List[typing.Type["NetworkHandler"]] = {}
+
+    @classmethod
+    async def common(cls, call: "Call"):
+        raise UnsupportedError()
+
+    @classmethod
+    def network_handler_dict(cls):
+        d = {}
+        for network_handler in cls.network_handlers:
+            d[network_handler.message_type] = network_handler
+        return d
+
+    def __getattribute__(self, item: str):
+        try:
+            return self.__dict__[item]
+        except KeyError:
+            return self.common

@@ -5,9 +5,9 @@ import logging as _logging
 import sys
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
-from ..error import UnregisteredError
+from ..error import UnregisteredError, InvalidConfigError
 from ..network import RoyalnetLink, Message, RequestError
-from ..database import Alchemy, relationshiplinkchain
+from ..database import Alchemy, relationshiplinkchain, DatabaseConfig
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -23,12 +23,9 @@ class TelegramBot:
                  master_server_uri: str,
                  master_server_secret: str,
                  commands: typing.List[typing.Type[Command]],
-                 database_uri: str,
-                 master_table,
-                 identity_table,
-                 identity_column_name: str,
                  missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand):
+                 error_command: typing.Type[Command] = NullCommand,
+                 database_config: typing.Optional[DatabaseConfig] = None):
         self.bot: telegram.Bot = telegram.Bot(api_key)
         self.should_run: bool = False
         self.offset: int = -100
@@ -43,12 +40,20 @@ class TelegramBot:
             self.commands[f"/{command.command_name}"] = command
             required_tables = required_tables.union(command.require_alchemy_tables)
         # Generate the Alchemy database
-        self.alchemy = Alchemy(database_uri, required_tables)
-        self.master_table = self.alchemy.__getattribute__(master_table.__name__)
-        self.identity_table = self.alchemy.__getattribute__(identity_table.__name__)
-        self.identity_column = self.identity_table.__getattribute__(self.identity_table, identity_column_name)
-        self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
-
+        if database_config:
+            self.alchemy = Alchemy(database_config.database_uri, required_tables)
+            self.master_table = self.alchemy.__getattribute__(database_config.master_table.__name__)
+            self.identity_table = self.alchemy.__getattribute__(database_config.identity_table.__name__)
+            self.identity_column = self.identity_table.__getattribute__(self.identity_table, database_config.identity_column_name)
+            self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
+        else:
+            if required_tables:
+                raise InvalidConfigError("Tables are required by the commands, but Alchemy is not configured")
+            self.alchemy = None
+            self.master_table = None
+            self.identity_table = None
+            self.identity_column = None
+            self.identity_chain = None
         # noinspection PyMethodParameters
         class TelegramCall(Call):
             interface_name = "telegram"

@@ -6,6 +6,7 @@ from royalnet.commands import *
 from royalnet.commands.debug_create import DebugCreateCommand
 from royalnet.commands.error_handler import ErrorHandlerCommand
 from royalnet.network import RoyalnetServer
+from royalnet.database import DatabaseConfig
 from royalnet.database.tables import Royal, Telegram, Discord
 
 loop = asyncio.get_event_loop()
@@ -20,11 +21,13 @@ commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziComm
             KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand]
 
 master = RoyalnetServer("localhost", 1234, "sas")
-# tg_bot = TelegramBot(os.environ["TG_AK"], "ws://localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Telegram, "tg_id", error_command=ErrorHandlerCommand)
-ds_bot = DiscordBot(os.environ["DS_AK"], "ws://localhost:1234", "sas", commands, os.environ["DB_PATH"], Royal, Discord, "discord_id", error_command=ErrorHandlerCommand)
+tg_db_cfg = DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id")
+tg_bot = TelegramBot(os.environ["TG_AK"], "ws://localhost:1234", "sas", commands, NullCommand, ErrorHandlerCommand, tg_db_cfg)
+ds_db_cfg = DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id")
+ds_bot = DiscordBot(os.environ["DS_AK"], "ws://localhost:1234", "sas", commands, NullCommand, ErrorHandlerCommand, ds_db_cfg)
 loop.run_until_complete(master.run())
 # Dirty hack, remove me asap
-# loop.create_task(tg_bot.run())
+loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())
 print("Starting loop...")
 loop.run_forever()

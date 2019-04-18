@@ -6,5 +6,7 @@ from .safeformat import safeformat
 from .classdictjanitor import cdj
 from .sleepuntil import sleep_until
 from .plusformat import plusformat
+from .networkhandler import NetworkHandler
 
-__all__ = ["asyncify", "Call", "Command", "safeformat", "cdj", "sleep_until", "plusformat", "CommandArgs"]
+__all__ = ["asyncify", "Call", "Command", "safeformat", "cdj", "sleep_until", "plusformat", "CommandArgs",
+           "NetworkHandler"]
