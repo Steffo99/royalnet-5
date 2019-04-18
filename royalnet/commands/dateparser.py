@@ -1,7 +1,6 @@
 import datetime
 import dateparser
 from ..utils import Command, Call
-from ..error import InvalidInputError
 
 
 class DateparserCommand(Command):

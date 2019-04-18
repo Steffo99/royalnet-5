@@ -1,6 +1,5 @@
 import traceback
-from logging import Logger
-from ..utils import Command, CommandArgs, Call
+from ..utils import Command, Call
 from ..error import NoneFoundError, \
                     TooManyFoundError, \
                     UnregisteredError, \
