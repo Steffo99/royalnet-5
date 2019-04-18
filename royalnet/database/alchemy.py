@@ -4,7 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager, asynccontextmanager
-from ..utils import cdj, asyncify
+from ..utils import asyncify
+from ..error import InvalidConfigError
 
 loop = asyncio.get_event_loop()
 

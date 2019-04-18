@@ -3,8 +3,7 @@ import asyncio
 import logging
 from ..network.messages import Message
 from .command import Command
-from royalnet.utils import CommandArgs
-
+from .commandargs import CommandArgs
 if typing.TYPE_CHECKING:
     from ..database import Alchemy
 
@@ -57,10 +56,7 @@ class Call:
 
     async def run(self):
         await self.session_init()
-        try:
-            coroutine = getattr(self.command, self.interface_name)
-        except AttributeError:
-            coroutine = getattr(self.command, "common")
+        coroutine = getattr(self.command, self.interface_name)
         try:
             result = await coroutine(self)
         finally:
