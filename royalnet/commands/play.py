@@ -35,6 +35,7 @@ class PlayNH(NetworkHandler):
             # TODO: change Exception
             raise Exception("No music_data for this guild")
         # Start downloading
+        # noinspection PyAsyncCall
         loop.create_task(bot.add_to_music_data(message.url, guild))
         return RequestSuccessful()
 

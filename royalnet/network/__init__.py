@@ -2,6 +2,7 @@ from .messages import Message, ServerErrorMessage, InvalidSecretEM, InvalidDesti
 from .packages import Package
 from .royalnetlink import RoyalnetLink, NetworkError, NotConnectedError, NotIdentifiedError
 from .royalnetserver import RoyalnetServer
+from .royalnetconfig import RoyalnetConfig
 
 __all__ = ["Message",
            "ServerErrorMessage",
@@ -15,4 +16,5 @@ __all__ = ["Message",
            "Package",
            "RoyalnetServer",
            "RequestSuccessful",
-           "RequestError"]
+           "RequestError",
+           "RoyalnetConfig"]

@@ -33,7 +33,7 @@ class TelegramBot:
         self.error_command = error_command
         self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
         loop.create_task(self.network.run())
-        # Generate commands
+        # Generate _commands
         self.commands = {}
         required_tables = set()
         for command in commands:
@@ -48,7 +48,7 @@ class TelegramBot:
             self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
         else:
             if required_tables:
-                raise InvalidConfigError("Tables are required by the commands, but Alchemy is not configured")
+                raise InvalidConfigError("Tables are required by the _commands, but Alchemy is not configured")
             self.alchemy = None
             self.master_table = None
             self.identity_table = None
@@ -135,7 +135,7 @@ class TelegramBot:
         try:
             command = self.commands[command_text]
         except KeyError:
-            # Skip inexistent commands
+            # Skip inexistent _commands
             command = self.missing_command
         # Call the command
         # noinspection PyBroadException

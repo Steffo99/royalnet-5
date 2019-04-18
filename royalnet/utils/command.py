@@ -27,9 +27,3 @@ class Command:
         for network_handler in cls.network_handlers:
             d[network_handler.message_type] = network_handler
         return d
-
-    def __getattribute__(self, item: str):
-        try:
-            return self.__dict__[item]
-        except KeyError:
-            return self.common

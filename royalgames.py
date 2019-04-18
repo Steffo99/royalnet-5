@@ -20,11 +20,11 @@ commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziComm
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
             KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand]
 
-master = RoyalnetServer("localhost", 1234, "sas")
+master = RoyalnetServer("localhost", 2468, "sas")
 tg_db_cfg = DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id")
-tg_bot = TelegramBot(os.environ["TG_AK"], "ws://localhost:1234", "sas", commands, NullCommand, ErrorHandlerCommand, tg_db_cfg)
+tg_bot = TelegramBot(os.environ["TG_AK"], "ws://localhost:2468", "sas", commands, NullCommand, ErrorHandlerCommand, tg_db_cfg)
 ds_db_cfg = DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id")
-ds_bot = DiscordBot(os.environ["DS_AK"], "ws://localhost:1234", "sas", commands, NullCommand, ErrorHandlerCommand, ds_db_cfg)
+ds_bot = DiscordBot(os.environ["DS_AK"], "ws://localhost:2468", "sas", commands, NullCommand, ErrorHandlerCommand, ds_db_cfg)
 loop.run_until_complete(master.run())
 # Dirty hack, remove me asap
 loop.create_task(tg_bot.run())
