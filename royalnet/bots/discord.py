@@ -28,18 +28,6 @@ class DiscordBot:
                  error_command: typing.Type[Command] = NullCommand,
                  database_config: typing.Optional[DatabaseConfig] = None):
         self.token = token
-        # Generate commands
-        self.missing_command = missing_command
-        self.error_command = error_command
-        self.commands = {}
-        required_tables = set()
-        for command in commands:
-            self.commands[f"!{command.command_name}"] = command
-            required_tables = required_tables.union(command.require_alchemy_tables)
-        # Generate network handlers
-        self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
-        for command in commands:
-            self.network_handlers = {**self.network_handlers, **command.network_handler_dict()}
         # Generate the Alchemy database
         if database_config:
             self.alchemy = Alchemy(database_config.database_uri, required_tables)
@@ -49,16 +37,12 @@ class DiscordBot:
             self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
         else:
             if required_tables:
-                raise InvalidConfigError("Tables are required by the commands, but Alchemy is not configured")
+                raise InvalidConfigError("Tables are required by the _commands, but Alchemy is not configured")
             self.alchemy = None
             self.master_table = None
             self.identity_table = None
             self.identity_column = None
             self.identity_chain = None
-        # Connect to Royalnet
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "discord",
-                                                  self.network_handler)
-        loop.create_task(self.network.run())
         # Create the PlayModes dictionary
         self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
 
@@ -134,8 +118,9 @@ class DiscordBot:
                 try:
                     selected_command = self.commands[command_text]
                 except KeyError:
-                    # Skip inexistent commands
+                    # Skip inexistent _commands
                     selected_command = self.missing_command
+                log.error(f"Running {selected_command}")
                 # Call the command
                 try:
                     return await self.DiscordCall(message.channel, selected_command, parameters, log,
@@ -207,11 +192,6 @@ class DiscordBot:
             if voice_client.guild == guild:
                 return voice_client
         raise NoneFoundError("No voice clients found")
-
-    async def network_handler(self, message: Message) -> Message:
-        """Handle a Royalnet request."""
-        log.debug(f"Received {message} from Royalnet")
-        return await self.network_handlers[message.__class__].discord(message)
 
     async def add_to_music_data(self, url: str, guild: discord.Guild):
         """Add a file to the corresponding music_data object."""

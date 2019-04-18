@@ -56,7 +56,10 @@ class Call:
 
     async def run(self):
         await self.session_init()
-        coroutine = getattr(self.command, self.interface_name)
+        try:
+            coroutine = getattr(self.command, self.interface_name)
+        except AttributeError:
+            coroutine = self.command.common
         try:
             result = await coroutine(self)
         finally:
