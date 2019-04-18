@@ -2,7 +2,9 @@ import typing
 import asyncio
 import logging
 from ..network.messages import Message
-from .command import Command, CommandArgs
+from .command import Command
+from royalnet.utils import CommandArgs
+
 if typing.TYPE_CHECKING:
     from ..database import Alchemy
 
