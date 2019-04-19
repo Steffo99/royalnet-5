@@ -1,11 +1,8 @@
-import discord
 import ffmpeg
-import re
 import os
 import typing
 import logging as _logging
 from .youtubedl import YtdlFile, YtdlInfo
-from .royalpcmaudio import RoyalPCMAudio
 
 log = _logging.getLogger(__name__)
 
@@ -50,8 +47,6 @@ class RoyalPCMFile(YtdlFile):
     def audio_filename(self):
         return f"./downloads/{self.info.title}-{self.info.id}.pcm"
 
-    def create_audio_source(self):
-        return RoyalPCMAudio(self)
-
-    def delete_audio_file(self):
+    def __del__(self):
+        log.info(f"Deleting {self.audio_filename}")
         os.remove(self.audio_filename)

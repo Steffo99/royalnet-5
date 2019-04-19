@@ -8,7 +8,7 @@ from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
 from ..network import Message, RoyalnetConfig
 from ..database import DatabaseConfig
-from ..audio import PlayMode, Playlist
+from ..audio import PlayMode, Playlist, RoyalPCMAudio
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -108,6 +108,10 @@ class DiscordBot(GenericBot):
                 # Skip non-text messages
                 if not text:
                     return
+                # Skip bot messages
+                author: typing.Union[discord.User] = message.author
+                if author.bot:
+                    return
                 # Find and clean parameters
                 command_text, *parameters = text.split(" ")
                 # Call the command
@@ -193,35 +197,29 @@ class DiscordBot(GenericBot):
         await self.client.connect()
         # TODO: how to stop?
 
-# class DiscordBot:
-#     async def add_to_music_data(self, url: str, guild: discord.Guild):
-#         """Add a file to the corresponding music_data object."""
-#         log.debug(f"Downloading {url} to add to music_data")
-#         files: typing.List[RoyalPCMFile] = await asyncify(RoyalPCMFile.create_from_url, url)
-#         guild_music_data = self.music_data[guild]
-#         for file in files:
-#             log.debug(f"Adding {file} to music_data")
-#             guild_music_data.add(file)
-#         if guild_music_data.now_playing is None:
-#             log.debug(f"Starting playback chain")
-#             await self.advance_music_data(guild)
-#
-#     async def advance_music_data(self, guild: discord.Guild):
-#         """Try to play the next song, while it exists. Otherwise, just return."""
-#         guild_music_data = self.music_data[guild]
-#         voice_client = self.find_voice_client(guild)
-#         next_file: RoyalPCMFile = await guild_music_data.next()
-#         if next_file is None:
-#             log.debug(f"Ending playback chain")
-#             return
-#
-#         def advance(error=None):
-#             log.debug(f"Deleting {next_file}")
-#             next_file.delete_audio_file()
-#             loop.create_task(self.advance_music_data(guild))
-#
-#         log.debug(f"Creating AudioSource of {next_file}")
-#         next_source = next_file.create_audio_source()
-#         log.debug(f"Starting playback of {next_source}")
-#         voice_client.play(next_source, after=advance)
-#
+    async def add_to_music_data(self, url: str, guild: discord.Guild):
+        """Add a file to the corresponding music_data object."""
+        log.debug(f"Adding {url} to music_data of {guild}")
+        guild_music_data = self.music_data[guild]
+        audio_sources = RoyalPCMAudio.create_from_url(url)
+        for audio_source in audio_sources:
+            log.debug(f"Adding {audio_source} to music_data")
+            guild_music_data.add(audio_source)
+        if guild_music_data.now_playing is None:
+            log.debug(f"Starting playback chain")
+            await self.advance_music_data(guild)
+
+    async def advance_music_data(self, guild: discord.Guild):
+        """Try to play the next song, while it exists. Otherwise, just return."""
+        guild_music_data = self.music_data[guild]
+        voice_client = self.client.find_voice_client_by_guild(guild)
+        next_source: RoyalPCMAudio = await guild_music_data.next()
+        if next_source is None:
+            log.debug(f"Ending playback chain")
+            return
+
+        def advance(error=None):
+            loop.create_task(self.advance_music_data(guild))
+
+        log.debug(f"Starting playback of {next_source}")
+        voice_client.play(next_source, after=advance)

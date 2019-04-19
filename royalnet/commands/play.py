@@ -21,7 +21,7 @@ class PlayNH(NetworkHandler):
     message_type = PlayMessage
 
     @classmethod
-    async def nh_play(cls, bot: "DiscordBot", message: PlayMessage):
+    async def discord(cls, bot: "DiscordBot", message: PlayMessage):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
         # Find the matching guild
         if message.guild_identifier:
