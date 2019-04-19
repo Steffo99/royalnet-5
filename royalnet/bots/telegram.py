@@ -3,10 +3,11 @@ import asyncio
 import typing
 import logging as _logging
 import sys
+from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, InvalidConfigError
-from ..network import RoyalnetLink, Message, RequestError
+from ..network import RoyalnetLink, Message, RequestError, RoyalnetConfig
 from ..database import Alchemy, relationshiplinkchain, DatabaseConfig
 
 loop = asyncio.get_event_loop()
@@ -17,48 +18,25 @@ async def todo(message: Message):
     log.warning(f"Skipped {message} because handling isn't supported yet.")
 
 
-class TelegramBot:
-    def __init__(self,
-                 api_key: str,
-                 master_server_uri: str,
-                 master_server_secret: str,
-                 commands: typing.List[typing.Type[Command]],
-                 missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand,
-                 database_config: typing.Optional[DatabaseConfig] = None):
-        self.bot: telegram.Bot = telegram.Bot(api_key)
-        self.should_run: bool = False
-        self.offset: int = -100
-        self.missing_command = missing_command
-        self.error_command = error_command
-        self.network: RoyalnetLink = RoyalnetLink(master_server_uri, master_server_secret, "telegram", todo)
-        loop.create_task(self.network.run())
-        # Generate _commands
-        self.commands = {}
-        required_tables = set()
-        for command in commands:
-            self.commands[f"/{command.command_name}"] = command
-            required_tables = required_tables.union(command.require_alchemy_tables)
-        # Generate the Alchemy database
-        if database_config:
-            self.alchemy = Alchemy(database_config.database_uri, required_tables)
-            self.master_table = self.alchemy.__getattribute__(database_config.master_table.__name__)
-            self.identity_table = self.alchemy.__getattribute__(database_config.identity_table.__name__)
-            self.identity_column = self.identity_table.__getattribute__(self.identity_table, database_config.identity_column_name)
-            self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
-        else:
-            if required_tables:
-                raise InvalidConfigError("Tables are required by the _commands, but Alchemy is not configured")
-            self.alchemy = None
-            self.master_table = None
-            self.identity_table = None
-            self.identity_column = None
-            self.identity_chain = None
+class TelegramConfig:
+    def __init__(self, token: str):
+        self.token: str = token
+
+
+class TelegramBot(GenericBot):
+    interface_name = "telegram"
+
+    def _init_client(self):
+        self.client = telegram.Bot(self._telegram_config.token)
+        self._offset: int = -100
+
+    def _call_factory(self) -> typing.Type[Call]:
         # noinspection PyMethodParameters
         class TelegramCall(Call):
-            interface_name = "telegram"
+            interface_name = self.interface_name
             interface_obj = self
             interface_prefix = "/"
+
             alchemy = self.alchemy
 
             async def reply(call, text: str):
@@ -75,9 +53,10 @@ class TelegramBot:
                 await asyncify(call.channel.send_message, escaped_text, parse_mode="HTML")
 
             async def net_request(call, message: Message, destination: str):
-                response = await self.network.request(message, destination)
-                if isinstance(response, RequestError):
-                    raise response.exc
+                if self.network is None:
+                    raise InvalidConfigError("Royalnet is not enabled on this bot")
+                response: Message = await self.network.request(message, destination)
+                response.raise_on_error()
                 return response
 
             async def get_author(call, error_if_none=False):
@@ -94,29 +73,26 @@ class TelegramBot:
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
                     raise UnregisteredError("Author is not registered")
-                return result
+        return TelegramCall
 
-        self.TelegramCall = TelegramCall
+    def __init__(self, *,
+                 telegram_config: TelegramConfig,
+                 royalnet_config: typing.Optional[RoyalnetConfig] = None,
+                 database_config: typing.Optional[DatabaseConfig] = None,
+                 command_prefix: str = "/",
+                 commands: typing.List[typing.Type[Command]] = None,
+                 missing_command: typing.Type[Command] = NullCommand,
+                 error_command: typing.Type[Command] = NullCommand):
+        super().__init__(royalnet_config=royalnet_config,
+                         database_config=database_config,
+                         command_prefix=command_prefix,
+                         commands=commands,
+                         missing_command=missing_command,
+                         error_command=error_command)
+        self._telegram_config = telegram_config
+        self._init_client()
 
-    async def run(self):
-        self.should_run = True
-        while self.should_run:
-            # Get the latest 100 updates
-            try:
-                last_updates: typing.List[telegram.Update] = await asyncify(self.bot.get_updates, offset=self.offset, timeout=60)
-            except telegram.error.TimedOut:
-                continue
-            # Handle updates
-            for update in last_updates:
-                # noinspection PyAsyncCall
-                asyncio.create_task(self.handle_update(update))
-            # Recalculate offset
-            try:
-                self.offset = last_updates[-1].update_id + 1
-            except IndexError:
-                pass
-
-    async def handle_update(self, update: telegram.Update):
+    async def _handle_update(self, update: telegram.Update):
         # Skip non-message updates
         if update.message is None:
             return
@@ -130,33 +106,31 @@ class TelegramBot:
             return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
-        command_text.replace(f"@{self.bot.username}", "")
-        # Find the function
-        try:
-            command = self.commands[command_text]
-        except KeyError:
-            # Skip inexistent _commands
-            command = self.missing_command
+        command_text.replace(f"@{self.client.username}", "")
         # Call the command
-        # noinspection PyBroadException
-        try:
-            return await self.TelegramCall(message.chat, command, parameters, log,
-                                           update=update).run()
-        except Exception as exc:
-            try:
-                return await self.TelegramCall(message.chat, self.error_command, parameters, log,
-                                               update=update,
-                                               exception_info=sys.exc_info(),
-                                               previous_command=command).run()
-            except Exception as exc2:
-                log.error(f"Exception in error handler command: {exc2}")
+        await self.call(command_text, update.message.chat, parameters, update=update)
 
-    def generate_botfather_command_string(self):
+    async def run(self):
+        while True:
+            # Get the latest 100 updates
+            try:
+                last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates, offset=self._offset, timeout=60)
+            except telegram.error.TimedOut:
+                continue
+            # Handle updates
+            for update in last_updates:
+                # noinspection PyAsyncCall
+                loop.create_task(self._handle_update(update))
+            # Recalculate offset
+            try:
+                self._offset = last_updates[-1].update_id + 1
+            except IndexError:
+                pass
+
+    @property
+    def botfather_command_string(self) -> str:
         string = ""
         for command_key in self.commands:
             command = self.commands[command_key]
             string += f"{command.command_name} - {command.command_description}\n"
         return string
-
-    async def handle_net_request(self, message: Message):
-        pass

@@ -1,3 +1,7 @@
+import traceback
+from ..error import RoyalnetError
+
+
 class Message:
     def __repr__(self):
         return f"<{self.__class__.__name__}>"
@@ -34,7 +38,7 @@ class RequestSuccessful(Message):
 
 class RequestError(Message):
     def __init__(self, exc: Exception):
-        self.exc = exc
+        self.exc: Exception = exc
 
     def raise_on_error(self):
-        raise self.exc
+        raise RoyalnetError(exc=self.exc)

@@ -1,5 +1,4 @@
 import logging as _logging
-import traceback
 from ..utils import Command, Call
 from ..error import NoneFoundError, \
                     TooManyFoundError, \
@@ -21,33 +20,28 @@ class ErrorHandlerCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        try:
-            e_type, e_value, e_tb = call.kwargs["exception_info"]
-        except InvalidInputError:
-            await call.reply("⚠️ Questo comando non può essere chiamato da solo.")
-            return
-        if e_type == NoneFoundError:
+        exception: Exception = call.kwargs["exception"]
+        if isinstance(exception, NoneFoundError):
             await call.reply("⚠️ L'elemento richiesto non è stato trovato.")
             return
-        if e_type == TooManyFoundError:
+        if isinstance(exception, TooManyFoundError):
             await call.reply("⚠️ La richiesta effettuata è ambigua, pertanto è stata annullata.")
             return
-        if e_type == UnregisteredError:
+        if isinstance(exception, UnregisteredError):
             await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")
             return
-        if e_type == UnsupportedError:
+        if isinstance(exception, UnsupportedError):
             await call.reply("⚠️ Il comando richiesto non è disponibile tramite questa interfaccia.")
             return
-        if e_type == InvalidInputError:
+        if isinstance(exception, InvalidInputError):
             command = call.kwargs["previous_command"]
             await call.reply(f"⚠️ Sintassi non valida.\nSintassi corretta: [c]{call.interface_prefix}{command.command_name} {command.command_syntax}[/c]")
             return
-        if e_type == InvalidConfigError:
+        if isinstance(exception, InvalidConfigError):
             await call.reply("⚠️ Il bot non è stato configurato correttamente, quindi questo comando non può essere eseguito. L'errore è stato segnalato all'amministratore.")
             return
-        if e_type == ExternalError:
+        if isinstance(exception, ExternalError):
             await call.reply("⚠️ Una risorsa esterna necessaria per l'esecuzione del comando non ha funzionato correttamente, quindi il comando è stato annullato.")
             return
-        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{e_type.__name__}[/b]\n{e_value}")
-        formatted_tb: str = '\n'.join(traceback.format_tb(e_tb))
-        log.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")
+        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{exception.__class__.__name__}[/b]\n{exception}")
+        log.error(f"Unhandled exception - {exception.__class__.__name__}: {exception}")

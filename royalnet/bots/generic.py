@@ -16,6 +16,7 @@ class GenericBot:
     interface_name = NotImplemented
 
     def _init_commands(self,
+                       command_prefix: str,
                        commands: typing.List[typing.Type[Command]],
                        missing_command: typing.Type[Command],
                        error_command: typing.Type[Command]):
@@ -24,7 +25,7 @@ class GenericBot:
         self.commands: typing.Dict[str, typing.Type[Command]] = {}
         self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
         for command in commands:
-            self.commands[f"!{command.command_name}"] = command
+            self.commands[f"{command_prefix}{command.command_name}"] = command
             self.network_handlers = {**self.network_handlers, **command.network_handler_dict()}
         self.missing_command: typing.Type[Command] = missing_command
         self.error_command: typing.Type[Command] = error_command
@@ -36,7 +37,7 @@ class GenericBot:
 
     def _init_royalnet(self, royalnet_config: RoyalnetConfig):
         """Create a RoyalnetLink, and run it as a task."""
-        self.network: RoyalnetLink = RoyalnetLink(royalnet_config.master_uri, royalnet_config.master_secret, "discord",
+        self.network: RoyalnetLink = RoyalnetLink(royalnet_config.master_uri, royalnet_config.master_secret, self.interface_name,
                                                   self._network_handler)
         log.debug(f"Running RoyalnetLink {self.network}")
         loop.create_task(self.network.run())
@@ -46,15 +47,17 @@ class GenericBot:
         log.debug(f"Received {message} from the RoyalnetLink")
         try:
             network_handler = self.network_handlers[message.__class__]
-        except KeyError as exc:
+        except KeyError:
+            _, exc, tb = sys.exc_info()
             log.debug(f"Missing network_handler for {message}")
-            return RequestError(KeyError("Missing network_handler"))
+            return RequestError(exc=exc)
         try:
             log.debug(f"Using {network_handler} as handler for {message}")
-            return await getattr(network_handler, self.interface_name)(message)
-        except Exception as exc:
+            return await getattr(network_handler, self.interface_name)(self, message)
+        except Exception:
+            _, exc, tb = sys.exc_info()
             log.debug(f"Exception {exc} in {network_handler}")
-            return RequestError(exc)
+            return RequestError(exc=exc)
 
     def _init_database(self, commands: typing.List[typing.Type[Command]], database_config: DatabaseConfig):
         """Connect to the database, and create the missing tables required by the selected commands."""
@@ -74,6 +77,7 @@ class GenericBot:
     def __init__(self, *,
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
+                 command_prefix: str,
                  commands: typing.List[typing.Type[Command]] = None,
                  missing_command: typing.Type[Command] = NullCommand,
                  error_command: typing.Type[Command] = NullCommand):
@@ -86,7 +90,7 @@ class GenericBot:
             self._init_database(commands=commands, database_config=database_config)
         if commands is None:
             commands = []
-        self._init_commands(commands, missing_command=missing_command, error_command=error_command)
+        self._init_commands(command_prefix, commands, missing_command=missing_command, error_command=error_command)
         self._Call = self._call_factory()
         if royalnet_config is None:
             self.network = None
@@ -95,15 +99,18 @@ class GenericBot:
 
     async def call(self, command_name: str, channel, parameters: typing.List[str] = None, **kwargs):
         """Call a command by its string, or missing_command if it doesn't exists, or error_command if an exception is raised during the execution."""
+        log.debug(f"Trying to call {command_name}")
         if parameters is None:
             parameters = []
         try:
             command: typing.Type[Command] = self.commands[command_name]
         except KeyError:
+            log.debug(f"Calling missing_command because {command_name} does not exist")
             command = self.missing_command
         try:
             await self._Call(channel, command, parameters, **kwargs).run()
         except Exception as exc:
+            log.debug(f"Calling error_command because of an error in {command_name}")
             await self._Call(channel, self.error_command,
                              exception_info=sys.exc_info(),
                              previous_command=command, **kwargs).run()

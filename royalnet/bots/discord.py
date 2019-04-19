@@ -6,7 +6,7 @@ from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
-from ..network import Message, RequestError, RoyalnetConfig
+from ..network import Message, RoyalnetConfig
 from ..database import DatabaseConfig
 from ..audio import PlayMode, Playlist
 
@@ -27,9 +27,12 @@ class DiscordBot(GenericBot):
     interface_name = "discord"
 
     def _init_voice(self):
+        log.debug(f"Creating music_data dict")
         self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
 
     def _call_factory(self) -> typing.Type[Call]:
+        log.debug(f"Creating DiscordCall")
+
         # noinspection PyMethodParameters
         class DiscordCall(Call):
             interface_name = self.interface_name
@@ -56,9 +59,8 @@ class DiscordBot(GenericBot):
             async def net_request(call, message: Message, destination: str):
                 if self.network is None:
                     raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response = await self.network.request(message, destination)
-                if isinstance(response, RequestError):
-                    raise response.exc
+                response: Message = await self.network.request(message, destination)
+                response.raise_on_error()
                 return response
 
             async def get_author(call, error_if_none=False):
@@ -77,12 +79,15 @@ class DiscordBot(GenericBot):
 
     def _bot_factory(self) -> typing.Type[discord.Client]:
         """Create a new DiscordClient class based on this DiscordBot."""
+        log.debug(f"Creating DiscordClient")
+
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
             async def vc_connect_or_move(cli, channel: discord.VoiceChannel):
                 # Connect to voice chat
                 try:
                     await channel.connect()
+                    log.debug(f"Connecting to Voice in {channel}")
                 except discord.errors.ClientException:
                     # Move to the selected channel, instead of connecting
                     # noinspection PyUnusedLocal
@@ -91,8 +96,10 @@ class DiscordBot(GenericBot):
                         if voice_client.guild != channel.guild:
                             continue
                         await voice_client.move_to(channel)
+                        log.debug(f"Moved {voice_client} to {channel}")
                 # Create a music_data entry, if it doesn't exist; default is a Playlist
                 if not self.music_data.get(channel.guild):
+                    log.debug(f"Creating music_data for {channel.guild}")
                     self.music_data[channel.guild] = Playlist()
 
             @staticmethod  # Not really static because of the self reference
@@ -157,17 +164,21 @@ class DiscordBot(GenericBot):
 
     def _init_client(self):
         """Create a bot instance."""
-        self.client = self._bot_factory()()
+        log.debug(f"Creating DiscordClient instance")
+        self._Client = self._bot_factory()
+        self.client = self._Client()
 
     def __init__(self, *,
                  discord_config: DiscordConfig,
-                 royalnet_config: RoyalnetConfig,
+                 royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
+                 command_prefix: str = "!",
                  commands: typing.List[typing.Type[Command]] = None,
                  missing_command: typing.Type[Command] = NullCommand,
                  error_command: typing.Type[Command] = NullCommand):
         super().__init__(royalnet_config=royalnet_config,
                          database_config=database_config,
+                         command_prefix=command_prefix,
                          commands=commands,
                          missing_command=missing_command,
                          error_command=error_command)
@@ -176,7 +187,9 @@ class DiscordBot(GenericBot):
         self._init_voice()
 
     async def run(self):
+        log.debug(f"Logging in to Discord")
         await self.client.login(self._discord_config.token)
+        log.debug(f"Connecting to Discord")
         await self.client.connect()
         # TODO: how to stop?
 
