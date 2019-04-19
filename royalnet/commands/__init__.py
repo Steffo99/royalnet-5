@@ -16,8 +16,10 @@ from .kvroll import KvrollCommand
 from .videoinfo import VideoinfoCommand
 from .summon import SummonCommand
 from .play import PlayCommand
+from .skip import SkipCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
-           "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand"]
+           "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand",
+           "SkipCommand"]

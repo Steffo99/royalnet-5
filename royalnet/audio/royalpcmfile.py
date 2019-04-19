@@ -16,6 +16,9 @@ class RoyalPCMFile(YtdlFile):
     def __init__(self, info: "YtdlInfo", **ytdl_args):
         # Preemptively initialize info to be able to generate the filename
         self.info = info
+        # Ensure the file doesn't already exist
+        if os.path.exists(self._ytdl_filename) or os.path.exists(self.audio_filename):
+            raise FileExistsError("Can't overwrite file")
         # Overwrite the new ytdl_args
         self.ytdl_args = {**self.ytdl_args, **ytdl_args}
         log.info(f"Now downloading {info.webpage_url}")

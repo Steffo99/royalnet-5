@@ -6,6 +6,7 @@ from ..error import NoneFoundError, \
                     UnsupportedError, \
                     InvalidInputError, \
                     InvalidConfigError, \
+                    RoyalnetError, \
                     ExternalError
 
 
@@ -39,6 +40,9 @@ class ErrorHandlerCommand(Command):
             return
         if isinstance(exception, InvalidConfigError):
             await call.reply("⚠️ Il bot non è stato configurato correttamente, quindi questo comando non può essere eseguito. L'errore è stato segnalato all'amministratore.")
+            return
+        if isinstance(exception, RoyalnetError):
+            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: {exception.exc}")
             return
         if isinstance(exception, ExternalError):
             await call.reply("⚠️ Una risorsa esterna necessaria per l'esecuzione del comando non ha funzionato correttamente, quindi il comando è stato annullato.")

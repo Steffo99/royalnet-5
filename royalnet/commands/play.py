@@ -1,8 +1,7 @@
 import typing
-import discord
 import asyncio
 from ..utils import Command, Call, NetworkHandler
-from ..network import Message, RequestSuccessful, RequestError
+from ..network import Message, RequestSuccessful
 from ..error import TooManyFoundError
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
@@ -12,9 +11,9 @@ loop = asyncio.get_event_loop()
 
 
 class PlayMessage(Message):
-    def __init__(self, url: str, guild_identifier: typing.Optional[str] = None):
+    def __init__(self, url: str, guild_name: typing.Optional[str] = None):
         self.url: str = url
-        self.guild_identifier: typing.Optional[str] = guild_identifier
+        self.guild_name: typing.Optional[str] = guild_name
 
 
 class PlayNH(NetworkHandler):
@@ -24,8 +23,8 @@ class PlayNH(NetworkHandler):
     async def discord(cls, bot: "DiscordBot", message: PlayMessage):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
         # Find the matching guild
-        if message.guild_identifier:
-            guild = bot.client.find_guild(message.guild_identifier)
+        if message.guild_name:
+            guild = bot.client.find_guild(message.guild_name)
         else:
             if len(bot.music_data) != 1:
                 raise TooManyFoundError("Multiple guilds found")

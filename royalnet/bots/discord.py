@@ -201,7 +201,7 @@ class DiscordBot(GenericBot):
         """Add a file to the corresponding music_data object."""
         log.debug(f"Adding {url} to music_data of {guild}")
         guild_music_data = self.music_data[guild]
-        audio_sources = RoyalPCMAudio.create_from_url(url)
+        audio_sources = await asyncify(RoyalPCMAudio.create_from_url, url)
         for audio_source in audio_sources:
             log.debug(f"Adding {audio_source} to music_data")
             guild_music_data.add(audio_source)

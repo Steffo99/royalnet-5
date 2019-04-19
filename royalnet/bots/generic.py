@@ -112,7 +112,7 @@ class GenericBot:
         except Exception as exc:
             log.debug(f"Calling error_command because of an error in {command_name}")
             await self._Call(channel, self.error_command,
-                             exception_info=sys.exc_info(),
+                             exception=exc,
                              previous_command=command, **kwargs).run()
 
     async def run(self):
