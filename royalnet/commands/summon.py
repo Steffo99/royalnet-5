@@ -24,10 +24,10 @@ class SummonNH(NetworkHandler):
     @classmethod
     async def discord(cls, bot: "DiscordBot", message: SummonMessage):
         """Handle a summon Royalnet request. That is, join a voice channel, or move to a different one if that is not possible."""
-        channel = bot.find_channel(message.channel_identifier)
+        channel = bot.client.find_channel(message.channel_identifier)
         if not isinstance(channel, discord.VoiceChannel):
             raise NoneFoundError("Channel is not a voice channel")
-        loop.create_task(bot.bot.vc_connect_or_move(channel))
+        loop.create_task(bot.client.vc_connect_or_move(channel))
         return RequestSuccessful()
 
 

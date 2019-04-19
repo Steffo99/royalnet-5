@@ -155,9 +155,9 @@ class DiscordBot(GenericBot):
 
         return DiscordClient
 
-    def _init_bot(self):
+    def _init_client(self):
         """Create a bot instance."""
-        self.bot = self._bot_factory()()
+        self.client = self._bot_factory()()
 
     def __init__(self, *,
                  discord_config: DiscordConfig,
@@ -172,12 +172,12 @@ class DiscordBot(GenericBot):
                          missing_command=missing_command,
                          error_command=error_command)
         self._discord_config = discord_config
-        self._init_bot()
+        self._init_client()
         self._init_voice()
 
     async def run(self):
-        await self.bot.login(self._discord_config.token)
-        await self.bot.connect()
+        await self.client.login(self._discord_config.token)
+        await self.client.connect()
         # TODO: how to stop?
 
 # class DiscordBot:
