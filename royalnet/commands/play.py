@@ -25,7 +25,7 @@ class PlayNH(NetworkHandler):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
         # Find the matching guild
         if message.guild_identifier:
-            guild = bot.find_guild(message.guild_identifier)
+            guild = bot.client.find_guild(message.guild_identifier)
         else:
             if len(bot.music_data) != 1:
                 raise TooManyFoundError("Multiple guilds found")
