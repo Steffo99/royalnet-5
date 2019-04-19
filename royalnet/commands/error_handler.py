@@ -1,3 +1,4 @@
+import logging as _logging
 import traceback
 from ..utils import Command, Call
 from ..error import NoneFoundError, \
@@ -7,6 +8,9 @@ from ..error import NoneFoundError, \
                     InvalidInputError, \
                     InvalidConfigError, \
                     ExternalError
+
+
+log = _logging.getLogger(__name__)
 
 
 class ErrorHandlerCommand(Command):
@@ -46,4 +50,4 @@ class ErrorHandlerCommand(Command):
             return
         await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{e_type.__name__}[/b]\n{e_value}")
         formatted_tb: str = '\n'.join(traceback.format_tb(e_tb))
-        call.logger.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")
+        log.error(f"Unhandled exception - {e_type.__name__}: {e_value}\n{formatted_tb}")
