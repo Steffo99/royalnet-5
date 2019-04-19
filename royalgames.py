@@ -21,7 +21,7 @@ logging.getLogger("royalnet.bots.telegram").setLevel(logging.DEBUG)
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
-            KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand]
+            KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand, SkipCommand]
 
 address, port = "localhost", 1234
 
