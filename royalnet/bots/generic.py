@@ -13,6 +13,8 @@ log = logging.getLogger(__name__)
 
 class GenericBot:
     """A generic bot class, to be used as base for the other more specific classes, such as TelegramBot and DiscordBot."""
+    interface_name = NotImplemented
+
     def _init_commands(self,
                        commands: typing.List[typing.Type[Command]],
                        missing_command: typing.Type[Command],
@@ -39,7 +41,7 @@ class GenericBot:
         log.debug(f"Running RoyalnetLink {self.network}")
         loop.create_task(self.network.run())
 
-    def _network_handler(self, message: Message) -> Message:
+    async def _network_handler(self, message: Message) -> Message:
         """Handle a single Message received from the RoyalnetLink"""
         log.debug(f"Received {message} from the RoyalnetLink")
         try:
@@ -49,7 +51,7 @@ class GenericBot:
             return RequestError(KeyError("Missing network_handler"))
         try:
             log.debug(f"Using {network_handler} as handler for {message}")
-            return await network_handler.discord(message)
+            return await getattr(network_handler, self.interface_name)(message)
         except Exception as exc:
             log.debug(f"Exception {exc} in {network_handler}")
             return RequestError(exc)
@@ -75,6 +77,13 @@ class GenericBot:
                  commands: typing.List[typing.Type[Command]] = None,
                  missing_command: typing.Type[Command] = NullCommand,
                  error_command: typing.Type[Command] = NullCommand):
+        if database_config is None:
+            self.alchemy = None
+            self.master_table = None
+            self.identity_table = None
+            self.identity_column = None
+        else:
+            self._init_database(commands=commands, database_config=database_config)
         if commands is None:
             commands = []
         self._init_commands(commands, missing_command=missing_command, error_command=error_command)
@@ -83,13 +92,6 @@ class GenericBot:
             self.network = None
         else:
             self._init_royalnet(royalnet_config=royalnet_config)
-        if database_config is None:
-            self.alchemy = None
-            self.master_table = None
-            self.identity_table = None
-            self.identity_column = None
-        else:
-            self._init_database(commands=commands, database_config=database_config)
 
     async def call(self, command_name: str, channel, parameters: typing.List[str] = None, **kwargs):
         """Call a command by its string, or missing_command if it doesn't exists, or error_command if an exception is raised during the execution."""
