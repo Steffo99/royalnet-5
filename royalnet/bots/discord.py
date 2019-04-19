@@ -2,14 +2,13 @@ import discord
 import asyncio
 import typing
 import logging as _logging
-import sys
 from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
-from ..network import RoyalnetLink, Message, RequestSuccessful, RequestError, RoyalnetConfig
-from ..database import Alchemy, relationshiplinkchain, DatabaseConfig
-from ..audio import RoyalPCMFile, PlayMode, Playlist
+from ..network import Message, RequestError, RoyalnetConfig
+from ..database import DatabaseConfig
+from ..audio import PlayMode, Playlist
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -25,13 +24,15 @@ class DiscordConfig:
 
 
 class DiscordBot(GenericBot):
+    interface_name = "discord"
+
     def _init_voice(self):
         self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
 
     def _call_factory(self) -> typing.Type[Call]:
         # noinspection PyMethodParameters
         class DiscordCall(Call):
-            interface_name = "discord"
+            interface_name = self.interface_name
             interface_obj = self
             interface_prefix = "!"
 
@@ -172,13 +173,12 @@ class DiscordBot(GenericBot):
                          error_command=error_command)
         self._discord_config = discord_config
         self._init_bot()
+        self._init_voice()
 
     async def run(self):
         await self.bot.login(self._discord_config.token)
         await self.bot.connect()
         # TODO: how to stop?
-
-
 
 # class DiscordBot:
 #     async def add_to_music_data(self, url: str, guild: discord.Guild):
@@ -211,6 +211,4 @@ class DiscordBot(GenericBot):
 #         next_source = next_file.create_audio_source()
 #         log.debug(f"Starting playback of {next_source}")
 #         voice_client.play(next_source, after=advance)
-#
-
 #
