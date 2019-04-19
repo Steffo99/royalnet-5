@@ -48,7 +48,7 @@ class SummonCommand(Command):
 
     @classmethod
     async def discord(cls, call: Call):
-        bot = call.interface_obj.bot
+        bot = call.interface_obj.client
         message: discord.Message = call.kwargs["message"]
         channel_name: str = call.args.optional(0)
         if channel_name:

@@ -1,14 +1,18 @@
 from discord import AudioSource
 from discord.opus import Encoder as OpusEncoder
 import typing
-if typing.TYPE_CHECKING:
-    from .royalpcmfile import RoyalPCMFile
+from .royalpcmfile import RoyalPCMFile
 
 
 class RoyalPCMAudio(AudioSource):
     def __init__(self, rpf: "RoyalPCMFile"):
         self.rpf: "RoyalPCMFile" = rpf
         self._file = open(rpf.audio_filename, "rb")
+
+    @staticmethod
+    def create_from_url(url) -> typing.List["RoyalPCMAudio"]:
+        rpf_list = RoyalPCMFile.create_from_url(url)
+        return [RoyalPCMAudio(rpf) for rpf in rpf_list]
 
     def cleanup(self):
         self._file.close()
