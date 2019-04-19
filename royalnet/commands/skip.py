@@ -20,7 +20,7 @@ class SkipNH(NetworkHandler):
     async def discord(cls, bot: "DiscordBot", message: SkipMessage):
         # Find the matching guild
         if message.guild_name:
-            guild = bot.client.find_guild(message.guild_name)
+            guild = bot.client.find_guild_by_name(message.guild_name)
         else:
             if len(bot.music_data) != 1:
                 raise TooManyFoundError("Multiple guilds found")
@@ -31,6 +31,7 @@ class SkipNH(NetworkHandler):
             raise NoneFoundError("Nothing to skip")
         # noinspection PyProtectedMember
         voice_client._player.stop()
+        return RequestSuccessful()
 
 
 class SkipCommand(Command):
@@ -43,6 +44,6 @@ class SkipCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        guild = call.args.match(r"(?:\[(.+)])?")
+        guild, = call.args.match(r"(?:\[(.+)])?")
         response: RequestSuccessful = await call.net_request(SkipMessage(guild), "discord")
         await call.reply(f"✅ Richiesta lo skip della canzone attuale..")
