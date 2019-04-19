@@ -14,7 +14,7 @@ loop = asyncio.get_event_loop()
 class SummonMessage(Message):
     def __init__(self, channel_identifier: typing.Union[int, str],
                  guild_identifier: typing.Optional[typing.Union[int, str]] = None):
-        self.channel_identifier = channel_identifier
+        self.channel_name = channel_identifier
         self.guild_identifier = guild_identifier
 
 
@@ -24,7 +24,7 @@ class SummonNH(NetworkHandler):
     @classmethod
     async def discord(cls, bot: "DiscordBot", message: SummonMessage):
         """Handle a summon Royalnet request. That is, join a voice channel, or move to a different one if that is not possible."""
-        channel = bot.client.find_channel(message.channel_identifier)
+        channel = bot.client.find_channel_by_name(message.channel_name)
         if not isinstance(channel, discord.VoiceChannel):
             raise NoneFoundError("Channel is not a voice channel")
         loop.create_task(bot.client.vc_connect_or_move(channel))

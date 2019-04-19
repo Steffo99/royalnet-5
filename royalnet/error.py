@@ -22,5 +22,12 @@ class InvalidConfigError(Exception):
     """The bot has not been configured correctly, therefore the command can not function."""
 
 
+class RoyalnetError(Exception):
+    """An error was raised while handling the Royalnet request.
+    This exception contains the exception that was raised during the handling."""
+    def __init__(self, exc):
+        self.exc = exc
+
+
 class ExternalError(Exception):
     """Something went wrong in a non-Royalnet component and the command execution cannot be completed."""
