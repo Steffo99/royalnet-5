@@ -2,10 +2,10 @@ from sqlalchemy import Column, \
                        Integer, \
                        String, \
                        BigInteger, \
-                       LargeBinary, \
                        ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
+# noinspection PyUnresolvedReferences
 from .royals import Royal
 
 

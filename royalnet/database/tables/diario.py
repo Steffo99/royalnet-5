@@ -8,6 +8,7 @@ from sqlalchemy import Column, \
                        String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
+# noinspection PyUnresolvedReferences
 from .royals import Royal
 
 

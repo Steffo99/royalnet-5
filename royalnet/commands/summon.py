@@ -53,9 +53,8 @@ class SummonCommand(Command):
         channel_name: str = call.args.optional(0)
         if channel_name:
             guild: typing.Optional[discord.Guild] = message.guild
-            channels: typing.List[discord.abc.GuildChannel]
             if guild is not None:
-                channels = guild.channels
+                channels: typing.List[discord.abc.GuildChannel] = guild.channels
             else:
                 channels = bot.get_all_channels()
             matching_channels: typing.List[discord.VoiceChannel] = []

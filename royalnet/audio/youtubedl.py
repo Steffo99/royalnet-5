@@ -2,7 +2,6 @@ import typing
 import logging as _logging
 import os
 from youtube_dl import YoutubeDL
-from contextlib import contextmanager
 
 log = _logging.getLogger(__name__)
 

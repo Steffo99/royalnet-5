@@ -1,6 +1,5 @@
 import typing
 from ..error import UnsupportedError
-from ..network import Message
 if typing.TYPE_CHECKING:
     from .call import Call
     from ..utils import NetworkHandler

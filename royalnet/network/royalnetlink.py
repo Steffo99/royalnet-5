@@ -146,7 +146,6 @@ class RoyalnetLink:
                 assert isinstance(response, Message)
             except Exception as exc:
                 response = RequestError(exc=exc)
-                return
             response_package: Package = package.reply(response)
             await self.send(response_package)
             log.debug(f"Replied to request {response_package.source_conv_id}: {response_package}")

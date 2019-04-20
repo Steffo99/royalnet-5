@@ -13,9 +13,8 @@ class ReminderCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         date_str, reminder_text = call.args.match(r"\[ *(.+?) *] *(.+?) *$")
-        date: typing.Optional[datetime.datetime]
         try:
-            date = dateparser.parse(date_str)
+            date: typing.Optional[datetime.datetime] = dateparser.parse(date_str)
         except OverflowError:
             date = None
         if date is None:
