@@ -206,11 +206,11 @@ class DiscordBot(GenericBot):
             log.debug(f"Adding {audio_source} to music_data")
             guild_music_data.add(audio_source)
         if guild_music_data.now_playing is None:
-            log.debug(f"Starting playback chain")
             await self.advance_music_data(guild)
 
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
+        log.debug(f"Starting playback chain")
         guild_music_data = self.music_data[guild]
         voice_client = self.client.find_voice_client_by_guild(guild)
         next_source: RoyalPCMAudio = await guild_music_data.next()
@@ -219,6 +219,8 @@ class DiscordBot(GenericBot):
             return
 
         def advance(error=None):
+            if error:
+                raise Exception(f"Error while advancing music_data: {error}")
             loop.create_task(self.advance_music_data(guild))
 
         log.debug(f"Starting playback of {next_source}")

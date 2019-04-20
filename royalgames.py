@@ -39,7 +39,7 @@ tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id"),
                      commands=commands,
                      error_command=ErrorHandlerCommand)
-loop.run_until_complete(master.run())
+loop.run_until_complete(master.start())
 loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())
 print("Starting loop...")
