@@ -2,13 +2,12 @@ import telegram
 import asyncio
 import typing
 import logging as _logging
-import sys
 from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, InvalidConfigError
-from ..network import RoyalnetLink, Message, RequestError, RoyalnetConfig
-from ..database import Alchemy, relationshiplinkchain, DatabaseConfig
+from ..network import Message, RoyalnetConfig
+from ..database import DatabaseConfig
 
 loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)

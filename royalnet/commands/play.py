@@ -49,5 +49,5 @@ class PlayCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         guild, url = call.args.match(r"(?:\[(.+)])?\s*(.+)")
-        response: RequestSuccessful = await call.net_request(PlayMessage(url, guild), "discord")
+        await call.net_request(PlayMessage(url, guild), "discord")
         await call.reply(f"✅ Richiesta la riproduzione di [c]{url}[/c].")

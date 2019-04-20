@@ -3,7 +3,6 @@ import discord
 from ..network import Message, RequestSuccessful
 from ..utils import Command, Call, NetworkHandler
 from ..error import TooManyFoundError, NoneFoundError
-from ..audio import RoyalPCMAudio
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
@@ -45,5 +44,5 @@ class SkipCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         guild, = call.args.match(r"(?:\[(.+)])?")
-        response: RequestSuccessful = await call.net_request(SkipMessage(guild), "discord")
+        await call.net_request(SkipMessage(guild), "discord")
         await call.reply(f"✅ Richiesta lo skip della canzone attuale..")

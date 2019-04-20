@@ -1,6 +1,3 @@
-import typing
-
-
 class RoyalnetConfig:
     def __init__(self,
                  master_uri: str,

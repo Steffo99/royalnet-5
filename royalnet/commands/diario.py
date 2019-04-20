@@ -100,12 +100,19 @@ class DiarioCommand(Command):
         message: telegram.Message = update.message
         reply: telegram.Message = message.reply_to_message
         creator = await call.get_author()
+        # noinspection PyUnusedLocal
         quoted_account: typing.Optional[call.alchemy.Telegram]
+        # noinspection PyUnusedLocal
         quoted: typing.Optional[str]
+        # noinspection PyUnusedLocal
         text: typing.Optional[str]
+        # noinspection PyUnusedLocal
         context: typing.Optional[str]
+        # noinspection PyUnusedLocal
         timestamp: datetime.datetime
+        # noinspection PyUnusedLocal
         media_url: typing.Optional[str]
+        # noinspection PyUnusedLocal
         spoiler: bool
         if creator is None:
             await call.reply("⚠️ Devi essere registrato a Royalnet per usare questo comando!")

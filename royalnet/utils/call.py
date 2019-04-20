@@ -1,6 +1,5 @@
 import typing
 import asyncio
-import logging
 from ..network.messages import Message
 from .command import Command
 from .commandargs import CommandArgs

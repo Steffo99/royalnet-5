@@ -1,4 +1,3 @@
-import traceback
 from ..error import RoyalnetError
 
 
