@@ -106,9 +106,9 @@ class TelegramBot(GenericBot):
             return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
-        command_text.replace(f"@{self.client.username}", "")
+        command_name = command_text.replace(f"@{self.client.username}", "").lower()
         # Call the command
-        await self.call(command_text, update.message.chat, parameters, update=update)
+        await self.call(command_name, update.message.chat, parameters, update=update)
 
     async def run(self):
         while True:

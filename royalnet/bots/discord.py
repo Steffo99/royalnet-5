@@ -114,8 +114,10 @@ class DiscordBot(GenericBot):
                     return
                 # Find and clean parameters
                 command_text, *parameters = text.split(" ")
+                # Don't use a case-sensitive command name
+                command_name = command_text.lower()
                 # Call the command
-                await self.call(command_text, message.channel, parameters, message=message)
+                await self.call(command_name, message.channel, parameters, message=message)
 
             def find_guild_by_name(cli, name: str) -> discord.Guild:
                 """Find the Guild with the specified name. Case-insensitive.
