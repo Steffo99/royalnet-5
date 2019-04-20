@@ -1,16 +1,12 @@
 import ffmpeg
 import os
 import typing
-import logging as _logging
 import time
 from .youtubedl import YtdlFile, YtdlInfo
-
-log = _logging.getLogger(__name__)
 
 
 class RoyalPCMFile(YtdlFile):
     ytdl_args = {
-        "logger": log,  # Log messages to a logging.Logger instance.
         "format": "bestaudio"  # Fetch the best audio format available
     }
 
@@ -24,17 +20,17 @@ class RoyalPCMFile(YtdlFile):
             raise FileExistsError("Can't overwrite file")
         # Overwrite the new ytdl_args
         self.ytdl_args = {**self.ytdl_args, **ytdl_args}
-        log.info(f"Now downloading {info.webpage_url}")
+        self.ytdl_args["log"].info(f"Now downloading {info.webpage_url}")
         super().__init__(info, outtmpl=self._ytdl_filename, **self.ytdl_args)
         # Find the audio_filename with a regex (should be video.opus)
-        log.info(f"Preparing {self.video_filename}...")
+        self.ytdl_args["log"].info(f"Preparing {self.video_filename}...")
         # Convert the video to pcm
         ffmpeg.input(f"./{self.video_filename}") \
               .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
               .overwrite_output() \
-              .run(quiet=not __debug__)
+              .run(quiet=False)
         # Delete the video file
-        log.info(f"Deleting {self.video_filename}")
+        self.ytdl_args["log"].info(f"Deleting {self.video_filename}")
         self.delete_video_file()
 
     def __repr__(self):
@@ -54,5 +50,5 @@ class RoyalPCMFile(YtdlFile):
         return f"./downloads/{self.info.title}-{str(int(self._time))}.pcm"
 
     def __del__(self):
-        log.info(f"Deleting {self.audio_filename}")
+        self.ytdl_args["log"].info(f"Deleting {self.audio_filename}")
         os.remove(self.audio_filename)
