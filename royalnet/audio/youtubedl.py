@@ -132,7 +132,7 @@ class YtdlInfo:
         return [YtdlInfo(first_info)]
 
     def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> YtdlFile:
-        return YtdlFile(self, outtmpl)
+        return YtdlFile(self, outtmpl, **ytdl_args)
 
     def __repr__(self):
         if self.title:
