@@ -28,7 +28,7 @@ class RoyalPCMFile(YtdlFile):
         log.info(f"Now downloading {info.webpage_url}")
         super().__init__(info, outtmpl=self._ytdl_filename, **self.ytdl_args)
         # Find the audio_filename with a regex (should be video.opus)
-        log.info(f"Preparing {self.video_filename}...")
+        log.info(f"Converting {self.video_filename}...")
         # Convert the video to pcm
         try:
             ffmpeg.input(f"./{self.video_filename}") \
@@ -58,6 +58,6 @@ class RoyalPCMFile(YtdlFile):
     def audio_filename(self):
         return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.pcm"
 
-    def __del__(self):
+    def delete_audio_file(self):
         log.info(f"Deleting {self.audio_filename}")
         os.remove(self.audio_filename)

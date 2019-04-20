@@ -25,8 +25,8 @@ class InvalidConfigError(Exception):
 class RoyalnetError(Exception):
     """An error was raised while handling the Royalnet request.
     This exception contains the exception that was raised during the handling."""
-    def __init__(self, exc):
-        self.exc = exc
+    def __init__(self, exc: Exception):
+        self.exc: Exception = exc
 
 
 class ExternalError(Exception):

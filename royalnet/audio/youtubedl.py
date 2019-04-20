@@ -147,7 +147,3 @@ class YtdlInfo:
         if self.webpage_url:
             return self.webpage_url
         return self.id
-
-
-if __name__ == "__main__":
-    f = YtdlFile.create_from_url("https://www.youtube.com/watch?v=BaW_jenozKc&v=UxxajLWwzqY", "./lovely.mp4")

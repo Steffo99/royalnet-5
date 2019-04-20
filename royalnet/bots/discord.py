@@ -102,7 +102,7 @@ class DiscordBot(GenericBot):
                     log.debug(f"Creating music_data for {channel.guild}")
                     self.music_data[channel.guild] = Playlist()
 
-            @staticmethod  # Not really static because of the self reference
+            @staticmethod
             async def on_message(message: discord.Message):
                 text = message.content
                 # Skip non-text messages
@@ -118,6 +118,10 @@ class DiscordBot(GenericBot):
                 command_name = command_text.lower()
                 # Call the command
                 await self.call(command_name, message.channel, parameters, message=message)
+
+            async def on_ready(cli):
+                log.debug("Connection successful, client is ready")
+                await cli.change_presence(status=discord.Status.online)
 
             def find_guild_by_name(cli, name: str) -> discord.Guild:
                 """Find the Guild with the specified name. Case-insensitive.
@@ -212,10 +216,10 @@ class DiscordBot(GenericBot):
 
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
-        log.debug(f"Starting playback chain")
         guild_music_data = self.music_data[guild]
         voice_client = self.client.find_voice_client_by_guild(guild)
         next_source: RoyalPCMAudio = await guild_music_data.next()
+        await self.update_activity_with_source_title(next_source)
         if next_source is None:
             log.debug(f"Ending playback chain")
             return
@@ -227,3 +231,19 @@ class DiscordBot(GenericBot):
 
         log.debug(f"Starting playback of {next_source}")
         voice_client.play(next_source, after=advance)
+
+    async def update_activity_with_source_title(self, rpa: typing.Optional[RoyalPCMAudio] = None):
+        if len(self.music_data) > 1:
+            # Multiple guilds are using the bot, do not display anything
+            log.debug(f"Updating current Activity: setting to None, as multiple guilds are using the bot")
+            await self.client.change_presence(status=discord.Status.online)
+            return
+        if rpa is None:
+            # No songs are playing now
+            log.debug(f"Updating current Activity: setting to None, as nothing is currently being played")
+            await self.client.change_presence(status=discord.Status.online)
+            return
+        log.debug(f"Updating current Activity: listening to {rpa.rpf.info.title}")
+        await self.client.change_presence(activity=discord.Activity(name=rpa.rpf.info.title,
+                                                                    type=discord.ActivityType.listening),
+                                          status=discord.Status.online)

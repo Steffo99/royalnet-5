@@ -2,7 +2,7 @@ import typing
 import asyncio
 from ..utils import Command, Call, NetworkHandler
 from ..network import Message, RequestSuccessful
-from ..error import TooManyFoundError
+from ..error import TooManyFoundError, NoneFoundError
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
@@ -26,7 +26,9 @@ class PlayNH(NetworkHandler):
         if message.guild_name:
             guild = bot.client.find_guild(message.guild_name)
         else:
-            if len(bot.music_data) != 1:
+            if len(bot.music_data) == 0:
+                raise NoneFoundError("No voice clients active")
+            if len(bot.music_data) > 1:
                 raise TooManyFoundError("Multiple guilds found")
             guild = list(bot.music_data)[0]
         # Ensure the guild has a PlayMode before adding the file to it
