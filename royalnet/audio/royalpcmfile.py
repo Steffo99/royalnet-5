@@ -34,8 +34,8 @@ class RoyalPCMFile(YtdlFile):
               .overwrite_output() \
               .run(quiet=not __debug__)
         # Delete the video file
-        # log.info(f"Deleting {self.video_filename}")
-        # self.delete_video_file()
+        log.info(f"Deleting {self.video_filename}")
+        self.delete_video_file()
 
     def __repr__(self):
         return f"<RoyalPCMFile {self.audio_filename}>"
