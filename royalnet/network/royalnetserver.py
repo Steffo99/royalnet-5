@@ -9,7 +9,7 @@ import logging as _logging
 from .messages import InvalidPackageEM, InvalidSecretEM, IdentifySuccessfulMessage
 from .packages import Package
 
-loop = asyncio.get_event_loop()
+default_loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 
@@ -29,11 +29,12 @@ class ConnectedClient:
 
 
 class RoyalnetServer:
-    def __init__(self, address: str, port: int, required_secret: str):
+    def __init__(self, address: str, port: int, required_secret: str, *, loop: asyncio.AbstractEventLoop = default_loop):
         self.address: str = address
         self.port: int = port
         self.required_secret: str = required_secret
         self.identified_clients: typing.List[ConnectedClient] = []
+        self._loop: asyncio.AbstractEventLoop = loop
 
     def find_client(self, *, nid: str = None, link_type: str = None) -> typing.List[ConnectedClient]:
         assert not (nid and link_type)
@@ -52,15 +53,15 @@ class RoyalnetServer:
         identify_msg = await websocket.recv()
         log.debug(f"{websocket.remote_address} identified itself with: {identify_msg}.")
         if not isinstance(identify_msg, str):
-            websocket.send(InvalidPackageEM("Invalid identification message (not a str)"))
+            await websocket.send(InvalidPackageEM("Invalid identification message (not a str)"))
             return
-        identification = re.match(r"Identify ([A-Za-z0-9\-]+):([a-z]+):([A-Za-z0-9\-]+)", identify_msg)
+        identification = re.match(r"Identify ([^:\s]+):([^:\s]+):([^:\s]+)", identify_msg)
         if identification is None:
-            websocket.send(InvalidPackageEM("Invalid identification message (regex failed)"))
+            await websocket.send(InvalidPackageEM("Invalid identification message (regex failed)"))
             return
         secret = identification.group(3)
         if secret != self.required_secret:
-            websocket.send(InvalidSecretEM("Invalid secret"))
+            await websocket.send(InvalidSecretEM("Invalid secret"))
             return
         # Identification successful
         connected_client.nid = identification.group(1)
@@ -81,7 +82,7 @@ class RoyalnetServer:
                 pass
             # Otherwise, route the package to its destination
             # noinspection PyAsyncCall
-            loop.create_task(self.route_package(package))
+            self._loop.create_task(self.route_package(package))
 
     def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
         """Find a list of destinations for the sent packages"""
@@ -112,7 +113,7 @@ class RoyalnetServer:
     async def serve(self):
         await websockets.serve(self.listener, host=self.address, port=self.port)
 
-    async def run(self):
-        log.debug(f"Running main server loop for __master__ on ws://{self.address}:{self.port}")
+    async def start(self):
+        log.debug(f"Starting main server loop for __master__ on ws://{self.address}:{self.port}")
         # noinspection PyAsyncCall
-        loop.create_task(self.serve())
+        self._loop.create_task(self.serve())

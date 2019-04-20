@@ -8,7 +8,7 @@ import logging as _logging
 from .messages import Message, ServerErrorMessage, RequestError
 from .packages import Package
 
-loop = asyncio.get_event_loop()
+default_loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 
@@ -27,8 +27,8 @@ class NetworkError(Exception):
 
 
 class PendingRequest:
-    def __init__(self):
-        self.event: asyncio.Event = asyncio.Event()
+    def __init__(self, *, loop=default_loop):
+        self.event: asyncio.Event = asyncio.Event(loop=loop)
         self.data: typing.Optional[Message] = None
 
     def __repr__(self):
@@ -58,7 +58,8 @@ def requires_identification(func):
 
 
 class RoyalnetLink:
-    def __init__(self, master_uri: str, secret: str, link_type: str, request_handler):
+    def __init__(self, master_uri: str, secret: str, link_type: str, request_handler, *,
+                 loop: asyncio.AbstractEventLoop = default_loop):
         assert ":" not in link_type
         self.master_uri: str = master_uri
         self.link_type: str = link_type
@@ -67,12 +68,13 @@ class RoyalnetLink:
         self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
         self.request_handler = request_handler
         self._pending_requests: typing.Dict[typing.Optional[Message]] = {}
-        self._connect_event: asyncio.Event = asyncio.Event()
-        self.identify_event: asyncio.Event = asyncio.Event()
+        self._loop: asyncio.AbstractEventLoop = loop
+        self._connect_event: asyncio.Event = asyncio.Event(loop=self._loop)
+        self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)
 
     async def connect(self):
         log.info(f"Connecting to {self.master_uri}...")
-        self.websocket = await websockets.connect(self.master_uri)
+        self.websocket = await websockets.connect(self.master_uri, loop=self._loop)
         self._connect_event.set()
         log.info(f"Connected!")
 
@@ -112,7 +114,7 @@ class RoyalnetLink:
     @requires_identification
     async def request(self, message, destination):
         package = Package(message, destination, self.nid)
-        request = PendingRequest()
+        request = PendingRequest(loop=self._loop)
         self._pending_requests[package.source_conv_id] = request
         await self.send(package)
         log.debug(f"Sent request: {message} -> {destination}")
@@ -141,6 +143,7 @@ class RoyalnetLink:
             log.debug(f"Received request {package.source_conv_id}: {package}")
             try:
                 response = await self.request_handler(package.data)
+                assert isinstance(response, Message)
             except Exception as exc:
                 response = RequestError(exc=exc)
                 return
