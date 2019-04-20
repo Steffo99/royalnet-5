@@ -1,8 +1,13 @@
+import logging
 import ffmpeg
 import os
 import typing
 import time
 from .youtubedl import YtdlFile, YtdlInfo
+from ..utils import safefilename
+
+
+log = logging.getLogger(__name__)
 
 
 class RoyalPCMFile(YtdlFile):
@@ -20,17 +25,21 @@ class RoyalPCMFile(YtdlFile):
             raise FileExistsError("Can't overwrite file")
         # Overwrite the new ytdl_args
         self.ytdl_args = {**self.ytdl_args, **ytdl_args}
-        self.ytdl_args["log"].info(f"Now downloading {info.webpage_url}")
+        log.info(f"Now downloading {info.webpage_url}")
         super().__init__(info, outtmpl=self._ytdl_filename, **self.ytdl_args)
         # Find the audio_filename with a regex (should be video.opus)
-        self.ytdl_args["log"].info(f"Preparing {self.video_filename}...")
+        log.info(f"Preparing {self.video_filename}...")
         # Convert the video to pcm
-        ffmpeg.input(f"./{self.video_filename}") \
-              .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
-              .overwrite_output() \
-              .run(quiet=False)
+        try:
+            ffmpeg.input(f"./{self.video_filename}") \
+                  .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
+                  .overwrite_output() \
+                  .run(quiet=False)
+        except ffmpeg.Error as exc:
+            log.error(f"FFmpeg error: {exc.stderr}")
+            raise
         # Delete the video file
-        self.ytdl_args["log"].info(f"Deleting {self.video_filename}")
+        log.info(f"Deleting {self.video_filename}")
         self.delete_video_file()
 
     def __repr__(self):
@@ -43,12 +52,12 @@ class RoyalPCMFile(YtdlFile):
 
     @property
     def _ytdl_filename(self):
-        return f"./downloads/{self.info.title}-{str(int(self._time))}.ytdl"
+        return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.ytdl"
 
     @property
     def audio_filename(self):
-        return f"./downloads/{self.info.title}-{str(int(self._time))}.pcm"
+        return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.pcm"
 
     def __del__(self):
-        self.ytdl_args["log"].info(f"Deleting {self.audio_filename}")
+        log.info(f"Deleting {self.audio_filename}")
         os.remove(self.audio_filename)
