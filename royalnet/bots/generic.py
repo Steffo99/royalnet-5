@@ -25,7 +25,8 @@ class GenericBot:
         self.commands: typing.Dict[str, typing.Type[Command]] = {}
         self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
         for command in commands:
-            self.commands[f"{command_prefix}{command.command_name}"] = command
+            lower_command_name = command.command_name.lower()
+            self.commands[f"{command_prefix}{lower_command_name}"] = command
             self.network_handlers = {**self.network_handlers, **command.network_handler_dict()}
         self.missing_command: typing.Type[Command] = missing_command
         self.error_command: typing.Type[Command] = error_command
