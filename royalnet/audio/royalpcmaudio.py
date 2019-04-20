@@ -14,9 +14,6 @@ class RoyalPCMAudio(AudioSource):
         rpf_list = RoyalPCMFile.create_from_url(url)
         return [RoyalPCMAudio(rpf) for rpf in rpf_list]
 
-    def cleanup(self):
-        self._file.close()
-
     def is_opus(self):
         return False
 
@@ -28,3 +25,7 @@ class RoyalPCMAudio(AudioSource):
 
     def __repr__(self):
         return f"<RoyalPCMAudio {self.rpf.audio_filename}>"
+
+    def __del__(self):
+        self._file.close()
+        del self.rpf
