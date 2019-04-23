@@ -22,7 +22,7 @@ class PlaymodeNH(NetworkHandler):
 
     @classmethod
     async def discord(cls, bot: "DiscordBot", message: PlaymodeMessage):
-        """Handle a play Royalnet request. That is, add audio to a PlayMode."""
+        """Handle a playmode Royalnet request. That is, change current PlayMode."""
         # Find the matching guild
         if message.guild_name:
             guild = bot.client.find_guild(message.guild_name)
