@@ -46,13 +46,17 @@ class RoyalPCMFile(YtdlFile):
         return f"<RoyalPCMFile {self.audio_filename}>"
 
     @staticmethod
-    def create_from_url(url, **ytdl_args) -> typing.List["RoyalPCMFile"]:
+    def create_from_url(url: str, **ytdl_args) -> typing.List["RoyalPCMFile"]:
+        """Download a file with youtube_dl and create a list of :py:class:`discord.audio.RoyalPCMFile`.
+
+        Parameters:
+            url: The url of the file to download."""
         info_list = YtdlInfo.create_from_url(url)
         return [RoyalPCMFile(info, **ytdl_args) for info in info_list]
 
     @staticmethod
     def create_from_ytsearch(search: str, amount: int = 1, **ytdl_args) -> typing.List["RoyalPCMFile"]:
-        """Search a string on YouTube and download the first amount videos found."""
+        """Search a string on YouTube and download the first ``amount`` number of videos, then download those with youtube_dl and create a list of :py:class:`discord.audio.RoyalPCMFile`."""
         url = f"ytsearch{amount}:{search}"
         info_list = YtdlInfo.create_from_url(url)
         return [RoyalPCMFile(info, **ytdl_args) for info in info_list]
