@@ -8,3 +8,4 @@ markovmodels/
 logs/
 royalnet.egg-info/
 .pytest_cache/
+docs/_build/*
