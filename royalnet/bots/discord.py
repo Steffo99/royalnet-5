@@ -53,7 +53,9 @@ class DiscordBot(GenericBot):
                     .replace("[u]", "__") \
                     .replace("[/u]", "__") \
                     .replace("[c]", "`") \
-                    .replace("[/c]", "`")
+                    .replace("[/c]", "`") \
+                    .replace("[p]", "```") \
+                    .replace("[/p]", "```")
                 await call.channel.send(escaped_text)
 
             async def net_request(call, message: Message, destination: str):
@@ -203,11 +205,9 @@ class DiscordBot(GenericBot):
         await self.client.connect()
         # TODO: how to stop?
 
-    async def add_to_music_data(self, url: str, guild: discord.Guild):
+    async def add_to_music_data(self, audio_sources: typing.List[discord.AudioSource], guild: discord.Guild):
         """Add a file to the corresponding music_data object."""
-        log.debug(f"Adding {url} to music_data of {guild}")
         guild_music_data = self.music_data[guild]
-        audio_sources = await asyncify(RoyalPCMAudio.create_from_url, url)
         for audio_source in audio_sources:
             log.debug(f"Adding {audio_source} to music_data")
             guild_music_data.add(audio_source)
