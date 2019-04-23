@@ -42,10 +42,10 @@ class ErrorHandlerCommand(Command):
             await call.reply("⚠️ Il bot non è stato configurato correttamente, quindi questo comando non può essere eseguito. L'errore è stato segnalato all'amministratore.")
             return
         if isinstance(exception, RoyalnetError):
-            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: {exception.exc}")
+            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: [p]{exception.exc}[/p]")
             return
         if isinstance(exception, ExternalError):
             await call.reply("⚠️ Una risorsa esterna necessaria per l'esecuzione del comando non ha funzionato correttamente, quindi il comando è stato annullato.")
             return
-        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{exception.__class__.__name__}[/b]\n{exception}")
+        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{exception.__class__.__name__}[/b]\n[p]{exception}[/p]")
         log.error(f"Unhandled exception - {exception.__class__.__name__}: {exception}")
