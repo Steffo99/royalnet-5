@@ -7,6 +7,8 @@ royalnet.database
 
 .. automodule:: royalnet.database
    :members:
+   :private-members:
+   :undoc-members:
 
 
 Tables
@@ -14,3 +16,5 @@ Tables
 
 .. automodule:: royalnet.database.tables
    :members:
+   :private-members:
+   :undoc-members:

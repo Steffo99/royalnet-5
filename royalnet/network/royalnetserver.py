@@ -85,7 +85,13 @@ class RoyalnetServer:
             self._loop.create_task(self.route_package(package))
 
     def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
-        """Find a list of destinations for the sent packages"""
+        """Find a list of destinations for the package.
+
+        Parameters:
+            package: The package to find the destination of.
+
+        Returns:
+            A :py:class:`list` of :py:class:`ConnectedClients` to send the package to."""
         # Parse destination
         # Is it nothing?
         if package.destination == "NULL":

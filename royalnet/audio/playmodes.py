@@ -10,36 +10,52 @@ class PlayMode:
     def __init__(self):
         """Create a new PlayMode and initialize the generator inside."""
         self.now_playing: typing.Optional[RoyalPCMAudio] = None
-        self.generator: typing.AsyncGenerator = self.generate_generator()
+        self.generator: typing.AsyncGenerator = self._generate_generator()
 
-    async def next(self):
+    async def next(self) -> typing.Optional[RoyalPCMAudio]:
+        """Get the next :py:class:`royalnet.audio.RoyalPCMAudio` from the list and advance it.
+
+        Returns:
+            The next :py:class:`royalnet.audio.RoyalPCMAudio`."""
         return await self.generator.__anext__()
 
     def videos_left(self) -> typing.Union[int, float]:
         """Return the number of videos left in the PlayMode.
 
-        Usually returns an :py:class:`int`, but may return :py:obj:`math.inf` if the PlayMode is infinite."""
+        Returns:
+            Usually a :py:class:`int`, but may return also :py:obj:`math.inf` if the PlayMode is infinite."""
         raise NotImplementedError()
 
-    async def generate_generator(self):
-        """Get the next :py:class:`royalnet.audio.RoyalPCMAudio` from the list and advance it."""
+    async def _generate_generator(self):
+        """Factory function for an async generator that changes the ``now_playing`` property either to a :py:class:`discord.audio.RoyalPCMAudio` or to ``None``, then yields the value it changed it to.
+
+        Yields:
+            The :py:class:`royalnet.audio.RoyalPCMAudio` to be played next."""
         raise NotImplementedError()
         # This is needed to make the coroutine an async generator
         # noinspection PyUnreachableCode
         yield NotImplemented
 
-    def add(self, item):
-        """Add a new :py:class:`royalnet.audio.RoyalPCMAudio` to the PlayMode."""
+    def add(self, item: RoyalPCMAudio) -> None:
+        """Add a new :py:class:`royalnet.audio.RoyalPCMAudio` to the PlayMode.
+
+        Args:
+            item: The item to add to the PlayMode."""
         raise NotImplementedError()
 
-    def delete(self):
+    def delete(self) -> None:
         """Delete all :py:class:`royalnet.audio.RoyalPCMAudio` contained inside this PlayMode."""
         raise NotImplementedError()
 
 
 class Playlist(PlayMode):
     """A video list. :py:class:`royalnet.audio.RoyalPCMAudio` played are removed from the list."""
+
     def __init__(self, starting_list: typing.List[RoyalPCMAudio] = None):
+        """Create a new Playlist.
+
+        Args:
+            starting_list: A list of items with which the Playlist will be created."""
         super().__init__()
         if starting_list is None:
             starting_list = []
@@ -48,7 +64,7 @@ class Playlist(PlayMode):
     def videos_left(self) -> typing.Union[int, float]:
         return len(self.list)
 
-    async def generate_generator(self):
+    async def _generate_generator(self):
         while True:
             try:
                 next_video = self.list.pop(0)
@@ -60,10 +76,10 @@ class Playlist(PlayMode):
             if self.now_playing is not None:
                 self.now_playing.delete()
 
-    def add(self, item):
+    def add(self, item) -> None:
         self.list.append(item)
 
-    def delete(self):
+    def delete(self) -> None:
         while self.list:
             self.list.pop(0).delete()
         self.now_playing.delete()
@@ -71,7 +87,12 @@ class Playlist(PlayMode):
 
 class Pool(PlayMode):
     """A :py:class:`royalnet.audio.RoyalPCMAudio` pool. :py:class:`royalnet.audio.RoyalPCMAudio` are selected in random order and are not repeated until every song has been played at least once."""
+
     def __init__(self, starting_pool: typing.List[RoyalPCMAudio] = None):
+        """Create a new Pool.
+
+        Args:
+            starting_pool: A list of items the Pool will be created from."""
         super().__init__()
         if starting_pool is None:
             starting_pool = []
@@ -81,7 +102,7 @@ class Pool(PlayMode):
     def videos_left(self) -> typing.Union[int, float]:
         return math.inf
 
-    async def generate_generator(self):
+    async def _generate_generator(self):
         while True:
             if not self.pool:
                 self.now_playing = None
@@ -94,12 +115,12 @@ class Pool(PlayMode):
                 self.now_playing = next_video
                 yield next_video
 
-    def add(self, item):
+    def add(self, item) -> None:
         self.pool.append(item)
         self._pool_copy.append(item)
         random.shuffle(self._pool_copy)
 
-    def delete(self):
+    def delete(self) -> None:
         for item in self.pool:
             item.delete()
         self.pool = None

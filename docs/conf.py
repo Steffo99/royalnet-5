@@ -32,6 +32,17 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.intersphi
 intersphinx_mapping = {'python': ('https://docs.python.org/3.7', None),
                        'discord': ('https://discordpy.readthedocs.io/en/latest/', None)}
 
+
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__init__":
+        return False
+    return would_skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
