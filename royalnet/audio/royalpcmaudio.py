@@ -10,8 +10,13 @@ class RoyalPCMAudio(AudioSource):
         self._file = open(self.rpf.audio_filename, "rb")
 
     @staticmethod
-    def create_from_url(url) -> typing.List["RoyalPCMAudio"]:
+    def create_from_url(url: str) -> typing.List["RoyalPCMAudio"]:
         rpf_list = RoyalPCMFile.create_from_url(url)
+        return [RoyalPCMAudio(rpf) for rpf in rpf_list]
+
+    @staticmethod
+    def create_from_ytsearch(search: str, amount: int = 1) -> typing.List["RoyalPCMAudio"]:
+        rpf_list = RoyalPCMFile.create_from_ytsearch(search, amount)
         return [RoyalPCMAudio(rpf) for rpf in rpf_list]
 
     def is_opus(self):

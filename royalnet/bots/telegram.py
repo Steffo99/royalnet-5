@@ -48,7 +48,9 @@ class TelegramBot(GenericBot):
                                    .replace("[u]", "<b>") \
                                    .replace("[/u]", "</b>") \
                                    .replace("[c]", "<code>") \
-                                   .replace("[/c]", "</code>")
+                                   .replace("[/c]", "</code>") \
+                                   .replace("[p]", "<pre>") \
+                                   .replace("[/p]", "</pre>")
                 await asyncify(call.channel.send_message, escaped_text, parse_mode="HTML")
 
             async def net_request(call, message: Message, destination: str):
