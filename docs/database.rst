@@ -7,3 +7,10 @@ royalnet.database
 
 .. automodule:: royalnet.database
    :members:
+
+
+Tables
+------------------------------------
+
+.. automodule:: royalnet.database.tables
+   :members:

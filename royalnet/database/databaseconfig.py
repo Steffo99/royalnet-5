@@ -2,6 +2,8 @@ import typing
 
 
 class DatabaseConfig:
+    """The configuration to be used for the :ref:`royalnet.database.Alchemy` component of :ref:`royalnet.bots.GenericBot`."""
+
     def __init__(self,
                  database_uri: str,
                  master_table: typing.Type,

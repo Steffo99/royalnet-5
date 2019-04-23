@@ -5,43 +5,50 @@ from .royalpcmaudio import RoyalPCMAudio
 
 
 class PlayMode:
+    """The base class for a PlayMode, such as :py:class:`royalnet.audio.Playlist`. Inherit from this class if you want to create a custom PlayMode."""
+
     def __init__(self):
+        """Create a new PlayMode and initialize the generator inside."""
         self.now_playing: typing.Optional[RoyalPCMAudio] = None
-        self.generator: typing.AsyncGenerator = self._generator()
+        self.generator: typing.AsyncGenerator = self.generate_generator()
 
     async def next(self):
         return await self.generator.__anext__()
 
-    def videos_left(self):
+    def videos_left(self) -> typing.Union[int, float]:
+        """Return the number of videos left in the PlayMode.
+
+        Usually returns an :py:class:`int`, but may return :py:obj:`math.inf` if the PlayMode is infinite."""
         raise NotImplementedError()
 
-    async def _generator(self):
-        """Get the next RPA from the list and advance it."""
+    async def generate_generator(self):
+        """Get the next :py:class:`royalnet.audio.RoyalPCMAudio` from the list and advance it."""
         raise NotImplementedError()
         # This is needed to make the coroutine an async generator
         # noinspection PyUnreachableCode
         yield NotImplemented
 
     def add(self, item):
-        """Add a new RPA to the PlayMode."""
+        """Add a new :py:class:`royalnet.audio.RoyalPCMAudio` to the PlayMode."""
         raise NotImplementedError()
 
     def delete(self):
-        """Delete all RPAs contained inside this PlayMode."""
+        """Delete all :py:class:`royalnet.audio.RoyalPCMAudio` contained inside this PlayMode."""
+        raise NotImplementedError()
 
 
 class Playlist(PlayMode):
-    """A video list. RPAs played are removed from the list."""
+    """A video list. :py:class:`royalnet.audio.RoyalPCMAudio` played are removed from the list."""
     def __init__(self, starting_list: typing.List[RoyalPCMAudio] = None):
         super().__init__()
         if starting_list is None:
             starting_list = []
         self.list: typing.List[RoyalPCMAudio] = starting_list
 
-    def videos_left(self):
+    def videos_left(self) -> typing.Union[int, float]:
         return len(self.list)
 
-    async def _generator(self):
+    async def generate_generator(self):
         while True:
             try:
                 next_video = self.list.pop(0)
@@ -63,7 +70,7 @@ class Playlist(PlayMode):
 
 
 class Pool(PlayMode):
-    """A RPA pool. RPAs played are played back in random order, and they are kept in the pool."""
+    """A :py:class:`royalnet.audio.RoyalPCMAudio` pool. :py:class:`royalnet.audio.RoyalPCMAudio` are selected in random order and are not repeated until every song has been played at least once."""
     def __init__(self, starting_pool: typing.List[RoyalPCMAudio] = None):
         super().__init__()
         if starting_pool is None:
@@ -71,10 +78,10 @@ class Pool(PlayMode):
         self.pool: typing.List[RoyalPCMAudio] = starting_pool
         self._pool_copy: typing.List[RoyalPCMAudio] = []
 
-    def videos_left(self):
+    def videos_left(self) -> typing.Union[int, float]:
         return math.inf
 
-    async def _generator(self):
+    async def generate_generator(self):
         while True:
             if not self.pool:
                 self.now_playing = None
