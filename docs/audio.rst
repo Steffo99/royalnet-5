@@ -7,3 +7,6 @@ royalnet.audio
 
 .. automodule:: royalnet.audio
    :members:
+   :private-members:
+   :undoc-members:
+

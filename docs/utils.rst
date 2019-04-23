@@ -7,3 +7,6 @@ royalnet.utils
 
 .. automodule:: royalnet.utils
    :members:
+   :private-members:
+   :undoc-members:
+

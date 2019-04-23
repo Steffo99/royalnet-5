@@ -7,3 +7,5 @@ royalnet.commands
 
 .. automodule:: royalnet.commands
    :members:
+   :private-members:
+   :special-members:

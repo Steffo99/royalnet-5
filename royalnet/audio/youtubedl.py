@@ -15,6 +15,8 @@ class InterruptDownload(DownloaderError):
 
 
 class YtdlFile:
+    """A wrapper around a youtube_dl downloaded file."""
+
     ytdl_args = {
         "logger": log,  # Log messages to a logging.Logger instance.
         "quiet": True,  # Do not print messages to stdout.
@@ -22,7 +24,6 @@ class YtdlFile:
         "no_warnings": True,  # Do not print out anything for warnings.
     }
 
-    """A wrapper around a youtube_dl downloaded file."""
     def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args):
         self.info: "YtdlInfo" = info
         self.video_filename: str
@@ -57,7 +58,11 @@ class YtdlFile:
 class YtdlInfo:
     """A wrapper around youtube_dl extracted info."""
 
-    def __init__(self, info):
+    def __init__(self, info: typing.Dict[str, typing.Any]):
+        """Create a YtdlInfo from the dict returned by the :py:func:`youtube_dl.YoutubeDL.extract_info` function.
+
+        Warning:
+            Does not download the info, for that use :py:func:`royalnet.audio.YtdlInfo.create_from_url`."""
         self.id: typing.Optional[str] = info.get("id")
         self.uploader: typing.Optional[str] = info.get("uploader")
         self.uploader_id: typing.Optional[str] = info.get("uploader_id")
