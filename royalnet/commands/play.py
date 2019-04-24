@@ -44,9 +44,9 @@ class PlayNH(NetworkHandler):
             # TODO: change Exception
             raise Exception("No music_data for this guild")
         # Start downloading
-        try:
+        if message.url.startswith("http://") or message.url.startswith("https://"):
             audio_sources: typing.List[RoyalPCMAudio] = await asyncify(RoyalPCMAudio.create_from_url, message.url)
-        except youtube_dl.utils.DownloadError:
+        else:
             audio_sources = await asyncify(RoyalPCMAudio.create_from_ytsearch, message.url)
         await bot.add_to_music_data(audio_sources, guild)
         return PlaySuccessful(info_list=[source.rpf.info for source in audio_sources])
