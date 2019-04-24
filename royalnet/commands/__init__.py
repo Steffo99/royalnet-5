@@ -18,9 +18,10 @@ from .summon import SummonCommand
 from .play import PlayCommand
 from .skip import SkipCommand
 from .playmode import PlaymodeCommand
+from .videochannel import VideochannelCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
            "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand",
-           "SkipCommand", "PlaymodeCommand"]
+           "SkipCommand", "PlaymodeCommand", "VideochannelCommand"]
