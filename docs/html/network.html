@@ -167,12 +167,6 @@
 <dt id="royalnet.network.ServerErrorMessage">
 <em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">ServerErrorMessage</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.ServerErrorMessage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Something went wrong in the connection to the <a class="reference internal" href="#royalnet.network.RoyalnetServer" title="royalnet.network.RoyalnetServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.RoyalnetServer</span></code></a>.</p>
-<dl class="method">
-<dt id="royalnet.network.ServerErrorMessage.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.ServerErrorMessage.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -198,12 +192,6 @@
 <dt id="royalnet.network.RoyalnetLink">
 <em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetLink</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>secret: str</em>, <em>link_type: str</em>, <em>request_handler</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="royalnet.network.RoyalnetLink.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>secret: str</em>, <em>link_type: str</em>, <em>request_handler</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="royalnet.network.RoyalnetLink.connect">
 <code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink.connect" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -238,18 +226,13 @@
 <dl class="exception">
 <dt id="royalnet.network.NetworkError">
 <em class="property">exception </em><code class="descclassname">royalnet.network.</code><code class="descname">NetworkError</code><span class="sig-paren">(</span><em>error_msg: royalnet.network.messages.ServerErrorMessage</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.NetworkError" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="royalnet.network.NetworkError.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>error_msg: royalnet.network.messages.ServerErrorMessage</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.NetworkError.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="exception">
 <dt id="royalnet.network.NotConnectedError">
 <em class="property">exception </em><code class="descclassname">royalnet.network.</code><code class="descname">NotConnectedError</code><a class="headerlink" href="#royalnet.network.NotConnectedError" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The <a class="reference internal" href="#royalnet.network.RoyalnetLink" title="royalnet.network.RoyalnetLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.RoyalnetLink</span></code></a> is not connected to a <a class="reference internal" href="#royalnet.network.RoyalnetServer" title="royalnet.network.RoyalnetServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.RoyalnetServer</span></code></a>.</p>
+</dd></dl>
 
 <dl class="exception">
 <dt id="royalnet.network.NotIdentifiedError">
@@ -308,12 +291,6 @@
 <dt id="royalnet.network.RoyalnetServer">
 <em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetServer</code><span class="sig-paren">(</span><em>address: str</em>, <em>port: int</em>, <em>required_secret: str</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetServer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="royalnet.network.RoyalnetServer.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>address: str</em>, <em>port: int</em>, <em>required_secret: str</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetServer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="royalnet.network.RoyalnetServer.find_client">
 <code class="descname">find_client</code><span class="sig-paren">(</span><em>*</em>, <em>nid: str = None</em>, <em>link_type: str = None</em><span class="sig-paren">)</span> &#x2192; List[royalnet.network.royalnetserver.ConnectedClient]<a class="headerlink" href="#royalnet.network.RoyalnetServer.find_client" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -395,10 +372,17 @@
 <dl class="class">
 <dt id="royalnet.network.RoyalnetConfig">
 <em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetConfig</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>master_secret: str</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetConfig" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="royalnet.network.RoyalnetConfig.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>master_secret: str</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetConfig.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="royalnet.network.Reply">
+<em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">Reply</code><a class="headerlink" href="#royalnet.network.Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>A reply to a request sent through the Royalnet.</p>
+<dl class="method">
+<dt id="royalnet.network.Reply.raise_on_error">
+<code class="descname">raise_on_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.network.Reply.raise_on_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the reply is an error, raise an error, otherwise, do nothing.</p>
+<p>:raises A <code class="xref py py-exc docutils literal notranslate"><span class="pre">RoyalnetError</span></code>, if the Reply is an error, otherwise, nothing.:</p>
 </dd></dl>
 
 </dd></dl>

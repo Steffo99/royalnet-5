@@ -30,12 +30,13 @@ author = 'Stefano Pigozzi'
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.intersphinx"]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.7', None),
-                       'discord': ('https://discordpy.readthedocs.io/en/latest/', None)}
+                       'discord': ('https://discordpy.readthedocs.io/en/latest/', None),
+                       "telegram": ("https://python-telegram-bot.readthedocs.io/en/stable/", None)}
 
 
 def skip(app, what, name, obj, would_skip, options):
     if name == "__init__":
-        return False
+        return not bool(obj.__doc__)
     return would_skip
 
 
