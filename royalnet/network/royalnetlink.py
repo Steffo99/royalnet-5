@@ -13,7 +13,7 @@ log = _logging.getLogger(__name__)
 
 
 class NotConnectedError(Exception):
-    pass
+    """The :py:class:`royalnet.network.RoyalnetLink` is not connected to a :py:class:`royalnet.network.RoyalnetServer`."""
 
 
 class NotIdentifiedError(Exception):
@@ -67,7 +67,7 @@ class RoyalnetLink:
         self.secret: str = secret
         self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
         self.request_handler = request_handler
-        self._pending_requests: typing.Dict[typing.Optional[Message]] = {}
+        self._pending_requests: typing.Dict[str, typing.Optional[Message]] = {}
         self._loop: asyncio.AbstractEventLoop = loop
         self._connect_event: asyncio.Event = asyncio.Event(loop=self._loop)
         self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)

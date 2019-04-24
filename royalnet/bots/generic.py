@@ -19,8 +19,8 @@ class GenericBot:
                        command_prefix: str,
                        commands: typing.List[typing.Type[Command]],
                        missing_command: typing.Type[Command],
-                       error_command: typing.Type[Command]):
-        """Generate the commands dictionary required to handle incoming messages, and the network_handlers dictionary required to handle incoming requests."""
+                       error_command: typing.Type[Command]) -> None:
+        """Generate the ``commands`` dictionary required to handle incoming messages, and the ``network_handlers`` dictionary required to handle incoming requests."""
         log.debug(f"Now generating commands")
         self.commands: typing.Dict[str, typing.Type[Command]] = {}
         self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
@@ -33,18 +33,24 @@ class GenericBot:
         log.debug(f"Successfully generated commands")
 
     def _call_factory(self) -> typing.Type[Call]:
-        """Create the Call class, representing a Call command. It should inherit from the utils.Call class."""
+        """Create the TelegramCall class, representing a command call. It should inherit from :py:class:`royalnet.utils.Call`.
+
+        Returns:
+            The created TelegramCall class."""
         raise NotImplementedError()
 
     def _init_royalnet(self, royalnet_config: RoyalnetConfig):
-        """Create a RoyalnetLink, and run it as a task."""
+        """Create a :py:class:`royalnet.network.RoyalnetLink`, and run it as a :py:class:`asyncio.Task`."""
         self.network: RoyalnetLink = RoyalnetLink(royalnet_config.master_uri, royalnet_config.master_secret, self.interface_name,
                                                   self._network_handler)
         log.debug(f"Running RoyalnetLink {self.network}")
         loop.create_task(self.network.run())
 
     async def _network_handler(self, message: Message) -> Message:
-        """Handle a single Message received from the RoyalnetLink"""
+        """Handle a single :py:class:`royalnet.network.Message` received from the :py:class:`royalnet.network.RoyalnetLink`.
+
+        Returns:
+            Another message, to be sent as :py:class:`royalnet.network.Reply`."""
         log.debug(f"Received {message} from the RoyalnetLink")
         try:
             network_handler = self.network_handlers[message.__class__]
@@ -61,7 +67,7 @@ class GenericBot:
             return RequestError(exc=exc)
 
     def _init_database(self, commands: typing.List[typing.Type[Command]], database_config: DatabaseConfig):
-        """Connect to the database, and create the missing tables required by the selected commands."""
+        """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then, find the chain that links the ``master_table`` to the ``identity_table``."""
         log.debug(f"Initializing database")
         required_tables = set()
         for command in commands:
@@ -99,7 +105,11 @@ class GenericBot:
             self._init_royalnet(royalnet_config=royalnet_config)
 
     async def call(self, command_name: str, channel, parameters: typing.List[str] = None, **kwargs):
-        """Call a command by its string, or missing_command if it doesn't exists, or error_command if an exception is raised during the execution."""
+        """Call the command with the specified name.
+
+        If it doesn't exist, call ``self.missing_command``.
+
+        If an exception is raised during the execution of the command, call ``self.error_command``."""
         log.debug(f"Trying to call {command_name}")
         if parameters is None:
             parameters = []

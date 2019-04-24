@@ -14,7 +14,7 @@ log = _logging.getLogger(__name__)
 
 
 class TelegramConfig:
-    """The specific configuration to be used for :ref:`royalnet.database.TelegramBot`."""
+    """The specific configuration to be used for :py:class:`royalnet.database.TelegramBot`."""
     def __init__(self, token: str):
         self.token: str = token
 
@@ -24,6 +24,7 @@ class TelegramBot(GenericBot):
     interface_name = "telegram"
 
     def _init_client(self):
+        """Create the :py:class:`telegram.Bot`, and set the starting offset."""
         self.client = telegram.Bot(self._telegram_config.token)
         self._offset: int = -100
 

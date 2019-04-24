@@ -6,7 +6,7 @@ from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
-from ..network import Message, RoyalnetConfig
+from ..network import Message, Reply, RoyalnetConfig
 from ..database import DatabaseConfig
 from ..audio import PlayMode, Playlist, RoyalPCMAudio
 
@@ -19,7 +19,7 @@ if not discord.opus.is_loaded():
 
 
 class DiscordConfig:
-    """The specific configuration to be used for :ref:`royalnet.database.DiscordBot`."""
+    """The specific configuration to be used for :py:class:`royalnet.bots.DiscordBot`."""
     def __init__(self, token: str):
         self.token = token
 
@@ -30,6 +30,7 @@ class DiscordBot(GenericBot):
     interface_name = "discord"
 
     def _init_voice(self):
+        """Initialize the variables needed for the connection to voice chat."""
         log.debug(f"Creating music_data dict")
         self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
 
@@ -64,7 +65,7 @@ class DiscordBot(GenericBot):
             async def net_request(call, message: Message, destination: str):
                 if self.network is None:
                     raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response: Message = await self.network.request(message, destination)
+                response: Reply = await self.network.request(message, destination)
                 response.raise_on_error()
                 return response
 
@@ -83,7 +84,7 @@ class DiscordBot(GenericBot):
         return DiscordCall
 
     def _bot_factory(self) -> typing.Type[discord.Client]:
-        """Create a new DiscordClient class based on this DiscordBot."""
+        """Create a custom DiscordClient class inheriting from :py:class:`discord.Client`."""
         log.debug(f"Creating DiscordClient")
 
         # noinspection PyMethodParameters
@@ -129,8 +130,11 @@ class DiscordBot(GenericBot):
                 await cli.change_presence(status=discord.Status.online)
 
             def find_guild_by_name(cli, name: str) -> discord.Guild:
-                """Find the Guild with the specified name. Case-insensitive.
-                Will raise a NoneFoundError if no channels are found, or a TooManyFoundError if more than one is found."""
+                """Find the :py:class:`discord.Guild` with the specified name. Case-insensitive.
+
+                Raises:
+                     :py:exc:`NoneFoundError` if no channels are found.
+                     :py:exc:`TooManyFoundError` if more than one is found."""
                 all_guilds: typing.List[discord.Guild] = cli.guilds
                 matching_channels: typing.List[discord.Guild] = []
                 for guild in all_guilds:
@@ -145,9 +149,9 @@ class DiscordBot(GenericBot):
             def find_channel_by_name(cli,
                                      name: str,
                                      guild: typing.Optional[discord.Guild] = None) -> discord.abc.GuildChannel:
-                """Find the TextChannel, VoiceChannel or CategoryChannel with the specified name. Case-insensitive.
-                Guild is optional, but the method will raise a TooManyFoundError if none is specified and there is more than one channel with the same name.
-                Will also raise a NoneFoundError if no channels are found."""
+                """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the specified name. Case-insensitive.
+                Guild is optional, but the method will raise a :py:exc:`TooManyFoundError` if none is specified and there is more than one channel with the same name.
+                Will also raise a :py:exc:`NoneFoundError` if no channels are found."""
                 if guild is not None:
                     all_channels = guild.channels
                 else:
@@ -167,10 +171,11 @@ class DiscordBot(GenericBot):
                 return matching_channels[0]
 
             def find_voice_client_by_guild(cli, guild: discord.Guild):
-                """Find the VoiceClient belonging to a specific Guild.
-                Raises a NoneFoundError if the Guild currently has no VoiceClient."""
+                """Find the :py:class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`.
+
+                Raises:
+                     :py:exc:`NoneFoundError` if the :py:class:`discord.Guild` currently has no :py:class:`discord.VoiceClient`."""
                 for voice_client in cli.voice_clients:
-                    voice_client: discord.VoiceClient
                     if voice_client.guild == guild:
                         return voice_client
                 raise NoneFoundError("No voice clients found")
@@ -178,7 +183,7 @@ class DiscordBot(GenericBot):
         return DiscordClient
 
     def _init_client(self):
-        """Create a bot instance."""
+        """Create an instance of the DiscordClient class created in :py:func:`royalnet.bots.DiscordBot._bot_factory`."""
         log.debug(f"Creating DiscordClient instance")
         self._Client = self._bot_factory()
         self.client = self._Client()
@@ -202,13 +207,14 @@ class DiscordBot(GenericBot):
         self._init_voice()
 
     async def run(self):
+        """Login to Discord, then run the bot."""
         log.debug(f"Logging in to Discord")
         await self.client.login(self._discord_config.token)
         log.debug(f"Connecting to Discord")
         await self.client.connect()
         # TODO: how to stop?
 
-    async def add_to_music_data(self, audio_sources: typing.List[discord.AudioSource], guild: discord.Guild):
+    async def add_to_music_data(self, audio_sources: typing.List[RoyalPCMAudio], guild: discord.Guild):
         """Add a file to the corresponding music_data object."""
         guild_music_data = self.music_data[guild]
         for audio_source in audio_sources:
@@ -222,7 +228,7 @@ class DiscordBot(GenericBot):
         guild_music_data = self.music_data[guild]
         voice_client = self.client.find_voice_client_by_guild(guild)
         next_source: RoyalPCMAudio = await guild_music_data.next()
-        await self.update_activity_with_source_title(next_source)
+        await self.update_activity_with_source_title()
         if next_source is None:
             log.debug(f"Ending playback chain")
             return
@@ -235,18 +241,25 @@ class DiscordBot(GenericBot):
         log.debug(f"Starting playback of {next_source}")
         voice_client.play(next_source, after=advance)
 
-    async def update_activity_with_source_title(self, rpa: typing.Optional[RoyalPCMAudio] = None):
-        if len(self.music_data) > 1:
+    async def update_activity_with_source_title(self):
+        """Change the bot's presence (using :py:func:`discord.Client.change_presence`) to match the current listening status.
+
+        If multiple guilds are using the bot, the bot will always have an empty presence."""
+        if len(self.music_data) != 1:
             # Multiple guilds are using the bot, do not display anything
             log.debug(f"Updating current Activity: setting to None, as multiple guilds are using the bot")
             await self.client.change_presence(status=discord.Status.online)
             return
-        if rpa is None:
+        # FIXME: PyCharm faulty inspection?
+        # noinspection PyUnresolvedReferences
+        play_mode: PlayMode = list(self.music_data.items())[0][1]
+        now_playing = play_mode.now_playing
+        if now_playing is None:
             # No songs are playing now
             log.debug(f"Updating current Activity: setting to None, as nothing is currently being played")
             await self.client.change_presence(status=discord.Status.online)
             return
-        log.debug(f"Updating current Activity: listening to {rpa.rpf.info.title}")
-        await self.client.change_presence(activity=discord.Activity(name=rpa.rpf.info.title,
+        log.debug(f"Updating current Activity: listening to {now_playing.rpf.info.title}")
+        await self.client.change_presence(activity=discord.Activity(name=now_playing.rpf.info.title,
                                                                     type=discord.ActivityType.listening),
                                           status=discord.Status.online)
