@@ -72,7 +72,7 @@ class PlayCommand(Command):
     async def common(cls, call: Call):
         guild, url = call.args.match(r"(?:\[(.+)])?\s*(.+)")
         download_task = loop.create_task(call.net_request(PlayMessage(url, guild), "discord"))
-        notify_task = loop.create_task(notify_on_timeout(call, url, time=20, repeat=True))
+        notify_task = loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
         try:
             response: PlaySuccessful = await download_task
         except Exception as exc:
