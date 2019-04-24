@@ -4,7 +4,7 @@ from royalnet.error import InvalidInputError
 
 
 class CommandArgs(list):
-    """The arguments of a command. Raises InvalidInputError if the requested argument does not exist."""
+    """The arguments of a command. Raises :py:exc:`InvalidInputError` if the requested argument does not exist."""
 
     def __getitem__(self, item):
         if isinstance(item, int):

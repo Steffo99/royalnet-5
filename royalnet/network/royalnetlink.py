@@ -17,7 +17,7 @@ class NotConnectedError(Exception):
 
 
 class NotIdentifiedError(Exception):
-    pass
+    """The :py:class:`royalnet.network.RoyalnetLink` has not identified yet to a :py:class:`royalnet.network.RoyalnetServer`."""
 
 
 class NetworkError(Exception):
