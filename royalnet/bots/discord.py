@@ -19,11 +19,14 @@ if not discord.opus.is_loaded():
 
 
 class DiscordConfig:
+    """The specific configuration to be used for :ref:`royalnet.database.DiscordBot`."""
     def __init__(self, token: str):
         self.token = token
 
 
 class DiscordBot(GenericBot):
+    """A bot that connects to `Discord <https://discordapp.com/>`_."""
+
     interface_name = "discord"
 
     def _init_voice(self):

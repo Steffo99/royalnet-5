@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 class GenericBot:
-    """A generic bot class, to be used as base for the other more specific classes, such as TelegramBot and DiscordBot."""
+    """A generic bot class, to be used as base for the other more specific classes, such as :ref:`royalnet.bots.TelegramBot` and :ref:`royalnet.bots.DiscordBot`."""
     interface_name = NotImplemented
 
     def _init_commands(self,
