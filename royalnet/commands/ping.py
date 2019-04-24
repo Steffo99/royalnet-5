@@ -6,7 +6,7 @@ from ..error import InvalidInputError
 class PingCommand(Command):
 
     command_name = "ping"
-    command_description = "Ping pong!"
+    command_description = "Ping pong dopo un po' di tempo!"
     command_syntax = "[time_to_wait]"
 
     @classmethod
