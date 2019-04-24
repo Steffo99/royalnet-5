@@ -13,16 +13,14 @@ loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 
-async def todo(message: Message):
-    log.warning(f"Skipped {message} because handling isn't supported yet.")
-
-
 class TelegramConfig:
+    """The specific configuration to be used for :ref:`royalnet.database.TelegramBot`."""
     def __init__(self, token: str):
         self.token: str = token
 
 
 class TelegramBot(GenericBot):
+    """A bot that connects to `Telegram <https://telegram.org/>`_."""
     interface_name = "telegram"
 
     def _init_client(self):
