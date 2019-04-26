@@ -1,4 +1,4 @@
-# `royalnet`
+# `royalnet` **alpha**
 
 The fifth rewrite of [Royalnet](https://github.com/Steffo99/royalnet/)!
 
