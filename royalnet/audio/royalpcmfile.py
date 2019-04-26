@@ -80,7 +80,7 @@ class RoyalPCMFile(YtdlFile):
             The name of the downloaded video file, as a :py:class:`str`.
 
         Warning:
-            It's going to be deleted as soon as the :py:func:`discord.audio.RoyalPCMFile.__init__` function has completed, so it's probably not going to be very useful...
+            It's going to be deleted as soon as the :py:func:`royalnet.audio.RoyalPCMFile.__init__` function has completed, so it's probably not going to be very useful...
         """
         return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.ytdl"
 

@@ -3,11 +3,13 @@ class SafeDict(dict):
         return "{" + key + "}"
 
 
-def safeformat(string: str, ignore_escaping: bool = False, **words: str) -> str:
-    if ignore_escaping:
-        escaped = words
-    else:
-        escaped = {}
-        for key in words:
-            escaped[key] = str(words[key]).replace("<", "&lt;").replace(">", "&gt;")
-    return string.format_map(SafeDict(**escaped))
+def safeformat(string: str, **words: str) -> str:
+    """:py:func:`str.format` something, but ignore missing keys instead of raising an error.
+
+    Parameters:
+        string: The base string to be formatted.
+        words: The words to format the string with.
+
+    Returns:
+        The formatted string."""
+    return string.format_map(SafeDict(**words))

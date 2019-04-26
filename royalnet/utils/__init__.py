@@ -1,3 +1,5 @@
+"""Miscellaneous useful functions and classes."""
+
 from .asyncify import asyncify
 from .call import Call
 from .command import Command

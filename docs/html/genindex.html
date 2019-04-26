@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="database.html">royalnet.database</a></li>
 <li class="toctree-l1"><a class="reference internal" href="network.html">royalnet.network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">royalnet.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error.html">royalnet.error</a></li>
 </ul>
 
             
@@ -157,6 +158,7 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
@@ -179,6 +181,8 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utils.html#royalnet.utils.CommandArgs.__getitem__">__getitem__() (royalnet.utils.CommandArgs method)</a>
+</li>
       <li><a href="audio.html#royalnet.audio.Playlist.__init__">__init__() (royalnet.audio.Playlist method)</a>
 
       <ul>
@@ -195,6 +199,8 @@
         <li><a href="network.html#royalnet.network.Package.__init__">(royalnet.network.Package method)</a>
 </li>
         <li><a href="network.html#royalnet.network.RequestError.__init__">(royalnet.network.RequestError method)</a>
+</li>
+        <li><a href="utils.html#royalnet.utils.Call.__init__">(royalnet.utils.Call method)</a>
 </li>
       </ul></li>
       <li><a href="bots.html#royalnet.bots.DiscordBot._bot_factory">_bot_factory() (royalnet.bots.DiscordBot method)</a>
@@ -236,6 +242,8 @@
       <li><a href="bots.html#royalnet.bots.DiscordBot._init_voice">_init_voice() (royalnet.bots.DiscordBot method)</a>
 </li>
       <li><a href="bots.html#royalnet.bots.GenericBot._network_handler">_network_handler() (royalnet.bots.GenericBot method)</a>
+</li>
+      <li><a href="utils.html#royalnet.utils.Call._session_init">_session_init() (royalnet.utils.Call method)</a>
 </li>
       <li><a href="audio.html#royalnet.audio.YtdlFile._stop_download">_stop_download() (royalnet.audio.YtdlFile method)</a>
 </li>
@@ -388,6 +396,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="error.html#royalnet.error.ExternalError">ExternalError</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -445,13 +461,17 @@
         <li><a href="utils.html#royalnet.utils.Call.interface_name">(royalnet.utils.Call attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#royalnet.utils.Call.interface_obj">interface_obj (royalnet.utils.Call attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#royalnet.utils.Call.interface_prefix">interface_prefix (royalnet.utils.Call attribute)</a>
 </li>
+      <li><a href="error.html#royalnet.error.InvalidConfigError">InvalidConfigError</a>
+</li>
       <li><a href="network.html#royalnet.network.InvalidDestinationEM">InvalidDestinationEM (class in royalnet.network)</a>
+</li>
+      <li><a href="error.html#royalnet.error.InvalidInputError">InvalidInputError</a>
 </li>
       <li><a href="network.html#royalnet.network.InvalidPackageEM">InvalidPackageEM (class in royalnet.network)</a>
 </li>
@@ -531,11 +551,13 @@
 </li>
       <li><a href="network.html#royalnet.network.NetworkError">NetworkError</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#royalnet.utils.NetworkHandler">NetworkHandler (class in royalnet.utils)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="audio.html#royalnet.audio.PlayMode.next">next() (royalnet.audio.PlayMode method)</a>
+</li>
+      <li><a href="error.html#royalnet.error.NoneFoundError">NoneFoundError</a>
 </li>
       <li><a href="network.html#royalnet.network.NotConnectedError">NotConnectedError</a>
 </li>
@@ -671,11 +693,15 @@
 </li>
       <li><a href="database.html#module-royalnet.database.tables">royalnet.database.tables (module)</a>
 </li>
+      <li><a href="error.html#module-royalnet.error">royalnet.error (module)</a>
+</li>
       <li><a href="network.html#module-royalnet.network">royalnet.network (module)</a>
 </li>
       <li><a href="utils.html#module-royalnet.utils">royalnet.utils (module)</a>
 </li>
       <li><a href="network.html#royalnet.network.RoyalnetConfig">RoyalnetConfig (class in royalnet.network)</a>
+</li>
+      <li><a href="error.html#royalnet.error.RoyalnetError">RoyalnetError</a>
 </li>
       <li><a href="network.html#royalnet.network.RoyalnetLink">RoyalnetLink (class in royalnet.network)</a>
 </li>
@@ -721,8 +747,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils.html#royalnet.utils.Call.session_init">session_init() (royalnet.utils.Call method)</a>
-</li>
       <li><a href="commands.html#royalnet.commands.ShipCommand">ShipCommand (class in royalnet.commands)</a>
 </li>
       <li><a href="commands.html#royalnet.commands.SkipCommand">SkipCommand (class in royalnet.commands)</a>
@@ -759,6 +783,8 @@
 </li>
       <li><a href="database.html#royalnet.database.tables.Diario.timestamp">timestamp (royalnet.database.tables.Diario attribute)</a>
 </li>
+      <li><a href="error.html#royalnet.error.TooManyFoundError">TooManyFoundError</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -767,10 +793,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.Royal.uid">uid (royalnet.database.tables.Royal attribute)</a>
 </li>
-      <li><a href="bots.html#royalnet.bots.DiscordBot.update_activity_with_source_title">update_activity_with_source_title() (royalnet.bots.DiscordBot method)</a>
+      <li><a href="error.html#royalnet.error.UnregisteredError">UnregisteredError</a>
+</li>
+      <li><a href="error.html#royalnet.error.UnsupportedError">UnsupportedError</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bots.html#royalnet.bots.DiscordBot.update_activity_with_source_title">update_activity_with_source_title() (royalnet.bots.DiscordBot method)</a>
+</li>
       <li><a href="database.html#royalnet.database.tables.Discord.username">username (royalnet.database.tables.Discord attribute)</a>
 
       <ul>

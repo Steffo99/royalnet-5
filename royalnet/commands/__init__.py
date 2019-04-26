@@ -1,3 +1,5 @@
+"""Commands that can be used in bots. These probably won't suit your needs, as they are tailored for the bots of the `Royal Games <https://ryg.steffo.eu>`_ gaming community, but you can check them for reference."""
+
 from .null import NullCommand
 from .ping import PingCommand
 from .ship import ShipCommand

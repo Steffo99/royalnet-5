@@ -14,6 +14,7 @@ log = _logging.getLogger(__name__)
 
 
 class ConnectedClient:
+    """The :py:class:`royalnet.network.RoyalnetServer`-side representation of a connected :py:class:`royalnet.network.RoyalnetLink`."""
     def __init__(self, socket: websockets.WebSocketServerProtocol):
         self.socket: websockets.WebSocketServerProtocol = socket
         self.nid: typing.Optional[str] = None
@@ -22,9 +23,11 @@ class ConnectedClient:
 
     @property
     def is_identified(self) -> bool:
+        """Has the client sent a valid identification package?"""
         return bool(self.nid)
 
     async def send(self, package: Package):
+        """Send a :py:class:`royalnet.network.Package` to the :py:class:`royalnet.network.RoyalnetLink`."""
         await self.socket.send(package.pickle())
 
 

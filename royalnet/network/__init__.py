@@ -1,3 +1,5 @@
+"""Royalnet realated classes."""
+
 from .messages import Message, ServerErrorMessage, InvalidSecretEM, InvalidDestinationEM, InvalidPackageEM, RequestSuccessful, RequestError, Reply
 from .packages import Package
 from .royalnetlink import RoyalnetLink, NetworkError, NotConnectedError, NotIdentifiedError

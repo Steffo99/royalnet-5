@@ -90,6 +90,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="network.html">royalnet.network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">royalnet.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error.html">royalnet.error</a></li>
 </ul>
 
             
@@ -158,7 +159,8 @@
 <h1>royalnet.database<a class="headerlink" href="#royalnet-database" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-royalnet.database"></span><dl class="class">
+<span class="target" id="module-royalnet.database"></span><p>Relational database classes and methods.</p>
+<dl class="class">
 <dt id="royalnet.database.Alchemy">
 <em class="property">class </em><code class="descclassname">royalnet.database.</code><code class="descname">Alchemy</code><span class="sig-paren">(</span><em>database_uri: str, tables: Set[T]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper around SQLAlchemy declarative that allows to use multiple databases at once while maintaining a single table-class for both of them.</p>
@@ -259,7 +261,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.Telegram.royal">
-<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x73b84b0; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Telegram.royal" title="Permalink to this definition">¶</a></dt>
+<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x717a078; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Telegram.royal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -289,7 +291,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.Diario.creator">
-<code class="descname">creator</code><em class="property"> = &lt;RelationshipProperty at 0x73b84f8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.creator" title="Permalink to this definition">¶</a></dt>
+<code class="descname">creator</code><em class="property"> = &lt;RelationshipProperty at 0x71841e0; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.creator" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -314,7 +316,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.Diario.quoted_account">
-<code class="descname">quoted_account</code><em class="property"> = &lt;RelationshipProperty at 0x73b8b28; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.quoted_account" title="Permalink to this definition">¶</a></dt>
+<code class="descname">quoted_account</code><em class="property"> = &lt;RelationshipProperty at 0x7184618; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.quoted_account" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -349,7 +351,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.Alias.royal">
-<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x73b8198; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Alias.royal" title="Permalink to this definition">¶</a></dt>
+<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7184810; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Alias.royal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -364,7 +366,7 @@
 <em class="property">class </em><code class="descclassname">royalnet.database.tables.</code><code class="descname">ActiveKvGroup</code><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="royalnet.database.tables.ActiveKvGroup.group">
-<code class="descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x73b80c0; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.group" title="Permalink to this definition">¶</a></dt>
+<code class="descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x7174ae0; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -374,7 +376,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.ActiveKvGroup.royal">
-<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x73b8df8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.royal" title="Permalink to this definition">¶</a></dt>
+<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x70b5a98; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.royal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -389,7 +391,7 @@
 <em class="property">class </em><code class="descclassname">royalnet.database.tables.</code><code class="descname">Keyvalue</code><a class="headerlink" href="#royalnet.database.tables.Keyvalue" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="royalnet.database.tables.Keyvalue.group">
-<code class="descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x73b8930; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.group" title="Permalink to this definition">¶</a></dt>
+<code class="descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x71848a0; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.group" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -444,7 +446,7 @@
 
 <dl class="attribute">
 <dt id="royalnet.database.tables.Discord.royal">
-<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x73b8b28; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Discord.royal" title="Permalink to this definition">¶</a></dt>
+<code class="descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7184810; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Discord.royal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
