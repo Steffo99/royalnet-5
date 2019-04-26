@@ -1,5 +1,5 @@
 def cdj(class_) -> dict:
-    """Return the cleaned class attributes in a dict."""
+    """Return a dict of the class attributes without the ``__module__``, ``__dict__``, ``__weakref__`` and ``__doc__`` keys, to be used while generating dynamically SQLAlchemy declarative table classes."""
     d = dict(class_.__dict__)
     del d["__module__"]
     del d["__dict__"]

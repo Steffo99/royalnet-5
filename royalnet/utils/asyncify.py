@@ -4,6 +4,9 @@ import typing
 
 
 async def asyncify(function: typing.Callable, *args, **kwargs):
-    # TODO: make cancellable somehow
-    loop = asyncio.get_running_loop()
+    """Convert a function into a coroutine.
+
+    Warning:
+        The coroutine cannot be cancelled, and any attempts to do so will result in unexpected outputs."""
+    loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, functools.partial(function, *args, **kwargs))

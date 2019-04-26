@@ -10,6 +10,7 @@ royalnet
    database
    network
    utils
+   error
 
 
 Indices and tables

@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="database.html">royalnet.database</a></li>
 <li class="toctree-l1"><a class="reference internal" href="network.html">royalnet.network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">royalnet.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error.html">royalnet.error</a></li>
 </ul>
 
             
@@ -157,7 +158,8 @@
 <h1>royalnet.bots<a class="headerlink" href="#royalnet-bots" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-royalnet.bots"></span><dl class="class">
+<span class="target" id="module-royalnet.bots"></span><p>Various bot interfaces, and a generic class to create new ones.</p>
+<dl class="class">
 <dt id="royalnet.bots.TelegramBot">
 <em class="property">class </em><code class="descclassname">royalnet.bots.</code><code class="descname">TelegramBot</code><span class="sig-paren">(</span><em>*</em>, <em>telegram_config: royalnet.bots.telegram.TelegramConfig</em>, <em>royalnet_config: Optional[royalnet.network.royalnetconfig.RoyalnetConfig] = None</em>, <em>database_config: Optional[royalnet.database.databaseconfig.DatabaseConfig] = None</em>, <em>command_prefix: str = '/'</em>, <em>commands: List[Type[royalnet.utils.command.Command]] = None</em>, <em>missing_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em>, <em>error_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.TelegramBot" title="Permalink to this definition">¶</a></dt>
 <dd><p>A bot that connects to <a class="reference external" href="https://telegram.org/">Telegram</a>.</p>

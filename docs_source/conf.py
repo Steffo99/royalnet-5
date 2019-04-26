@@ -29,13 +29,14 @@ author = 'Stefano Pigozzi'
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.intersphinx"]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.7', None),
-                       'discord': ('https://discordpy.readthedocs.io/en/latest/', None),
-                       "telegram": ("https://python-telegram-bot.readthedocs.io/en/stable/", None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3.7", None),
+                       "discord": ("https://discordpy.readthedocs.io/en/latest/", None),
+                       "telegram": ("https://python-telegram-bot.readthedocs.io/en/stable/", None),
+                       "sqlalchemy": ("https://docs.sqlalchemy.org/en/13/", None)}
 
 
-def skip(app, what, name, obj, would_skip, options):
-    if name == "__init__":
+def skip(app, what, name: str, obj, would_skip, options):
+    if name == "__init__" or name == "__getitem__" or name == "__getattr__":
         return not bool(obj.__doc__)
     return would_skip
 
