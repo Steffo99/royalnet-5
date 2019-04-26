@@ -28,6 +28,10 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.7",
-        "Topic :: Internet"
+        "Topic :: Internet",
+        "Topic :: Database",
+        "Topic :: Multimedia :: Sound/Audio",
+        "Topic :: Multimedia :: Video",
+        "License :: OSI Approved :: MIT License"
     ]
 )
