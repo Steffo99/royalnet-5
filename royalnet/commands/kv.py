@@ -18,6 +18,7 @@ class KvCommand(Command):
         active = await asyncify(call.session.query(call.alchemy.ActiveKvGroup).filter_by(royal=author).one_or_none)
         if active is None:
             await call.reply("⚠️ Devi prima attivare un gruppo con il comando [c]kvactive[/c]!")
+            return
         keyvalue = await asyncify(call.session.query(call.alchemy.Keyvalue).filter_by(group=active.group, key=key).one_or_none)
         if value is None:
             # Get
