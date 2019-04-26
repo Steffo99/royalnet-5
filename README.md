@@ -2,6 +2,6 @@
 
 The fifth rewrite of [Royalnet](https://github.com/Steffo99/royalnet/)!
 
-The goal is to make it highly parallel and with multi server support.
+It includes a lot of miscellaneous useful stuff.
 
-New commands should be easily implemented on all platforms.
+[Documentation available here.](https://steffo99.github.io/royalnet/html/)
