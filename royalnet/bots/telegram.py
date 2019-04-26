@@ -6,7 +6,7 @@ from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, InvalidConfigError
-from ..network import Message, RoyalnetConfig
+from ..network import Message, RoyalnetConfig, Reply
 from ..database import DatabaseConfig
 
 loop = asyncio.get_event_loop()
@@ -55,7 +55,7 @@ class TelegramBot(GenericBot):
             async def net_request(call, message: Message, destination: str):
                 if self.network is None:
                     raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response: Message = await self.network.request(message, destination)
+                response: Reply = await self.network.request(message, destination)
                 response.raise_on_error()
                 return response
 

@@ -47,7 +47,7 @@ class SyncCommand(Command):
             telegram.first_name = user.first_name
             telegram.last_name = user.last_name
             telegram.username = user.username
-            await call.reply(f"✅ Dati di {str(telegram)} aggiornati.")
+            await call.reply(f"✅ Connessione aggiornata: {str(royal)} ⬌ {str(telegram)}")
         # Commit the session
         await asyncify(call.session.commit)
 
@@ -76,6 +76,6 @@ class SyncCommand(Command):
             discord.username = user.name
             discord.discriminator = user.discriminator
             discord.avatar_hash = user.avatar
-            await call.reply(f"✅ Dati di {str(discord)} aggiornati.")
+            await call.reply(f"✅ Connessione aggiornata: {str(royal)} ⬌ {str(discord)}")
         # Commit the session
         await asyncify(call.session.commit)
