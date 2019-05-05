@@ -1,3 +1,4 @@
+import royalnet
 import setuptools
 
 with open("README.md", "r") as f:
@@ -5,7 +6,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="royalnet",
-    version="5.0a3",
+    version=royalnet.version,
     author="Stefano Pigozzi",
     author_email="ste.pigozzi@gmail.com",
     description="The great bot network of the Royal Games community",
