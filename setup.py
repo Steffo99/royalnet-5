@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="royalnet",
-    version="5.0a2",
+    version="5.0a3",
     author="Stefano Pigozzi",
     author_email="ste.pigozzi@gmail.com",
     description="The great bot network of the Royal Games community",
