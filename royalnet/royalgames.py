@@ -15,7 +15,7 @@ log = logging.root
 stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
-log.setLevel(logging.WARNING)
+log.setLevel(logging.INFO)
 
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
@@ -29,12 +29,14 @@ ds_bot = DiscordBot(discord_config=DiscordConfig(os.environ["DS_AK"]),
                     royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", "sas"),
                     database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id"),
                     commands=commands,
-                    error_command=ErrorHandlerCommand)
+                    error_command=ErrorHandlerCommand,
+                    missing_command=MissingCommand)
 tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", "sas"),
                      database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id"),
                      commands=commands,
-                     error_command=ErrorHandlerCommand)
+                     error_command=ErrorHandlerCommand,
+                     missing_command=MissingCommand)
 print(tg_bot.botfather_command_string)
 loop.run_until_complete(master.start())
 loop.create_task(tg_bot.run())
