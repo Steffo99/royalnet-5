@@ -76,6 +76,8 @@ class TelegramBot(GenericBot):
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
                     raise UnregisteredError("Author is not registered")
+                return result
+
         return TelegramCall
 
     def __init__(self, *,
