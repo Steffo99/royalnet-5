@@ -4,8 +4,9 @@ import asyncio
 import logging
 from ..utils import Command, NetworkHandler, Call
 from ..commands import NullCommand
-from ..network import RoyalnetLink, Message, RequestError, RoyalnetConfig
+from ..network import RoyalnetLink, Message, RoyalnetConfig
 from ..database import Alchemy, DatabaseConfig, relationshiplinkchain
+
 
 loop = asyncio.get_event_loop()
 log = logging.getLogger(__name__)
@@ -57,14 +58,14 @@ class GenericBot:
         except KeyError:
             _, exc, tb = sys.exc_info()
             log.debug(f"Missing network_handler for {message}")
-            return RequestError(exc=exc)
+            raise Exception(f"Missing network_handler for {message}")
         try:
             log.debug(f"Using {network_handler} as handler for {message}")
             return await getattr(network_handler, self.interface_name)(self, message)
         except Exception:
-            _, exc, tb = sys.exc_info()
+            _, exc, _ = sys.exc_info()
             log.debug(f"Exception {exc} in {network_handler}")
-            return RequestError(exc=exc)
+            raise
 
     def _init_database(self, commands: typing.List[typing.Type[Command]], database_config: DatabaseConfig):
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then, find the chain that links the ``master_table`` to the ``identity_table``."""
