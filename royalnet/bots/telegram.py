@@ -1,4 +1,5 @@
 import telegram
+from telegram.utils.request import Request
 import asyncio
 import typing
 import logging as _logging
@@ -25,7 +26,9 @@ class TelegramBot(GenericBot):
 
     def _init_client(self):
         """Create the :py:class:`telegram.Bot`, and set the starting offset."""
-        self.client = telegram.Bot(self._telegram_config.token)
+        # https://github.com/python-telegram-bot/python-telegram-bot/issues/341
+        request = Request(5)
+        self.client = telegram.Bot(self._telegram_config.token, request=request)
         self._offset: int = -100
 
     def _call_factory(self) -> typing.Type[Call]:
