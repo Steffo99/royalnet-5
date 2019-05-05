@@ -126,3 +126,5 @@ class RoyalnetServer:
         log.debug(f"Starting main server loop for __master__ on ws://{self.address}:{self.port}")
         # noinspection PyAsyncCall
         self._loop.create_task(self.serve())
+        # Just to be sure it has started on Linux
+        await asyncio.sleep(0.5)
