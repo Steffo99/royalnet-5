@@ -1,3 +1,5 @@
+import typing
+import pickle
 from ..error import RoyalnetError
 
 
@@ -56,12 +58,17 @@ class RequestSuccessful(Reply):
 class RequestError(Reply):
     """The sent request wasn't successful."""
 
-    def __init__(self, exc: Exception):
+    def __init__(self, exc: typing.Optional[Exception] = None):
         """Create a RequestError.
 
         Parameters:
              exc: The exception that caused the error in the request."""
-        self.exc: Exception = exc
+        try:
+            pickle.dumps(exc)
+        except TypeError:
+            self.exc: Exception = Exception(repr(exc))
+        else:
+            self.exc = exc
 
     def raise_on_error(self) -> None:
         """If the reply is an error, raise an error, otherwise, do nothing.
