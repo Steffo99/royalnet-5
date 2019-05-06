@@ -23,7 +23,8 @@ setuptools.setup(
                       "dateparser>=0.7.1",
                       "discord.py>=1.0.1",
                       "youtube_dl>=2019.4.24",
-                      "ffmpeg-python>=0.1.17"],
+                      "ffmpeg-python>=0.1.17",
+                      "PyNaCl>=1.3.0"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",
