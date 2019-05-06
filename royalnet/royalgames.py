@@ -24,9 +24,11 @@ commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziComm
 
 address, port = "127.0.0.1", 1234
 
+print("Starting master...")
 master = RoyalnetServer(address, port, "sas")
 loop.run_until_complete(master.start())
 
+print("Starting bots...")
 ds_bot = DiscordBot(discord_config=DiscordConfig(os.environ["DS_AK"]),
                     royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", "sas"),
                     database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id"),
@@ -41,4 +43,6 @@ tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      missing_command=MissingCommand)
 loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())
+
+print("Running loop...")
 loop.run_forever()
