@@ -25,7 +25,7 @@ commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziComm
 address, port = "127.0.0.1", 1234
 
 print("Starting master...")
-master = RoyalnetServer(address, port, "sas")
+master = RoyalnetServer(address, port, os.environ["MASTER_KEY"])
 loop.run_until_complete(master.start())
 
 print("Starting bots...")
