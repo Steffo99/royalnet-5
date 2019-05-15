@@ -6,7 +6,6 @@ import pickle
 import uuid
 import asyncio
 import logging as _logging
-from .messages import InvalidPackageEM, InvalidSecretEM, IdentifySuccessfulMessage
 from .packages import Package
 
 default_loop = asyncio.get_event_loop()
@@ -26,9 +25,14 @@ class ConnectedClient:
         """Has the client sent a valid identification package?"""
         return bool(self.nid)
 
+    async def send_server_error(self, reason: str):
+        await self.send(Package({"error": reason},
+                                source="<server>",
+                                destination=self.nid))
+
     async def send(self, package: Package):
         """Send a :py:class:`royalnet.network.Package` to the :py:class:`royalnet.network.RoyalnetLink`."""
-        await self.socket.send(package.pickle())
+        await self.socket.send(package.to_json_bytes())
 
 
 class RoyalnetServer:
@@ -49,22 +53,22 @@ class RoyalnetServer:
             matching = [client for client in self.identified_clients if client.link_type == link_type]
             return matching or []
 
-    async def listener(self, websocket: websockets.server.WebSocketServerProtocol, request_uri: str):
+    async def listener(self, websocket: websockets.server.WebSocketServerProtocol):
         log.info(f"{websocket.remote_address} connected to the server.")
         connected_client = ConnectedClient(websocket)
         # Wait for identification
         identify_msg = await websocket.recv()
         log.debug(f"{websocket.remote_address} identified itself with: {identify_msg}.")
         if not isinstance(identify_msg, str):
-            await websocket.send(InvalidPackageEM("Invalid identification message (not a str)"))
+            await websocket.send(connected_client.send_server_error("Invalid identification message (not a str)"))
             return
         identification = re.match(r"Identify ([^:\s]+):([^:\s]+):([^:\s]+)", identify_msg)
         if identification is None:
-            await websocket.send(InvalidPackageEM("Invalid identification message (regex failed)"))
+            await websocket.send(connected_client.send_server_error("Invalid identification message (regex failed)"))
             return
         secret = identification.group(3)
         if secret != self.required_secret:
-            await websocket.send(InvalidSecretEM("Invalid secret"))
+            await websocket.send(connected_client.send_server_error("Invalid secret"))
             return
         # Identification successful
         connected_client.nid = identification.group(1)
