@@ -108,10 +108,7 @@ class RoyalnetLink:
     async def identify(self) -> None:
         log.info(f"Identifying to {self.master_uri}...")
         await self.websocket.send(f"Identify {self.nid}:{self.link_type}:{self.secret}")
-        response_package = await self.receive()
-        response = response_package.data
-        if isinstance(response, ServerErrorMessage):
-            raise NetworkError(response, "Server returned error while identifying self")
+        response_package: dict = await self.receive()
         self.identify_event.set()
         log.info(f"Identified successfully!")
 
