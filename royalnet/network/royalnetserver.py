@@ -2,7 +2,6 @@ import typing
 import websockets
 import re
 import datetime
-import pickle
 import uuid
 import asyncio
 import logging as _logging
@@ -25,8 +24,8 @@ class ConnectedClient:
         """Has the client sent a valid identification package?"""
         return bool(self.nid)
 
-    async def send_server_error(self, reason: str):
-        await self.send(Package({"error": reason},
+    async def send_service(self, msg_type: str, message: str):
+        await self.send(Package({"type": msg_type, "service": message},
                                 source="<server>",
                                 destination=self.nid))
 
@@ -60,31 +59,31 @@ class RoyalnetServer:
         identify_msg = await websocket.recv()
         log.debug(f"{websocket.remote_address} identified itself with: {identify_msg}.")
         if not isinstance(identify_msg, str):
-            await websocket.send(connected_client.send_server_error("Invalid identification message (not a str)"))
+            await websocket.send(connected_client.send_service("error", "Invalid identification message (not a str)"))
             return
         identification = re.match(r"Identify ([^:\s]+):([^:\s]+):([^:\s]+)", identify_msg)
         if identification is None:
-            await websocket.send(connected_client.send_server_error("Invalid identification message (regex failed)"))
+            await websocket.send(connected_client.send_service("error", "Invalid identification message (regex failed)"))
             return
         secret = identification.group(3)
         if secret != self.required_secret:
-            await websocket.send(connected_client.send_server_error("Invalid secret"))
+            await websocket.send(connected_client.send_service("error", "Invalid secret"))
             return
         # Identification successful
         connected_client.nid = identification.group(1)
         connected_client.link_type = identification.group(2)
         self.identified_clients.append(connected_client)
         log.debug(f"{websocket.remote_address} identified successfully as {connected_client.nid} ({connected_client.link_type}).")
-        await connected_client.send(Package(IdentifySuccessfulMessage(), connected_client.nid, "__master__"))
+        await connected_client.send_service("success", "Identification successful!")
         log.debug(f"{connected_client.nid}'s identification confirmed.")
         # Main loop
         while True:
             # Receive packages
-            raw_pickle = await websocket.recv()
-            package: Package = pickle.loads(raw_pickle)
+            raw_bytes = await websocket.recv()
+            package: Package = Package.from_json_bytes(raw_bytes)
             log.debug(f"Received package: {package}")
             # Check if the package destination is the server itself.
-            if package.destination == "__master__":
+            if package.destination == "<server>":
                 # TODO: do stuff
                 pass
             # Otherwise, route the package to its destination
@@ -101,7 +100,7 @@ class RoyalnetServer:
             A :py:class:`list` of :py:class:`ConnectedClients` to send the package to."""
         # Parse destination
         # Is it nothing?
-        if package.destination == "NULL":
+        if package.destination == "<none>":
             return []
         # Is it a valid nid?
         try:
@@ -118,7 +117,10 @@ class RoyalnetServer:
         destinations = self.find_destination(package)
         log.debug(f"Routing package: {package} -> {destinations}")
         for destination in destinations:
-            specific_package = Package(package.data, destination.nid, package.source,
+            # This may have some consequences
+            specific_package = Package(package.data,
+                                       source=package.source,
+                                       destination=destination.nid,
                                        source_conv_id=package.source_conv_id,
                                        destination_conv_id=package.destination_conv_id)
             await destination.send(specific_package)
@@ -127,7 +129,7 @@ class RoyalnetServer:
         await websockets.serve(self.listener, host=self.address, port=self.port)
 
     async def start(self):
-        log.debug(f"Starting main server loop for __master__ on ws://{self.address}:{self.port}")
+        log.debug(f"Starting main server loop for <server> on ws://{self.address}:{self.port}")
         # noinspection PyAsyncCall
         self._loop.create_task(self.serve())
         # Just to be sure it has started on Linux
