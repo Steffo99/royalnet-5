@@ -91,7 +91,7 @@ class RoyalnetLink:
         Raises:
             :py:exc:`royalnet.network.royalnetlink.ConnectionClosedError` if the connection closes."""
         try:
-            jbytes = await self.websocket.recv()
+            jbytes: bytes = await self.websocket.recv()
             package: Package = Package.from_json_bytes(jbytes)
         except websockets.ConnectionClosed:
             self.error_event.set()
@@ -99,7 +99,7 @@ class RoyalnetLink:
             self.identify_event.clear()
             log.info(f"Connection to {self.master_uri} was closed.")
             # What to do now? Let's just reraise.
-            raise ConnectionClosedError("")
+            raise ConnectionClosedError()
         assert package.destination == self.nid
         log.debug(f"Received package: {package}")
         return package
@@ -108,7 +108,11 @@ class RoyalnetLink:
     async def identify(self) -> None:
         log.info(f"Identifying to {self.master_uri}...")
         await self.websocket.send(f"Identify {self.nid}:{self.link_type}:{self.secret}")
-        response_package: dict = await self.receive()
+        response: Package = await self.receive()
+        assert response.source == "<server>"
+        if "error" in response.data:
+            raise ConnectionClosedError(f"Identification error: {response.data['error']}")
+        assert "success" in response.data
         self.identify_event.set()
         log.info(f"Identified successfully!")
 
@@ -125,11 +129,9 @@ class RoyalnetLink:
         await self.send(package)
         log.debug(f"Sent request: {message} -> {destination}")
         await request.event.wait()
-        result: Message = request.data
-        log.debug(f"Received response: {request} -> {result}")
-        if isinstance(result, ServerErrorMessage):
-            raise NetworkError(result, "Server returned error while requesting something")
-        return result
+        response: dict = request.data
+        log.debug(f"Received response: {request} -> {response}")
+        return response
 
     async def run(self, loops: numbers.Real = math.inf):
         """Blockingly run the Link."""
@@ -153,9 +155,9 @@ class RoyalnetLink:
             log.debug(f"Received request {package.source_conv_id}: {package}")
             try:
                 response = await self.request_handler(package.data)
-                assert isinstance(response, Message)
             except Exception as exc:
-                response = RequestError(exc=exc)
+                response = {"error": "Exception in request_handler",
+                            "exception": exc.__class__.__name__}
             response_package: Package = package.reply(response)
             await self.send(response_package)
             log.debug(f"Replied to request {response_package.source_conv_id}: {response_package}")
