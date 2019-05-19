@@ -21,7 +21,7 @@ class Diario:
 
     @declared_attr
     def creator_id(self):
-        return Column(Integer, ForeignKey("royals.uid"), nullable=False)
+        return Column(Integer, ForeignKey("royals.uid"))
 
     @declared_attr
     def quoted_account_id(self):
