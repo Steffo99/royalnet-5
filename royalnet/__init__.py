@@ -1,10 +1,5 @@
-from . import audio
-from . import bots
-from . import commands
-from . import database
-from . import network
-from . import utils
+from . import audio, bots, commands, database, network, utils, error
 
-version = "5.0a10"
+version = "5.0a11"
 
-__all__ = ["audio", "bots", "commands", "database", "network", "utils"]
+__all__ = ["audio", "bots", "commands", "database", "network", "utils", "error"]
