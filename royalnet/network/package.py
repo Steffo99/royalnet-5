@@ -4,7 +4,8 @@ import typing
 
 
 class Package:
-    """A Royalnet package, the data type with which a :py:class:`royalnet.network.RoyalnetLink` communicates with a :py:class:`royalnet.network.RoyalnetServer` or another link. """
+    """A Royalnet package, the data type with which a :py:class:`royalnet.network.RoyalnetLink` communicates with a :py:class:`royalnet.network.RoyalnetServer` or another link.
+    Contains info about the source and the destination."""
 
     def __init__(self,
                  data: dict,

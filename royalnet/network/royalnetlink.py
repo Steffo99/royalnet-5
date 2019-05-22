@@ -6,7 +6,7 @@ import math
 import numbers
 import logging as _logging
 import typing
-from .packages import Package
+from .package import Package
 
 default_loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
@@ -22,6 +22,10 @@ class NotIdentifiedError(Exception):
 
 class ConnectionClosedError(Exception):
     """The :py:class:`royalnet.network.RoyalnetLink`'s connection was closed unexpectedly. The link can't be used anymore."""
+
+
+class InvalidServerResponseError(Exception):
+    """The :py:class:`royalnet.network.RoyalnetServer` sent invalid data to the :py:class:`royalnet.network.RoyalnetLink`."""
 
 
 class NetworkError(Exception):
@@ -100,7 +104,8 @@ class RoyalnetLink:
             log.info(f"Connection to {self.master_uri} was closed.")
             # What to do now? Let's just reraise.
             raise ConnectionClosedError()
-        assert package.destination == self.nid
+        if self.identify_event.is_set() and package.destination != self.nid:
+            raise InvalidServerResponseError("Package is not addressed to this RoyalnetLink.")
         log.debug(f"Received package: {package}")
         return package
 
@@ -109,10 +114,13 @@ class RoyalnetLink:
         log.info(f"Identifying to {self.master_uri}...")
         await self.websocket.send(f"Identify {self.nid}:{self.link_type}:{self.secret}")
         response: Package = await self.receive()
-        assert response.source == "<server>"
-        if "error" in response.data:
-            raise ConnectionClosedError(f"Identification error: {response.data['error']}")
-        assert "success" in response.data
+        if not response.source == "<server>":
+            raise InvalidServerResponseError("Received a non-service package before identification.")
+        if "type" not in response.data:
+            raise InvalidServerResponseError("Missing 'type' in response data")
+        if response.data["type"] == "error":
+            raise ConnectionClosedError(f"Identification error: {response.data['type']}")
+        assert response.data["type"] == "success"
         self.identify_event.set()
         log.info(f"Identified successfully!")
 
