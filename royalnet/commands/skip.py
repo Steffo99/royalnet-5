@@ -1,25 +1,20 @@
 import typing
 import discord
-from ..network import Message, RequestSuccessful
+from ..network import Request, ResponseSuccess
 from ..utils import Command, Call, NetworkHandler
 from ..error import TooManyFoundError, NoneFoundError
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
 
-class SkipMessage(Message):
-    def __init__(self, guild_name: typing.Optional[str] = None):
-        self.guild_name: typing.Optional[str] = guild_name
-
-
 class SkipNH(NetworkHandler):
-    message_type = SkipMessage
+    message_type = "music_skip"
 
     @classmethod
-    async def discord(cls, bot: "DiscordBot", message: SkipMessage):
+    async def discord(cls, bot: "DiscordBot", data: dict):
         # Find the matching guild
-        if message.guild_name:
-            guild = bot.client.find_guild_by_name(message.guild_name)
+        if data["guild_name"]:
+            guild = bot.client.find_guild_by_name(data["guild_name"])
         else:
             if len(bot.music_data) == 0:
                 raise NoneFoundError("No voice clients active")
@@ -32,7 +27,7 @@ class SkipNH(NetworkHandler):
             raise NoneFoundError("Nothing to skip")
         # noinspection PyProtectedMember
         voice_client._player.stop()
-        return RequestSuccessful()
+        return ResponseSuccess()
 
 
 class SkipCommand(Command):
@@ -46,5 +41,5 @@ class SkipCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         guild, = call.args.match(r"(?:\[(.+)])?")
-        await call.net_request(SkipMessage(guild), "discord")
+        await call.net_request(Request("music_skip", {"guild_name": guild}), "discord")
         await call.reply(f"✅ Richiesto lo skip della canzone attuale.")
