@@ -1,3 +1,8 @@
+import typing
+if typing.TYPE_CHECKING:
+    from .network import ResponseError
+
+
 class NoneFoundError(Exception):
     """The element that was being looked for was not found."""
 
@@ -22,11 +27,16 @@ class InvalidConfigError(Exception):
     """The bot has not been configured correctly, therefore the command can not function."""
 
 
-class RoyalnetError(Exception):
+class RoyalnetRequestError(Exception):
     """An error was raised while handling the Royalnet request.
-    This exception contains the exception that was raised during the handling."""
-    def __init__(self, exc: Exception):
-        self.exc: Exception = exc
+
+    This exception contains the :py:class:`royalnet.network.ResponseError` that was returned by the other Link."""
+    def __init__(self, error: "ResponseError"):
+        self.error: "ResponseError" = error
+
+
+class RoyalnetResponseError(Exception):
+    """The :py:class:`royalnet.network.Response` that was received is invalid."""
 
 
 class ExternalError(Exception):

@@ -1,14 +1,6 @@
 import logging as _logging
 from ..utils import Command, Call
-from ..error import NoneFoundError, \
-                    TooManyFoundError, \
-                    UnregisteredError, \
-                    UnsupportedError, \
-                    InvalidInputError, \
-                    InvalidConfigError, \
-                    RoyalnetError, \
-                    ExternalError
-
+from ..error import *
 
 log = _logging.getLogger(__name__)
 
@@ -41,11 +33,15 @@ class ErrorHandlerCommand(Command):
         if isinstance(exception, InvalidConfigError):
             await call.reply(f"⚠️ Il bot non è stato configurato correttamente, quindi questo comando non può essere eseguito.\n[p]{exception}[/p]")
             return
-        if isinstance(exception, RoyalnetError):
-            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: [p]{exception.exc}[/p]")
+        if isinstance(exception, RoyalnetRequestError):
+            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: [p]{exception.error}[/p]")
             return
         if isinstance(exception, ExternalError):
             await call.reply(f"⚠️ Una risorsa esterna necessaria per l'esecuzione del comando non ha funzionato correttamente, quindi il comando è stato annullato.\n[p]{exception}[/p]")
             return
-        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{exception.__class__.__name__}[/b]\n[p]{exception}[/p]")
+        if isinstance(exception, RoyalnetResponseError):
+            log.warning(f"Invalid response from Royalnet - {exception.__class__.__name__}: {exception}")
+            await call.reply(f"❌ La risposta ricevuta da Royalnet non è valida: [p]{exception}[/p]")
+            return
         log.error(f"Unhandled exception - {exception.__class__.__name__}: {exception}")
+        await call.reply(f"❌ Eccezione non gestita durante l'esecuzione del comando:\n[b]{exception.__class__.__name__}[/b]\n[p]{exception}[/p]")
