@@ -5,8 +5,8 @@ import logging as _logging
 from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
-from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError
-from ..network import Message, Reply, RoyalnetConfig
+from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
+from ..network import RoyalnetConfig, Request, Response, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
 from ..audio import PlayMode, Playlist, RoyalPCMAudio
 
@@ -62,12 +62,20 @@ class DiscordBot(GenericBot):
                     .replace("[/p]", "```")
                 await call.channel.send(escaped_text)
 
-            async def net_request(call, message: Message, destination: str):
+            async def net_request(call, request: Request, destination: str) -> dict:
                 if self.network is None:
                     raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response: Reply = await self.network.request(message, destination)
+                response_dict: dict = await self.network.request(request.to_dict(), destination)
+                if "type" not in response_dict:
+                    raise RoyalnetResponseError("Response is missing a type")
+                elif response_dict["type"] == "ResponseSuccess":
+                    response: typing.Union[ResponseSuccess, ResponseError] = ResponseSuccess.from_dict(response_dict)
+                elif response_dict["type"] == "ResponseError":
+                    response = ResponseError.from_dict(response_dict)
+                else:
+                    raise RoyalnetResponseError("Response type is unknown")
                 response.raise_on_error()
-                return response
+                return response.data
 
             async def get_author(call, error_if_none=False):
                 message: discord.Message = call.kwargs["message"]
