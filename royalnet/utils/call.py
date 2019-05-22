@@ -1,6 +1,5 @@
 import typing
 import asyncio
-from ..network import Message, Reply
 from .command import Command
 from .commandargs import CommandArgs
 if typing.TYPE_CHECKING:
@@ -26,7 +25,7 @@ class Call:
              text: The text to be sent, possibly formatted in the weird undescribed markup that I'm using."""
         raise NotImplementedError()
 
-    async def net_request(self, message, destination: str) -> Reply:
+    async def net_request(self, message, destination: str) -> dict:
         """Send data through a :py:class:`royalnet.network.RoyalnetLink` and wait for a :py:class:`royalnet.network.Reply`.
 
         Parameters:

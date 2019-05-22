@@ -4,7 +4,7 @@ import asyncio
 import logging
 from ..utils import Command, NetworkHandler, Call
 from ..commands import NullCommand
-from ..network import RoyalnetLink, Message, RoyalnetConfig
+from ..network import RoyalnetLink, Request, Response, ResponseSuccess, ResponseError, RoyalnetConfig
 from ..database import Alchemy, DatabaseConfig, relationshiplinkchain
 
 
@@ -24,7 +24,7 @@ class GenericBot:
         """Generate the ``commands`` dictionary required to handle incoming messages, and the ``network_handlers`` dictionary required to handle incoming requests."""
         log.debug(f"Now generating commands")
         self.commands: typing.Dict[str, typing.Type[Command]] = {}
-        self.network_handlers: typing.Dict[typing.Type[Message], typing.Type[NetworkHandler]] = {}
+        self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
         for command in commands:
             lower_command_name = command.command_name.lower()
             self.commands[f"{command_prefix}{lower_command_name}"] = command
@@ -47,25 +47,38 @@ class GenericBot:
         log.debug(f"Running RoyalnetLink {self.network}")
         loop.create_task(self.network.run())
 
-    async def _network_handler(self, message: Message) -> Message:
-        """Handle a single :py:class:`royalnet.network.Message` received from the :py:class:`royalnet.network.RoyalnetLink`.
+    async def _network_handler(self, request_dict: dict) -> dict:
+        """Handle a single :py:class:`dict` received from the :py:class:`royalnet.network.RoyalnetLink`.
 
         Returns:
-            Another message, to be sent as :py:class:`royalnet.network.Reply`."""
-        log.debug(f"Received {message} from the RoyalnetLink")
+            Another :py:class:`dict`, formatted as a :py:class:`royalnet.network.Response`."""
+        # Convert the dict to a Request
         try:
-            network_handler = self.network_handlers[message.__class__]
+            request: Request = Request.from_dict(request_dict)
+        except TypeError:
+            log.warning(f"Invalid request received: {request_dict}")
+            return ResponseError("invalid_request",
+                                 f"The Request that you sent was invalid. Check extra_info to see what you sent.",
+                                 extra_info={"you_sent": request_dict}).to_dict()
+        log.debug(f"Received {request} from the RoyalnetLink")
+        try:
+            network_handler = self.network_handlers[request.handler]
         except KeyError:
-            _, exc, tb = sys.exc_info()
-            log.debug(f"Missing network_handler for {message}")
-            raise Exception(f"Missing network_handler for {message}")
+            log.warning(f"Missing network_handler for {request.handler}")
+            return ResponseError("no_handler", f"This Link is missing a network handler for {request.handler}.").to_dict()
         try:
-            log.debug(f"Using {network_handler} as handler for {message}")
-            return await getattr(network_handler, self.interface_name)(self, message)
+            log.debug(f"Using {network_handler} as handler for {request.handler}")
+            response: Response = await getattr(network_handler, self.interface_name)(self, request.data)
+            return response.to_dict()
         except Exception:
             _, exc, _ = sys.exc_info()
             log.debug(f"Exception {exc} in {network_handler}")
-            raise
+            return ResponseError("exception_in_handler",
+                                 f"An exception was raised in {network_handler} for {request.handler}. Check extra_info for details.",
+                                 extra_info={
+                                     "type": exc.__class__.__name__,
+                                     "str": str(exc)
+                                 }).to_dict()
 
     def _init_database(self, commands: typing.List[typing.Type[Command]], database_config: DatabaseConfig):
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then, find the chain that links the ``master_table`` to the ``identity_table``."""

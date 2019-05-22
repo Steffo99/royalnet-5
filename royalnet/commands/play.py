@@ -3,9 +3,9 @@ import asyncio
 import youtube_dl
 import ffmpeg
 from ..utils import Command, Call, NetworkHandler, asyncify
-from ..network import Message, RequestSuccessful
+from ..network import Request, ResponseSuccess
 from ..error import TooManyFoundError, NoneFoundError
-from ..audio import RoyalPCMAudio, YtdlInfo
+from ..audio import RoyalPCMAudio
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
@@ -13,26 +13,15 @@ if typing.TYPE_CHECKING:
 loop = asyncio.get_event_loop()
 
 
-class PlayMessage(Message):
-    def __init__(self, url: str, guild_name: typing.Optional[str] = None):
-        self.url: str = url
-        self.guild_name: typing.Optional[str] = guild_name
-
-
-class PlaySuccessful(RequestSuccessful):
-    def __init__(self, info_list: typing.List[YtdlInfo]):
-        self.info_list: typing.List[YtdlInfo] = info_list
-
-
 class PlayNH(NetworkHandler):
-    message_type = PlayMessage
+    message_type = "music_play"
 
     @classmethod
-    async def discord(cls, bot: "DiscordBot", message: PlayMessage):
+    async def discord(cls, bot: "DiscordBot", data: dict):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
         # Find the matching guild
-        if message.guild_name:
-            guild = bot.client.find_guild(message.guild_name)
+        if data["guild_name"]:
+            guild = bot.client.find_guild(data["guild_name"])
         else:
             if len(bot.music_data) == 0:
                 raise NoneFoundError("No voice clients active")
@@ -44,12 +33,12 @@ class PlayNH(NetworkHandler):
             # TODO: change Exception
             raise Exception("No music_data for this guild")
         # Start downloading
-        if message.url.startswith("http://") or message.url.startswith("https://"):
-            audio_sources: typing.List[RoyalPCMAudio] = await asyncify(RoyalPCMAudio.create_from_url, message.url)
+        if data["url"].startswith("http://") or data["url"].startswith("https://"):
+            audio_sources: typing.List[RoyalPCMAudio] = await asyncify(RoyalPCMAudio.create_from_url, data["url"])
         else:
-            audio_sources = await asyncify(RoyalPCMAudio.create_from_ytsearch, message.url)
+            audio_sources = await asyncify(RoyalPCMAudio.create_from_ytsearch, data["url"])
         await bot.add_to_music_data(audio_sources, guild)
-        return PlaySuccessful(info_list=[source.rpf.info for source in audio_sources])
+        return ResponseSuccess({"title_list": [source.rpf.info.title for source in audio_sources]})
 
 
 async def notify_on_timeout(call: Call, url: str, time: float, repeat: bool = False):
@@ -70,11 +59,11 @@ class PlayCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        guild, url = call.args.match(r"(?:\[(.+)])?\s*(.+)")
-        download_task = loop.create_task(call.net_request(PlayMessage(url, guild), "discord"))
+        guild_name, url = call.args.match(r"(?:\[(.+)])?\s*(.+)")
+        download_task = loop.create_task(call.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord"))
         notify_task = loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
         try:
-            response: PlaySuccessful = await download_task
+            data: dict = await download_task
         except Exception as exc:
             # RoyalPCMFile errors
             if isinstance(exc, FileExistsError):
@@ -112,5 +101,5 @@ class PlayCommand(Command):
             raise
         finally:
             notify_task.cancel()
-        for info in response.info_list:
-            await call.reply(f"⬇️ Download di [i]{info.title}[/i] completato.")
+        for title in data["title_list"]:
+            await call.reply(f"⬇️ Download di [i]{title}[/i] completato.")
