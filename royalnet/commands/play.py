@@ -2,6 +2,7 @@ import typing
 import asyncio
 import youtube_dl
 import ffmpeg
+import pickle
 from ..utils import Command, Call, NetworkHandler, asyncify
 from ..network import Request, ResponseSuccess
 from ..error import TooManyFoundError, NoneFoundError
@@ -38,7 +39,14 @@ class PlayNH(NetworkHandler):
         else:
             audio_sources = await asyncify(RoyalPCMAudio.create_from_ytsearch, data["url"])
         await bot.add_to_music_data(audio_sources, guild)
-        return ResponseSuccess({"title_list": [source.rpf.info.title for source in audio_sources]})
+        # Create response dictionary
+        response = {
+            "videos": [{
+                "title": source.rpf.info.title,
+                "discord_embed_pickle": str(pickle.dumps(source.rpf.info.to_discord_embed()))
+            } for source in audio_sources]
+        }
+        return ResponseSuccess(response)
 
 
 async def notify_on_timeout(call: Call, url: str, time: float, repeat: bool = False):
@@ -59,7 +67,7 @@ class PlayCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        guild_name, url = call.args.match(r"(?:\[(.+)])?\s*(.+)")
+        guild_name, url = call.args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
         download_task = loop.create_task(call.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord"))
         notify_task = loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
         try:
@@ -101,5 +109,10 @@ class PlayCommand(Command):
             raise
         finally:
             notify_task.cancel()
-        for title in data["title_list"]:
-            await call.reply(f"⬇️ Download di [i]{title}[/i] completato.")
+        for video in data["videos"]:
+            if call.interface_name == "discord":
+                # This is one of the unsafest things ever
+                embed = pickle.loads(eval(video["discord_embed_pickle"]))
+                await call.channel.send(content="✅ Aggiunto alla coda:", embed=embed)
+            else:
+                await call.reply(f"✅ [i]{video['title']}[/i] scaricato e aggiunto alla coda.")
