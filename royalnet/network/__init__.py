@@ -1,6 +1,6 @@
 """Royalnet realated classes."""
-
-from .packages import Package
+from .data import Data, Request
+from .package import Package
 from .royalnetlink import RoyalnetLink, NetworkError, NotConnectedError, NotIdentifiedError, ConnectionClosedError
 from .royalnetserver import RoyalnetServer
 from .royalnetconfig import RoyalnetConfig
@@ -12,4 +12,6 @@ __all__ = ["RoyalnetLink",
            "Package",
            "RoyalnetServer",
            "RoyalnetConfig",
-           "ConnectionClosedError"]
+           "ConnectionClosedError",
+           "Data",
+           "Request"]

@@ -3,7 +3,7 @@ import asyncio
 import youtube_dl
 import ffmpeg
 from ..utils import Command, Call, NetworkHandler, asyncify
-from ..network import Message, RequestSuccessful
+from ..network import Request, Data
 from ..error import TooManyFoundError, NoneFoundError
 from ..audio import RoyalPCMAudio, YtdlInfo
 if typing.TYPE_CHECKING:
@@ -13,14 +13,16 @@ if typing.TYPE_CHECKING:
 loop = asyncio.get_event_loop()
 
 
-class PlayMessage(Message):
+class PlayMessage(Data):
     def __init__(self, url: str, guild_name: typing.Optional[str] = None):
+        super().__init__()
         self.url: str = url
         self.guild_name: typing.Optional[str] = guild_name
 
 
-class PlaySuccessful(RequestSuccessful):
+class PlaySuccessful(Data):
     def __init__(self, info_list: typing.List[YtdlInfo]):
+        super().__init__()
         self.info_list: typing.List[YtdlInfo] = info_list
 
 
