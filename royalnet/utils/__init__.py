@@ -1,6 +1,7 @@
 """Miscellaneous useful functions and classes."""
 
 from .asyncify import asyncify
+from .escaping import telegram_escape, discord_escape
 from .call import Call
 from .command import Command
 from .commandargs import CommandArgs

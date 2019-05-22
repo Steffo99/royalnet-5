@@ -5,9 +5,9 @@ import typing
 import logging as _logging
 from .generic import GenericBot
 from ..commands import NullCommand
-from ..utils import asyncify, Call, Command
+from ..utils import asyncify, Call, Command, telegram_escape
 from ..error import UnregisteredError, InvalidConfigError, RoyalnetResponseError
-from ..network import RoyalnetConfig, Request, Response, ResponseSuccess, ResponseError
+from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
 
 loop = asyncio.get_event_loop()
@@ -41,19 +41,7 @@ class TelegramBot(GenericBot):
             alchemy = self.alchemy
 
             async def reply(call, text: str):
-                escaped_text = text.replace("<", "&lt;") \
-                                   .replace(">", "&gt;") \
-                                   .replace("[b]", "<b>") \
-                                   .replace("[/b]", "</b>") \
-                                   .replace("[i]", "<i>") \
-                                   .replace("[/i]", "</i>") \
-                                   .replace("[u]", "<b>") \
-                                   .replace("[/u]", "</b>") \
-                                   .replace("[c]", "<code>") \
-                                   .replace("[/c]", "</code>") \
-                                   .replace("[p]", "<pre>") \
-                                   .replace("[/p]", "</pre>")
-                await asyncify(call.channel.send_message, escaped_text, parse_mode="HTML")
+                await asyncify(call.channel.send_message, telegram_escape(text), parse_mode="HTML")
 
             async def net_request(call, request: Request, destination: str) -> dict:
                 if self.network is None:

@@ -4,7 +4,7 @@ import typing
 import logging as _logging
 from .generic import GenericBot
 from ..commands import NullCommand
-from ..utils import asyncify, Call, Command
+from ..utils import asyncify, Call, Command, discord_escape
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
 from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
@@ -47,20 +47,7 @@ class DiscordBot(GenericBot):
 
             async def reply(call, text: str):
                 # TODO: don't escape characters inside [c][/c] blocks
-                escaped_text = text.replace("*", "\\*") \
-                    .replace("_", "\\_") \
-                    .replace("`", "\\`") \
-                    .replace("[b]", "**") \
-                    .replace("[/b]", "**") \
-                    .replace("[i]", "_") \
-                    .replace("[/i]", "_") \
-                    .replace("[u]", "__") \
-                    .replace("[/u]", "__") \
-                    .replace("[c]", "`") \
-                    .replace("[/c]", "`") \
-                    .replace("[p]", "```") \
-                    .replace("[/p]", "```")
-                await call.channel.send(escaped_text)
+                await call.channel.send(discord_escape(text))
 
             async def net_request(call, request: Request, destination: str) -> dict:
                 if self.network is None:
