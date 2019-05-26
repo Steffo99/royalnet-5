@@ -4,7 +4,7 @@ import os
 import typing
 import time
 from .youtubedl import YtdlFile, YtdlInfo
-from ..utils import safefilename
+from ..utils import fileformat
 
 
 log = logging.getLogger(__name__)
@@ -82,14 +82,14 @@ class RoyalPCMFile(YtdlFile):
         Warning:
             It's going to be deleted as soon as the :py:func:`royalnet.audio.RoyalPCMFile.__init__` function has completed, so it's probably not going to be very useful...
         """
-        return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.ytdl"
+        return f"./downloads/{fileformat(self.info.title)}-{fileformat(str(int(self._time)))}.ytdl"
 
     @property
     def audio_filename(self) -> str:
         """
         Returns:
             The name of the downloaded and PCM-converted audio file."""
-        return f"./downloads/{safefilename(self.info.title)}-{safefilename(str(int(self._time)))}.pcm"
+        return f"./downloads/{fileformat(self.info.title)}-{fileformat(str(int(self._time)))}.pcm"
 
     def delete_audio_file(self):
         """Delete the PCM-converted audio file."""

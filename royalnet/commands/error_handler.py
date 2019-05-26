@@ -34,7 +34,9 @@ class ErrorHandlerCommand(Command):
             await call.reply(f"⚠️ Il bot non è stato configurato correttamente, quindi questo comando non può essere eseguito.\n[p]{exception}[/p]")
             return
         if isinstance(exception, RoyalnetRequestError):
-            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore: [p]{exception.error}[/p]")
+            await call.reply(f"⚠️ La richiesta a Royalnet ha restituito un errore:\n"
+                             f"[p]{exception.error.extra_info['type']}\n"
+                             f"{exception.error.extra_info['str']}[/p]")
             return
         if isinstance(exception, ExternalError):
             await call.reply(f"⚠️ Una risorsa esterna necessaria per l'esecuzione del comando non ha funzionato correttamente, quindi il comando è stato annullato.\n[p]{exception}[/p]")
