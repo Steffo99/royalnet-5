@@ -6,7 +6,7 @@ from .generic import GenericBot
 from ..commands import NullCommand
 from ..utils import asyncify, Call, Command
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
-from ..network import RoyalnetConfig, Request, Response, ResponseSuccess, ResponseError
+from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
 from ..audio import PlayMode, Playlist, RoyalPCMAudio
 
