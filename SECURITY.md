@@ -16,4 +16,4 @@ I think you should be able to report vulnerabilities on GitHub.
 
 If you report a vulnerability there I'll try to fix it as soon as I have time.
 
-Thanks for your cooperation!
+Thanks for your help!
