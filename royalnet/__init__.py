@@ -1,9 +1,9 @@
-import audio
-import bots
-import commands
-import database
-import network
-import utils
+from . import audio
+from . import bots
+from . import commands
+from . import database
+from . import network
+from . import utils
 
 version = "5.0a10"
 
