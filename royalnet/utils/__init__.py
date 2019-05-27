@@ -9,7 +9,7 @@ from .safeformat import safeformat
 from .classdictjanitor import cdj
 from .sleepuntil import sleep_until
 from .networkhandler import NetworkHandler
-from .formatters import andformat, plusformat, fileformat
+from .formatters import andformat, plusformat, fileformat, ytdldateformat
 
 __all__ = ["asyncify", "Call", "Command", "safeformat", "cdj", "sleep_until", "plusformat", "CommandArgs",
-           "NetworkHandler", "andformat", "plusformat", "fileformat"]
+           "NetworkHandler", "andformat", "plusformat", "fileformat", "ytdldateformat"]

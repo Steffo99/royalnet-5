@@ -38,3 +38,9 @@ def plusformat(i: int) -> str:
 def fileformat(string: str) -> str:
     """Ensure a string can be used as a filename by replacing all non-word characters with underscores."""
     return re.sub(r"\W", "_", string)
+
+
+def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
+    if string is None:
+        return ""
+    return f"{string[0:4]}-{string[4:6]}-{string[6:8]}"
