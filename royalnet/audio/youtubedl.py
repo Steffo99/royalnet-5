@@ -2,8 +2,10 @@ import typing
 import logging as _logging
 import discord
 import os
+import dateparser
 import datetime
 from youtube_dl import YoutubeDL
+from ..utils import ytdldateformat
 
 log = _logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ class YtdlInfo:
         self.uploader_url: typing.Optional[str] = info.get("uploader_url")
         self.channel_id: typing.Optional[str] = info.get("channel_id")
         self.channel_url: typing.Optional[str] = info.get("channel_url")
-        self.upload_date: typing.Optional[str] = info.get("upload_date")
+        self.upload_date: typing.Optional[datetime.datetime] = dateparser.parse(ytdldateformat(info.get("upload_date")))
         self.license: typing.Optional[str] = info.get("license")
         self.creator: typing.Optional[...] = info.get("creator")
         self.title: typing.Optional[str] = info.get("title")
@@ -82,7 +84,7 @@ class YtdlInfo:
         self.tags: typing.Optional[typing.List[str]] = info.get("tags")
         self.subtitles: typing.Optional[typing.Dict[str, typing.List[typing.Dict[str, str]]]] = info.get("subtitles")
         self.automatic_captions: typing.Optional[dict] = info.get("automatic_captions")
-        self.duration: typing.Optional[int] = info.get("duration")
+        self.duration: typing.Optional[datetime.timedelta] = datetime.timedelta(seconds=info.get("duration", 0))
         self.age_limit: typing.Optional[int] = info.get("age_limit")
         self.annotations: typing.Optional[...] = info.get("annotations")
         self.chapters: typing.Optional[...] = info.get("chapters")
@@ -150,7 +152,7 @@ class YtdlInfo:
         embed.set_author(name=self.uploader, url=self.uploader_url)
         embed.set_footer(text="Fonte: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
         embed.add_field(name="Duration", value=str(self.duration), inline=True)
-        embed.add_field(name="Published on", value=self.upload_date, inline=True)
+        embed.add_field(name="Published on", value=str(self.upload_date), inline=True)
         return embed
 
     def __repr__(self):
