@@ -80,9 +80,10 @@ class Playlist(PlayMode):
         self.list.append(item)
 
     def delete(self) -> None:
+        if self.now_playing is not None:
+            self.now_playing.delete()
         while self.list:
             self.list.pop(0).delete()
-        self.now_playing.delete()
 
 
 class Pool(PlayMode):
