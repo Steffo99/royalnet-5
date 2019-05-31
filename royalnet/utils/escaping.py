@@ -1,4 +1,8 @@
 def discord_escape(string: str) -> str:
+    """Escape a string to be sent through Discord, and format it using RoyalCode.
+    
+    Warning:
+        Currently escapes everything, even items in code blocks."""
     return string.replace("*", "\\*") \
                  .replace("_", "\\_") \
                  .replace("`", "\\`") \
@@ -15,6 +19,10 @@ def discord_escape(string: str) -> str:
 
 
 def telegram_escape(string: str) -> str:
+    """Escape a string to be sent through Telegram, and format it using RoyalCode.
+    
+    Warning:
+        Currently escapes everything, even items in code blocks."""
     return string.replace("<", "&lt;") \
                  .replace(">", "&gt;") \
                  .replace("[b]", "<b>") \

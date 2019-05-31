@@ -1,4 +1,4 @@
-"""Royalnet realated classes."""
+"""Royalnet (websocket) related classes."""
 from .request import Request
 from .response import Response, ResponseSuccess, ResponseError
 from .package import Package
