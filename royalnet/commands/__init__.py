@@ -25,9 +25,10 @@ from .playmode import PlaymodeCommand
 from .videochannel import VideochannelCommand
 from .missing import MissingCommand
 from .cv import CvCommand
+from .pause import PauseCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
            "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand",
-           "SkipCommand", "PlaymodeCommand", "VideochannelCommand", "MissingCommand", "CvCommand"]
+           "SkipCommand", "PlaymodeCommand", "VideochannelCommand", "MissingCommand", "CvCommand", "PauseCommand"]
