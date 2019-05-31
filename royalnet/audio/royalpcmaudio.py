@@ -5,7 +5,7 @@ from .royalpcmfile import RoyalPCMFile
 
 
 class RoyalPCMAudio(AudioSource):
-    """A discord-compatible :py:class:`discord.AudioSource` that keeps data in a file instead of in memory."""
+    """A :py:class:`discord.AudioSource` that keeps data in a file instead of in memory."""
 
     def __init__(self, rpf: "RoyalPCMFile"):
         """Create a :py:class:`discord.audio.RoyalPCMAudio` from a :py:class:`royalnet.audio.RoyalPCMFile`.
@@ -41,9 +41,16 @@ class RoyalPCMAudio(AudioSource):
         return [RoyalPCMAudio(rpf) for rpf in rpf_list]
 
     def is_opus(self):
+        """This audio file isn't Opus-encoded, but PCM-encoded.
+        
+        Returns:
+            ``False``."""
         return False
 
     def read(self):
+        """Reads 20ms worth of audio.
+        
+        If the audio is complete, then returning an empty :py:class:`bytes`-like object to signal this is the way to do so."""
         data: bytes = self._file.read(OpusEncoder.FRAME_SIZE)
         # If the file was externally closed, it means it was deleted
         if self._file.closed:

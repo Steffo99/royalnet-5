@@ -340,17 +340,41 @@
 <dl class="method">
 <dt id="royalnet.audio.YtdlFile._stop_download">
 <code class="descname">_stop_download</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlFile._stop_download" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>I have no clue of what this does, or why is it here. Possibly remove it?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>InterruptDownload</strong> – …uhhh, always?</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="royalnet.audio.YtdlFile.create_from_url">
 <em class="property">static </em><code class="descname">create_from_url</code><span class="sig-paren">(</span><em>url</em>, <em>outtmpl='%(title)s-%(id)s.%(ext)s'</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; List[royalnet.audio.youtubedl.YtdlFile]<a class="headerlink" href="#royalnet.audio.YtdlFile.create_from_url" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Download the videos at the specified url.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The url to download the videos from.</p></li>
+<li><p><strong>outtmpl</strong> – The filename that the downloaded videos are going to have. The name can be formatted according to the <a class="reference external" href="https://github.com/ytdl-org/youtube-dl/blob/master/README.md#output-template">outtmpl documentation</a>.</p></li>
+<li><p><strong>ytdl_args</strong> – Other arguments to be passed to the YoutubeDL object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of YtdlFiles.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="royalnet.audio.YtdlFile.delete_video_file">
 <code class="descname">delete_video_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlFile.delete_video_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Delete the file located at <code class="docutils literal notranslate"><span class="pre">self.video_filename</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No checks are done when deleting, so it may try to delete a non-existing file and raise an exception or do some other weird stuff with weird filenames.</p>
+</div>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="royalnet.audio.YtdlFile.ytdl_args">
@@ -381,6 +405,11 @@
 <dl class="method">
 <dt id="royalnet.audio.YtdlInfo.download">
 <code class="descname">download</code><span class="sig-paren">(</span><em>outtmpl='%(title)s-%(id)s.%(ext)s'</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; royalnet.audio.youtubedl.YtdlFile<a class="headerlink" href="#royalnet.audio.YtdlInfo.download" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlInfo.to_discord_embed">
+<code class="descname">to_discord_embed</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; discord.embeds.Embed<a class="headerlink" href="#royalnet.audio.YtdlInfo.to_discord_embed" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -460,7 +489,7 @@ The name of the downloaded and PCM-converted audio file.</p>
 <dl class="class">
 <dt id="royalnet.audio.RoyalPCMAudio">
 <em class="property">class </em><code class="descclassname">royalnet.audio.</code><code class="descname">RoyalPCMAudio</code><span class="sig-paren">(</span><em>rpf: royalnet.audio.royalpcmfile.RoyalPCMFile</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.RoyalPCMAudio" title="Permalink to this definition">¶</a></dt>
-<dd><p>A discord-compatible <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.AudioSource" title="(in discord.py v1.2.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.AudioSource</span></code></a> that keeps data in a file instead of in memory.</p>
+<dd><p>A <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.AudioSource" title="(in discord.py v1.2.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.AudioSource</span></code></a> that keeps data in a file instead of in memory.</p>
 <dl class="method">
 <dt id="royalnet.audio.RoyalPCMAudio.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>rpf: royalnet.audio.royalpcmfile.RoyalPCMFile</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.RoyalPCMAudio.__init__" title="Permalink to this definition">¶</a></dt>
@@ -511,29 +540,19 @@ The name of the downloaded and PCM-converted audio file.</p>
 <dl class="method">
 <dt id="royalnet.audio.RoyalPCMAudio.is_opus">
 <code class="descname">is_opus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.RoyalPCMAudio.is_opus" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if the audio source is already encoded in Opus.</p>
-<p>Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dd><p>This audio file isn’t Opus-encoded, but PCM-encoded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="royalnet.audio.RoyalPCMAudio.read">
 <code class="descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.RoyalPCMAudio.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads 20ms worth of audio.</p>
-<p>Subclasses must implement this.</p>
-<p>If the audio is complete, then returning an empty
-<span class="xref std std-term">py:bytes-like object</span> to signal this is the way to do so.</p>
-<p>If <a class="reference internal" href="#royalnet.audio.RoyalPCMAudio.is_opus" title="royalnet.audio.RoyalPCMAudio.is_opus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_opus()</span></code></a> method returns <code class="docutils literal notranslate"><span class="pre">True</span></code>, then it must return
-20ms worth of Opus encoded audio. Otherwise, it must be 20ms
-worth of 16-bit 48KHz stereo PCM, which is about 3,840 bytes
-per frame (20ms worth of audio).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A bytes like object that represents the PCM or Opus data.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#bytes" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
-</dd>
-</dl>
+<p>If the audio is complete, then returning an empty <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#bytes" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>-like object to signal this is the way to do so.</p>
 </dd></dl>
 
 </dd></dl>
