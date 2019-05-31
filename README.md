@@ -1,7 +1,7 @@
-# `royalnet` **alpha**
+# `royalnet` [![PyPI](https://img.shields.io/pypi/v/royalnet.svg)](https://pypi.org/project/royalnet/)
 
-The fifth rewrite of [Royalnet](https://github.com/Steffo99/royalnet/)!
+The fifth rewrite of the Royal Network!
 
-It includes a lot of miscellaneous useful stuff.
+It has a lot of submodules, many of which may be used in other bots.
 
-[Documentation available here.](https://royal-games.github.io/royalnet/html/index.html)
+[Documentation available here](https://royal-games.github.io/royalnet/html/index.html).
