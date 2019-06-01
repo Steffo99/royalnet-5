@@ -1,6 +1,6 @@
 import flask as f
-from .. import Royalprint
-from ...database.tables import Royal
+from ... import Royalprint
+from ....database.tables import Royal
 
 
 bp = Royalprint("testing", __name__, url_prefix="/testing", required_tables={Royal})
