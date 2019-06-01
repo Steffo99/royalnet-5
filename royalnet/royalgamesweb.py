@@ -1,6 +1,6 @@
 import os
 from .web import create_app
-from .web.blueprints import helloworld, testing
+from .web.blueprints import home
 
 
 class TestConfig:
@@ -8,7 +8,7 @@ class TestConfig:
     REQUIRED_TABLES = set()
 
 
-app = create_app(TestConfig, [helloworld, testing])
+app = create_app(TestConfig, [home])
 
 
 if __name__ == "__main__":
