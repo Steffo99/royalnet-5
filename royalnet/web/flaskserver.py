@@ -1,13 +1,16 @@
 import typing
 import flask as f
 from ..database import Alchemy
+from .royalprint import Royalprint
 
 
-def create_app(config_obj: typing.Type, blueprints: typing.List[f.Blueprint]):
+def create_app(config_obj: typing.Type, blueprints: typing.List[Royalprint]):
     app = f.Flask(__name__)
     app.config.from_object(config_obj)
-    with app.app_context():
-        f.g.alchemy = Alchemy(app.config["DB_PATH"], app.config["REQUIRED_TABLES"])
+    required_tables = set()
     for blueprint in blueprints:
+        required_tables.union(blueprint.required_tables)
         app.register_blueprint(blueprint)
+    with app.app_context():
+        f.g.alchemy = Alchemy(app.config["DB_PATH"], required_tables)
     return app
