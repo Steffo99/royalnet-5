@@ -7,7 +7,7 @@ bp = Royalprint("testing", __name__, url_prefix="/testing", required_tables={Roy
 
 
 @bp.route("/listroyals")
-def listroyals():
-    from ..alchemyhandler import alchemy, alchemy_session
+def testing_listroyals():
+    from ...alchemyhandler import alchemy, alchemy_session
     royals = alchemy_session.query(alchemy.Royal).all()
     return f'<body><script type="text/plain" style="display: block;">{repr(royals)}</script></body>'

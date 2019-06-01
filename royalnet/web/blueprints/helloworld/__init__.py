@@ -6,5 +6,5 @@ bp = Royalprint("helloworld", __name__, url_prefix="/helloworld")
 
 
 @bp.route("/")
-def helloworld():
+def helloworld_index():
     return "Hello world!"
