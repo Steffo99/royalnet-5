@@ -1,19 +1,13 @@
+import typing
 import flask as f
-import os
 from ..database import Alchemy
 
 
-app = f.Flask(__name__)
-app.config["RN_ALCHEMY"] = Alchemy(os.environ["DB_PATH"], set())
-with app.app_context():
-    from .alchemyhandler import alchemy_session as db_session
-
-
-@app.route("/")
-def test():
-    ...
-    return repr(db_session)
-
-
-if __name__ == "__main__":
-    app.run()
+def create_app(config_obj: typing.Type, blueprints: typing.List[f.Blueprint]):
+    app = f.Flask(__name__)
+    app.config.from_object(config_obj)
+    with app.app_context():
+        f.g.alchemy = Alchemy(app.config["DB_PATH"], app.config["REQUIRED_TABLES"])
+    for blueprint in blueprints:
+        app.register_blueprint(blueprint)
+    return app
