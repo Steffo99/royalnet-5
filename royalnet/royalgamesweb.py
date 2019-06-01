@@ -9,4 +9,7 @@ class TestConfig:
 
 
 app = create_app(TestConfig, [helloworld.bp])
-app.run()
+
+
+if __name__ == "__main__":
+    app.run()
