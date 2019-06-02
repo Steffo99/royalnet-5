@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Stefano Pigozzi">
+    <meta name="keywords" content="Royal Games,RYG,Gaming,Videogames,Community">
+    <meta name="description" content="Royal Games Community">
+    <meta property="og:site_name" content="Royal Games">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <link rel="stylesheet" href="https://steffo.eu/static/styling.css">
+    <link rel="icon" href="{{ url_for("static", filename="favicon.png") }}" type="image/png">
+</head>
+<body>
+    <!--TODO: togliere questa roba-->
+    <div id="top-bar">
+        <span id="steffo">
+            Royal Games
+        </span>
+    </div>
+    <div class="h-container">
+        {% block content %}{% endblock %}
+    </div>
+    <div id="foot-scripts">
+        {% block footscripts %}{% endblock %}
+    </div>
+</body>
+</html>
