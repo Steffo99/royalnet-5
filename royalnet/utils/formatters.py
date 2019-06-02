@@ -58,3 +58,15 @@ def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
     if string is None:
         return ""
     return f"{string[0:4]}{separator}{string[4:6]}{separator}{string[6:8]}"
+
+
+def numberemojiformat(l: typing.List[str]) -> str:
+    number_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    extra_emoji = "*️⃣"
+    result = ""
+    for index, element in enumerate(l):
+        try:
+            result += f"{number_emojis[index]} {element}\n"
+        except IndexError:
+            result += f"{extra_emoji} {element}\n"
+    return result
