@@ -10,7 +10,13 @@ loop = asyncio.get_event_loop()
 
 
 class Call:
-    """A command call. An abstract class, sub-bots should create a new call class from this."""
+    """A command call. An abstract class, sub-bots should create a new call class from this.
+    
+    Attributes:
+        interface_name: The name of the interface that is calling the command. For example, ``telegram``, or ``discord``.
+        interface_obj: The main object of the interface that is calling the command. For example, the :py:class:`royalnet.bots.TelegramBot` object.
+        interface_prefix: The command prefix used by the interface. For example, ``/``, or ``!``.
+        alchemy: The :py:class:`royalnet.database.Alchemy` object associated to this interface. May be None if the interface is not connected to any database."""
 
     # These parameters / methods should be overridden
     interface_name = NotImplemented
@@ -30,7 +36,7 @@ class Call:
 
         Parameters:
             message: The data to be sent. Must be :py:mod:`pickle`-able.
-            destination: """
+            destination: The destination of the request, either in UUID format or node name."""
         raise NotImplementedError()
 
     async def get_author(self, error_if_none=False):

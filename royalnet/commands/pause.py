@@ -7,9 +7,10 @@ if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
 
-class SkipNH(NetworkHandler):
-    message_type = "music_skip"
+class PauseNH(NetworkHandler):
+    message_type = "music_pause"
 
+    # noinspection PyProtectedMember
     @classmethod
     async def discord(cls, bot: "DiscordBot", data: dict):
         # Find the matching guild
@@ -24,22 +25,29 @@ class SkipNH(NetworkHandler):
         # Set the currently playing source as ended
         voice_client: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
         if not (voice_client.is_playing() or voice_client.is_paused()):
-            raise NoneFoundError("Nothing to skip")
-        # noinspection PyProtectedMember
-        voice_client._player.stop()
-        return ResponseSuccess()
+            raise NoneFoundError("Nothing to pause")
+        # Toggle pause
+        resume = voice_client._player.is_paused()
+        if resume:
+            voice_client._player.resume()
+        else:
+            voice_client._player.pause()
+        return ResponseSuccess({"resume": resume})
 
 
-class SkipCommand(Command):
+class PauseCommand(Command):
 
-    command_name = "skip"
-    command_description = "Salta la canzone attualmente in riproduzione in chat vocale."
+    command_name = "pause"
+    command_description = "Mette in pausa o riprende la riproduzione della canzone attuale."
     command_syntax = "[ [guild] ]"
 
-    network_handlers = [SkipNH]
+    network_handlers = [PauseNH]
 
     @classmethod
     async def common(cls, call: Call):
         guild, = call.args.match(r"(?:\[(.+)])?")
-        await call.net_request(Request("music_skip", {"guild_name": guild}), "discord")
-        await call.reply(f"✅ Richiesto lo skip della canzone attuale.")
+        response = await call.net_request(Request("music_pause", {"guild_name": guild}), "discord")
+        if response["resume"]:
+            await call.reply(f"▶️ Riproduzione ripresa.")
+        else:
+            await call.reply(f"⏸ Riproduzione messa in pausa.")

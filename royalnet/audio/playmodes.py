@@ -47,6 +47,18 @@ class PlayMode:
         """Delete all :py:class:`royalnet.audio.RoyalPCMAudio` contained inside this PlayMode."""
         raise NotImplementedError()
 
+    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+        """Display all the videos in the PlayMode as a list, if possible.
+
+        To be used with `queue` commands, for example.
+
+        Raises:
+            NotImplementedError: If a preview can't be generated.
+
+        Returns:
+            A list of videos contained in the queue."""
+        raise NotImplementedError()
+
 
 class Playlist(PlayMode):
     """A video list. :py:class:`royalnet.audio.RoyalPCMAudio` played are removed from the list."""
@@ -80,9 +92,13 @@ class Playlist(PlayMode):
         self.list.append(item)
 
     def delete(self) -> None:
+        if self.now_playing is not None:
+            self.now_playing.delete()
         while self.list:
             self.list.pop(0).delete()
-        self.now_playing.delete()
+
+    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+        return self.list
 
 
 class Pool(PlayMode):
@@ -125,3 +141,8 @@ class Pool(PlayMode):
             item.delete()
         self.pool = None
         self._pool_copy = None
+
+    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+        preview_pool = self.pool.copy()
+        random.shuffle(preview_pool)
+        return preview_pool

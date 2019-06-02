@@ -20,7 +20,7 @@ log.setLevel(logging.WARNING)
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
             AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
             KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
-            VideochannelCommand, CvCommand]
+            VideochannelCommand, CvCommand, PauseCommand, QueueCommand]
 
 address, port = "127.0.0.1", 1234
 
