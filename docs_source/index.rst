@@ -11,6 +11,7 @@ royalnet
    network
    utils
    error
+   web
 
 
 Indices and tables
