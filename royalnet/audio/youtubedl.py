@@ -166,9 +166,9 @@ class YtdlInfo:
         embed.set_thumbnail(
             url=self.thumbnail)
         embed.set_author(name=self.uploader, url=self.uploader_url)
-        embed.set_footer(text="Fonte: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
+        embed.set_footer(text="Source: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
         embed.add_field(name="Duration", value=str(self.duration), inline=True)
-        embed.add_field(name="Published on", value=str(self.upload_date), inline=True)
+        embed.add_field(name="Published on", value=self.upload_date.strftime("%d %b %Y"), inline=True)
         return embed
 
     def __repr__(self):
