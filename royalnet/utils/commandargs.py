@@ -4,13 +4,13 @@ from royalnet.error import InvalidInputError
 
 
 class CommandArgs(list):
-    """The arguments of a command."""
+    """An interface to access the arguments of a command with ease."""
 
     def __getitem__(self, item):
         """Arguments can be accessed with an array notation, such as ``args[0]``.
 
         Raises:
-             :py:exc:`InvalidInputError` if the requested argument does not exist."""
+            royalnet.error.InvalidInputError: if the requested argument does not exist."""
         if isinstance(item, int):
             try:
                 return super().__getitem__(item)
@@ -30,7 +30,7 @@ class CommandArgs(list):
             require_at_least: the minimum amount of arguments required, will raise :py:exc:`royalnet.error.InvalidInputError` if the requirement is not fullfilled.
 
         Raises:
-            :py:exc:`royalnet.error.InvalidInputError` if the ``require_at_least`` requirement is not fullfilled.
+            royalnet.error.InvalidInputError: if there are less than ``require_at_least`` arguments.
 
         Returns:
             The space-joined string."""
@@ -43,6 +43,9 @@ class CommandArgs(list):
 
         Parameters:
             pattern: The regex pattern to be passed to :py:func:`re.match`.
+
+        Raises:
+            royalnet.error.InvalidInputError: if the pattern doesn't match.
 
         Returns:
             The matched groups, as returned by :py:func:`re.Match.groups`."""

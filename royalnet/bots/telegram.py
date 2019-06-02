@@ -130,6 +130,7 @@ class TelegramBot(GenericBot):
 
     @property
     def botfather_command_string(self) -> str:
+        """Generate a string to be pasted in the "Edit Commands" BotFather prompt."""
         string = ""
         for command_key in self.commands:
             command = self.commands[command_key]

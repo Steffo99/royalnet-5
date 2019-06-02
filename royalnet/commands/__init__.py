@@ -1,4 +1,6 @@
-"""Commands that can be used in bots. These probably won't suit your needs, as they are tailored for the bots of the `Royal Games <https://ryg.steffo.eu>`_ gaming community, but you can check them for reference."""
+"""Commands that can be used in bots. 
+
+These probably won't suit your needs, as they are tailored for the bots of the Royal Games gaming community, but they may be useful to develop new ones."""
 
 from .null import NullCommand
 from .ping import PingCommand
@@ -23,9 +25,12 @@ from .playmode import PlaymodeCommand
 from .videochannel import VideochannelCommand
 from .missing import MissingCommand
 from .cv import CvCommand
+from .pause import PauseCommand
+from .queue import QueueCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
            "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand",
-           "SkipCommand", "PlaymodeCommand", "VideochannelCommand", "MissingCommand", "CvCommand"]
+           "SkipCommand", "PlaymodeCommand", "VideochannelCommand", "MissingCommand", "CvCommand", "PauseCommand",
+           "QueueCommand"]
