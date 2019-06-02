@@ -23,7 +23,7 @@ class SkipNH(NetworkHandler):
             guild = list(bot.music_data)[0]
         # Set the currently playing source as ended
         voice_client: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
-        if not voice_client.is_playing():
+        if not (voice_client.is_playing() or voice_client.is_paused()):
             raise NoneFoundError("Nothing to skip")
         # noinspection PyProtectedMember
         voice_client._player.stop()
