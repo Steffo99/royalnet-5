@@ -10,6 +10,7 @@ if typing.TYPE_CHECKING:
 class PauseNH(NetworkHandler):
     message_type = "music_pause"
 
+    # noinspection PyProtectedMember
     @classmethod
     async def discord(cls, bot: "DiscordBot", data: dict):
         # Find the matching guild
@@ -23,7 +24,7 @@ class PauseNH(NetworkHandler):
             guild = list(bot.music_data)[0]
         # Set the currently playing source as ended
         voice_client: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
-        if not voice_client.is_playing():
+        if not (voice_client.is_playing() or voice_client.is_paused()):
             raise NoneFoundError("Nothing to pause")
         # Toggle pause
         resume = voice_client._player.is_paused()
