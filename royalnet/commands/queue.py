@@ -72,5 +72,5 @@ class QueueCommand(Command):
             for embed in pickle.loads(eval(data["queue"]["pickled_embeds"]))[:5]:
                 await call.channel.send(embed=embed)
         else:
-            message += numberemojiformat(data["queue"]["strings"])
+            message += numberemojiformat(data["queue"]["strings"][:10])
             await call.reply(message)
