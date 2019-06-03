@@ -62,11 +62,20 @@ class QueueCommand(Command):
             await call.reply(f"ℹ️ La coda di riproduzione attuale ([c]{data['type']}[/c]) non permette l'anteprima.")
             return
         if data["type"] == "Playlist":
-            message = f"ℹ️ Questa [c]Playlist[/c] contiene {len(data['queue'])} elementi, e i prossimi saranno:\n"
+            if len(data["queue"]["strings"]) == 0:
+                message = f"ℹ️ Questa [c]Playlist[/c] è vuota."
+            else:
+                message = f"ℹ️ Questa [c]Playlist[/c] contiene {len(data['queue']['strings'])} elementi, e i prossimi saranno:\n"
         elif data["type"] == "Pool":
-            message = f"ℹ️ Questo [c]Pool[/c] contiene {len(data['queue'])} elementi, tra cui:\n"
+            if len(data["queue"]["strings"]) == 0:
+                message = f"ℹ️ Questo [c]Pool[/c] è vuoto."
+            else:
+                message = f"ℹ️ Questo [c]Pool[/c] contiene {len(data['queue']['strings'])} elementi, tra cui:\n"
         else:
-            message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], contiene {len(data['queue'])} elementi:\n"
+            if len(data["queue"]["strings"]) == 0:
+                message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], è vuoto.\n"
+            else:
+                message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], contiene {len(data['queue']['strings'])} elementi:\n"
         if call.interface_name == "discord":
             await call.reply(message)
             for embed in pickle.loads(eval(data["queue"]["pickled_embeds"]))[:5]:
