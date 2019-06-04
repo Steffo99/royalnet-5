@@ -41,3 +41,7 @@ class RoyalnetResponseError(Exception):
 
 class ExternalError(Exception):
     """Something went wrong in a non-Royalnet component and the command execution cannot be completed."""
+
+
+class FileTooBigError(Exception):
+    """The file to be downloaded would be too big to store; therefore, it has been skipped."""
