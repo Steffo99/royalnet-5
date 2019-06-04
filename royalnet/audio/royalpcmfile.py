@@ -3,7 +3,9 @@ import ffmpeg
 import os
 import typing
 import time
+import datetime
 from .youtubedl import YtdlFile, YtdlInfo
+from ..error import FileTooBigError
 from ..utils import fileformat
 
 
@@ -18,6 +20,9 @@ class RoyalPCMFile(YtdlFile):
     def __init__(self, info: "YtdlInfo", **ytdl_args):
         # Preemptively initialize info to be able to generate the filename
         self.info = info
+        # If the video is longer than 3 hours, don't download it
+        if self.info.duration >= datetime.timedelta(hours=3):
+            raise FileTooBigError("File is over 3 hours long")
         # Set the time to generate the filename
         self._time = time.time()
         # Ensure the file doesn't already exist
