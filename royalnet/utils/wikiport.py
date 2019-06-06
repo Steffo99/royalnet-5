@@ -12,8 +12,10 @@ if __name__ == "__main__":
     with open(r"data.txt") as file, alchemy.session_cm() as session:
         for line in file.readlines():
             match = re.match("^([^\t]+)\t([^\t]+)\t([tf])$", line)
+            if match is None:
+                continue
             title = match.group(1)
-            content = match.group(2)
+            content = match.group(2).replace(r"\r\n", "\n").replace(r"\t", "\t")
             page = alchemy.WikiPage(page_id=uuid.uuid4(),
                                     title=title,
                                     content=content)

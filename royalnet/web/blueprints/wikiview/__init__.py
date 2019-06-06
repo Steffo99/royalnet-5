@@ -1,6 +1,7 @@
 import flask as f
 import markdown2
 import re
+import uuid
 from ... import Royalprint
 from ....database.tables import Royal, WikiPage, WikiRevision
 
@@ -30,14 +31,22 @@ def prepare_page(page):
     return converted_md
 
 
-@bp.route("/id/<int:page_id>")
-def wikiview_by_id(page_id: int):
+@bp.route("/")
+def wikiview_index():
     from ...alchemyhandler import alchemy, alchemy_session
-    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
+    pages = alchemy_session.query(alchemy.WikiPage).all()
+    return f.render_template("wikiview_index.html", pages=pages)
+
+
+@bp.route("/id/<page_id>")
+def wikiview_by_id(page_id: str):
+    from ...alchemyhandler import alchemy, alchemy_session
+    page_uuid = uuid.UUID(page_id)
+    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
     if page is None:
         return "No such page", 404
     parsed_content = prepare_page(page)
-    return f.render_template("wikiviewer.html", page=page, parsed_content=f.Markup(parsed_content))
+    return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(parsed_content))
 
 
 @bp.route("/title/<title>")
@@ -47,4 +56,4 @@ def wikiview_by_title(title: str):
     if page is None:
         return "No such page", 404
     parsed_content = prepare_page(page)
-    return f.render_template("wikiviewer.html", page=page, parsed_content=f.Markup(parsed_content))
+    return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(parsed_content))
