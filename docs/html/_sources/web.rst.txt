@@ -1,4 +1,4 @@
-royalnet.utils
+royalnet.web
 ====================================
 
 .. toctree::
