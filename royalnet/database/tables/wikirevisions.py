@@ -2,33 +2,14 @@ from sqlalchemy import Column, \
                        Integer, \
                        Text, \
                        DateTime, \
-                       String, \
                        ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
+from .wikipages import WikiPage
+# noinspection PyUnresolvedReferences
 from .royals import Royal
-
-
-class WikiPage:
-    """Wiki page properties.
-
-    Warning:
-        Requires PostgreSQL!"""
-    __tablename__ = "wikipages"
-
-    @declared_attr
-    def page_id(self):
-        return Column(UUID(as_uuid=True), primary_key=True)
-
-    @declared_attr
-    def title(self):
-        return Column(String, nullable=False)
-
-    @declared_attr
-    def content(self):
-        return Column(Text)
 
 
 class WikiRevision:
@@ -52,7 +33,7 @@ class WikiRevision:
 
     @declared_attr
     def author_id(self):
-        return Column(Integer, ForeignKey("royals.uid"))
+        return Column(Integer, ForeignKey("royals.uid"), nullable=False)
 
     @declared_attr
     def author(self):
