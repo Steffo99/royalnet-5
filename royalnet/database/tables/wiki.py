@@ -1,7 +1,9 @@
 from sqlalchemy import Column, \
                        Integer, \
                        Text, \
-                       DateTime
+                       DateTime, \
+                       String, \
+                       ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
@@ -10,8 +12,23 @@ from .royals import Royal
 
 
 class WikiPage:
-    """Wiki page properties."""
+    """Wiki page properties.
+
+    Warning:
+        Requires PostgreSQL!"""
     __tablename__ = "wikipages"
+
+    @declared_attr
+    def page_id(self):
+        return Column(UUID(as_uuid=True), primary_key=True)
+
+    @declared_attr
+    def title(self):
+        return Column(String, nullable=False)
+
+    @declared_attr
+    def content(self):
+        return Column(Text)
 
 
 class WikiRevision:
@@ -27,11 +44,19 @@ class WikiRevision:
 
     @declared_attr
     def page_id(self):
-        return Column(UUID(as_uuid=True), nullable=False)
+        return Column(UUID(as_uuid=True), ForeignKey("wikipages.page_id"), nullable=False)
 
     @declared_attr
-    def content(self):
-        return Column(Text, nullable=False)
+    def page(self):
+        return relationship("WikiPage", foreign_keys=self.page_id, backref="revisions")
+
+    @declared_attr
+    def author_id(self):
+        return Column(Integer, ForeignKey("royals.uid"))
+
+    @declared_attr
+    def author(self):
+        return relationship("Royal", foreign_keys=self.author_id, backref="wiki_contributions")
 
     @declared_attr
     def timestamp(self):
@@ -42,4 +67,5 @@ class WikiRevision:
         return Column(Text)
 
     @declared_attr
-    def
+    def diff(self):
+        return Column(Text)
