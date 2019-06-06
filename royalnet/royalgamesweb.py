@@ -5,7 +5,6 @@ from .web.blueprints import home, wikiview
 
 class TestConfig:
     DB_PATH = os.environ["DB_PATH"]
-    REQUIRED_TABLES = set()
 
 
 app = create_app(TestConfig, [home, wikiview])
