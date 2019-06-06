@@ -87,7 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="network.html">royalnet.network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">royalnet.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="error.html">royalnet.error</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web.html">royalnet.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web.html">royalnet.web</a></li>
 </ul>
 
             
@@ -176,6 +176,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  | <a href="#Y"><strong>Y</strong></a>
  
 </div>
@@ -270,10 +271,10 @@
 </li>
       <li><a href="utils.html#royalnet.utils.Call.alchemy">alchemy (royalnet.utils.Call attribute)</a>, <a href="utils.html#royalnet.utils.Call.alchemy">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.Alias">Alias (class in royalnet.database.tables)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.Alias.alias">alias (royalnet.database.tables.Alias attribute)</a>
 </li>
       <li><a href="utils.html#royalnet.utils.andformat">andformat() (in module royalnet.utils)</a>
@@ -281,6 +282,10 @@
       <li><a href="utils.html#royalnet.utils.asyncify">asyncify() (in module royalnet.utils)</a>
 </li>
       <li><a href="audio.html#royalnet.audio.RoyalPCMFile.audio_filename">audio_filename (royalnet.audio.RoyalPCMFile attribute)</a>
+</li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.author">author (royalnet.database.tables.WikiRevision attribute)</a>
+</li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.author_id">author_id (royalnet.database.tables.WikiRevision attribute)</a>
 </li>
       <li><a href="commands.html#royalnet.commands.AuthorCommand">AuthorCommand (class in royalnet.commands)</a>
 </li>
@@ -329,6 +334,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="network.html#royalnet.network.ConnectionClosedError">ConnectionClosedError</a>
+</li>
+      <li><a href="database.html#royalnet.database.tables.WikiPage.content">content (royalnet.database.tables.WikiPage attribute)</a>
 </li>
       <li><a href="database.html#royalnet.database.tables.Diario.context">context (royalnet.database.tables.Diario attribute)</a>
 </li>
@@ -380,13 +387,15 @@
 </li>
       <li><a href="audio.html#royalnet.audio.YtdlFile.delete_video_file">delete_video_file() (royalnet.audio.YtdlFile method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.Diario">Diario (class in royalnet.database.tables)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.Diario.diario_id">diario_id (royalnet.database.tables.Diario attribute)</a>
 </li>
       <li><a href="commands.html#royalnet.commands.DiarioCommand">DiarioCommand (class in royalnet.commands)</a>
+</li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.diff">diff (royalnet.database.tables.WikiRevision attribute)</a>
 </li>
       <li><a href="database.html#royalnet.database.tables.Discord">Discord (class in royalnet.database.tables)</a>
 </li>
@@ -416,12 +425,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#royalnet.utils.fileformat">fileformat() (in module royalnet.utils)</a>
 </li>
+      <li><a href="error.html#royalnet.error.FileTooBigError">FileTooBigError</a>
+</li>
       <li><a href="network.html#royalnet.network.RoyalnetServer.find_client">find_client() (royalnet.network.RoyalnetServer method)</a>
 </li>
       <li><a href="network.html#royalnet.network.RoyalnetServer.find_destination">find_destination() (royalnet.network.RoyalnetServer method)</a>
 </li>
       <li><a href="database.html#royalnet.database.tables.Telegram.first_name">first_name (royalnet.database.tables.Telegram attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="network.html#royalnet.network.Package.from_dict">from_dict() (royalnet.network.Package static method)</a>
 
       <ul>
@@ -430,8 +443,6 @@
         <li><a href="network.html#royalnet.network.Response.from_dict">(royalnet.network.Response class method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="network.html#royalnet.network.Package.from_json_bytes">from_json_bytes() (royalnet.network.Package static method)</a>
 </li>
       <li><a href="network.html#royalnet.network.Package.from_json_string">from_json_string() (royalnet.network.Package static method)</a>
@@ -598,16 +609,24 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="network.html#royalnet.network.Package">Package (class in royalnet.network)</a>
 </li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.page">page (royalnet.database.tables.WikiRevision attribute)</a>
+</li>
+      <li><a href="database.html#royalnet.database.tables.WikiPage.page_id">page_id (royalnet.database.tables.WikiPage attribute)</a>
+
+      <ul>
+        <li><a href="database.html#royalnet.database.tables.WikiRevision.page_id">(royalnet.database.tables.WikiRevision attribute)</a>
+</li>
+      </ul></li>
       <li><a href="database.html#royalnet.database.tables.Royal.password">password (royalnet.database.tables.Royal attribute)</a>
 </li>
       <li><a href="commands.html#royalnet.commands.PauseCommand">PauseCommand (class in royalnet.commands)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="commands.html#royalnet.commands.PingCommand">PingCommand (class in royalnet.commands)</a>
 </li>
       <li><a href="commands.html#royalnet.commands.PlayCommand">PlayCommand (class in royalnet.commands)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="audio.html#royalnet.audio.Playlist">Playlist (class in royalnet.audio)</a>
 </li>
       <li><a href="audio.html#royalnet.audio.PlayMode">PlayMode (class in royalnet.audio)</a>
@@ -660,6 +679,8 @@
       </ul></li>
       <li><a href="audio.html#royalnet.audio.RoyalPCMAudio.read">read() (royalnet.audio.RoyalPCMAudio method)</a>
 </li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.reason">reason (royalnet.database.tables.WikiRevision attribute)</a>
+</li>
       <li><a href="network.html#royalnet.network.RoyalnetLink.receive">receive() (royalnet.network.RoyalnetLink method)</a>
 </li>
       <li><a href="database.html#royalnet.database.relationshiplinkchain">relationshiplinkchain() (in module royalnet.database)</a>
@@ -684,6 +705,8 @@
 </li>
       <li><a href="network.html#royalnet.network.ResponseSuccess">ResponseSuccess (class in royalnet.network)</a>
 </li>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision.revision_id">revision_id (royalnet.database.tables.WikiRevision attribute)</a>
+</li>
       <li><a href="database.html#royalnet.database.tables.Royal.role">role (royalnet.database.tables.Royal attribute)</a>
 </li>
       <li><a href="network.html#royalnet.network.RoyalnetServer.route_package">route_package() (royalnet.network.RoyalnetServer method)</a>
@@ -700,6 +723,8 @@
         <li><a href="database.html#royalnet.database.tables.Telegram.royal">(royalnet.database.tables.Telegram attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#royalnet.database.tables.ActiveKvGroup.royal_id">royal_id (royalnet.database.tables.ActiveKvGroup attribute)</a>
 
       <ul>
@@ -710,8 +735,6 @@
         <li><a href="database.html#royalnet.database.tables.Telegram.royal_id">(royalnet.database.tables.Telegram attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="audio.html#module-royalnet.audio">royalnet.audio (module)</a>
 </li>
       <li><a href="bots.html#module-royalnet.bots">royalnet.bots (module)</a>
@@ -811,9 +834,15 @@
       <li><a href="database.html#royalnet.database.tables.Telegram.tg_id">tg_id (royalnet.database.tables.Telegram attribute)</a>
 </li>
       <li><a href="database.html#royalnet.database.tables.Diario.timestamp">timestamp (royalnet.database.tables.Diario attribute)</a>
+
+      <ul>
+        <li><a href="database.html#royalnet.database.tables.WikiRevision.timestamp">(royalnet.database.tables.WikiRevision attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="database.html#royalnet.database.tables.WikiPage.title">title (royalnet.database.tables.WikiPage attribute)</a>
+</li>
       <li><a href="network.html#royalnet.network.Package.to_dict">to_dict() (royalnet.network.Package method)</a>
 
       <ul>
@@ -876,6 +905,18 @@
         <li><a href="audio.html#royalnet.audio.Pool.videos_left">(royalnet.audio.Pool method)</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="database.html#royalnet.database.tables.WikiPage">WikiPage (class in royalnet.database.tables)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="database.html#royalnet.database.tables.WikiRevision">WikiRevision (class in royalnet.database.tables)</a>
+</li>
   </ul></td>
 </tr></table>
 
