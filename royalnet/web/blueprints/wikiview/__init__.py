@@ -2,11 +2,13 @@ import flask as f
 import markdown2
 import re
 import uuid
+import os
 from ... import Royalprint
 from ....database.tables import Royal, WikiPage, WikiRevision
 
 
-bp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder="templates",
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+bp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder=tmpl_dir,
                 required_tables={Royal, WikiPage, WikiRevision})
 
 
