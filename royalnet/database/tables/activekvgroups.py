@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
 from .royals import Royal
 # noinspection PyUnresolvedReferences
-from .keygroup import Keygroup
+from .keygroups import Keygroup
 
 
 class ActiveKvGroup:
