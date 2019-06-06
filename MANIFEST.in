@@ -1,0 +1,2 @@
+recursive-include **/templates *.html
+recursive-include **/static *
