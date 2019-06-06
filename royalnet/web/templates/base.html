@@ -10,15 +10,12 @@
     <meta property="og:site_name" content="Royal Games">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
-    <link rel="stylesheet" href="https://steffo.eu/static/styling.css">
-    <link rel="icon" href="{{ url_for("static", filename="favicon.png") }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for("static", filename="styling.css") }}">
+    <link rel="icon" href="{{ url_for("static", filename="logo.png") }}" type="image/png">
 </head>
 <body>
-    <!--TODO: togliere questa roba-->
-    <div id="top-bar">
-        <span id="steffo">
-            Royal Games
-        </span>
+    <div class="title-bar">
+        <span><img class="ryg-logo" src="{{ url_for('static', filename="logo.svg") }}" alt=""> Royal Games</span>
     </div>
     <div class="h-container">
         <div class="main-container">
