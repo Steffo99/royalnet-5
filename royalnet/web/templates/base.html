@@ -14,9 +14,27 @@
     <link rel="icon" href="{{ url_for("static", filename="logo.png") }}" type="image/png">
 </head>
 <body>
-    <div class="title-bar">
-        <span><img class="ryg-logo" src="{{ url_for('static', filename="logo.svg") }}" alt=""> Royal Games</span>
-    </div>
+    <nav>
+        <div class="nav-left">
+            <span class="nav-site">
+                <img class="nav-image" alt="" src="{{ url_for("static", filename="logo.svg") }}">
+                <span class="nav-sitename">Royal Games</span>
+            </span>
+            <span class="nav-modules">
+                <a class="no-icon" href="{{ url_for("wikiview.wikiview_index") }}">Wiki</a>
+            </span>
+        </div>
+        <div class="nav-center">
+        </div>
+        <div class="nav-right">
+            <span>
+                <span class="nav-login nav-login-unavailable">
+                    <span class="nav-accountname">Account non disponibili</span>
+                    <img class="nav-image" alt="" src="{{ url_for("static", filename="logo.svg") }}">
+                </span>
+            </span>
+        </div>
+    </nav>
     <div class="h-container">
         <div class="main-container">
             {% block content %}{% endblock %}

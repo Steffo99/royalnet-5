@@ -185,6 +185,33 @@ img {
   display: block;
   max-width: 100%;
 }
+nav {
+  display: flex;
+  justify-content: space-between;
+  height: 50px;
+  line-height: 50px;
+}
+nav .nav-left {
+  text-align: left;
+}
+nav .nav-center {
+  text-align: center;
+}
+nav .nav-right {
+  text-align: right;
+}
+nav .nav-image {
+  height: 50px;
+  display: inline;
+  vertical-align: middle;
+}
+nav .nav-sitename {
+  color: #ffffff;
+  font-weight: bold;
+}
+nav .nav-login-unavailable {
+  opacity: 0.25;
+}
 .h-container {
   display: flex;
   justify-content: center;
@@ -208,19 +235,6 @@ img {
   .main-container {
     width: 1200px;
   }
-}
-.title-bar {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  font-size: 64px;
-  color: #ffffff;
-}
-.title-bar .ryg-logo {
-  width: 144px;
-  height: 144px;
-  display: inline;
-  vertical-align: middle;
 }
 .box {
   background-color: rgba(160, 204, 255, 0.1);
