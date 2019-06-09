@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Login with Telegram
+{% endblock %}
+
+{% block content %}
+    <div class="doublebox">
+        <div class="top">
+            <span class="left">
+                Telegram login
+            </span>
+        </div>
+        <div class="bot">
+            Login riuscito! Sei connesso come <b>{{ session["login_name"] }}</b>!
+        </div>
+    </div>
+{% endblock %}

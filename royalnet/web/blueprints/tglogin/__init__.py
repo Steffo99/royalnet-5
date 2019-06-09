@@ -1,6 +1,7 @@
 import flask as f
 import hashlib
 import hmac
+import datetime
 from ... import Royalprint
 from ....database.tables import Royal, Telegram
 
@@ -31,5 +32,7 @@ def tglogin_done():
     if tg_user is None:
         return "No such telegram", 404
     royal_user = tg_user.royal
-    f.session["royal_id"] = royal_user.id
-    return f.redirect(f.url_for("/"))
+    f.session["login_id"] = royal_user.id
+    f.session["login_name"] = royal_user.name
+    f.session["login_date"] = datetime.datetime.now()
+    return f.render_template("tglogin_success.html")
