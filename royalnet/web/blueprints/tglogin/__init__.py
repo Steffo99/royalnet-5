@@ -22,7 +22,7 @@ def tglogin_done():
     for field in f.request.args:
         if field == "hash":
             continue
-        data_check_string += f"{field}={f.request.args['field']}\n"
+        data_check_string += f"{field}={f.request.args[field]}\n"
     data_check_string.rstrip("\n")
     secret_key = hashlib.sha256(f.current_app.config["TG_AK"])
     hex_data = hmac.new(key=secret_key, msg=data_check_string, digestmod="sha256").hexdigest()
