@@ -404,4 +404,7 @@ nav .nav-login-unavailable {
 .spoiler:hover {
   color: #a0ccff;
 }
+.faded {
+  opacity: 0.3;
+}
 /*# sourceMappingURL=styling.css.map */

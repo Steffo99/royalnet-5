@@ -8,11 +8,15 @@
     <div class="doublebox">
         <div class="top">
             <span class="left">
-                Telegram login
+                Telegram Login
             </span>
         </div>
         <div class="bot">
-            <script async src="https://telegram.org/js/telegram-widget.js?6" data-telegram-login="royalgamesbot" data-size="large" data-auth-url="{{ url_for("tglogin.tglogin_done") }}" data-request-access="write"></script>
+            {% if request.url_root == "https://ryg.steffo.eu/" %}
+                <script async src="https://telegram.org/js/telegram-widget.js?6" data-telegram-login="royalgamesbot" data-size="large" data-auth-url="{{ url_for("tglogin.tglogin_done") }}" data-request-access="write"></script>
+            {% else %}
+                Il login con Telegram non è attivo per questo dominio.
+            {% endif %}
         </div>
     </div>
 {% endblock %}

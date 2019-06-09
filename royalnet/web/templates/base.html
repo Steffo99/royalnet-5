@@ -28,10 +28,23 @@
         </div>
         <div class="nav-right">
             <span>
-                <span class="nav-login nav-login-unavailable">
-                    <span class="nav-accountname">Account non disponibili</span>
-                    <img class="nav-image" alt="" src="{{ url_for("static", filename="logo.svg") }}">
-                </span>
+                {% if session["royal"] %}
+                    <span class="nav-login">
+                        <span class="nav-accountname">{{ session["royal"]["username"] }}</span>
+                        {% if session["royal"]["avatar"] %}
+                            <img class="nav-image" alt="" src="{{ session["royal"]["avatar"] }}">
+                        {% else %}
+                            <img class="nav-image" alt="" src="{{ url_for("static", filename="generic.png") }}">
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="nav-login">
+                        <a class="no-icon" href="/login/telegram">
+                            Login
+                            <img class="nav-image faded" alt="" src="{{ url_for("static", filename="generic.png") }}">
+                        </a>
+                    </span>
+                {% endif %}
             </span>
         </div>
     </nav>
