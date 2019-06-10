@@ -12,6 +12,7 @@ bp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tabl
 
 @bp.route("/")
 def tglogin_index():
+    f.session.pop("royal", None)
     return f.render_template("tglogin_index.html")
 
 
