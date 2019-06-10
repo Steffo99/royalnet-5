@@ -23,3 +23,7 @@ class WikiPage:
     @declared_attr
     def content(self):
         return Column(Text)
+
+    @declared_attr
+    def format(self):
+        return Column(String, nullable=False, default="markdown")

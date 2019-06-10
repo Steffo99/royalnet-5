@@ -12,7 +12,7 @@ bp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder=tm
                 required_tables={Royal, WikiPage, WikiRevision})
 
 
-def prepare_page(page):
+def prepare_page_markdown(page):
     converted_md = markdown2.markdown(page.content.replace("<", "&lt;"),
                                       extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
     converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
@@ -30,7 +30,20 @@ def prepare_page(page):
                           r'    <iframe width="100%" height="160" src="https://clyp.it/\1/widget" frameborder="0">'
                           r'    </iframe>'
                           r'</div>', converted_md)
-    return converted_md
+    return f.Markup(converted_md)
+
+
+def prepare_page_html(page):
+    return f.Markup(page.content)
+
+
+def prepare_page(page):
+    if page.format == "markdown":
+        return prepare_page_markdown(page)
+    elif page.format == "html":
+        return prepare_page_html(page)
+    else:
+        return "Format not available", 500
 
 
 @bp.route("/")
@@ -47,7 +60,7 @@ def wikiview_by_id(page_id: str):
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
     if page is None:
         return "No such page", 404
-    parsed_content = prepare_page(page)
+    parsed_content = prepare_page_markdown(page)
     return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(parsed_content))
 
 
@@ -57,5 +70,5 @@ def wikiview_by_title(title: str):
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.title == title).one_or_none()
     if page is None:
         return "No such page", 404
-    parsed_content = prepare_page(page)
-    return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(parsed_content))
+    parsed_content = prepare_page_markdown(page)
+    return f.render_template("wikiview_page.html", page=page, parsed_content=parsed_content)
