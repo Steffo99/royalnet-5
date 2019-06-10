@@ -33,15 +33,11 @@ def prepare_page_markdown(page):
     return f.Markup(converted_md)
 
 
-def prepare_page_html(page):
-    return f.Markup(page.content)
-
-
 def prepare_page(page):
     if page.format == "markdown":
-        return prepare_page_markdown(page)
+        return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(prepare_page_markdown(page)))
     elif page.format == "html":
-        return prepare_page_html(page)
+        return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(page.content))
     else:
         return "Format not available", 500
 
@@ -60,8 +56,7 @@ def wikiview_by_id(page_id: str):
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
     if page is None:
         return "No such page", 404
-    parsed_content = prepare_page_markdown(page)
-    return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(parsed_content))
+    return prepare_page(page)
 
 
 @bp.route("/title/<title>")
@@ -70,5 +65,4 @@ def wikiview_by_title(title: str):
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.title == title).one_or_none()
     if page is None:
         return "No such page", 404
-    parsed_content = prepare_page_markdown(page)
-    return f.render_template("wikiview_page.html", page=page, parsed_content=parsed_content)
+    return prepare_page(page)
