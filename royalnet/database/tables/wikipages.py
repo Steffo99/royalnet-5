@@ -27,3 +27,7 @@ class WikiPage:
     @declared_attr
     def format(self):
         return Column(String, nullable=False, default="markdown")
+
+    @declared_attr
+    def css(self):
+        return Column(String)

@@ -8,19 +8,14 @@
     <div class="doublebox">
         <div class="top">
             <span class="left">
-                Wiki page
+                {{ page.title }}
             </span>
             <span class="right">
                 <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string) }}">#</a>
             </span>
         </div>
         <div class="bot">
-            <h1>
-                {{ page.title }}
-            </h1>
-            <div>
-                {{ parsed_content }}
-            </div>
+            {{ parsed_content }}
         </div>
     </div>
 {% endblock %}

@@ -1,0 +1,363 @@
+@bg: #2e2a28; //Background color
+@fg: #d2cdc8; //Foreground color
+@li: #9a4713; //Link
+@ec: #ffffff; //Extra color
+
+
+@font-face {
+    font-family: 'TF2';
+    src: url('https://scaleway.steffo.eu/tf2.ttf');
+}
+
+@font-face {
+    font-family: 'TF2 Build';
+    src: url('https://scaleway.steffo.eu/tf2build.ttf');
+}
+
+@font-face {
+    font-family: 'TF2 Professor';
+    src: url('https://scaleway.steffo.eu/tf2professor.ttf');
+}
+
+@font-face {
+    font-family: 'TF2 Secondary';
+    src: url('https://scaleway.steffo.eu/tf2secondary.ttf');
+}
+
+@main-fonts: "TF2 Secondary", sans-serif;
+@monospace-fonts: "Consolas", "Source Code Pro", monospace;
+
+//General
+body {
+    font-family: @main-fonts;
+    background-color: @bg;
+    color: @fg;
+    box-sizing: border-box;
+}
+
+a {
+    color: @li;
+    text-decoration: none;
+
+    &:hover {
+        color: lighten(@li, 25%);
+    }
+
+    &:active {
+        color: white;
+    }
+
+    //Icon link
+    //noinspection CssNoGenericFontName
+    &:not(.no-icon) {
+        //External link
+        &::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: bold;
+            content: "\f0c1";
+            margin-right: 4px;
+        }
+
+        //Telegram link
+        &[href^="https://t.me"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f2c6";
+            margin-right: 3px;
+        }
+
+        //YouTube link
+        &[href^="https://www.youtube.com"]::before, &[href^="https://youtu.be"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f167";
+            margin-right: 3px;
+        }
+
+        //Vimeo link
+        &[href^="https://vimeo.com"]::before, &[href^="https://player.vimeo.com"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f27d";
+            margin-right: 4px;
+        }
+
+        //GitHub link
+        &[href^="https://github.com"]::before, &[href^="https://gist.github.com"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f09b";
+            margin-right: 4px;
+        }
+
+        //Itchio link
+        &[href^="https://itch.io"]::before, &[href^="https://steffo.itch.io"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f83a";
+            margin-right: 3px;
+        }
+
+        //Kickstarter link
+        &[href^="https://www.kickstarter.com"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f3bb";
+            margin-right: 4px;
+        }
+
+        //Reddit link
+        &[href^="https://reddit.com"]::before, &[href^="https://new.reddit.com"]::before, &[href^="https://old.reddit.com"]::before, &[href^="https://redd.it"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f281";
+            margin-right: 3px;
+        }
+
+        //Twitch link
+        &[href^="https://www.twitch.tv"]::before, &[href^="https://clips.twitch.tv"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f1e8";
+            margin-right: 4px;
+        }
+
+        //Steam link
+        &[href^="https://store.steampowered.com"]::before, &[href^="https://steamcommunity.com"]::before, &[href^="https://partner.steamgames.com"]::before, &[href^="steam:"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f1b6";
+            margin-right: 4px;
+        }
+
+        //Twitter link
+        &[href^="https://twitter.com"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f099";
+            margin-right: 3px;
+        }
+
+        //Wikipedia link
+        &[href^="https://it.wikipedia.org"]::before, &[href^="https://en.wikipedia.org"]::before {
+            font-family: "Font Awesome 5 Brands";
+            font-weight: bold;
+            content: "\f266";
+            margin-right: 3px;
+        }
+
+        //Anchor
+        &[href^="#"]::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: bold;
+            content: "\f13d";
+            margin-right: 3px;
+        }
+
+        //Unsafe link
+        &[href^="http:"]::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: bold;
+            content: "\f09c";
+            margin-right: 4px;
+        }
+
+        //Magnet link
+        &[href^="magnet:"]::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: bold;
+            content: "\f076";
+            margin-right: 4px;
+        }
+    }
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "TF2 Build", sans-serif;
+    color: @ec;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: normal;
+}
+
+code {
+    font-family: @monospace-fonts;
+}
+
+blockquote {
+    color: @fg;
+    border-left: 3px solid @fg;
+    background-color: fade(@fg, 10%);
+    padding: 2px 4px 2px 8px;
+    margin: 8px;
+}
+
+textarea {
+    background-color: fade(@fg, 10%);
+    color: @fg;
+    border: 1px solid @fg;
+    padding: 2px;
+    margin: 1px;
+    font-size: small;
+    font-family: @monospace-fonts;
+    width: 100%;
+    height: 300px;
+}
+
+button, input[type="submit"], .btn {
+    background-color: fade(@fg, 10%);
+    color: @fg !important;
+    border: 1px solid @fg;
+    border-radius: 0;
+    padding: 2px 8px;
+    margin: 1px;
+    font-size: medium;
+    font-family: sans-serif;
+    text-decoration: none;
+    cursor: default;
+
+    &:hover {
+        background-color: fade(@fg, 20%);
+        color: lighten(@fg, 25%);
+        border-color: lighten(@fg, 25%);
+    }
+
+    &:active {
+        background-color: fade(@fg, 30%);
+        color: white;
+        border-color: white;
+    }
+}
+
+pre {
+    margin: 0;
+}
+
+img {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    max-width: 100%;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    line-height: 50px;
+
+    .nav-left {
+        text-align: left;
+    }
+
+    .nav-center {
+        text-align: center;
+    }
+
+    .nav-right {
+        text-align: right;
+    }
+
+    .nav-image {
+        height: 50px;
+        display: none;
+        vertical-align: middle;
+    }
+
+    .nav-sitename {
+        color: @ec;
+        font-weight: bold;
+    }
+
+    .nav-login-unavailable {
+        opacity: 0.25;
+    }
+}
+
+//Elements
+
+.h-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+
+    @media (min-width: 800px)
+    {
+        flex-direction: row;
+    }
+}
+
+.main-container {
+    width: 100%;
+
+    @media (min-width: 800px)
+    {
+        width: 800px;
+    }
+
+    @media (min-width: 1200px)
+    {
+        width: 1200px;
+    }
+}
+
+.box {
+    background-color: @fg;
+    color: black;
+    border-radius: 2px;
+    padding: 4px;
+    margin: 8px;
+}
+
+.doublebox {
+    margin: 8px;
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        background-color: @li;
+        padding: 8px;
+        border-radius: 4px 4px 0 0;
+        color: @ec;
+        font-family: "TF2 Build", sans-serif;
+        font-weight: normal;
+
+        .left {
+            align-self: flex-start;
+        }
+
+        .right {
+            align-self: flex-end;
+        }
+
+        a {
+            color: #00caca;
+        }
+    }
+
+    .bot {
+        background-color: @fg;
+        color: black;
+        padding: 8px;
+        border-radius: 0 0 4px 4px;
+
+        h1, h2, h3, h4, h5, h6 {
+            color: black;
+        }
+    }
+}
+
+.spoiler {
+    color: rgba(0, 0, 0, 0);
+    border: 1px solid fade(@fg, 10%);
+    border-radius: 2px;
+
+    &:hover {
+        color: @fg;
+    }
+}
+
+.faded {
+    opacity: 0.3;
+}

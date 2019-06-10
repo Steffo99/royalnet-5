@@ -35,9 +35,15 @@ def prepare_page_markdown(page):
 
 def prepare_page(page):
     if page.format == "markdown":
-        return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(prepare_page_markdown(page)))
+        return f.render_template("wikiview_page.html",
+                                 page=page,
+                                 parsed_content=f.Markup(prepare_page_markdown(page)),
+                                 css=page.css)
     elif page.format == "html":
-        return f.render_template("wikiview_page.html", page=page, parsed_content=f.Markup(page.content))
+        return f.render_template("wikiview_page.html",
+                                 page=page,
+                                 parsed_content=f.Markup(page.content),
+                                 css=page.css)
     else:
         return "Format not available", 500
 
@@ -45,7 +51,7 @@ def prepare_page(page):
 @bp.route("/")
 def wikiview_index():
     from ...alchemyhandler import alchemy, alchemy_session
-    pages = alchemy_session.query(alchemy.WikiPage).all()
+    pages = sorted(alchemy_session.query(alchemy.WikiPage).all(), key=lambda page: page.title)
     return f.render_template("wikiview_index.html", pages=pages)
 
 
