@@ -1,14 +1,10 @@
 import typing
 import discord
-import asyncio
 from ..utils import Command, Call, NetworkHandler
 from ..network import Request, ResponseSuccess
 from ..error import NoneFoundError
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
-
-
-loop = asyncio.get_event_loop()
 
 
 class SummonNH(NetworkHandler):
@@ -20,7 +16,7 @@ class SummonNH(NetworkHandler):
         channel = bot.client.find_channel_by_name(data["channel_name"])
         if not isinstance(channel, discord.VoiceChannel):
             raise NoneFoundError("Channel is not a voice channel")
-        loop.create_task(bot.client.vc_connect_or_move(channel))
+        bot.loop.create_task(bot.client.vc_connect_or_move(channel))
         return ResponseSuccess()
 
 

@@ -10,7 +10,6 @@ from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
 from ..audio import PlayMode, Playlist, RoyalPCMAudio
 
-loop = asyncio.get_event_loop()
 log = _logging.getLogger(__name__)
 
 # TODO: Load the opus library
@@ -231,7 +230,7 @@ class DiscordBot(GenericBot):
         def advance(error=None):
             if error:
                 raise Exception(f"Error while advancing music_data: {error}")
-            loop.create_task(self.advance_music_data(guild))
+            self.loop.create_task(self.advance_music_data(guild))
 
         log.debug(f"Starting playback of {next_source}")
         voice_client.play(next_source, after=advance)

@@ -6,9 +6,6 @@ if typing.TYPE_CHECKING:
     from ..database import Alchemy
 
 
-loop = asyncio.get_event_loop()
-
-
 class Call:
     """A command call. An abstract class, sub-bots should create a new call class from this.
     
@@ -55,6 +52,7 @@ class Call:
                  channel,
                  command: typing.Type[Command],
                  command_args: typing.List[str] = None,
+                 loop: asyncio.AbstractEventLoop = None,
                  **kwargs):
         """Create the call.
 
@@ -66,6 +64,10 @@ class Call:
             """
         if command_args is None:
             command_args = []
+        if loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = loop
         self.channel = channel
         self.command = command
         self.args = CommandArgs(command_args)
@@ -76,7 +78,7 @@ class Call:
         """If the command requires database access, create a :py:class:`royalnet.database.Alchemy` session for this call, otherwise, do nothing."""
         if not self.command.require_alchemy_tables:
             return
-        self.session = await loop.run_in_executor(None, self.alchemy.Session)
+        self.session = await self.loop.run_in_executor(None, self.alchemy.Session)
 
     async def session_end(self):
         """Close the previously created :py:class:`royalnet.database.Alchemy` session for this call (if it was created)."""

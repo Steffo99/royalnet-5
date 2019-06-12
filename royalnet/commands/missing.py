@@ -2,7 +2,7 @@ import asyncio
 import logging as _logging
 from ..utils import Command, Call
 
-loop = asyncio.get_event_loop()
+
 log = _logging.getLogger(__name__)
 
 

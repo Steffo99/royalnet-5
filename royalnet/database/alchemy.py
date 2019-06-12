@@ -1,5 +1,4 @@
 import typing
-import asyncio
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -7,8 +6,6 @@ from contextlib import contextmanager, asynccontextmanager
 from ..utils import asyncify
 # noinspection PyUnresolvedReferences
 from ..error import InvalidConfigError
-
-loop = asyncio.get_event_loop()
 
 
 class Alchemy:

@@ -8,9 +8,6 @@ if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
 
-loop = asyncio.get_event_loop()
-
-
 class CvNH(NetworkHandler):
     message_type = "discord_cv"
 

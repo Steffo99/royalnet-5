@@ -8,7 +8,7 @@ import logging as _logging
 import typing
 from .package import Package
 
-default_loop = asyncio.get_event_loop()
+
 log = _logging.getLogger(__name__)
 
 
@@ -35,7 +35,11 @@ class NetworkError(Exception):
 
 
 class PendingRequest:
-    def __init__(self, *, loop=default_loop):
+    def __init__(self, *, loop: asyncio.AbstractEventLoop = None):
+        if loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = loop
         self.event: asyncio.Event = asyncio.Event(loop=loop)
         self.data: typing.Optional[dict] = None
 
@@ -67,8 +71,9 @@ def requires_identification(func):
 
 class RoyalnetLink:
     def __init__(self, master_uri: str, secret: str, link_type: str, request_handler, *,
-                 loop: asyncio.AbstractEventLoop = default_loop):
-        assert ":" not in link_type
+                 loop: asyncio.AbstractEventLoop = None):
+        if ":" in link_type:
+            raise ValueError("Link types cannot contain colons.")
         self.master_uri: str = master_uri
         self.link_type: str = link_type
         self.nid: str = str(uuid.uuid4())
@@ -76,7 +81,10 @@ class RoyalnetLink:
         self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
         self.request_handler = request_handler
         self._pending_requests: typing.Dict[str, PendingRequest] = {}
-        self._loop: asyncio.AbstractEventLoop = loop
+        if loop is None:
+            self._loop = asyncio.get_event_loop()
+        else:
+            self._loop = loop
         self.error_event: asyncio.Event = asyncio.Event(loop=self._loop)
         self.connect_event: asyncio.Event = asyncio.Event(loop=self._loop)
         self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)

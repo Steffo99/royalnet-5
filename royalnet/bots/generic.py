@@ -8,7 +8,6 @@ from ..network import RoyalnetLink, Request, Response, ResponseError, RoyalnetCo
 from ..database import Alchemy, DatabaseConfig, relationshiplinkchain
 
 
-loop = asyncio.get_event_loop()
 log = logging.getLogger(__name__)
 
 
@@ -45,7 +44,7 @@ class GenericBot:
         self.network: RoyalnetLink = RoyalnetLink(royalnet_config.master_uri, royalnet_config.master_secret, self.interface_name,
                                                   self._network_handler)
         log.debug(f"Running RoyalnetLink {self.network}")
-        loop.create_task(self.network.run())
+        self.loop.create_task(self.network.run())
 
     async def _network_handler(self, request_dict: dict) -> dict:
         """Handle a single :py:class:`dict` received from the :py:class:`royalnet.network.RoyalnetLink`.
@@ -101,7 +100,12 @@ class GenericBot:
                  command_prefix: str,
                  commands: typing.List[typing.Type[Command]] = None,
                  missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand):
+                 error_command: typing.Type[Command] = NullCommand,
+                 loop: asyncio.AbstractEventLoop = None):
+        if loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = loop
         if database_config is None:
             self.alchemy = None
             self.master_table = None

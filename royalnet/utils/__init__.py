@@ -12,4 +12,5 @@ from .networkhandler import NetworkHandler
 from .formatters import andformat, plusformat, fileformat, ytdldateformat, numberemojiformat
 
 __all__ = ["asyncify", "Call", "Command", "safeformat", "cdj", "sleep_until", "plusformat", "CommandArgs",
-           "NetworkHandler", "andformat", "plusformat", "fileformat", "ytdldateformat", "numberemojiformat"]
+           "NetworkHandler", "andformat", "plusformat", "fileformat", "ytdldateformat", "numberemojiformat",
+           "telegram_escape", "discord_escape"]

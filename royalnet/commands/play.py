@@ -11,9 +11,6 @@ if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
 
-loop = asyncio.get_event_loop()
-
-
 class PlayNH(NetworkHandler):
     message_type = "music_play"
 

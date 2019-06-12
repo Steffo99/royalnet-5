@@ -7,7 +7,7 @@ import asyncio
 import logging as _logging
 from .package import Package
 
-default_loop = asyncio.get_event_loop()
+
 log = _logging.getLogger(__name__)
 
 
@@ -35,12 +35,15 @@ class ConnectedClient:
 
 
 class RoyalnetServer:
-    def __init__(self, address: str, port: int, required_secret: str, *, loop: asyncio.AbstractEventLoop = default_loop):
+    def __init__(self, address: str, port: int, required_secret: str, *, loop: asyncio.AbstractEventLoop = None):
         self.address: str = address
         self.port: int = port
         self.required_secret: str = required_secret
         self.identified_clients: typing.List[ConnectedClient] = []
-        self._loop: asyncio.AbstractEventLoop = loop
+        if loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = loop
 
     def find_client(self, *, nid: str = None, link_type: str = None) -> typing.List[ConnectedClient]:
         assert not (nid and link_type)

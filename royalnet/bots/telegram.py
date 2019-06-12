@@ -10,7 +10,7 @@ from ..error import UnregisteredError, InvalidConfigError, RoyalnetResponseError
 from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
 
-loop = asyncio.get_event_loop()
+
 log = _logging.getLogger(__name__)
 
 
@@ -121,7 +121,7 @@ class TelegramBot(GenericBot):
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall
-                loop.create_task(self._handle_update(update))
+                self.loop.create_task(self._handle_update(update))
             # Recalculate offset
             try:
                 self._offset = last_updates[-1].update_id + 1
