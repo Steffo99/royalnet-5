@@ -3,6 +3,8 @@ import flask as f
 
 
 class Royalprint(f.Blueprint):
+    """An edited :py:class:`flask.Blueprint` containing an additional ``required_tables`` parameter."""
+
     def __init__(self, name, import_name, static_folder=None,
                  static_url_path=None, template_folder=None,
                  url_prefix=None, subdomain=None, url_defaults=None,

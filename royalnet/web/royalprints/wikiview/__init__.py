@@ -1,3 +1,5 @@
+"""A Royal Games Wiki viewer :py:class:`royalnet.web.Royalprint`. Doesn't support any kind of edit."""
+
 import flask as f
 import markdown2
 import re
@@ -8,7 +10,7 @@ from ....database.tables import Royal, WikiPage, WikiRevision
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-bp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder=tmpl_dir,
+rp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder=tmpl_dir,
                 required_tables={Royal, WikiPage, WikiRevision})
 
 
@@ -48,15 +50,15 @@ def prepare_page(page):
         return "Format not available", 500
 
 
-@bp.route("/")
+@rp.route("/")
 def wikiview_index():
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     pages = sorted(alchemy_session.query(alchemy.WikiPage).all(), key=lambda page: page.title)
     return f.render_template("wikiview_index.html", pages=pages)
 
 
-@bp.route("/<uuid:page_id>", defaults={"title": ""})
-@bp.route("/<uuid:page_id>/<title>")
+@rp.route("/<uuid:page_id>", defaults={"title": ""})
+@rp.route("/<uuid:page_id>/<title>")
 def wikiview_by_id(page_id: uuid.UUID, title: str):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()

@@ -162,7 +162,7 @@
 <span class="target" id="module-royalnet.network"></span><p>Royalnet (websocket) related classes.</p>
 <dl class="class">
 <dt id="royalnet.network.RoyalnetLink">
-<em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetLink</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>secret: str</em>, <em>link_type: str</em>, <em>request_handler</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetLink</code><span class="sig-paren">(</span><em>master_uri: str</em>, <em>secret: str</em>, <em>link_type: str</em>, <em>request_handler</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="royalnet.network.RoyalnetLink.connect">
 <code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetLink.connect" title="Permalink to this definition">¶</a></dt>
@@ -296,7 +296,7 @@ Contains info about the source and the destination.</p>
 
 <dl class="class">
 <dt id="royalnet.network.RoyalnetServer">
-<em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetServer</code><span class="sig-paren">(</span><em>address: str</em>, <em>port: int</em>, <em>required_secret: str</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = &lt;_WindowsSelectorEventLoop running=False closed=False debug=False&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetServer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">royalnet.network.</code><code class="descname">RoyalnetServer</code><span class="sig-paren">(</span><em>address: str</em>, <em>port: int</em>, <em>required_secret: str</em>, <em>*</em>, <em>loop: asyncio.events.AbstractEventLoop = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.network.RoyalnetServer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="royalnet.network.RoyalnetServer.find_client">
 <code class="descname">find_client</code><span class="sig-paren">(</span><em>*</em>, <em>nid: str = None</em>, <em>link_type: str = None</em><span class="sig-paren">)</span> &#x2192; List[royalnet.network.royalnetserver.ConnectedClient]<a class="headerlink" href="#royalnet.network.RoyalnetServer.find_client" title="Permalink to this definition">¶</a></dt>

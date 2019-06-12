@@ -1,3 +1,4 @@
+"""A Royalnet Telegram login :py:class:`royalnet.web.Royalprint`."""
 import flask as f
 import hashlib
 import hmac
@@ -6,17 +7,17 @@ from ... import Royalprint
 from ....database.tables import Royal, Telegram
 
 
-bp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={Royal, Telegram},
+rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={Royal, Telegram},
                 template_folder="templates")
 
 
-@bp.route("/")
+@rp.route("/")
 def tglogin_index():
     f.session.pop("royal", None)
     return f.render_template("tglogin_index.html")
 
 
-@bp.route("/done")
+@rp.route("/done")
 def tglogin_done():
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     data_check_string = ""

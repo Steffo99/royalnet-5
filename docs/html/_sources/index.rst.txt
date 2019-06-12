@@ -14,9 +14,8 @@ royalnet
    web
 
 
-Indices and tables
-==================
+Some useful links
+------------------------------------
 
+* `Royalnet on GitHub <https://github.com/royal-games/royalnet>`_
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

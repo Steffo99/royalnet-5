@@ -1,6 +1,6 @@
 import os
 from .web import create_app
-from .web.blueprints import home, wikiview, tglogin
+from .web.royalprints import rp_home, rp_wikiview, rp_tglogin
 
 
 class TestConfig:
@@ -8,7 +8,7 @@ class TestConfig:
     TG_AK = os.environ["TG_AK"]
 
 
-app = create_app(TestConfig, [home, wikiview, tglogin])
+app = create_app(TestConfig, [rp_home, rp_wikiview, rp_tglogin])
 
 
 if __name__ == "__main__":

@@ -172,7 +172,7 @@
 
 <dl class="class">
 <dt id="royalnet.utils.Call">
-<em class="property">class </em><code class="descclassname">royalnet.utils.</code><code class="descname">Call</code><span class="sig-paren">(</span><em>channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">royalnet.utils.</code><code class="descname">Call</code><span class="sig-paren">(</span><em>channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, loop: asyncio.events.AbstractEventLoop = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call" title="Permalink to this definition">¶</a></dt>
 <dd><p>A command call. An abstract class, sub-bots should create a new call class from this.</p>
 <dl class="attribute">
 <dt id="royalnet.utils.Call.interface_name">
@@ -200,7 +200,7 @@
 
 <dl class="method">
 <dt id="royalnet.utils.Call.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, loop: asyncio.events.AbstractEventLoop = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -570,6 +570,26 @@ That probably means, the database row identifying the user.</p>
 <dt id="royalnet.utils.numberemojiformat">
 <code class="descclassname">royalnet.utils.</code><code class="descname">numberemojiformat</code><span class="sig-paren">(</span><em>l: List[str]</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.numberemojiformat" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.telegram_escape">
+<code class="descclassname">royalnet.utils.</code><code class="descname">telegram_escape</code><span class="sig-paren">(</span><em>string: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.telegram_escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Escape a string to be sent through Telegram, and format it using RoyalCode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently escapes everything, even items in code blocks.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.discord_escape">
+<code class="descclassname">royalnet.utils.</code><code class="descname">discord_escape</code><span class="sig-paren">(</span><em>string: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.discord_escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Escape a string to be sent through Discord, and format it using RoyalCode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently escapes everything, even items in code blocks.</p>
+</div>
+</dd></dl>
 
 </div>
 

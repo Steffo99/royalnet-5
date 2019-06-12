@@ -10,3 +10,11 @@ royalnet.web
    :private-members:
    :undoc-members:
 
+
+Royalprints
+------------------------------------
+
+.. automodule:: royalnet.web.royalprints
+   :members:
+   :private-members:
+   :undoc-members:

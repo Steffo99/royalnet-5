@@ -218,7 +218,7 @@
 <dl class="method">
 <dt id="royalnet.bots.DiscordBot._bot_factory">
 <code class="descname">_bot_factory</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Type[discord.client.Client]<a class="headerlink" href="#royalnet.bots.DiscordBot._bot_factory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a custom DiscordClient class inheriting from <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.Client" title="(in discord.py v1.2.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.Client</span></code></a>.</p>
+<dd><p>Create a custom DiscordClient class inheriting from <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.Client" title="(in discord.py v1.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.Client</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -284,7 +284,7 @@
 
 <dl class="class">
 <dt id="royalnet.bots.GenericBot">
-<em class="property">class </em><code class="descclassname">royalnet.bots.</code><code class="descname">GenericBot</code><span class="sig-paren">(</span><em>*</em>, <em>royalnet_config: Optional[royalnet.network.royalnetconfig.RoyalnetConfig] = None</em>, <em>database_config: Optional[royalnet.database.databaseconfig.DatabaseConfig] = None</em>, <em>command_prefix: str</em>, <em>commands: List[Type[royalnet.utils.command.Command]] = None</em>, <em>missing_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em>, <em>error_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.GenericBot" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">royalnet.bots.</code><code class="descname">GenericBot</code><span class="sig-paren">(</span><em>*</em>, <em>royalnet_config: Optional[royalnet.network.royalnetconfig.RoyalnetConfig] = None</em>, <em>database_config: Optional[royalnet.database.databaseconfig.DatabaseConfig] = None</em>, <em>command_prefix: str</em>, <em>commands: List[Type[royalnet.utils.command.Command]] = None</em>, <em>missing_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em>, <em>error_command: Type[royalnet.utils.command.Command] = &lt;class 'royalnet.commands.null.NullCommand'&gt;</em>, <em>loop: asyncio.events.AbstractEventLoop = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.GenericBot" title="Permalink to this definition">¶</a></dt>
 <dd><p>A generic bot class, to be used as base for the other more specific classes, such as <span class="xref std std-ref">royalnet.bots.TelegramBot</span> and <span class="xref std std-ref">royalnet.bots.DiscordBot</span>.</p>
 <dl class="method">
 <dt id="royalnet.bots.GenericBot._call_factory">
