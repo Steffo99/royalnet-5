@@ -55,20 +55,11 @@ def wikiview_index():
     return f.render_template("wikiview_index.html", pages=pages)
 
 
-@bp.route("/id/<page_id>")
-def wikiview_by_id(page_id: str):
+@bp.route("/<uuid:page_id>", defaults={"title": ""})
+@bp.route("/<uuid:page_id>/<title>")
+def wikiview_by_id(page_id: uuid.UUID, title: str):
     from ...alchemyhandler import alchemy, alchemy_session
-    page_uuid = uuid.UUID(page_id)
-    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
-    if page is None:
-        return "No such page", 404
-    return prepare_page(page)
-
-
-@bp.route("/title/<title>")
-def wikiview_by_title(title: str):
-    from ...alchemyhandler import alchemy, alchemy_session
-    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.title == title).one_or_none()
+    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
     if page is None:
         return "No such page", 404
     return prepare_page(page)

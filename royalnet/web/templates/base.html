@@ -20,10 +20,10 @@
 <body>
     <nav>
         <div class="nav-left">
-            <span class="nav-site">
+            <a class="nav-site no-icon" href="{{ url_for("home.home_index") }}">
                 <img class="nav-image" alt="" src="{{ url_for("static", filename="logo.svg") }}">
                 <span class="nav-sitename">Royal Games</span>
-            </span>
+            </a>
             <span class="nav-modules">
                 <a class="no-icon" href="{{ url_for("wikiview.wikiview_index") }}">Wiki</a>
             </span>

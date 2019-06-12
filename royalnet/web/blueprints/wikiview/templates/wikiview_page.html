@@ -11,7 +11,7 @@
                 {{ page.title }}
             </span>
             <span class="right">
-                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string) }}">#</a>
+                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">#</a>
             </span>
         </div>
         <div class="bot">
