@@ -18,7 +18,7 @@ def tglogin_index():
 
 @bp.route("/done")
 def tglogin_done():
-    from ...alchemyhandler import alchemy, alchemy_session
+    alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     data_check_string = ""
     for field in sorted(list(f.request.args)):
         if field == "hash":

@@ -50,7 +50,7 @@ def prepare_page(page):
 
 @bp.route("/")
 def wikiview_index():
-    from ...alchemyhandler import alchemy, alchemy_session
+    alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     pages = sorted(alchemy_session.query(alchemy.WikiPage).all(), key=lambda page: page.title)
     return f.render_template("wikiview_index.html", pages=pages)
 
@@ -58,7 +58,7 @@ def wikiview_index():
 @bp.route("/<uuid:page_id>", defaults={"title": ""})
 @bp.route("/<uuid:page_id>/<title>")
 def wikiview_by_id(page_id: uuid.UUID, title: str):
-    from ...alchemyhandler import alchemy, alchemy_session
+    alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
     if page is None:
         return "No such page", 404
