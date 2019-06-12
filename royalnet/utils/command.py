@@ -13,7 +13,7 @@ class Command:
         command_description: A small description of the command, to be displayed when the command is being autocompleted.
         command_syntax: The syntax of the command, to be displayed when a :py:exc:`royalnet.error.InvalidInputError` is raised, in the format ``(required_arg) [optional_arg]``.
         require_alchemy_tables: A set of :py:class:`royalnet.database` tables, that must exist for this command to work.
-        network_handlers: A list of :py:class:`classyalnet.utils.NetworkHandler`s that must exist for this command to work."""
+        network_handlers: A list of :py:class:`royalnet.utils.NetworkHandler`s that must exist for this command to work."""
 
     command_name: str = NotImplemented
     command_description: str = NotImplemented
