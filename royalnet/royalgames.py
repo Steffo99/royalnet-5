@@ -3,6 +3,7 @@ import asyncio
 import logging
 from royalnet.bots import DiscordBot, DiscordConfig, TelegramBot, TelegramConfig
 from royalnet.commands import *
+# noinspection PyUnresolvedReferences
 from royalnet.commands.debug_create import DebugCreateCommand
 from royalnet.commands.error_handler import ErrorHandlerCommand
 from royalnet.network import RoyalnetServer, RoyalnetConfig
@@ -15,12 +16,16 @@ log = logging.root
 stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
-log.setLevel(logging.WARNING)
+log.setLevel(logging.INFO)
 
-commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, DebugCreateCommand, SyncCommand,
-            AuthorCommand, DiarioCommand, RageCommand, DateparserCommand, ReminderCommand, KvactiveCommand, KvCommand,
-            KvrollCommand, VideoinfoCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
+commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, SyncCommand,
+            DiarioCommand, RageCommand, ReminderCommand, KvactiveCommand, KvCommand,
+            KvrollCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
             VideochannelCommand, CvCommand, PauseCommand, QueueCommand]
+
+# noinspection PyUnreachableCode
+if __debug__:
+    commands = [DebugCreateCommand, VideoinfoCommand, DateparserCommand, AuthorCommand, *commands]
 
 address, port = "127.0.0.1", 1234
 

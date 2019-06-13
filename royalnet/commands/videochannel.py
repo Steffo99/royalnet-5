@@ -39,4 +39,7 @@ class VideochannelCommand(Command):
                 await call.reply("⚠️ Non sei connesso a nessun canale vocale!")
                 return
             channel = voice.channel
+            if author.is_on_mobile():
+                await call.reply(f"📹 Per entrare in modalità video, clicca qui: <https://discordapp.com/channels/{channel.guild.id}/{channel.id}>\n[b]Attenzione: la modalità video non funziona su Discord per Android e iOS![/b]")
+                return
         await call.reply(f"📹 Per entrare in modalità video, clicca qui: <https://discordapp.com/channels/{channel.guild.id}/{channel.id}>")

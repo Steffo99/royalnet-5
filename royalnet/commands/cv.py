@@ -67,10 +67,16 @@ class CvNH(NetworkHandler):
                 # Voice
                 if channel != 0:
                     # Voice status
-                    if member.voice.self_mute:
-                        message += f"🔇 "
+                    if member.voice.afk:
+                        message += "💤 "
+                    elif member.voice.self_deaf or member.voice.deaf:
+                        message += "🔇 "
+                    elif member.voice.self_mute or member.voice.mute:
+                        message += "🔈 "
+                    elif member.voice.self_video:
+                        message += "📺 "
                     else:
-                        message += f"🔊 "
+                        message += "🔊 "
                 # Nickname
                 if member.nick is not None:
                     message += f"[i]{member.nick}[/i]"
@@ -99,6 +105,8 @@ class CvNH(NetworkHandler):
                             message += f" | 🎧 {member.activity.name}"
                     elif member.activity.type == discord.ActivityType.watching:
                         message += f" | 📺 {member.activity.name}"
+                    else:
+                        message += f" | ❓ Unknown activity"
                 message += "\n"
             message += "\n"
         return ResponseSuccess({"response": message})

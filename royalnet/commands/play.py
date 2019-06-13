@@ -65,8 +65,8 @@ class PlayCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         guild_name, url = call.args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
-        download_task = loop.create_task(call.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord"))
-        notify_task = loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
+        download_task = call.loop.create_task(call.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord"))
+        notify_task = call.loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
         try:
             data: dict = await download_task
         except Exception as exc:

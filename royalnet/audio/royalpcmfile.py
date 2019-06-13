@@ -39,7 +39,7 @@ class RoyalPCMFile(YtdlFile):
             ffmpeg.input(f"./{self.video_filename}") \
                   .output(self.audio_filename, format="s16le", ac=2, ar="48000") \
                   .overwrite_output() \
-                  .run(quiet=False)
+                  .run(quiet=True)
         except ffmpeg.Error as exc:
             log.error(f"FFmpeg error: {exc.stderr}")
             raise

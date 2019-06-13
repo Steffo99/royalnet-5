@@ -1,5 +1,5 @@
 from . import audio, bots, commands, database, network, utils, error, web
 
-version = "5.0a22"
+version = "5.0a23"
 
 __all__ = ["audio", "bots", "commands", "database", "network", "utils", "error", "web"]

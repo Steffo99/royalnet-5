@@ -43,7 +43,7 @@
                     </span>
                 {% else %}
                     <span class="nav-login">
-                        <a class="no-icon" href="/login/telegram">
+                        <a class="no-icon" href="{{ url_for("tglogin.tglogin_index") }}">
                             Login
                             <img class="nav-image faded" alt="" src="{{ url_for("static", filename="generic.png") }}">
                         </a>

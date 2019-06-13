@@ -45,3 +45,7 @@ class ExternalError(Exception):
 
 class FileTooBigError(Exception):
     """The file to be downloaded would be too big to store; therefore, it has been skipped."""
+
+
+class CurrentlyDisabledError(Exception):
+    """This feature is temporarely disabled and is not available right now."""

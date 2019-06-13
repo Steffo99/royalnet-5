@@ -3,12 +3,14 @@ import flask as f
 import hashlib
 import hmac
 import datetime
+import os
 from ... import Royalprint
 from ....database.tables import Royal, Telegram
 
 
-rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={Royal, Telegram},
-                template_folder="templates")
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+rp = Royalprint("tglogin", __name__, url_prefix="/tglogin", required_tables={Royal, Telegram},
+                template_folder=tmpl_dir)
 
 
 @rp.route("/")

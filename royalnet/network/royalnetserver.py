@@ -41,9 +41,9 @@ class RoyalnetServer:
         self.required_secret: str = required_secret
         self.identified_clients: typing.List[ConnectedClient] = []
         if loop is None:
-            self.loop = asyncio.get_event_loop()
+            self._loop = asyncio.get_event_loop()
         else:
-            self.loop = loop
+            self._loop = loop
 
     def find_client(self, *, nid: str = None, link_type: str = None) -> typing.List[ConnectedClient]:
         assert not (nid and link_type)
