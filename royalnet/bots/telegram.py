@@ -105,6 +105,9 @@ class TelegramBot(GenericBot):
         # No text or caption, ignore the message
         if text is None:
             return
+        # Skip non-command updates
+        if not text.startswith(self.command_prefix):
+            return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()

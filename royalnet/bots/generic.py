@@ -22,6 +22,7 @@ class GenericBot:
                        error_command: typing.Type[Command]) -> None:
         """Generate the ``commands`` dictionary required to handle incoming messages, and the ``network_handlers`` dictionary required to handle incoming requests."""
         log.debug(f"Now generating commands")
+        self.command_prefix = command_prefix
         self.commands: typing.Dict[str, typing.Type[Command]] = {}
         self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
         for command in commands:

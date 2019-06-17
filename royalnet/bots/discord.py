@@ -108,6 +108,9 @@ class DiscordBot(GenericBot):
                 # Skip non-text messages
                 if not text:
                     return
+                # Skip non-command updates
+                if not text.startswith(self.command_prefix):
+                    return
                 # Skip bot messages
                 author: typing.Union[discord.User] = message.author
                 if author.bot:
