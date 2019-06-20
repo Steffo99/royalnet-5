@@ -4,5 +4,6 @@ from .home import rp as rp_home
 from .wikiview import rp as rp_wikiview
 from .tglogin import rp as rp_tglogin
 from .docs import rp as rp_docs
+from .wikiedit import rp as rp_wikiedit
 
-__all__ = ["rp_home", "rp_wikiview", "rp_tglogin", "rp_docs"]
+__all__ = ["rp_home", "rp_wikiview", "rp_tglogin", "rp_docs", "rp_wikiedit"]

@@ -497,3 +497,43 @@ nav {
 .faded {
     opacity: 0.3;
 }
+
+.wikiedit-form {
+
+    .field {
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+
+    .editor-toolbar, .editor-statusbar {
+        background-color: #2a3d62;
+        color: @fg !important;
+        border: 0;
+        opacity: 1 !important;
+
+        a {
+            color: @fg !important;
+            border: 0;
+
+            &:hover {
+                background-color: fade(@fg, 20%);
+                color: lighten(@fg, 25%) !important;
+            }
+
+            &.active {
+                background-color: fade(@fg, 30%);
+                color: white !important;
+
+                &:hover {
+                    background-color: fade(@fg, 20%);
+                    color: lighten(@fg, 25%) !important;
+                }
+            }
+        }
+    }
+
+    .CodeMirror {
+        font-family: "Consolas", monospace !important;
+        border: 0;
+    }
+}

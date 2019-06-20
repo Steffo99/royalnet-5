@@ -406,4 +406,39 @@ nav .nav-login-unavailable {
 .faded {
   opacity: 0.3;
 }
+.wikiedit-form .field {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.wikiedit-form .editor-toolbar,
+.wikiedit-form .editor-statusbar {
+  background-color: #2a3d62;
+  color: #a0ccff !important;
+  border: 0;
+  opacity: 1 !important;
+}
+.wikiedit-form .editor-toolbar a,
+.wikiedit-form .editor-statusbar a {
+  color: #a0ccff !important;
+  border: 0;
+}
+.wikiedit-form .editor-toolbar a:hover,
+.wikiedit-form .editor-statusbar a:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.wikiedit-form .editor-toolbar a.active,
+.wikiedit-form .editor-statusbar a.active {
+  background-color: rgba(160, 204, 255, 0.3);
+  color: white !important;
+}
+.wikiedit-form .editor-toolbar a.active:hover,
+.wikiedit-form .editor-statusbar a.active:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.wikiedit-form .CodeMirror {
+  font-family: "Consolas", monospace !important;
+  border: 0;
+}
 /*# sourceMappingURL=ryg.css.map */
