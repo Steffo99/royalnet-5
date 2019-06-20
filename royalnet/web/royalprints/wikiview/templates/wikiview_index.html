@@ -12,6 +12,11 @@
             </span>
         </div>
         <div class="bot">
+            {% if session.royal %}
+                <a href="{{ url_for("wikiedit.wikiedit_newpage") }}" class="btn no-icon">Crea nuova pagina</a>
+            {% else %}
+                <button disabled title="Devi fare il login per creare nuove pagine!">Crea nuova pagina</button>
+            {% endif %}
             <ul>
                 {% for page in pages %}
                     <li><a href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">{{ page.title }}</a></li>

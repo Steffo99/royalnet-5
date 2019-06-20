@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="{{ url_for("static", filename="ryg.css") }}">
     {% endif %}
     <link rel="icon" href="{{ url_for("static", filename="logo.png") }}" type="image/png">
+    {% block head %}{% endblock %}
 </head>
 <body>
     <nav>

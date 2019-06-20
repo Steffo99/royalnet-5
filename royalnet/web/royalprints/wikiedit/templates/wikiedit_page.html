@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ page.title }} - RYGwikieditor
+{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="doublebox">
+        <div class="top">
+            <span class="left">
+                Wiki Editor
+            </span>
+        </div>
+        <div class="bot">
+            <form method="POST" class="wikiedit-form">
+                <label for="wikiedit-title">
+                    <span class="label-text">Titolo</span>
+                    <input id="wikiedit-title" type="text" name="title" value="{{ page.title }}">
+                </label>
+                <label for="wikiedit-format">
+                    <span class="label-text">Formato</span>
+                    <input id="wikiedit-format" type="text" name="format" disabled value="{{ page.format }}">
+                </label>
+                <!--suppress HtmlFormInputWithoutLabel -->
+                <textarea id="wikiedit-content" name="content">{{ page.content }}</textarea>
+                <label for="wikiedit-css">
+                    <span class="label-text">Tema</span>
+                    <select id="wikiedit-css" name="css">
+                        <option value="None" {% if page.css == None %}selected{% endif %}>Royal Games</option>
+                        <option value="tf2.css" {% if page.css == "tf2.css" %}selected{% endif %}>Team Fortress 2</option>
+                    </select>
+                </label>
+                <label for="wikiedit-reason">
+                    <span class="label-text">Motivo</span>
+                    <input id="wikiedit-reason" type="text" name="reason">
+                </label>
+                <label for="wikiedit-submit">
+                    <input id="wikiedit-submit" type="submit" value="Salva">
+                </label>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footscripts %}
+    <script>
+        //TODO: maybe enable autosave?
+        let simplemde = new SimpleMDE({
+            element: document.getElementById("wikiedit-content"),
+            blockStyles: {
+                italic: "_"
+            },
+            tabSize: 4,
+            spellChecker: false,
+            toolbar: [
+                {
+                    name: "bold",
+                    action: SimpleMDE.toggleBold,
+                    className: "fas fa-bold no-icon",
+                    title: "Grassetto",
+                },
+                {
+                    name: "italic",
+                    action: SimpleMDE.toggleItalic,
+                    className: "fas fa-italic no-icon",
+                    title: "Corsivo",
+                },
+                {
+                    name: "strikethrough",
+                    action: SimpleMDE.toggleStrikethrough,
+                    className: "fas fa-strikethrough no-icon",
+                    title: "Barrato",
+                },
+                {
+                    name: "link",
+                    action: SimpleMDE.drawLink,
+                    className: "fas fa-link no-icon",
+                    title: "Link",
+                },
+                "|",
+                {
+                    name: "heading-smaller",
+                    action: SimpleMDE.toggleHeadingSmaller,
+                    className: "fas fa-header no-icon",
+                    title: "(Rimpicciolisci) Titolo",
+                },
+                {
+                    name: "heading",
+                    action: SimpleMDE.toggleHeadingBigger,
+                    className: "fas fa-header fa-lg no-icon",
+                    title: "(Ingrandisci) Titolo",
+                },
+                "|",
+                {
+                    name: "code",
+                    action: SimpleMDE.toggleCodeBlock,
+                    className: "fas fa-code no-icon",
+                    title: "Codice",
+                },
+                {
+                    name: "quote",
+                    action: SimpleMDE.toggleBlockquote,
+                    className: "fas fa-quote-left no-icon",
+                    title: "Citazione",
+                },
+                {
+                    name: "unordered-list",
+                    action: SimpleMDE.toggleUnorderedList,
+                    className: "fas fa-list-ul no-icon",
+                    title: "Lista puntata",
+                },
+                {
+                    name: "ordered-list",
+                    action: SimpleMDE.toggleOrderedList,
+                    className: "fas fa-list-ol no-icon",
+                    title: "Lista ordinata",
+                },
+                {
+                    name: "horizontal-rule",
+                    action: SimpleMDE.drawHorizontalRule,
+                    className: "fas fa-minus no-icon",
+                    title: "Separatore",
+                },
+                "|",
+                {
+                    name: "image",
+                    action: SimpleMDE.drawImage,
+                    className: "fas fa-picture-o no-icon",
+                    title: "Immagine",
+                },
+                {
+                    name: "table",
+                    action: SimpleMDE.drawTable,
+                    className: "fas fa-table no-icon",
+                    title: "Tabella",
+                }
+	        ],
+        });
+    </script>
+{% endblock %}

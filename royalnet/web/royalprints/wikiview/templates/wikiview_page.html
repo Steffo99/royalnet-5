@@ -8,14 +8,27 @@
     <div class="doublebox">
         <div class="top">
             <span class="left">
-                {{ page.title }}
+                Wiki page
             </span>
             <span class="right">
-                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">#</a>
+                {% if session.royal %}
+                    <a class="edit no-icon" href="{{ url_for("wikiedit.wikiedit_by_id", page_id=page.page_id|string, title=page.title) }}">Modifica</a>
+                {% else %}
+                    <a class="edit no-icon faded" title="Devi fare il login per creare nuove pagine!">Modifica</a>
+                {% endif %}
+                |
+                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">Permalink</a>
             </span>
         </div>
         <div class="bot">
-            {{ parsed_content }}
+            <div class="wikiview-page">
+                <h1 class="wikiview-title">
+                    {{ page.title }}
+                </h1>
+                <div class="wikiview-content">
+                    {{ parsed_content }}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

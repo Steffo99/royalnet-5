@@ -215,6 +215,33 @@ button, input[type="submit"], .btn {
     }
 }
 
+input[type="text"], input[type="password"], input[type="email"] {
+    background-color: fade(@fg, 10%);
+    color: @fg;
+    border: none;
+    border-bottom: 1px dashed @fg;
+    padding: 2px;
+    margin: 1px;
+    font-size: medium;
+    font-family: sans-serif;
+}
+
+select {
+    background-color: fade(@fg, 10%);
+    color: @fg;
+    border: none;
+    border-bottom: 1px dotted @fg;
+    padding: 2px;
+    margin: 1px;
+    font-size: medium;
+    font-family: sans-serif;
+
+    option {
+        background-color: #293c61;
+        color: @fg;
+    }
+}
+
 pre {
     margin: 0;
 }
@@ -494,6 +521,103 @@ nav {
     }
 }
 
-.faded {
+.faded, input[disabled=""], button[disabled=""] {
     opacity: 0.3;
+}
+
+.wikiedit-form {
+
+    label {
+        margin-top: 4px;
+        margin-bottom: 4px;
+        display: flex;
+
+        .label-text {
+            margin-right: 12px;
+            min-width: 60px;
+        }
+
+        input {
+            flex-grow: 1;
+        }
+    }
+
+    label[for="wikiedit-title"] {
+        font-size: x-large;
+
+        * {
+            font-size: x-large;
+        }
+    }
+
+    .editor-toolbar, .editor-statusbar {
+        background-color: #2a3d62;
+        color: @fg !important;
+        border: 0;
+        opacity: 1 !important;
+
+        a {
+            color: @fg !important;
+            border: 0;
+
+            &:hover {
+                background-color: fade(@fg, 20%);
+                color: lighten(@fg, 25%) !important;
+            }
+
+            &.active {
+                background-color: fade(@fg, 30%);
+                color: white !important;
+
+                &:hover {
+                    background-color: fade(@fg, 20%);
+                    color: lighten(@fg, 25%) !important;
+                }
+            }
+        }
+    }
+
+    .CodeMirror {
+        font-family: "Consolas", monospace !important;
+        background-color: transparent;
+        color: @fg;
+        border-top: 0;
+        border-bottom: 0;
+        border-left: 1px solid fade(@fg, 20%);
+        border-right: 1px solid fade(@fg, 20%);
+        border-radius: 0;
+
+        .cm-link {
+            color: @pastel-cyan !important;
+        }
+
+        .cm-url {
+            color: @li !important;
+        }
+
+        .cm-tag {
+            color: @pastel-magenta !important;
+        }
+
+        .cm-strong {
+            color: @pastel-yellow !important;
+        }
+        
+        .cm-em {
+            color: @pastel-orange !important;
+        }
+
+        .cm-quote {
+            color: @pastel-lime !important;
+        }
+
+        .cm-comment {
+            color: @pastel-red !important;
+        }
+
+        .cm-header {
+            color: @ec !important;
+        }
+
+    }
 }

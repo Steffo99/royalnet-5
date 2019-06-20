@@ -176,6 +176,32 @@ input[type="submit"]:active,
   color: white;
   border-color: white;
 }
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  background-color: rgba(160, 204, 255, 0.1);
+  color: #a0ccff;
+  border: none;
+  border-bottom: 1px dashed #a0ccff;
+  padding: 2px;
+  margin: 1px;
+  font-size: medium;
+  font-family: sans-serif;
+}
+select {
+  background-color: rgba(160, 204, 255, 0.1);
+  color: #a0ccff;
+  border: none;
+  border-bottom: 1px dotted #a0ccff;
+  padding: 2px;
+  margin: 1px;
+  font-size: medium;
+  font-family: sans-serif;
+}
+select option {
+  background-color: #293c61;
+  color: #a0ccff;
+}
 pre {
   margin: 0;
 }
@@ -403,7 +429,88 @@ nav .nav-login-unavailable {
 .spoiler:hover {
   color: #a0ccff;
 }
-.faded {
+.faded,
+input[disabled=""],
+button[disabled=""] {
   opacity: 0.3;
+}
+.wikiedit-form label {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+}
+.wikiedit-form label .label-text {
+  margin-right: 12px;
+  min-width: 60px;
+}
+.wikiedit-form label input {
+  flex-grow: 1;
+}
+.wikiedit-form label[for="wikiedit-title"] {
+  font-size: x-large;
+}
+.wikiedit-form label[for="wikiedit-title"] * {
+  font-size: x-large;
+}
+.wikiedit-form .editor-toolbar,
+.wikiedit-form .editor-statusbar {
+  background-color: #2a3d62;
+  color: #a0ccff !important;
+  border: 0;
+  opacity: 1 !important;
+}
+.wikiedit-form .editor-toolbar a,
+.wikiedit-form .editor-statusbar a {
+  color: #a0ccff !important;
+  border: 0;
+}
+.wikiedit-form .editor-toolbar a:hover,
+.wikiedit-form .editor-statusbar a:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.wikiedit-form .editor-toolbar a.active,
+.wikiedit-form .editor-statusbar a.active {
+  background-color: rgba(160, 204, 255, 0.3);
+  color: white !important;
+}
+.wikiedit-form .editor-toolbar a.active:hover,
+.wikiedit-form .editor-statusbar a.active:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.wikiedit-form .CodeMirror {
+  font-family: "Consolas", monospace !important;
+  background-color: transparent;
+  color: #a0ccff;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 1px solid rgba(160, 204, 255, 0.2);
+  border-right: 1px solid rgba(160, 204, 255, 0.2);
+  border-radius: 0;
+}
+.wikiedit-form .CodeMirror .cm-link {
+  color: #7dffff !important;
+}
+.wikiedit-form .CodeMirror .cm-url {
+  color: #00caca !important;
+}
+.wikiedit-form .CodeMirror .cm-tag {
+  color: #ff7dff !important;
+}
+.wikiedit-form .CodeMirror .cm-strong {
+  color: #ffff7d !important;
+}
+.wikiedit-form .CodeMirror .cm-em {
+  color: #ffbb7d !important;
+}
+.wikiedit-form .CodeMirror .cm-quote {
+  color: #7dff7d !important;
+}
+.wikiedit-form .CodeMirror .cm-comment {
+  color: #ff7d7d !important;
+}
+.wikiedit-form .CodeMirror .cm-header {
+  color: #ffffff !important;
 }
 /*# sourceMappingURL=ryg.css.map */
