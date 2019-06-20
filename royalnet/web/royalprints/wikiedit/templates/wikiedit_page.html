@@ -18,26 +18,30 @@
         </div>
         <div class="bot">
             <form method="POST" class="wikiedit-form">
-                    <label for="wikiedit-title">
-                        <span class="label-text">Titolo</span>
-                        <input id="wikiedit-title" type="text" name="title" placeholder="Titolo" value="{{ page.title }}">
-                    </label>
-                    <label for="wikiedit-format">
-                        <span class="label-text">Formato</span>
-                        <input id="wikiedit-format" type="text" name="format" placeholder="Format" disabled value="{{ page.format }}">
-                    </label>
-                    <!--suppress HtmlFormInputWithoutLabel -->
-                    <textarea id="wikiedit-content" name="content">{{ page.content }}</textarea>
-                    <label for="wikiedit-css">
-                        <span class="label-text">Tema</span>
-                        <select id="wikiedit-css" name="css">
-                            <option value="None" {% if page.css == None %}selected{% endif %}>Royal Games</option>
-                            <option value="tf2.css" {% if page.css == "tf2.css" %}selected{% endif %}>Team Fortress 2</option>
-                        </select>
-                    </label>
-                    <label for="wikiedit-submit">
-                        <input id="wikiedit-submit" type="submit" value="Salva">
-                    </label>
+                <label for="wikiedit-title">
+                    <span class="label-text">Titolo</span>
+                    <input id="wikiedit-title" type="text" name="title" value="{{ page.title }}">
+                </label>
+                <label for="wikiedit-format">
+                    <span class="label-text">Formato</span>
+                    <input id="wikiedit-format" type="text" name="format" disabled value="{{ page.format }}">
+                </label>
+                <!--suppress HtmlFormInputWithoutLabel -->
+                <textarea id="wikiedit-content" name="content">{{ page.content }}</textarea>
+                <label for="wikiedit-css">
+                    <span class="label-text">Tema</span>
+                    <select id="wikiedit-css" name="css">
+                        <option value="None" {% if page.css == None %}selected{% endif %}>Royal Games</option>
+                        <option value="tf2.css" {% if page.css == "tf2.css" %}selected{% endif %}>Team Fortress 2</option>
+                    </select>
+                </label>
+                <label for="wikiedit-reason">
+                    <span class="label-text">Motivo</span>
+                    <input id="wikiedit-reason" type="text" name="reason">
+                </label>
+                <label for="wikiedit-submit">
+                    <input id="wikiedit-submit" type="submit" value="Salva">
+                </label>
             </form>
         </div>
     </div>

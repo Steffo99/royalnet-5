@@ -12,7 +12,7 @@ rp = Royalprint("wikiedit", __name__, url_prefix="/wikiedit", template_folder=tm
 
 
 @rp.route("/<uuid:page_id>", defaults={"title": ""}, methods=["GET", "POST"])
-@rp.route("/<uuid:page_id>/<title>")
+@rp.route("/<uuid:page_id>/<title>", methods=["GET", "POST"])
 def wikiedit_by_id(page_id: uuid.UUID, title: str):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
@@ -23,4 +23,4 @@ def wikiedit_by_id(page_id: uuid.UUID, title: str):
         return f.render_template("wikiedit_page.html", page=page)
 
     elif f.request.method == "POST":
-        return "Haha doesn't work yet"
+        return ""
