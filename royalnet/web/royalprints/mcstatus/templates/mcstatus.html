@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ server_str }} - RYG MCstatus
+{% endblock %}
+
+{% block content %}
+    <div class="doublebox">
+        <div class="top">
+            <span class="left">Minecraft Status</span>
+        </div>
+        <div class="bot">
+            <div class="mcstatus-grid">
+                {% if query %}
+                    {% if status.favicon %}
+                        <div class="mcstatus-icon"><img class="mcstatus-icon-img" src="{{ status.favicon }}" alt="Server icon"></div>
+                    {% else %}
+                        <div class="mcstatus-icon"><div class="mcstatus-icon-img" title="Server icon"></div></div>
+                    {% endif %}
+                    <div class="mcstatus-address"><span class="server-up">{{ server_str }}</span></div>
+                    <div class="mcstatus-description"><span>{{ query.motd }}</span></div>
+                    <div class="mcstatus-players"><span>{{ query.players.online }}</span>/<span>{{ query.players.max }}</span></div>
+                    <div class="mcstatus-version"><span>{{ query.software.brand }}</span> <span>{{ query.software.version }}</span> (<span>{{ status.version.protocol }}</span>)</div>
+                {% elif status %}
+                    {% if status.favicon %}
+                        <div class="mcstatus-icon"><img class="mcstatus-icon-img" src="{{ status.favicon }}" alt="Server icon"></div>
+                    {% else %}
+                        <div class="mcstatus-icon"><div class="mcstatus-icon-img" title="Server icon"></div></div>
+                    {% endif %}
+                    <div class="mcstatus-address"><span class="server-up">{{ server_str }}</span></div>
+                    <div class="mcstatus-description"><span>{{ status.description }}</span></div>
+                    <div class="mcstatus-players"><span>{{ status.players.online }}</span>/<span>{{ status.players.max }}</span></div>
+                    <div class="mcstatus-version"><span>{{ status.version.name }}</span> (<span>{{ status.version.protocol }}</span>)</div>
+                {% else %}
+                    <div class="mcstatus-icon"><div class="mcstatus-icon-img" title="Server icon"></div></div>
+                    <div class="mcstatus-address"><span class="server-down">{{ server_str }}</span></div>
+                    <div class="mcstatus-description"><span>-</span></div>
+                    <div class="mcstatus-players"><span>0</span>/<span>0</span></div>
+                    <div class="mcstatus-version"><span>Offline</span> (<span>-</span>)</div>
+                {% endif %}
+            </div>
+            {% if query %}
+                <div class="mcstatus-playerlist">
+                    <h3>Giocatori connessi:</h3>
+                    <ul>
+                        {% for player in query.players.names %}
+                            <li>{{ player }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -621,3 +621,59 @@ nav {
 
     }
 }
+
+.mcstatus-grid {
+    display: grid;
+
+    grid-template-columns: 64px auto auto;
+    grid-column-gap: 12px;
+
+    align-items: center;
+
+    .mcstatus-icon {
+        grid-column: 1;
+        grid-row-start: 1;
+        grid-row-end: 3;
+        width: 64px;
+        height: 64px;
+
+        .mcstatus-icon-img {
+            width: 64px;
+            height: 64px;
+        }
+    }
+
+    .mcstatus-address {
+        font-weight: bold;
+
+        grid-column: 2;
+        justify-self: start;
+        grid-row: 1;
+
+        .server-up {
+            color: @pastel-lime;
+        }
+
+        .server-down {
+            color: @pastel-red;
+        }
+    }
+
+    .mcstatus-description {
+        grid-column: 2;
+        justify-self: start;
+        grid-row: 2;
+    }
+
+    .mcstatus-players {
+        grid-column: 3;
+        justify-self: end;
+        grid-row: 1;
+    }
+
+    .mcstatus-version {
+        grid-column: 3;
+        justify-self: end;
+        grid-row: 2;
+    }
+}
