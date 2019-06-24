@@ -3,6 +3,12 @@
 @li: #00caca; //Link
 @ec: #ffffff; //Extra color
 
+@fg-ten: fade(@fg, 10%);
+@fg-twenty: fade(@fg, 20%);
+
+@fg-ten-hard: overlay(@bg, @fg-ten);
+@fg-twenty-hard: overlay(@bg, @fg-twenty);
+
 @pastel-red: #ff7d7d;
 @pastel-orange: #ffbb7d;
 @pastel-yellow: #ffff7d;
@@ -173,13 +179,13 @@ code {
 blockquote {
     color: @fg;
     border-left: 3px solid @fg;
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     padding: 2px 4px 2px 8px;
     margin: 8px;
 }
 
 textarea {
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     color: @fg;
     border: 1px solid @fg;
     padding: 2px;
@@ -191,19 +197,19 @@ textarea {
 }
 
 button, input[type="submit"], .btn {
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     color: @fg !important;
     border: 1px solid @fg;
     border-radius: 0;
     padding: 2px 8px;
     margin: 1px;
     font-size: medium;
-    font-family: sans-serif;
+    font-family: @main-fonts;
     text-decoration: none;
     cursor: default;
 
     &:hover {
-        background-color: fade(@fg, 20%);
+        background-color: @fg-twenty;
         color: lighten(@fg, 25%);
         border-color: lighten(@fg, 25%);
     }
@@ -216,25 +222,25 @@ button, input[type="submit"], .btn {
 }
 
 input[type="text"], input[type="password"], input[type="email"] {
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     color: @fg;
     border: none;
     border-bottom: 1px dashed @fg;
     padding: 2px;
     margin: 1px;
     font-size: medium;
-    font-family: sans-serif;
+    font-family: @main-fonts;
 }
 
 select {
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     color: @fg;
     border: none;
     border-bottom: 1px dotted @fg;
     padding: 2px;
     margin: 1px;
     font-size: medium;
-    font-family: sans-serif;
+    font-family: @main-fonts;
 
     option {
         background-color: #293c61;
@@ -286,6 +292,67 @@ nav {
     }
 }
 
+table {
+    border-collapse: collapse;
+
+    thead {
+        margin-top: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 8px;
+
+        th {
+            background-color: @fg-twenty;
+            color: @ec;
+            padding-left: 4px;
+            padding-right: 4px;
+            text-align: left;
+            font-size: small;
+            font-weight: bold;
+        }
+
+        tr:first-child {
+            th:first-child {
+                border-radius: 4px 0 0 0;
+            }
+
+            th:last-child {
+                border-radius: 0 4px 0 0;
+            }
+        }
+    }
+
+    tbody {
+        margin-bottom: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 8px;
+
+        td {
+            background-color: @fg-ten;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+
+        tr {
+            border-bottom: 1px solid @fg-twenty;
+
+            &:last-child {
+                border-bottom: none;
+
+                td:first-child {
+                    border-radius: 0 0 0 4px;
+                }
+
+                td:last-child {
+                    border-radius: 0 0 4px 0;
+                }
+            }
+        }
+    }
+}
+
+
 //Elements
 
 .h-container {
@@ -315,7 +382,7 @@ nav {
 }
 
 .box {
-    background-color: fade(@fg, 10%);
+    background-color: @fg-ten;
     border-radius: 4px;
     padding: 8px;
     margin: 8px;
@@ -327,7 +394,7 @@ nav {
     .top {
         display: flex;
         justify-content: space-between;
-        background-color: fade(@fg, 20%);
+        background-color: @fg-twenty;
         padding: 4px;
         border-radius: 4px 4px 0 0;
         color: @ec;
@@ -345,7 +412,7 @@ nav {
     }
 
     .bot {
-        background-color: fade(@fg, 10%);
+        background-color: @fg-ten;
         padding: 8px;
         border-radius: 0 0 4px 4px;
     }
@@ -496,7 +563,7 @@ nav {
 
     &:not(.plus):not(.minus):not(.stars) {
         color: @fg;
-        background-color: fade(@fg, 10%);
+        background-color: @fg-ten;
 
         &::before {
             font-family: "Font Awesome 5 Free";
@@ -512,9 +579,10 @@ nav {
 }
 
 .spoiler {
-    color: rgba(0, 0, 0, 0);
-    border: 1px solid fade(@fg, 10%);
+    color: transparent;
+    border: 1px solid @fg-ten;
     border-radius: 2px;
+    padding: 4px;
 
     &:hover {
         color: @fg;
@@ -551,7 +619,7 @@ nav {
     }
 
     .editor-toolbar, .editor-statusbar {
-        background-color: #2a3d62;
+        background-color: @fg-twenty-hard;
         color: @fg !important;
         border: 0;
         opacity: 1 !important;
@@ -561,7 +629,7 @@ nav {
             border: 0;
 
             &:hover {
-                background-color: fade(@fg, 20%);
+                background-color: @fg-twenty;
                 color: lighten(@fg, 25%) !important;
             }
 
@@ -570,7 +638,7 @@ nav {
                 color: white !important;
 
                 &:hover {
-                    background-color: fade(@fg, 20%);
+                    background-color: @fg-twenty;
                     color: lighten(@fg, 25%) !important;
                 }
             }
@@ -583,8 +651,8 @@ nav {
         color: @fg;
         border-top: 0;
         border-bottom: 0;
-        border-left: 1px solid fade(@fg, 20%);
-        border-right: 1px solid fade(@fg, 20%);
+        border-left: 1px solid @fg-twenty;
+        border-right: 1px solid @fg-twenty;
         border-radius: 0;
 
         .cm-link {
@@ -612,7 +680,7 @@ nav {
         }
 
         .cm-comment {
-            color: @pastel-red !important;
+            color: lightgray !important;
         }
 
         .cm-header {
@@ -675,5 +743,52 @@ nav {
         grid-column: 3;
         justify-self: end;
         grid-row: 2;
+    }
+}
+
+.wikiview-doublebox {
+    .bot {
+        background-color: transparent;
+        border-top: 0;
+        border-bottom: 4px solid @fg-twenty;
+        border-left: 4px solid @fg-twenty;
+        border-right: 4px solid @fg-twenty;
+
+        .wikiview-title {
+            text-align: center;
+            font-size: 42px;
+            margin-top: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: revert;
+            margin-bottom: revert;
+        }
+
+        blockquote {
+            color: @pastel-lime;
+            border-left: 3px solid @pastel-lime;
+            background-color: fade(@pastel-lime, 10%);
+
+            &.spoiler {
+                color: transparent;
+                background-color: fade(@pastel-red, 10%);
+                border: 1px solid fade(@pastel-red, 10%);
+                border-radius: 2px;
+                padding: 4px;
+
+                &:hover {
+                    color: @pastel-red;
+                }
+            }
+        }
+
+        pre {
+            color: lightgray;
+            border: 1px solid @fg-ten;
+            background-color: @fg-ten;
+            padding: 2px 4px 2px 8px;
+            margin: 8px;
+        }
     }
 }

@@ -158,7 +158,7 @@ input[type="submit"],
   padding: 2px 8px;
   margin: 1px;
   font-size: medium;
-  font-family: sans-serif;
+  font-family: "Arial", "Helvetica Neue", sans-serif;
   text-decoration: none;
   cursor: default;
 }
@@ -186,7 +186,7 @@ input[type="email"] {
   padding: 2px;
   margin: 1px;
   font-size: medium;
-  font-family: sans-serif;
+  font-family: "Arial", "Helvetica Neue", sans-serif;
 }
 select {
   background-color: rgba(160, 204, 255, 0.1);
@@ -196,7 +196,7 @@ select {
   padding: 2px;
   margin: 1px;
   font-size: medium;
-  font-family: sans-serif;
+  font-family: "Arial", "Helvetica Neue", sans-serif;
 }
 select option {
   background-color: #293c61;
@@ -236,6 +236,53 @@ nav .nav-sitename {
 }
 nav .nav-login-unavailable {
   opacity: 0.25;
+}
+table {
+  border-collapse: collapse;
+}
+table thead {
+  margin-top: 4px;
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 8px;
+}
+table thead th {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: left;
+  font-size: small;
+  font-weight: bold;
+}
+table thead tr:first-child th:first-child {
+  border-radius: 4px 0 0 0;
+}
+table thead tr:first-child th:last-child {
+  border-radius: 0 4px 0 0;
+}
+table tbody {
+  margin-bottom: 4px;
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 8px;
+}
+table tbody td {
+  background-color: rgba(160, 204, 255, 0.1);
+  padding-left: 4px;
+  padding-right: 4px;
+}
+table tbody tr {
+  border-bottom: 1px solid rgba(160, 204, 255, 0.2);
+}
+table tbody tr:last-child {
+  border-bottom: none;
+}
+table tbody tr:last-child td:first-child {
+  border-radius: 0 0 0 4px;
+}
+table tbody tr:last-child td:last-child {
+  border-radius: 0 0 4px 0;
 }
 .h-container {
   display: flex;
@@ -422,9 +469,10 @@ nav .nav-login-unavailable {
   font-size: xx-large;
 }
 .spoiler {
-  color: rgba(0, 0, 0, 0);
+  color: transparent;
   border: 1px solid rgba(160, 204, 255, 0.1);
   border-radius: 2px;
+  padding: 4px;
 }
 .spoiler:hover {
   color: #a0ccff;
@@ -454,7 +502,7 @@ button[disabled=""] {
 }
 .wikiedit-form .editor-toolbar,
 .wikiedit-form .editor-statusbar {
-  background-color: #2a3d62;
+  background-color: #0e1c47;
   color: #a0ccff !important;
   border: 0;
   opacity: 1 !important;
@@ -508,7 +556,7 @@ button[disabled=""] {
   color: #7dff7d !important;
 }
 .wikiedit-form .CodeMirror .cm-comment {
-  color: #ff7d7d !important;
+  color: lightgray !important;
 }
 .wikiedit-form .CodeMirror .cm-header {
   color: #ffffff !important;
@@ -556,5 +604,48 @@ button[disabled=""] {
   grid-column: 3;
   justify-self: end;
   grid-row: 2;
+}
+.wikiview-doublebox .bot {
+  background-color: transparent;
+  border-top: 0;
+  border-bottom: 4px solid rgba(160, 204, 255, 0.2);
+  border-left: 4px solid rgba(160, 204, 255, 0.2);
+  border-right: 4px solid rgba(160, 204, 255, 0.2);
+}
+.wikiview-doublebox .bot .wikiview-title {
+  text-align: center;
+  font-size: 42px;
+  margin-top: 0;
+}
+.wikiview-doublebox .bot h1,
+.wikiview-doublebox .bot h2,
+.wikiview-doublebox .bot h3,
+.wikiview-doublebox .bot h4,
+.wikiview-doublebox .bot h5,
+.wikiview-doublebox .bot h6 {
+  margin-top: revert;
+  margin-bottom: revert;
+}
+.wikiview-doublebox .bot blockquote {
+  color: #7dff7d;
+  border-left: 3px solid #7dff7d;
+  background-color: rgba(125, 255, 125, 0.1);
+}
+.wikiview-doublebox .bot blockquote.spoiler {
+  color: transparent;
+  background-color: rgba(255, 125, 125, 0.1);
+  border: 1px solid rgba(255, 125, 125, 0.1);
+  border-radius: 2px;
+  padding: 4px;
+}
+.wikiview-doublebox .bot blockquote.spoiler:hover {
+  color: #ff7d7d;
+}
+.wikiview-doublebox .bot pre {
+  color: lightgray;
+  border: 1px solid rgba(160, 204, 255, 0.1);
+  background-color: rgba(160, 204, 255, 0.1);
+  padding: 2px 4px 2px 8px;
+  margin: 8px;
 }
 /*# sourceMappingURL=ryg.css.map */
