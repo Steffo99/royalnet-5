@@ -605,6 +605,7 @@ button[disabled=""] {
   justify-self: end;
   grid-row: 2;
 }
+
 .wikiview-doublebox .bot {
   background-color: transparent;
   border-top: 0;
