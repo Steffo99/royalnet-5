@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="doublebox">
+    <div class="doublebox wikiview-doublebox">
         <div class="top">
             <span class="left">
                 Wiki page
@@ -14,7 +14,7 @@
                 {% if session.royal %}
                     <a class="edit no-icon" href="{{ url_for("wikiedit.wikiedit_by_id", page_id=page.page_id|string, title=page.title) }}">Modifica</a>
                 {% else %}
-                    <a class="edit no-icon faded" title="Devi fare il login per creare nuove pagine!">Modifica</a>
+                    <a class="edit no-icon faded" title="Devi fare il login per modificare pagine!">Modifica</a>
                 {% endif %}
                 |
                 <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">Permalink</a>

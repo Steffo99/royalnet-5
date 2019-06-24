@@ -27,7 +27,8 @@ setuptools.setup(
                       "PyNaCl>=1.3.0",
                       "werkzeug>=0.15.4",
                       "flask>=1.0.3",
-                      "markdown2>=2.3.8"],
+                      "markdown2>=2.3.8",
+                      "mcstatus>=2.2.1"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",
