@@ -127,15 +127,32 @@ h6 {
   margin-bottom: 0;
   font-weight: normal;
 }
+pre {
+  color: lightgray;
+  border: 1px solid rgba(160, 204, 255, 0.1);
+  background-color: rgba(160, 204, 255, 0.1);
+  padding: 2px 4px 2px 8px;
+  margin: 8px;
+}
 code {
   font-family: "Consolas", "Source Code Pro", monospace;
 }
 blockquote {
-  color: #a0ccff;
-  border-left: 3px solid #a0ccff;
-  background-color: rgba(160, 204, 255, 0.1);
+  color: #7dff7d;
+  border-left: 3px solid #7dff7d;
+  background-color: rgba(125, 255, 125, 0.1);
   padding: 2px 4px 2px 8px;
   margin: 8px;
+}
+blockquote.spoiler {
+  color: transparent;
+  background-color: rgba(255, 125, 125, 0.1);
+  border: 1px solid rgba(255, 125, 125, 0.1);
+  border-radius: 2px;
+  padding: 4px;
+}
+blockquote.spoiler:hover {
+  color: #ff7d7d;
 }
 textarea {
   background-color: rgba(160, 204, 255, 0.1);
@@ -201,9 +218,6 @@ select {
 select option {
   background-color: #293c61;
   color: #a0ccff;
-}
-pre {
-  margin: 0;
 }
 img {
   margin-left: auto;
@@ -605,7 +619,6 @@ button[disabled=""] {
   justify-self: end;
   grid-row: 2;
 }
-
 .wikiview-doublebox .bot {
   background-color: transparent;
   border-top: 0;
@@ -627,26 +640,60 @@ button[disabled=""] {
   margin-top: revert;
   margin-bottom: revert;
 }
-.wikiview-doublebox .bot blockquote {
-  color: #7dff7d;
-  border-left: 3px solid #7dff7d;
-  background-color: rgba(125, 255, 125, 0.1);
+.diario {
+  display: grid;
+  grid-template-columns: auto auto 8%;
 }
-.wikiview-doublebox .bot blockquote.spoiler {
+.diario .diario-content {
+  grid-row: 1;
+  grid-column-start: 1;
+  grid-column-end: 4;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.diario .diario-content .diario-img {
+  color: red;
+}
+.diario .diario-quote {
+  grid-row: 2;
+  grid-column-start: 1;
+  grid-column-end: 4;
+  font-size: small;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.diario .diario-quote .diario-context {
+  font-style: italic;
+}
+.diario .diario-timestamp {
+  grid-row: 3;
+  grid-column: 1;
+  font-size: x-small;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.diario .diario-created {
+  grid-row: 3;
+  grid-column: 2;
+  justify-self: end;
+  font-size: x-small;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.diario .diario-id {
+  grid-row: 3;
+  grid-column: 3;
+  justify-self: end;
+  font-size: x-small;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.diario.diario-spoiler {
   color: transparent;
   background-color: rgba(255, 125, 125, 0.1);
-  border: 1px solid rgba(255, 125, 125, 0.1);
-  border-radius: 2px;
-  padding: 4px;
+  border-left: 3px solid #ff7d7d;
 }
-.wikiview-doublebox .bot blockquote.spoiler:hover {
+.diario.diario-spoiler:hover {
   color: #ff7d7d;
-}
-.wikiview-doublebox .bot pre {
-  color: lightgray;
-  border: 1px solid rgba(160, 204, 255, 0.1);
-  background-color: rgba(160, 204, 255, 0.1);
-  padding: 2px 4px 2px 8px;
-  margin: 8px;
 }
 /*# sourceMappingURL=ryg.css.map */

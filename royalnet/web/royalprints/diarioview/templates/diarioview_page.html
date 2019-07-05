@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Pagina {{ page }} - Diario RYG
+{% endblock %}
+
+{% block content %}
+    <div class="diarioview">
+        {% for entry in entries %}
+            <blockquote id="diario-{{ entry.diario_id }}" class="diario{% if entry.spoiler %} diario-spoiler{% endif %}">
+                <div class="diario-content">
+                    {% if entry.media_url %}
+                        <img class="diario-img" src="{{ entry.media_url }}" alt="Caricamento immagine fallito">
+                    {% endif %}
+                    {% if entry.text %}
+                        "<span class="diario-text">{{ entry.text }}</span>"
+                    {% endif %}
+                </div>
+                {% if entry.quoted %}
+                    <div class="diario-quote">
+                        —
+                        {% if entry.quoted_account %}
+                            <abbr title="{{ entry.quoted_account.username }}" class="diario-quoted">{{ entry.quoted }}</abbr>
+                        {% else %}
+                            <span class="diario-quoted">{{ entry.quoted }}</span>
+                        {% endif %}
+                        {% if entry.context %}
+                            , <span class="diario-context">{{ entry.context }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if entry.creator %}
+                    <div class="diario-created">Salvato da <span class="diario-creator">{{ entry.creator.username }}</span></div>
+                {% endif %}
+                <time class="diario-timestamp" datetime="{{ entry.timestamp.isoformat() }}">{{ entry.timestamp.strftime("%d %b %Y %H:%M:%S") }}</time>
+                <a class="diario-id no-icon" href="#diario-{{ entry.diario_id }}">#{{ entry.diario_id }}</a>
+            </blockquote>
+        {% endfor %}
+    </div>
+{% endblock %}
