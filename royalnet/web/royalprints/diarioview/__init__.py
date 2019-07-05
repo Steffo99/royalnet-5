@@ -7,13 +7,13 @@ from ....database.tables import Royal, Diario
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("diarioview", __name__, url_prefix="/diarioview", template_folder=tmpl_dir,
+rp = Royalprint("diarioview", __name__, url_prefix="/diario", template_folder=tmpl_dir,
                 required_tables={Royal, Diario})
 
 
 @rp.route("/", defaults={"page": 1})
 @rp.route("/<int:page>")
-def diarioview_index(page):
+def diarioview_page(page):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     if page < 1:
         return "Page should be >1", 404

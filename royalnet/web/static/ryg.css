@@ -648,11 +648,16 @@ button[disabled=""] {
   grid-row: 1;
   grid-column-start: 1;
   grid-column-end: 4;
-  margin-top: 2px;
-  margin-bottom: 2px;
 }
 .diario .diario-content .diario-img {
   color: red;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  max-height: 400px;
+}
+.diario .diario-content .diario-text {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 .diario .diario-quote {
   grid-row: 2;

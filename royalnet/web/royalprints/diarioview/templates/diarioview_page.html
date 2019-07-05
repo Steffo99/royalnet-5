@@ -6,11 +6,14 @@
 
 {% block content %}
     <div class="diarioview">
+        {% if page > 1 %}
+            <a class="previous-page" href="{{ url_for("diarioview.diarioview_page", page=(page - 1)) }}">Pagina precedente</a>
+        {% endif %}
         {% for entry in entries %}
             <blockquote id="diario-{{ entry.diario_id }}" class="diario{% if entry.spoiler %} diario-spoiler{% endif %}">
                 <div class="diario-content">
                     {% if entry.media_url %}
-                        <img class="diario-img" src="{{ entry.media_url }}" alt="Caricamento immagine fallito">
+                        <a href="{{ entry.media_url }}" class="no-icon diario-img"><img src="{{ entry.media_url }}" alt="Caricamento immagine fallito"></a>
                     {% endif %}
                     {% if entry.text %}
                         "<span class="diario-text">{{ entry.text }}</span>"
@@ -33,8 +36,11 @@
                     <div class="diario-created">Salvato da <span class="diario-creator">{{ entry.creator.username }}</span></div>
                 {% endif %}
                 <time class="diario-timestamp" datetime="{{ entry.timestamp.isoformat() }}">{{ entry.timestamp.strftime("%d %b %Y %H:%M:%S") }}</time>
-                <a class="diario-id no-icon" href="#diario-{{ entry.diario_id }}">#{{ entry.diario_id }}</a>
+                <span class="diario-id">#{{ entry.diario_id }}</span>
             </blockquote>
         {% endfor %}
+        {% if entries|length == 1000 %}
+            <a class="next-page" href="{{ url_for("diarioview.diarioview_page", page=(page + 1)) }}">Pagina successiva</a>
+        {% endif %}
     </div>
 {% endblock %}

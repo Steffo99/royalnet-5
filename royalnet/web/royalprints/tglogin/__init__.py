@@ -9,7 +9,7 @@ from ....database.tables import Royal, Telegram
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("tglogin", __name__, url_prefix="/tglogin", required_tables={Royal, Telegram},
+rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={Royal, Telegram},
                 template_folder=tmpl_dir)
 
 

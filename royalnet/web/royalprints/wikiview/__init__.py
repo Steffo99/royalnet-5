@@ -10,7 +10,7 @@ from ....database.tables import Royal, WikiPage, WikiRevision
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("wikiview", __name__, url_prefix="/wikiview", template_folder=tmpl_dir,
+rp = Royalprint("wikiview", __name__, url_prefix="/wiki/view", template_folder=tmpl_dir,
                 required_tables={Royal, WikiPage, WikiRevision})
 
 
