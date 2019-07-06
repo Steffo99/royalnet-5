@@ -27,10 +27,11 @@ from .missing import MissingCommand
 from .cv import CvCommand
 from .pause import PauseCommand
 from .queue import QueueCommand
+from .royalnetprofile import RoyalnetprofileCommand
 
 
 __all__ = ["NullCommand", "PingCommand", "ShipCommand", "SmecdsCommand", "CiaoruoziCommand", "ColorCommand",
            "SyncCommand", "DiarioCommand", "RageCommand", "DateparserCommand", "AuthorCommand", "ReminderCommand",
            "KvactiveCommand", "KvCommand", "KvrollCommand", "VideoinfoCommand", "SummonCommand", "PlayCommand",
            "SkipCommand", "PlaymodeCommand", "VideochannelCommand", "MissingCommand", "CvCommand", "PauseCommand",
-           "QueueCommand"]
+           "QueueCommand", "RoyalnetprofileCommand"]
