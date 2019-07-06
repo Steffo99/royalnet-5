@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Indice RYGwiki
+{% endblock %}
+
+{% block content %}
+    <div class="doublebox">
+        <div class="top">
+            <span class="left">
+                Elenco Membri
+            </span>
+        </div>
+        <div class="bot">
+            <ul>
+                {% for royal in royals %}
+                    <li><a href="{{ url_for("profile.profile_by_username", username=royal.username) }}">{{ royal.username }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

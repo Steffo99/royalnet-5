@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ royal.username }} - Profilo RYG
+{% endblock %}
+
+{% block content %}
+    <div class="profile">
+        <h1>
+            {{ royal.username }}
+        </h1>
+        <div class="doublebox profile-links">
+            <div class="top">
+                <span class="left">Account collegati</span>
+            </div>
+            <div class="bot">
+                <ul class="links-list">
+                    <li><span class="links-item links-linked">royalnet:{{ royal.username }}</span></li>
+                    {% for telegram in royal.telegram %}
+                        {% if telegram.username %}
+                            <li><a class="links-item links-linked" href="https://t.me/{{ telegram.username }}">telegram:{{ telegram.mention() }}</a></li>
+                        {% else %}
+                            <li><span class="links-item links-linked">telegram:{{ telegram.mention() }}</span></li>
+                        {% endif %}
+                    {% else %}
+                        <li><span class="links-item links-missing">Telegram non collegato</span></li>
+                    {% endfor %}
+                    {% for discord in royal.discord %}
+                        <li><span class="links-item links-linked">discord:{{ discord.full_username() }}</span></li>
+                    {% else %}
+                        <li><span class="links-item links-missing">Discord non collegato</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="doublebox profile-stats">
+            <div class="top">
+                <span class="left">Statistiche</span>
+            </div>
+            <div class="bot">
+                <ul class="stats-list">
+                    <li><span class="stats-info">Righe del diario create</span>: <span class="stats-value">{{ royal.diario_created|length }}</span></li>
+                    <li><span class="stats-info">Righe del diario in cui è menzionato</span>: <span class="stats-value">{{ royal.diario_quoted|length }}</span></li>
+                    <li><span class="stats-info">Modifiche alla wiki</span>: <span class="stats-value">{{ royal.wiki_contributions|length }}</span>
+                    {% if royal.active_kv_group %}
+                        <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value">{{ royal.active_kv_group[0].group_name }}</span></li>
+                    {% else %}
+                        <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value faded">Nessuno</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="doublebox profile-aliases">
+            <div class="top">
+                <span class="left">Alias</span>
+            </div>
+            <div class="bot">
+                <ul class="alias-list">
+                    {% for alias in royal.aliases %}
+                        <li>{{ alias.alias|capitalize }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

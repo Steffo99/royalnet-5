@@ -786,14 +786,14 @@ table {
 
 .diario {
     display: grid;
-    grid-template-columns: auto auto 8%;
+    grid-template-columns: auto auto 40px;
 
     .diario-content {
         grid-row: 1;
         grid-column-start: 1;
         grid-column-end: 4;
 
-        .diario-img {
+        .diario-img img {
             color: red;
             margin-top: 2px;
             margin-bottom: 2px;
@@ -852,6 +852,27 @@ table {
 
         &:hover {
             color: @pastel-red;
+        }
+    }
+}
+
+.profile {
+
+    .profile-links {
+
+        .links-linked {
+            font-family: @monospace-fonts;
+        }
+
+        .links-missing {
+            color: @pastel-red;
+        }
+    }
+
+    .profile-stats {
+
+        .stats-value {
+            font-weight: bold;
         }
     }
 }

@@ -28,6 +28,7 @@
             <span class="nav-modules">
                 <a class="no-icon" href="{{ url_for("wikiview.wikiview_index") }}">Wiki</a>
                 <a class="no-icon" href="{{ url_for("diarioview.diarioview_page", page=1) }}">Diario</a>
+                <a class="no-icon" href="{{ url_for("profile.profile_index") }}">Membri</a>
             </span>
         </div>
         <div class="nav-center">
@@ -35,14 +36,14 @@
         <div class="nav-right">
             <span>
                 {% if session["royal"] %}
-                    <span class="nav-login">
+                    <a href="{{ url_for("profile.profile_by_username", username=session["royal"]["username"]) }}" class="no-icon nav-profile">
                         <span class="nav-accountname">{{ session["royal"]["username"] }}</span>
                         {% if session["royal"]["avatar"] %}
                             <img class="nav-image" alt="" src="{{ session["royal"]["avatar"] }}">
                         {% else %}
                             <img class="nav-image" alt="" src="{{ url_for("static", filename="generic.png") }}">
                         {% endif %}
-                    </span>
+                    </a>
                 {% else %}
                     <span class="nav-login">
                         <a class="no-icon" href="{{ url_for("tglogin.tglogin_index") }}">

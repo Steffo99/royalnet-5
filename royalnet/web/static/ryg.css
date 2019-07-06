@@ -642,14 +642,14 @@ button[disabled=""] {
 }
 .diario {
   display: grid;
-  grid-template-columns: auto auto 8%;
+  grid-template-columns: auto auto 40px;
 }
 .diario .diario-content {
   grid-row: 1;
   grid-column-start: 1;
   grid-column-end: 4;
 }
-.diario .diario-content .diario-img {
+.diario .diario-content .diario-img img {
   color: red;
   margin-top: 2px;
   margin-bottom: 2px;
@@ -701,4 +701,12 @@ button[disabled=""] {
 .diario.diario-spoiler:hover {
   color: #ff7d7d;
 }
-/*# sourceMappingURL=ryg.css.map */
+.profile .profile-links .links-linked {
+  font-family: "Consolas", "Source Code Pro", monospace;
+}
+.profile .profile-links .links-missing {
+  color: #ff7d7d;
+}
+.profile .profile-stats .stats-value {
+  font-weight: bold;
+}

@@ -8,7 +8,8 @@ class TestConfig:
     TG_AK = os.environ["TG_AK"]
 
 
-app = create_app(TestConfig, [rp_home, rp_wikiview, rp_tglogin, rp_docs, rp_wikiedit, rp_mcstatus, rp_diarioview])
+app = create_app(TestConfig, [rp_home, rp_wikiview, rp_tglogin, rp_docs, rp_wikiedit, rp_mcstatus, rp_diarioview,
+                              rp_profile])
 
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@
                     <div class="diario-quote">
                         —
                         {% if entry.quoted_account %}
-                            <abbr title="{{ entry.quoted_account.username }}" class="diario-quoted">{{ entry.quoted }}</abbr>
+                            <a href="{{ url_for("profile.profile_by_username", username=entry.quoted_account.username) }}" class="diario-quoted">{{ entry.quoted }}</a>
                         {% else %}
                             <span class="diario-quoted">{{ entry.quoted }}</span>
                         {% endif %}
@@ -33,7 +33,7 @@
                     </div>
                 {% endif %}
                 {% if entry.creator %}
-                    <div class="diario-created">Salvato da <span class="diario-creator">{{ entry.creator.username }}</span></div>
+                    <div class="diario-created">Salvato da <a href="{{ url_for("profile.profile_by_username", username=entry.creator.username) }}" class="diario-creator">{{ entry.creator.username }}</a></div>
                 {% endif %}
                 <time class="diario-timestamp" datetime="{{ entry.timestamp.isoformat() }}">{{ entry.timestamp.strftime("%d %b %Y %H:%M:%S") }}</time>
                 <span class="diario-id">#{{ entry.diario_id }}</span>
