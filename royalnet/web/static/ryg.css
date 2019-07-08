@@ -353,6 +353,14 @@ table tbody tr:last-child td:last-child {
   padding: 8px;
   border-radius: 0 0 4px 4px;
 }
+.doublebox.doublebox-red .top {
+  background-color: rgba(255, 125, 125, 0.2);
+  color: #ff7d7d;
+}
+.doublebox.doublebox-red .bot {
+  background-color: rgba(255, 125, 125, 0.1);
+  color: #ff7d7d;
+}
 .multirow {
   list-style-type: none;
   margin-top: 0;

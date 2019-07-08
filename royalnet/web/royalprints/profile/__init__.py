@@ -2,7 +2,8 @@
 
 import flask as f
 import os
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from ....database.tables import *
 
 
@@ -25,5 +26,5 @@ def profile_by_username(username):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     royal = alchemy_session.query(alchemy.Royal).filter_by(username=username).one_or_none()
     if royal is None:
-        return "No such user", 404
+        return error(404, "Non esiste nessun utente con l'username richiesto.")
     return f.render_template("profile_page.html", royal=royal)

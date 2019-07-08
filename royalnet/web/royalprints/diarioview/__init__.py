@@ -2,7 +2,8 @@
 
 import flask as f
 import os
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from ....database.tables import Royal, Diario
 
 
@@ -16,6 +17,8 @@ rp = Royalprint("diarioview", __name__, url_prefix="/diario", template_folder=tm
 def diarioview_page(page):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     if page < 1:
-        return "Page should be >1", 404
+        return error(404, "Il numero di pagina deve essere maggiore di 0.")
     entries = alchemy_session.query(alchemy.Diario).order_by(alchemy.Diario.diario_id.desc()).offset((page - 1) * 1000).limit(1000).all()
+    if len(entries) == 0:
+        return error(404, "Non ci sono righe di diario in questa pagina (e in tutte le successive).")
     return f.render_template("diarioview_page.html", page=page, entries=entries)

@@ -5,7 +5,8 @@ import markdown2
 import re
 import uuid
 import os
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from ....database.tables import Royal, WikiPage, WikiRevision
 
 
@@ -47,7 +48,7 @@ def prepare_page(page):
                                  parsed_content=f.Markup(page.content),
                                  css=page.css)
     else:
-        return "Format not available", 500
+        return error(500, f"Non esiste nessun handler in grado di preparare pagine con il formato {page.format}.")
 
 
 @rp.route("/")
@@ -63,5 +64,5 @@ def wikiview_by_id(page_id: uuid.UUID, title: str):
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
     if page is None:
-        return "No such page", 404
+        return error(404, f"La pagina richiesta non esiste.")
     return prepare_page(page)

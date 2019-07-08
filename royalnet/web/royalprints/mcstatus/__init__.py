@@ -2,7 +2,8 @@
 import os
 import flask as f
 import socket
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from mcstatus import MinecraftServer
 
 
@@ -22,7 +23,7 @@ def mcstatus_index(server_str: str):
         except (socket.timeout, ConnectionRefusedError, OSError):
             query = None
     except socket.gaierror:
-        return "No such address", 404
+        return error(400, "L'indirizzo richiesto non è valido.")
     except (socket.timeout, ConnectionRefusedError, OSError):
         status = None
         query = None

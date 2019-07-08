@@ -4,7 +4,8 @@ import hashlib
 import hmac
 import datetime
 import os
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from ....database.tables import Royal, Telegram
 
 
@@ -15,6 +16,8 @@ rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tabl
 
 @rp.route("/")
 def tglogin_index():
+    if f.request.url_root != "https://ryg.steffo.eu/":
+        return error(404, "Il login tramite Telegram non è possibile su questo dominio.")
     f.session.pop("royal", None)
     return f.render_template("tglogin_index.html")
 
@@ -32,10 +35,10 @@ def tglogin_done():
     secret_key = hashlib.sha256(bytes(f.current_app.config["TG_AK"], encoding="ascii")).digest()
     hex_data = hmac.new(key=secret_key, msg=data_check, digestmod="sha256").hexdigest()
     if hex_data != f.request.args["hash"]:
-        return "Invalid authentication", 403
+        return error(400, "L'autenticazione è fallita: l'hash ricevuto non coincide con quello calcolato.")
     tg_user = alchemy_session.query(alchemy.Telegram).filter(alchemy.Telegram.tg_id == f.request.args["id"]).one_or_none()
     if tg_user is None:
-        return "No such telegram", 404
+        return error(404, "L'account Telegram con cui hai fatto il login non è connesso a nessun account Royal Games. Se sei un membro Royal Games, assicurati di aver syncato con il bot il tuo account di Telegram!")
     royal_user = tg_user.royal
     f.session["royal"] = {
         "uid": royal_user.uid,

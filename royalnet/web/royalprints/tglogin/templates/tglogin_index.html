@@ -12,32 +12,26 @@
             </span>
         </div>
         <div class="bot">
-            {% if request.url_root == "https://ryg.steffo.eu/" %}
-                <p>
-                    Facendo il login su questo sito, acconsenti a ricevere due <abbr title="cookie">biscottini</abbr> che memorizzino l'account con cui hai fatto il login.<br>
-                </p>
-                <p>
-                    Essi avranno il seguente formato:
-                </p>
-                <pre><code>session["royal"] = {
-    "uid": [il tuo id Royalnet]
-    "username": [il tuo username Royalnet],
-    "avatar": [il tuo avatar Royalnet],
-    "role": [il tuo ruolo Royalnet]
+            <p>
+                Facendo il login su questo sito, acconsenti a ricevere due <abbr title="cookie">biscottini</abbr> che memorizzino l'account con cui hai fatto il login.<br>
+            </p>
+            <p>
+                Essi avranno il seguente formato:
+            </p>
+            <pre><code>session["royal"] = {
+"uid": [il tuo id Royalnet]
+"username": [il tuo username Royalnet],
+"avatar": [il tuo avatar Royalnet],
+"role": [il tuo ruolo Royalnet]
 }
 
 session["login_date"] = [la data e l'ora di adesso]</code></pre>
-                <p>
-                    <script async src="https://telegram.org/js/telegram-widget.js?6" data-telegram-login="royalgamesbot" data-size="large" data-auth-url="{{ url_for("tglogin.tglogin_done") }}" data-request-access="write"></script>
-                </p>
-                <p>
-                    Nota: per fare il login, devi aver <code>sync</code>ato il tuo account sul gruppo Telegram Royal Games!
-                </p>
-            {% else %}
-                <p>
-                    Il login con Telegram non è attivo su questo dominio.
-                </p>
-            {% endif %}
+            <p>
+                <script async src="https://telegram.org/js/telegram-widget.js?6" data-telegram-login="royalgamesbot" data-size="large" data-auth-url="{{ url_for("tglogin.tglogin_done") }}" data-request-access="write"></script>
+            </p>
+            <p>
+                Nota: per fare il login, devi aver <code>sync</code>ato il tuo account sul gruppo Telegram Royal Games!
+            </p>
         </div>
     </div>
 {% endblock %}

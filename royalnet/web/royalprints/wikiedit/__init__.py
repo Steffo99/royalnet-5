@@ -4,7 +4,8 @@ import uuid
 import os
 import datetime
 import difflib
-from ... import Royalprint
+from ...royalprint import Royalprint
+from ...shortcuts import error
 from ....database.tables import Royal, WikiPage, WikiRevision
 
 
@@ -16,7 +17,7 @@ rp = Royalprint("wikiedit", __name__, url_prefix="/wiki/edit", template_folder=t
 @rp.route("/newpage", methods=["GET", "POST"])
 def wikiedit_newpage():
     if "royal" not in f.session:
-        return "Please login to edit wiki pages", 403
+        return error(403, "Devi aver effettuato il login per creare pagine wiki.")
 
     if f.request.method == "GET":
         return f.render_template("wikiedit_page.html", page=None)
@@ -24,7 +25,7 @@ def wikiedit_newpage():
     elif f.request.method == "POST":
         fd = f.request.form
         if not ("title" in fd and "content" in fd and "css" in fd):
-            return "Missing field", 400
+            return error(400, "Uno dei campi obbligatori non è stato compilato. Controlla e riprova!")
         alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
         page = alchemy.WikiPage(page_id=uuid.uuid4(),
                                 title=fd["title"],
@@ -47,12 +48,12 @@ def wikiedit_newpage():
 @rp.route("/<uuid:page_id>/<title>", methods=["GET", "POST"])
 def wikiedit_by_id(page_id: uuid.UUID, title: str):
     if "royal" not in f.session:
-        return "Please login to edit wiki pages", 403
+        return error(403, "Devi aver effettuato il login per modificare pagine wiki.")
 
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
     page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
     if page is None:
-        return "No such page", 404
+        return error(404, "La pagina che stai cercando di modificare non esiste.")
 
     if f.request.method == "GET":
         return f.render_template("wikiedit_page.html", page=page)
@@ -60,7 +61,7 @@ def wikiedit_by_id(page_id: uuid.UUID, title: str):
     elif f.request.method == "POST":
         fd = f.request.form
         if not ("title" in fd and "content" in fd and "css" in fd):
-            return "Missing field", 400
+            return error(400, "Uno dei campi obbligatori non è stato compilato. Controlla e riprova!")
         # Create new revision
         revision = alchemy.WikiRevision(revision_id=uuid.uuid4(),
                                         page=page,
