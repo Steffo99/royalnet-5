@@ -79,7 +79,8 @@ class DiarioCommand(Command):
             quoted_alias = None
         quoted_account = quoted_alias.royal if quoted_alias is not None else None
         if quoted_alias is not None and quoted_account is None:
-            await call.reply("⚠️ Il nome dell'autore è ambiguo, quindi la riga non è stata aggiunta.\nPer piacere, ripeti il comando con un nome più specifico!")
+            await call.reply("⚠️ Il nome dell'autore è ambiguo, quindi la riga non è stata aggiunta.\n"
+                             "Per piacere, ripeti il comando con un nome più specifico!")
             return
         # Create the diario quote
         diario = call.alchemy.Diario(creator=creator,
@@ -132,7 +133,9 @@ class DiarioCommand(Command):
             if not (text or media_url):
                 raise InvalidInputError("Missing text.")
             # Find the Royalnet account associated with the sender
-            quoted_tg = await asyncify(call.session.query(call.alchemy.Telegram).filter_by(tg_id=reply.from_user.id).one_or_none)
+            quoted_tg = await asyncify(call.session.query(call.alchemy.Telegram)
+                                                   .filter_by(tg_id=reply.from_user.id)
+                                                   .one_or_none)
             quoted_account = quoted_tg.royal if quoted_tg is not None else None
             # Find the quoted name to assign
             quoted_user: telegram.User = reply.from_user
@@ -178,7 +181,8 @@ class DiarioCommand(Command):
                 # Find if there's a Royalnet account associated with the quoted name
                 if quoted is not None:
                     quoted_alias = await asyncify(
-                        call.session.query(call.alchemy.Alias).filter_by(alias=quoted.lower()).one_or_none)
+                        call.session.query(call.alchemy.Alias)
+                                    .filter_by(alias=quoted.lower()).one_or_none)
                 else:
                     quoted_alias = None
                 quoted_account = quoted_alias.royal if quoted_alias is not None else None

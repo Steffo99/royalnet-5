@@ -60,10 +60,17 @@ class Diario:
         return relationship("Royal", foreign_keys=self.quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
-        return f"<Diario diario_id={self.diario_id} creator_id={self.creator_id} quoted_account_id={self.quoted_account_id} quoted={self.quoted} text={self.text} context={self.context} timestamp={self.timestamp} media_url={self.media_url} spoiler={self.spoiler}>"
+        return f"<Diario diario_id={self.diario_id}" \
+                      f" creator_id={self.creator_id}" \
+                      f" quoted_account_id={self.quoted_account_id}" \
+                      f" quoted={self.quoted}" \
+                      f" text={self.text}" \
+                      f" context={self.context}" \
+                      f" timestamp={self.timestamp}" \
+                      f" media_url={self.media_url}" \
+                      f" spoiler={self.spoiler}>"
 
     def __str__(self):
-        # TODO: support media_url
         text = f"Riga #{self.diario_id}"
         text += f" (salvata da {str(self.creator)}"
         text += f" il {self.timestamp.strftime('%Y-%m-%d %H:%M')}):\n"
