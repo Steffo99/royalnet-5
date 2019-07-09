@@ -115,12 +115,14 @@ class DiscordBot(GenericBot):
                 author: typing.Union[discord.User] = message.author
                 if author.bot:
                     return
-                # Find and clean parameters
-                command_text, *parameters = text.split(" ")
-                # Don't use a case-sensitive command name
-                command_name = command_text.lower()
-                # Call the command
-                await self.call(command_name, message.channel, parameters, message=message)
+                # Start typing
+                with message.channel.typing():
+                    # Find and clean parameters
+                    command_text, *parameters = text.split(" ")
+                    # Don't use a case-sensitive command name
+                    command_name = command_text.lower()
+                    # Call the command
+                    await self.call(command_name, message.channel, parameters, message=message)
 
             async def on_ready(cli):
                 log.debug("Connection successful, client is ready")
@@ -146,7 +148,10 @@ class DiscordBot(GenericBot):
             def find_channel_by_name(cli,
                                      name: str,
                                      guild: typing.Optional[discord.Guild] = None) -> discord.abc.GuildChannel:
-                """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the specified name. Case-insensitive.
+                """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the specified name.
+
+                Case-insensitive.
+
                 Guild is optional, but the method will raise a :py:exc:`TooManyFoundError` if none is specified and there is more than one channel with the same name.
                 Will also raise a :py:exc:`NoneFoundError` if no channels are found."""
                 if guild is not None:
