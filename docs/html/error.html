@@ -159,6 +159,73 @@
 <h1>royalnet.error<a class="headerlink" href="#royalnet-error" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<span class="target" id="module-royalnet.error"></span><dl class="exception">
+<dt id="royalnet.error.CurrentlyDisabledError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">CurrentlyDisabledError</code><a class="headerlink" href="#royalnet.error.CurrentlyDisabledError" title="Permalink to this definition">¶</a></dt>
+<dd><p>This feature is temporarely disabled and is not available right now.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.ExternalError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">ExternalError</code><a class="headerlink" href="#royalnet.error.ExternalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Something went wrong in a non-Royalnet component and the command execution cannot be completed.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.FileTooBigError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">FileTooBigError</code><a class="headerlink" href="#royalnet.error.FileTooBigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The file to be downloaded would be too big to store; therefore, it has been skipped.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.InvalidConfigError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">InvalidConfigError</code><a class="headerlink" href="#royalnet.error.InvalidConfigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The bot has not been configured correctly, therefore the command can not function.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.InvalidInputError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">InvalidInputError</code><a class="headerlink" href="#royalnet.error.InvalidInputError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The command has received invalid input and cannot complete.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.NoneFoundError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">NoneFoundError</code><a class="headerlink" href="#royalnet.error.NoneFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The element that was being looked for was not found.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.RoyalnetRequestError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">RoyalnetRequestError</code><span class="sig-paren">(</span><em class="sig-param">error: ResponseError</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.error.RoyalnetRequestError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An error was raised while handling the Royalnet request.</p>
+<p>This exception contains the <a class="reference internal" href="network.html#royalnet.network.ResponseError" title="royalnet.network.ResponseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.ResponseError</span></code></a> that was returned by the other Link.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.RoyalnetResponseError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">RoyalnetResponseError</code><a class="headerlink" href="#royalnet.error.RoyalnetResponseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="network.html#royalnet.network.Response" title="royalnet.network.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.Response</span></code></a> that was received is invalid.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.TooManyFoundError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">TooManyFoundError</code><a class="headerlink" href="#royalnet.error.TooManyFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiple elements matching the request were found, and only one was expected.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.UnregisteredError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">UnregisteredError</code><a class="headerlink" href="#royalnet.error.UnregisteredError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The command required a registered user, and the user was not registered.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.UnsupportedError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">UnsupportedError</code><a class="headerlink" href="#royalnet.error.UnsupportedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>The command is not supported for the specified interface.</p>
+</dd></dl>
+
 </div>
 
 

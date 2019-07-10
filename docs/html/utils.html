@@ -159,6 +159,438 @@
 <h1>royalnet.utils<a class="headerlink" href="#royalnet-utils" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<span class="target" id="module-royalnet.utils"></span><p>Miscellaneous useful functions and classes.</p>
+<dl class="function">
+<dt id="royalnet.utils.asyncify">
+<em class="property">async </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">asyncify</code><span class="sig-paren">(</span><em class="sig-param">function: Callable</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.asyncify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a function into a coroutine.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The coroutine cannot be cancelled, and any attempts to do so will result in unexpected outputs.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.utils.Call">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">Call</code><span class="sig-paren">(</span><em class="sig-param">channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, loop: asyncio.events.AbstractEventLoop = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call" title="Permalink to this definition">¶</a></dt>
+<dd><p>A command call. An abstract class, sub-bots should create a new call class from this.</p>
+<dl class="attribute">
+<dt id="royalnet.utils.Call.interface_name">
+<code class="sig-name descname">interface_name</code><a class="headerlink" href="#royalnet.utils.Call.interface_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the interface that is calling the command. For example, <code class="docutils literal notranslate"><span class="pre">telegram</span></code>, or <code class="docutils literal notranslate"><span class="pre">discord</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Call.interface_obj">
+<code class="sig-name descname">interface_obj</code><a class="headerlink" href="#royalnet.utils.Call.interface_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main object of the interface that is calling the command. For example, the <a class="reference internal" href="bots.html#royalnet.bots.TelegramBot" title="royalnet.bots.TelegramBot"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.bots.TelegramBot</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Call.interface_prefix">
+<code class="sig-name descname">interface_prefix</code><a class="headerlink" href="#royalnet.utils.Call.interface_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The command prefix used by the interface. For example, <code class="docutils literal notranslate"><span class="pre">/</span></code>, or <code class="docutils literal notranslate"><span class="pre">!</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Call.alchemy">
+<code class="sig-name descname">alchemy</code><a class="headerlink" href="#royalnet.utils.Call.alchemy" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="database.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> object associated to this interface. May be None if the interface is not connected to any database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">channel, command: Type[royalnet.utils.command.Command], command_args: List[str] = None, loop: asyncio.events.AbstractEventLoop = None, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel</strong> – The channel object this call was sent in.</p></li>
+<li><p><strong>command</strong> – The command to be called.</p></li>
+<li><p><strong>command_args</strong> – The arguments to be passed to the command</p></li>
+<li><p><strong>kwargs</strong> – Additional optional keyword arguments that may be passed to the command, possibly specific to the bot.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call._session_init">
+<em class="property">async </em><code class="sig-name descname">_session_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call._session_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the command requires database access, create a <a class="reference internal" href="database.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> session for this call, otherwise, do nothing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">alchemy</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.get_author">
+<em class="property">async </em><code class="sig-name descname">get_author</code><span class="sig-paren">(</span><em class="sig-param">error_if_none=False</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.get_author" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to find the universal identifier of the user that sent the message.
+That probably means, the database row identifying the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>error_if_none</strong> – Raise a <a class="reference internal" href="error.html#royalnet.error.UnregisteredError" title="royalnet.error.UnregisteredError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.UnregisteredError</span></code></a> if this is True and the call has no author.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="error.html#royalnet.error.UnregisteredError" title="royalnet.error.UnregisteredError"><strong>royalnet.error.UnregisteredError</strong></a> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">interface_name</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">interface_obj</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">interface_prefix</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.net_request">
+<em class="property">async </em><code class="sig-name descname">net_request</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">destination: str</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#royalnet.utils.Call.net_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send data through a <a class="reference internal" href="network.html#royalnet.network.RoyalnetLink" title="royalnet.network.RoyalnetLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.RoyalnetLink</span></code></a> and wait for a <code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.network.Reply</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> – The data to be sent. Must be <a class="reference external" href="https://docs.python.org/3.7/library/pickle.html#module-pickle" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a>-able.</p></li>
+<li><p><strong>destination</strong> – The destination of the request, either in UUID format or node name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.reply">
+<em class="property">async </em><code class="sig-name descname">reply</code><span class="sig-paren">(</span><em class="sig-param">text: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.utils.Call.reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a text message to the channel where the call was made.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> – The text to be sent, possibly formatted in the weird undescribed markup that I’m using.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.run">
+<em class="property">async </em><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the called command, and return the command result.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Call.session_end">
+<em class="property">async </em><code class="sig-name descname">session_end</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Call.session_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the previously created <a class="reference internal" href="database.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> session for this call (if it was created).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.utils.Command">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">Command</code><a class="headerlink" href="#royalnet.utils.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class from which all commands should inherit.</p>
+<dl class="attribute">
+<dt id="royalnet.utils.Command.command_name">
+<code class="sig-name descname">command_name</code><a class="headerlink" href="#royalnet.utils.Command.command_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the command. To have <code class="docutils literal notranslate"><span class="pre">/example</span></code> on Telegram, the name should be <code class="docutils literal notranslate"><span class="pre">example</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Command.command_description">
+<code class="sig-name descname">command_description</code><a class="headerlink" href="#royalnet.utils.Command.command_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>A small description of the command, to be displayed when the command is being autocompleted.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Command.command_syntax">
+<code class="sig-name descname">command_syntax</code><a class="headerlink" href="#royalnet.utils.Command.command_syntax" title="Permalink to this definition">¶</a></dt>
+<dd><p>The syntax of the command, to be displayed when a <a class="reference internal" href="error.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> is raised, in the format <code class="docutils literal notranslate"><span class="pre">(required_arg)</span> <span class="pre">[optional_arg]</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Command.require_alchemy_tables">
+<code class="sig-name descname">require_alchemy_tables</code><a class="headerlink" href="#royalnet.utils.Command.require_alchemy_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of <a class="reference internal" href="database.html#module-royalnet.database" title="royalnet.database"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database</span></code></a> tables, that must exist for this command to work.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.utils.Command.network_handlers">
+<code class="sig-name descname">network_handlers</code><a class="headerlink" href="#royalnet.utils.Command.network_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of :py:class:<a href="#id1"><span class="problematic" id="id2">`</span></a>royalnet.utils.NetworkHandler`s that must exist for this command to work.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">command_description</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">command_name</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">command_syntax</code><em class="property"> = NotImplemented</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Command.common">
+<em class="property">classmethod </em><code class="sig-name descname">common</code><span class="sig-paren">(</span><em class="sig-param">call: Call</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Command.common" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.Command.network_handler_dict">
+<em class="property">classmethod </em><code class="sig-name descname">network_handler_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.Command.network_handler_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">network_handlers</code><em class="property"> = {}</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">require_alchemy_tables</code><em class="property"> = {}</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.safeformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">safeformat</code><span class="sig-paren">(</span><em class="sig-param">string: str</em>, <em class="sig-param">**words</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.safeformat" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-func docutils literal notranslate"><span class="pre">str.format()</span></code> something, but ignore missing keys instead of raising an error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> – The base string to be formatted.</p></li>
+<li><p><strong>words</strong> – The words to format the string with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The formatted string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.cdj">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">cdj</code><span class="sig-paren">(</span><em class="sig-param">class_: Any</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#royalnet.utils.cdj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dict of the class attributes without the <code class="docutils literal notranslate"><span class="pre">__module__</span></code>, <code class="docutils literal notranslate"><span class="pre">__dict__</span></code>, <code class="docutils literal notranslate"><span class="pre">__weakref__</span></code> and <code class="docutils literal notranslate"><span class="pre">__doc__</span></code> keys, to be used while generating dynamically SQLAlchemy declarative table classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>class_</strong> – The object that you want to dict-ify.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The class dict.</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You can’t dict-ify classes with <code class="docutils literal notranslate"><span class="pre">__slots__</span></code>!</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.sleep_until">
+<em class="property">async </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">sleep_until</code><span class="sig-paren">(</span><em class="sig-param">dt: datetime.datetime</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.utils.sleep_until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Block the call until the specified datetime.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Accurate only to seconds.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.plusformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">plusformat</code><span class="sig-paren">(</span><em class="sig-param">i: int</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.plusformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an <a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, prepending a <code class="docutils literal notranslate"><span class="pre">+</span></code> if it’s greater than 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> – the <a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to convert.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The resulting <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.utils.CommandArgs">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">CommandArgs</code><a class="headerlink" href="#royalnet.utils.CommandArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>An interface to access the arguments of a command with ease.</p>
+<dl class="method">
+<dt id="royalnet.utils.CommandArgs.__getitem__">
+<code class="sig-name descname">__getitem__</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.CommandArgs.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments can be accessed with an array notation, such as <code class="docutils literal notranslate"><span class="pre">args[0]</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="error.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><strong>royalnet.error.InvalidInputError</strong></a> – if the requested argument does not exist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.CommandArgs.joined">
+<code class="sig-name descname">joined</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">require_at_least=0</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.CommandArgs.joined" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the arguments as a space-joined string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>require_at_least</strong> – the minimum amount of arguments required, will raise <a class="reference internal" href="error.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> if the requirement is not fullfilled.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="error.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><strong>royalnet.error.InvalidInputError</strong></a> – if there are less than <code class="docutils literal notranslate"><span class="pre">require_at_least</span></code> arguments.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The space-joined string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.CommandArgs.match">
+<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param">pattern: Pattern</em><span class="sig-paren">)</span> &#x2192; Sequence[AnyStr]<a class="headerlink" href="#royalnet.utils.CommandArgs.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the <code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.commandargs.joined()</span></code> to a regex pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pattern</strong> – The regex pattern to be passed to <a class="reference external" href="https://docs.python.org/3.7/library/re.html#re.match" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="error.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><strong>royalnet.error.InvalidInputError</strong></a> – if the pattern doesn’t match.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The matched groups, as returned by <code class="xref py py-func docutils literal notranslate"><span class="pre">re.Match.groups()</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.utils.CommandArgs.optional">
+<code class="sig-name descname">optional</code><span class="sig-paren">(</span><em class="sig-param">index: int</em>, <em class="sig-param">default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.CommandArgs.optional" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the argument at a specific index, but don’t raise an error if nothing is found, instead returning the <code class="docutils literal notranslate"><span class="pre">default</span></code> value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – The index of the argument you want to retrieve.</p></li>
+<li><p><strong>default</strong> – The value returned if the argument is missing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Either the argument or the <code class="docutils literal notranslate"><span class="pre">default</span></code> value, defaulting to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.utils.NetworkHandler">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">NetworkHandler</code><a class="headerlink" href="#royalnet.utils.NetworkHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>The NetworkHandler functions are called when a specific Message type is received.</p>
+<dl class="attribute">
+<dt id="royalnet.utils.NetworkHandler.message_type">
+<code class="sig-name descname">message_type</code><em class="property"> = NotImplemented</em><a class="headerlink" href="#royalnet.utils.NetworkHandler.message_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.andformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">andformat</code><span class="sig-paren">(</span><em class="sig-param">l: List[str], middle=', ', final=' and '</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.andformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> to a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> by adding <code class="docutils literal notranslate"><span class="pre">final</span></code> between the last two elements and <code class="docutils literal notranslate"><span class="pre">middle</span></code> between the others.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l</strong> – the input <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>.</p></li>
+<li><p><strong>middle</strong> – the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> to be added between the middle elements.</p></li>
+<li><p><strong>final</strong> – the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> to be added between the last two elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The resulting <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">plusformat</code><span class="sig-paren">(</span><em class="sig-param">i: int</em><span class="sig-paren">)</span> &#x2192; str</dt>
+<dd><p>Convert an <a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, prepending a <code class="docutils literal notranslate"><span class="pre">+</span></code> if it’s greater than 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> – the <a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to convert.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The resulting <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.fileformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">fileformat</code><span class="sig-paren">(</span><em class="sig-param">string: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.fileformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure a string can be used as a filename by replacing all non-word characters with underscores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> – the input string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A valid filename string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.ytdldateformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">ytdldateformat</code><span class="sig-paren">(</span><em class="sig-param">string: Optional[str], separator: str = '-'</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.ytdldateformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the weird date string returned by <code class="docutils literal notranslate"><span class="pre">youtube-dl</span></code> into the <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> – the input string, in the <code class="docutils literal notranslate"><span class="pre">YYYYMMDD</span></code> format.</p></li>
+<li><p><strong>separator</strong> – the string to add between the years, the months and the days. Defaults to <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The resulting string, in the format <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.numberemojiformat">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">numberemojiformat</code><span class="sig-paren">(</span><em class="sig-param">l: List[str]</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.numberemojiformat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.telegram_escape">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">telegram_escape</code><span class="sig-paren">(</span><em class="sig-param">string: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.telegram_escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Escape a string to be sent through Telegram, and format it using RoyalCode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently escapes everything, even items in code blocks.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.utils.discord_escape">
+<code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">discord_escape</code><span class="sig-paren">(</span><em class="sig-param">string: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.utils.discord_escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Escape a string to be sent through Discord, and format it using RoyalCode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently escapes everything, even items in code blocks.</p>
+</div>
+</dd></dl>
+
 </div>
 
 

@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="bots.html">royalnet.bots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="commands.html">royalnet.commands</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">royalnet.database</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tables">Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-royalnet.database.tables">Tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="network.html">royalnet.network</a></li>
@@ -160,8 +160,393 @@
 <h1>royalnet.database<a class="headerlink" href="#royalnet-database" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<div class="section" id="tables">
-<h2>Tables<a class="headerlink" href="#tables" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-royalnet.database"></span><p>Relational database classes and methods.</p>
+<dl class="class">
+<dt id="royalnet.database.Alchemy">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.</code><code class="sig-name descname">Alchemy</code><span class="sig-paren">(</span><em class="sig-param">database_uri: str</em>, <em class="sig-param">tables: Set</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper around SQLAlchemy declarative that allows to use multiple databases at once while maintaining a single table-class for both of them.</p>
+<dl class="method">
+<dt id="royalnet.database.Alchemy.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">database_uri: str</em>, <em class="sig-param">tables: Set</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Alchemy object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database_uri</strong> – The uri of the database, as described at <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/engines.html">https://docs.sqlalchemy.org/en/13/core/engines.html</a> .</p></li>
+<li><p><strong>tables</strong> – The set of tables to be created and used in the selected database. Check the tables submodule for more details.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.database.Alchemy._create_tables">
+<code class="sig-name descname">_create_tables</code><span class="sig-paren">(</span><em class="sig-param">tables: Set</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy._create_tables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.database.Alchemy.session_acm">
+<code class="sig-name descname">session_acm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy.session_acm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Alchemy as a asyncronous context manager (to be used in async with statements).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.database.Alchemy.session_cm">
+<code class="sig-name descname">session_cm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.Alchemy.session_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Alchemy as a context manager (to be used in with statements).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="royalnet.database.relationshiplinkchain">
+<code class="sig-prename descclassname">royalnet.database.</code><code class="sig-name descname">relationshiplinkchain</code><span class="sig-paren">(</span><em class="sig-param">starting_class</em>, <em class="sig-param">ending_class</em><span class="sig-paren">)</span> &#x2192; Optional[tuple]<a class="headerlink" href="#royalnet.database.relationshiplinkchain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the path to follow to get from the starting table to the ending table.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.DatabaseConfig">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.</code><code class="sig-name descname">DatabaseConfig</code><span class="sig-paren">(</span><em class="sig-param">database_uri: str</em>, <em class="sig-param">master_table: Type</em>, <em class="sig-param">identity_table: Type</em>, <em class="sig-param">identity_column_name: str</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.DatabaseConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>The configuration to be used for the <span class="xref std std-ref">royalnet.database.Alchemy</span> component of <span class="xref std std-ref">royalnet.bots.GenericBot</span>.</p>
+</dd></dl>
+
+<div class="section" id="module-royalnet.database.tables">
+<span id="tables"></span><h2>Tables<a class="headerlink" href="#module-royalnet.database.tables" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="royalnet.database.tables.Royal">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Royal</code><a class="headerlink" href="#royalnet.database.tables.Royal" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Royal.avatar">
+<code class="sig-name descname">avatar</code><em class="property"> = Column(None, LargeBinary(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Royal.avatar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Royal.password">
+<code class="sig-name descname">password</code><em class="property"> = Column(None, LargeBinary(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Royal.password" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Royal.role">
+<code class="sig-name descname">role</code><em class="property"> = Column(None, String(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Royal.role" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Royal.uid">
+<code class="sig-name descname">uid</code><em class="property"> = Column(None, Integer(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Royal.uid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Royal.username">
+<code class="sig-name descname">username</code><em class="property"> = Column(None, String(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Royal.username" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Telegram">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Telegram</code><a class="headerlink" href="#royalnet.database.tables.Telegram" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.first_name">
+<code class="sig-name descname">first_name</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Telegram.first_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.last_name">
+<code class="sig-name descname">last_name</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Telegram.last_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.database.tables.Telegram.mention">
+<code class="sig-name descname">mention</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#royalnet.database.tables.Telegram.mention" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.royal">
+<code class="sig-name descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa024a8c8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Telegram.royal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.royal_id">
+<code class="sig-name descname">royal_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Telegram.royal_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.tg_id">
+<code class="sig-name descname">tg_id</code><em class="property"> = Column(None, BigInteger(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Telegram.tg_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Telegram.username">
+<code class="sig-name descname">username</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Telegram.username" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Diario">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Diario</code><a class="headerlink" href="#royalnet.database.tables.Diario" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Diario.context">
+<code class="sig-name descname">context</code><em class="property"> = Column(None, Text(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.creator">
+<code class="sig-name descname">creator</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e6448; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.creator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.creator_id">
+<code class="sig-name descname">creator_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.creator_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.diario_id">
+<code class="sig-name descname">diario_id</code><em class="property"> = Column(None, Integer(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Diario.diario_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.media_url">
+<code class="sig-name descname">media_url</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.media_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.quoted">
+<code class="sig-name descname">quoted</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.quoted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.quoted_account">
+<code class="sig-name descname">quoted_account</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e6648; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Diario.quoted_account" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.quoted_account_id">
+<code class="sig-name descname">quoted_account_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.quoted_account_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.spoiler">
+<code class="sig-name descname">spoiler</code><em class="property"> = Column(None, Boolean(), table=None, default=ColumnDefault(False))</em><a class="headerlink" href="#royalnet.database.tables.Diario.spoiler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.text">
+<code class="sig-name descname">text</code><em class="property"> = Column(None, Text(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Diario.text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Diario.timestamp">
+<code class="sig-name descname">timestamp</code><em class="property"> = Column(None, DateTime(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Diario.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Alias">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Alias</code><a class="headerlink" href="#royalnet.database.tables.Alias" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Alias.alias">
+<code class="sig-name descname">alias</code><em class="property"> = Column(None, String(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Alias.alias" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Alias.royal">
+<code class="sig-name descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e6bc8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Alias.royal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Alias.royal_id">
+<code class="sig-name descname">royal_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Alias.royal_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.ActiveKvGroup">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">ActiveKvGroup</code><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.ActiveKvGroup.group">
+<code class="sig-name descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa024ad48; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.ActiveKvGroup.group_name">
+<code class="sig-name descname">group_name</code><em class="property"> = Column(None, String(), ForeignKey('keygroups.group_name'), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.group_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.ActiveKvGroup.royal">
+<code class="sig-name descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e64c8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.royal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.ActiveKvGroup.royal_id">
+<code class="sig-name descname">royal_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.ActiveKvGroup.royal_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Keyvalue">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Keyvalue</code><a class="headerlink" href="#royalnet.database.tables.Keyvalue" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Keyvalue.group">
+<code class="sig-name descname">group</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa024acc8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Keyvalue.group_name">
+<code class="sig-name descname">group_name</code><em class="property"> = Column(None, String(), ForeignKey('keygroups.group_name'), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.group_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Keyvalue.key">
+<code class="sig-name descname">key</code><em class="property"> = Column(None, String(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Keyvalue.value">
+<code class="sig-name descname">value</code><em class="property"> = Column(None, String(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Keyvalue.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Keygroup">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Keygroup</code><a class="headerlink" href="#royalnet.database.tables.Keygroup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Keygroup.group_name">
+<code class="sig-name descname">group_name</code><em class="property"> = Column(None, String(), ForeignKey('keygroups.group_name'), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Keygroup.group_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.Discord">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">Discord</code><a class="headerlink" href="#royalnet.database.tables.Discord" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="royalnet.database.tables.Discord.avatar_hash">
+<code class="sig-name descname">avatar_hash</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Discord.avatar_hash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Discord.discord_id">
+<code class="sig-name descname">discord_id</code><em class="property"> = Column(None, BigInteger(), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.Discord.discord_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Discord.discriminator">
+<code class="sig-name descname">discriminator</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Discord.discriminator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.database.tables.Discord.full_username">
+<code class="sig-name descname">full_username</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.database.tables.Discord.full_username" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Discord.royal">
+<code class="sig-name descname">royal</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa024abc8; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.Discord.royal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Discord.royal_id">
+<code class="sig-name descname">royal_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Discord.royal_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.Discord.username">
+<code class="sig-name descname">username</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.Discord.username" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.WikiPage">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">WikiPage</code><a class="headerlink" href="#royalnet.database.tables.WikiPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wiki page properties.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Requires PostgreSQL!</p>
+</div>
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiPage.content">
+<code class="sig-name descname">content</code><em class="property"> = Column(None, Text(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.WikiPage.content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiPage.css">
+<code class="sig-name descname">css</code><em class="property"> = Column(None, String(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.WikiPage.css" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiPage.format">
+<code class="sig-name descname">format</code><em class="property"> = Column(None, String(), table=None, nullable=False, default=ColumnDefault('markdown'))</em><a class="headerlink" href="#royalnet.database.tables.WikiPage.format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiPage.page_id">
+<code class="sig-name descname">page_id</code><em class="property"> = Column(None, UUID(as_uuid=True), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiPage.page_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiPage.title">
+<code class="sig-name descname">title</code><em class="property"> = Column(None, String(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiPage.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.database.tables.WikiRevision">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.database.tables.</code><code class="sig-name descname">WikiRevision</code><a class="headerlink" href="#royalnet.database.tables.WikiRevision" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wiki page revision.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Requires PostgreSQL!</p>
+</div>
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.author">
+<code class="sig-name descname">author</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e6b48; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.author" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.author_id">
+<code class="sig-name descname">author_id</code><em class="property"> = Column(None, Integer(), ForeignKey('royals.uid'), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.author_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.diff">
+<code class="sig-name descname">diff</code><em class="property"> = Column(None, Text(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.page">
+<code class="sig-name descname">page</code><em class="property"> = &lt;RelationshipProperty at 0x7fafa01e6448; no key&gt;</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.page_id">
+<code class="sig-name descname">page_id</code><em class="property"> = Column(None, UUID(as_uuid=True), ForeignKey('wikipages.page_id'), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.page_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.reason">
+<code class="sig-name descname">reason</code><em class="property"> = Column(None, Text(), table=None)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.reason" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.revision_id">
+<code class="sig-name descname">revision_id</code><em class="property"> = Column(None, UUID(as_uuid=True), table=None, primary_key=True, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.revision_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.database.tables.WikiRevision.timestamp">
+<code class="sig-name descname">timestamp</code><em class="property"> = Column(None, DateTime(), table=None, nullable=False)</em><a class="headerlink" href="#royalnet.database.tables.WikiRevision.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
