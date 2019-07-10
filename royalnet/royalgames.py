@@ -1,3 +1,5 @@
+"""The production Royalnet, active at @royalgamesbot on Telegram and Royalbot on Discord."""
+
 import os
 import asyncio
 import logging

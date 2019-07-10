@@ -14,7 +14,7 @@ def create_app(config_obj: typing.Type, blueprints: typing.List[Royalprint]):
     Also requires a ``DB_PATH`` key in ``config_obj`` to initialize the database connection.
 
     Warning:
-        The code for this class was written at 1 AM, and I have no clue of how and why it works or even of if it really does work.
+        The code for this class was written at 1 AM, and I have no clue of how and why it works or even if it really does work.
         Use with caution?
 
     Args:

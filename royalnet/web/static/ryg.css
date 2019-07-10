@@ -504,52 +504,52 @@ input[disabled=""],
 button[disabled=""] {
   opacity: 0.3;
 }
-.wikiedit-form label {
+form.fullsize label {
   margin-top: 4px;
   margin-bottom: 4px;
   display: flex;
 }
-.wikiedit-form label .label-text {
+form.fullsize label .label-text {
   margin-right: 12px;
   min-width: 60px;
 }
-.wikiedit-form label input {
+form.fullsize label input {
   flex-grow: 1;
 }
-.wikiedit-form label[for="wikiedit-title"] {
+form.fullsize label[for="wikiedit-title"] {
   font-size: x-large;
 }
-.wikiedit-form label[for="wikiedit-title"] * {
+form.fullsize label[for="wikiedit-title"] * {
   font-size: x-large;
 }
-.wikiedit-form .editor-toolbar,
-.wikiedit-form .editor-statusbar {
+form.fullsize .editor-toolbar,
+form.fullsize .editor-statusbar {
   background-color: #0e1c47;
   color: #a0ccff !important;
   border: 0;
   opacity: 1 !important;
 }
-.wikiedit-form .editor-toolbar a,
-.wikiedit-form .editor-statusbar a {
+form.fullsize .editor-toolbar a,
+form.fullsize .editor-statusbar a {
   color: #a0ccff !important;
   border: 0;
 }
-.wikiedit-form .editor-toolbar a:hover,
-.wikiedit-form .editor-statusbar a:hover {
+form.fullsize .editor-toolbar a:hover,
+form.fullsize .editor-statusbar a:hover {
   background-color: rgba(160, 204, 255, 0.2);
   color: #ffffff !important;
 }
-.wikiedit-form .editor-toolbar a.active,
-.wikiedit-form .editor-statusbar a.active {
+form.fullsize .editor-toolbar a.active,
+form.fullsize .editor-statusbar a.active {
   background-color: rgba(160, 204, 255, 0.3);
   color: white !important;
 }
-.wikiedit-form .editor-toolbar a.active:hover,
-.wikiedit-form .editor-statusbar a.active:hover {
+form.fullsize .editor-toolbar a.active:hover,
+form.fullsize .editor-statusbar a.active:hover {
   background-color: rgba(160, 204, 255, 0.2);
   color: #ffffff !important;
 }
-.wikiedit-form .CodeMirror {
+form.fullsize .CodeMirror {
   font-family: "Consolas", monospace !important;
   background-color: transparent;
   color: #a0ccff;
@@ -559,28 +559,28 @@ button[disabled=""] {
   border-right: 1px solid rgba(160, 204, 255, 0.2);
   border-radius: 0;
 }
-.wikiedit-form .CodeMirror .cm-link {
+form.fullsize .CodeMirror .cm-link {
   color: #7dffff !important;
 }
-.wikiedit-form .CodeMirror .cm-url {
+form.fullsize .CodeMirror .cm-url {
   color: #00caca !important;
 }
-.wikiedit-form .CodeMirror .cm-tag {
+form.fullsize .CodeMirror .cm-tag {
   color: #ff7dff !important;
 }
-.wikiedit-form .CodeMirror .cm-strong {
+form.fullsize .CodeMirror .cm-strong {
   color: #ffff7d !important;
 }
-.wikiedit-form .CodeMirror .cm-em {
+form.fullsize .CodeMirror .cm-em {
   color: #ffbb7d !important;
 }
-.wikiedit-form .CodeMirror .cm-quote {
+form.fullsize .CodeMirror .cm-quote {
   color: #7dff7d !important;
 }
-.wikiedit-form .CodeMirror .cm-comment {
+form.fullsize .CodeMirror .cm-comment {
   color: lightgray !important;
 }
-.wikiedit-form .CodeMirror .cm-header {
+form.fullsize .CodeMirror .cm-header {
   color: #ffffff !important;
 }
 .mcstatus-grid {
