@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ page.title }} - RYGwiki
+    Wiki: {{ page.title }}
 {% endblock %}
 
 {% block content %}
@@ -12,12 +12,12 @@
             </span>
             <span class="right">
                 {% if session.royal %}
-                    <a class="edit no-icon" href="{{ url_for("wikiedit.wikiedit_by_id", page_id=page.page_id|string, title=page.title) }}">Modifica</a>
+                    <a class="edit no-icon" href="{{ url_for("wikiedit.wikiedit_by_id", page_id=page.page_short_id, title=page.title) }}">Modifica</a>
                 {% else %}
                     <a class="edit no-icon faded" title="Devi fare il login per modificare pagine!">Modifica</a>
                 {% endif %}
                 |
-                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">Permalink</a>
+                <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title) }}">Permalink</a>
             </span>
         </div>
         <div class="bot">

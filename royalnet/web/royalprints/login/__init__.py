@@ -22,15 +22,15 @@ def login_index():
 @rp.route("/done", methods=["POST"])
 def login_done():
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
-    data = f.request.form
-    if "username" not in data:
+    fd = f.request.form
+    if "username" not in fd:
         return error(400, "Nessun username inserito.")
-    royal_user = alchemy_session.query(alchemy.Royal).filter_by(username=data["username"]).one_or_none()
+    royal_user = alchemy_session.query(alchemy.Royal).filter_by(username=fd["username"]).one_or_none()
     if royal_user is None:
         return error(404, "L'username inserito non corrisponde a nessun account registrato.")
-    if "password" not in data:
+    if "password" not in fd:
         return error(400, "Nessuna password inserita.")
-    if not bcrypt.checkpw(bytes(data["password"], encoding="utf8"), royal_user.password):
+    if not bcrypt.checkpw(bytes(fd["password"], encoding="utf8"), royal_user.password):
         return error(400, "La password inserita non è valida.")
     f.session["royal"] = {
         "uid": royal_user.uid,

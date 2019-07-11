@@ -5,7 +5,7 @@ import os
 import datetime
 import difflib
 from ...royalprint import Royalprint
-from ...shortcuts import error
+from ...shortcuts import error, from_urluuid
 from ....database.tables import Royal, WikiPage, WikiRevision
 
 
@@ -41,17 +41,18 @@ def wikiedit_newpage():
         alchemy_session.add(page)
         alchemy_session.add(revision)
         alchemy_session.commit()
-        return f.redirect(f.url_for("wikiview.wikiview_by_id", page_id=page.page_id, title=page.title))
+        return f.redirect(f.url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title))
 
 
-@rp.route("/<uuid:page_id>", defaults={"title": ""}, methods=["GET", "POST"])
-@rp.route("/<uuid:page_id>/<title>", methods=["GET", "POST"])
-def wikiedit_by_id(page_id: uuid.UUID, title: str):
+@rp.route("/<page_id>", defaults={"title": ""}, methods=["GET", "POST"])
+@rp.route("/<page_id>/<title>", methods=["GET", "POST"])
+def wikiedit_by_id(page_id: str, title: str):
+    page_uuid = from_urluuid(page_id)
     if "royal" not in f.session:
         return error(403, "Devi aver effettuato il login per modificare pagine wiki.")
 
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
-    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
+    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
     if page is None:
         return error(404, "La pagina che stai cercando di modificare non esiste.")
 
@@ -75,4 +76,4 @@ def wikiedit_by_id(page_id: uuid.UUID, title: str):
         page.title = fd["title"]
         page.css = fd["css"] if fd["css"] != "None" else None
         alchemy_session.commit()
-        return f.redirect(f.url_for("wikiview.wikiview_by_id", page_id=page.page_id, title=page.title))
+        return f.redirect(f.url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title))

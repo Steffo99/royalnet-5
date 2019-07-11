@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Nuovo account
+{% endblock %}
+
+{% block content %}
+    <div class="login">
+        <div class="doublebox">
+            <div class="top">
+                <span class="left">
+                    Nuovo account
+                </span>
+            </div>
+            <div class="bot">
+                <form method="post" class="newaccount-form fullsize">
+                    <label for="newaccount-username">
+                        <span class="label-text">Username</span>
+                        <input id="newaccount-username" type="text" name="username">
+                    </label>
+                    <label for="newaccount-password">
+                        <span class="label-text">Password</span>
+                        <input id="newaccount-password" type="password" name="password">
+                    </label>
+                    <label for="newaccount-role">
+                        <span class="label-text">Ruolo</span>
+                        <input id="newaccount-role" type="text" name="role" disabled value="Guest">
+                    </label>
+                    <label for="newaccount-submit">
+                        <input id="newaccount-submit" type="submit" value="Login">
+                    </label>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
