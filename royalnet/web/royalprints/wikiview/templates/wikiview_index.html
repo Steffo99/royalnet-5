@@ -19,7 +19,7 @@
             {% endif %}
             <ul>
                 {% for page in pages %}
-                    <li><a href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_id|string, title=page.title) }}">{{ page.title }}</a></li>
+                    <li><a href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title) }}">{{ page.title }}</a></li>
                 {% endfor %}
             </ul>
         </div>

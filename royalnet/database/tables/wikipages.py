@@ -3,6 +3,7 @@ from sqlalchemy import Column, \
                        String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declared_attr
+from royalnet.web.shortcuts import to_urluuid
 
 
 class WikiPage:
@@ -31,3 +32,7 @@ class WikiPage:
     @declared_attr
     def css(self):
         return Column(String)
+
+    @property
+    def page_short_id(self):
+        return to_urluuid(self.page_id)
