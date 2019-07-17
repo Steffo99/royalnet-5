@@ -17,14 +17,14 @@
             </span>
         </div>
         <div class="bot">
-            <form method="POST" class="wikiedit-form">
+            <form method="POST" class="wikiedit-form fullsize">
                 <label for="wikiedit-title">
                     <span class="label-text">Titolo</span>
                     <input id="wikiedit-title" type="text" name="title" value="{{ page.title }}">
                 </label>
                 <label for="wikiedit-format">
                     <span class="label-text">Formato</span>
-                    <input id="wikiedit-format" type="text" name="format" disabled value="{{ page.format }}">
+                    <input id="wikiedit-format" type="text" name="format" disabled value="markdown">
                 </label>
                 <!--suppress HtmlFormInputWithoutLabel -->
                 <textarea id="wikiedit-content" name="content">{{ page.content }}</textarea>

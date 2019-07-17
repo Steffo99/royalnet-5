@@ -47,4 +47,4 @@ def tglogin_done():
         "role": royal_user.role
     }
     f.session["login_date"] = datetime.datetime.now()
-    return f.render_template("tglogin_success.html")
+    return f.render_template("login_success.html")

@@ -6,7 +6,7 @@ import re
 import uuid
 import os
 from ...royalprint import Royalprint
-from ...shortcuts import error
+from ...shortcuts import error, from_urluuid
 from ....database.tables import Royal, WikiPage, WikiRevision
 
 
@@ -58,11 +58,12 @@ def wikiview_index():
     return f.render_template("wikiview_index.html", pages=pages)
 
 
-@rp.route("/<uuid:page_id>", defaults={"title": ""})
-@rp.route("/<uuid:page_id>/<title>")
-def wikiview_by_id(page_id: uuid.UUID, title: str):
+@rp.route("/<page_id>", defaults={"title": ""})
+@rp.route("/<page_id>/<title>")
+def wikiview_by_id(page_id: str, title: str):
+    page_uuid = from_urluuid(page_id)
     alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
-    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_id).one_or_none()
+    page = alchemy_session.query(alchemy.WikiPage).filter(alchemy.WikiPage.page_id == page_uuid).one_or_none()
     if page is None:
         return error(404, f"La pagina richiesta non esiste.")
     return prepare_page(page)

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Password Login
+{% endblock %}
+
+{% block content %}
+    <div class="login">
+        <div class="doublebox">
+            <div class="top">
+                <span class="left">
+                    Password Login
+                </span>
+            </div>
+            <div class="bot">
+                <p>
+                    Non hai una password? Prova il <a href="{{ url_for("tglogin.tglogin_index") }}">Login con Telegram</a>!
+                </p>
+                <p>
+                    Facendo il login su questo sito, acconsenti a ricevere due <abbr title="cookie">biscottini</abbr> che memorizzino l'account con cui hai fatto il login.<br>
+                </p>
+                <p>
+                    Essi avranno il seguente formato:
+                </p>
+                <pre><code>session["royal"] = {
+"uid": [il tuo id Royalnet]
+"username": [il tuo username Royalnet],
+"avatar": [il tuo avatar Royalnet],
+"role": [il tuo ruolo Royalnet]
+}
+
+session["login_date"] = [la data e l'ora di adesso]</code></pre>
+                <form action="{{ url_for("login.login_done") }}" method="post" class="login-form fullsize">
+                    <label for="login-username">
+                        <span class="label-text">Username</span>
+                        <input id="login-username" type="text" name="username">
+                    </label>
+                    <label for="login-password">
+                        <span class="label-text">Password</span>
+                        <input id="login-password" type="password" name="password">
+                    </label>
+                    <label for="login-submit">
+                        <input id="login-submit" type="submit" value="Login">
+                    </label>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

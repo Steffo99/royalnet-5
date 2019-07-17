@@ -8,7 +8,7 @@
     <meta name="keywords" content="Royal Games,RYG,Gaming,Videogames,Community">
     <meta name="description" content="Royal Games Community">
     <meta property="og:site_name" content="Royal Games">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %} - {{ config["SITE_NAME"] }}</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
     {% if css %}
         <link rel="stylesheet" href="{{ url_for("static", filename=css) }}">
@@ -23,12 +23,12 @@
         <div class="nav-left">
             <a class="nav-site no-icon" href="{{ url_for("home.home_index") }}">
                 <img class="nav-image" alt="" src="{{ url_for("static", filename="logo.svg") }}">
-                <span class="nav-sitename">Royal Games</span>
+                <span class="nav-sitename">{{ config["SITE_NAME"] }}</span>
             </a>
             <span class="nav-modules">
                 <a class="no-icon" href="{{ url_for("wikiview.wikiview_index") }}">Wiki</a>
                 <a class="no-icon" href="{{ url_for("diarioview.diarioview_page", page=1) }}">Diario</a>
-                <a class="no-icon" href="{{ url_for("profile.profile_index") }}">Membri</a>
+                <a class="no-icon" href="{{ url_for("profile.profile_index") }}">Profili</a>
             </span>
         </div>
         <div class="nav-center">
@@ -46,7 +46,7 @@
                     </a>
                 {% else %}
                     <span class="nav-login">
-                        <a class="no-icon" href="{{ url_for("tglogin.tglogin_index") }}">
+                        <a class="no-icon" href="{{ url_for("login.login_index") }}">
                             Login
                             <img class="nav-image faded" alt="" src="{{ url_for("static", filename="generic.png") }}">
                         </a>
