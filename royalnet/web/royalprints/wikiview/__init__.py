@@ -15,7 +15,13 @@ rp = Royalprint("wikiview", __name__, url_prefix="/wiki/view", template_folder=t
                 required_tables={Royal, WikiPage, WikiRevision})
 
 
+class WikiRenderError(Exception):
+    """An error occurred while trying to render the wiki page."""
+
+
 def prepare_page_markdown(page):
+    if list(page.content).count(">") > 99:
+        raise WikiRenderError("Too many nested quotes")
     converted_md = markdown2.markdown(page.content.replace("<", "&lt;"),
                                       extras=["spoiler", "tables", "smarty-pants", "fenced-code-blocks"])
     converted_md = re.sub(r"{https?://(?:www\.)?(?:youtube\.com/watch\?.*?&?v=|youtu.be/)([0-9A-Za-z-]+).*?}",
@@ -37,18 +43,21 @@ def prepare_page_markdown(page):
 
 
 def prepare_page(page):
-    if page.format == "markdown":
-        return f.render_template("wikiview_page.html",
-                                 page=page,
-                                 parsed_content=f.Markup(prepare_page_markdown(page)),
-                                 css=page.css)
-    elif page.format == "html":
-        return f.render_template("wikiview_page.html",
-                                 page=page,
-                                 parsed_content=f.Markup(page.content),
-                                 css=page.css)
-    else:
-        return error(500, f"Non esiste nessun handler in grado di preparare pagine con il formato {page.format}.")
+    try:
+        if page.format == "markdown":
+            return f.render_template("wikiview_page.html",
+                                     page=page,
+                                     parsed_content=f.Markup(prepare_page_markdown(page)),
+                                     css=page.css)
+        elif page.format == "html":
+            return f.render_template("wikiview_page.html",
+                                     page=page,
+                                     parsed_content=f.Markup(page.content),
+                                     css=page.css)
+        else:
+            return error(500, f"Non esiste nessun handler in grado di preparare pagine con il formato {page.format}.")
+    except WikiRenderError as e:
+        return error(500, f"La pagina Wiki non può essere preparata a causa di un errore: {str(e)}")
 
 
 @rp.route("/")
