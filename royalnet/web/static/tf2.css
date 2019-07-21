@@ -1,0 +1,309 @@
+@font-face {
+  font-family: 'TF2';
+  src: url('https://scaleway.steffo.eu/tf2.ttf');
+}
+@font-face {
+  font-family: 'TF2 Build';
+  src: url('https://scaleway.steffo.eu/tf2build.ttf');
+}
+@font-face {
+  font-family: 'TF2 Professor';
+  src: url('https://scaleway.steffo.eu/tf2professor.ttf');
+}
+@font-face {
+  font-family: 'TF2 Secondary';
+  src: url('https://scaleway.steffo.eu/tf2secondary.ttf');
+}
+body {
+  font-family: "TF2 Secondary", sans-serif;
+  background-color: #2e2a28;
+  color: #d2cdc8;
+  box-sizing: border-box;
+}
+a {
+  color: #9a4713;
+  text-decoration: none;
+}
+a:hover {
+  color: #e88345;
+}
+a:active {
+  color: white;
+}
+a:not(.no-icon)::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+  content: "\f0c1";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://t.me"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f2c6";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="https://www.youtube.com"]::before,
+a:not(.no-icon)[href^="https://youtu.be"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f167";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="https://vimeo.com"]::before,
+a:not(.no-icon)[href^="https://player.vimeo.com"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f27d";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://github.com"]::before,
+a:not(.no-icon)[href^="https://gist.github.com"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f09b";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://itch.io"]::before,
+a:not(.no-icon)[href^="https://steffo.itch.io"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f83a";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="https://www.kickstarter.com"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f3bb";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://reddit.com"]::before,
+a:not(.no-icon)[href^="https://new.reddit.com"]::before,
+a:not(.no-icon)[href^="https://old.reddit.com"]::before,
+a:not(.no-icon)[href^="https://redd.it"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f281";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="https://www.twitch.tv"]::before,
+a:not(.no-icon)[href^="https://clips.twitch.tv"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f1e8";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://store.steampowered.com"]::before,
+a:not(.no-icon)[href^="https://steamcommunity.com"]::before,
+a:not(.no-icon)[href^="https://partner.steamgames.com"]::before,
+a:not(.no-icon)[href^="steam:"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f1b6";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="https://twitter.com"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f099";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="https://it.wikipedia.org"]::before,
+a:not(.no-icon)[href^="https://en.wikipedia.org"]::before {
+  font-family: "Font Awesome 5 Brands";
+  font-weight: bold;
+  content: "\f266";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="#"]::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+  content: "\f13d";
+  margin-right: 3px;
+}
+a:not(.no-icon)[href^="http:"]::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+  content: "\f09c";
+  margin-right: 4px;
+}
+a:not(.no-icon)[href^="magnet:"]::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+  content: "\f076";
+  margin-right: 4px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "TF2 Build", sans-serif;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: normal;
+}
+code {
+  font-family: "Consolas", "Source Code Pro", monospace;
+}
+blockquote {
+  color: #d2cdc8;
+  border-left: 3px solid #d2cdc8;
+  background-color: rgba(210, 205, 200, 0.1);
+  padding: 2px 4px 2px 8px;
+  margin: 8px;
+}
+textarea {
+  background-color: rgba(210, 205, 200, 0.1);
+  color: #d2cdc8;
+  border: 1px solid #d2cdc8;
+  padding: 2px;
+  margin: 1px;
+  font-size: small;
+  font-family: "Consolas", "Source Code Pro", monospace;
+  width: 100%;
+  height: 300px;
+}
+button,
+input[type="submit"],
+.btn {
+  background-color: rgba(210, 205, 200, 0.1);
+  color: #d2cdc8 !important;
+  border: 1px solid #d2cdc8;
+  border-radius: 0;
+  padding: 2px 8px;
+  margin: 1px;
+  font-size: medium;
+  font-family: sans-serif;
+  text-decoration: none;
+  cursor: default;
+}
+button:hover,
+input[type="submit"]:hover,
+.btn:hover {
+  background-color: rgba(210, 205, 200, 0.2);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+button:active,
+input[type="submit"]:active,
+.btn:active {
+  background-color: rgba(210, 205, 200, 0.3);
+  color: white;
+  border-color: white;
+}
+pre {
+  margin: 0;
+}
+img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  max-width: 100%;
+}
+nav {
+  display: flex;
+  justify-content: space-between;
+  height: 50px;
+  line-height: 50px;
+}
+nav .nav-left {
+  text-align: left;
+}
+nav .nav-center {
+  text-align: center;
+}
+nav .nav-right {
+  text-align: right;
+}
+nav .nav-image {
+  height: 50px;
+  display: none;
+  vertical-align: middle;
+}
+nav .nav-sitename {
+  font-weight: bold;
+}
+nav .nav-login-unavailable {
+  opacity: 0.25;
+}
+.h-container {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+@media (min-width: 800px) {
+  .h-container {
+    flex-direction: row;
+  }
+}
+.main-container {
+  width: 100%;
+}
+@media (min-width: 800px) {
+  .main-container {
+    width: 800px;
+  }
+}
+@media (min-width: 1200px) {
+  .main-container {
+    width: 1200px;
+  }
+}
+.box {
+  background-color: #d2cdc8;
+  color: black;
+  border-radius: 2px;
+  padding: 4px;
+  margin: 8px;
+}
+.doublebox {
+  margin: 8px;
+}
+.doublebox .top {
+  display: flex;
+  justify-content: space-between;
+  background-color: #9a4713;
+  padding: 8px;
+  border-radius: 4px 4px 0 0;
+  color: #ffffff;
+  font-family: "TF2 Build", sans-serif;
+  font-weight: normal;
+}
+.doublebox .top .left {
+  align-self: flex-start;
+}
+.doublebox .top .right {
+  align-self: flex-end;
+}
+.doublebox .top a {
+  color: #00caca;
+}
+.doublebox .bot {
+  background-color: #d2cdc8;
+  color: black;
+  padding: 8px;
+  border-radius: 0 0 4px 4px;
+}
+.doublebox .bot h1,
+.doublebox .bot h2,
+.doublebox .bot h3,
+.doublebox .bot h4,
+.doublebox .bot h5,
+.doublebox .bot h6 {
+  color: black;
+}
+.spoiler {
+  color: rgba(0, 0, 0, 0);
+  border: 1px solid rgba(210, 205, 200, 0.1);
+  border-radius: 2px;
+}
+.spoiler:hover {
+  color: #d2cdc8;
+}
+.faded {
+  opacity: 0.3;
+}
+/*# sourceMappingURL=tf2.css.map */
