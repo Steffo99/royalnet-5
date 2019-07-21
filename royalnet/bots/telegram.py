@@ -41,7 +41,9 @@ class TelegramBot(GenericBot):
             alchemy = self.alchemy
 
             async def reply(call, text: str):
-                await asyncify(call.channel.send_message, telegram_escape(text), parse_mode="HTML")
+                await asyncify(call.channel.send_message, telegram_escape(text),
+                               parse_mode="HTML",
+                               disable_web_page_preview=True)
 
             async def net_request(call, request: Request, destination: str) -> dict:
                 if self.network is None:
