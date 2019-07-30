@@ -9,6 +9,13 @@ import royalnet.utils as u
 class YtdlInfo:
     """A wrapper around youtube_dl extracted info."""
 
+    _default_ytdl_args = {
+        "quiet": True,  # Do not print messages to stdout.
+        "noplaylist": True,  # Download single video instead of a playlist if in doubt.
+        "no_warnings": True,  # Do not print out anything for warnings.
+        "outtmpl": "%(title)s-%(id)s.%(ext)s"  # Use the default outtmpl.
+    }
+
     def __init__(self, info: typing.Dict[str, typing.Any]):
         """Create a YtdlInfo from the dict returned by the :py:func:`youtube_dl.YoutubeDL.extract_info` function.
 
@@ -71,19 +78,14 @@ class YtdlInfo:
         self.abr: typing.Optional[int] = info.get("abr")
         self.ext: typing.Optional[str] = info.get("ext")
 
-    @staticmethod
-    def retrieve_for_url(url, **ytdl_args) -> typing.List["YtdlInfo"]:
+    @classmethod
+    def retrieve_for_url(cls, url, **ytdl_args) -> typing.List["YtdlInfo"]:
         """Fetch the info for an url through YoutubeDL.
 
         Returns:
             A :py:class:`list` containing the infos for the requested videos."""
         # So many redundant options!
-        ytdl = youtube_dl.YoutubeDL({
-            "quiet": True,  # Do not print messages to stdout.
-            "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-            "no_warnings": True,  # Do not print out anything for warnings.
-            **ytdl_args
-        })
+        ytdl = youtube_dl.YoutubeDL({**cls._default_ytdl_args, **ytdl_args})
         first_info = ytdl.extract_info(url=url, download=False)
         # If it is a playlist, create multiple videos!
         if "entries" in first_info:
