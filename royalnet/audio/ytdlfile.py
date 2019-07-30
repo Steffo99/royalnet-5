@@ -18,11 +18,11 @@ class YtdlFile:
 
     def __init__(self,
                  url: str,
-                 info: YtdlInfo = None,
-                 filename: str = None):
+                 info: typing.Optional[YtdlInfo] = None,
+                 filename: typing.Optional[str] = None):
         self.url: str = url
-        self.info: YtdlInfo = info
-        self.filename: str = filename
+        self.info: typing.Optional[YtdlInfo] = info
+        self.filename: typing.Optional[str] = filename
 
     def has_info(self) -> bool:
         return self.info is not None
