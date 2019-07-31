@@ -1,95 +1,33 @@
 import typing
-import logging as _logging
-import discord
-import os
-import dateparser
 import datetime
-from youtube_dl import YoutubeDL
-from ..utils import ytdldateformat
-
-log = _logging.getLogger(__name__)
-
-
-class DownloaderError(Exception):
-    pass
-
-
-class InterruptDownload(DownloaderError):
-    """Raised from a progress_hook to interrupt the video download."""
-
-
-class YtdlFile:
-    """A wrapper around a youtube_dl downloaded file."""
-
-    ytdl_args = {
-        "logger": log,  # Log messages to a logging.Logger instance.
-        "quiet": True,  # Do not print messages to stdout.
-        "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-        "no_warnings": True,  # Do not print out anything for warnings.
-    }
-
-    def __init__(self, info: "YtdlInfo", outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args):
-        self.info: "YtdlInfo" = info
-        self.video_filename: str
-        # Create a local args copy
-        ytdl_args["outtmpl"] = outtmpl
-        self.ytdl_args = {**self.ytdl_args, **ytdl_args}
-        # Create the ytdl
-        ytdl = YoutubeDL(ytdl_args)
-        # Find the file name
-        self.video_filename = ytdl.prepare_filename(self.info.__dict__)
-        # Download the file
-        ytdl.download([self.info.webpage_url])
-        # Final checks
-        assert os.path.exists(self.video_filename)
-
-    def __repr__(self):
-        return f"<YtdlFile {self.video_filename}>"
-
-    @staticmethod
-    def create_from_url(url, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> typing.List["YtdlFile"]:
-        """Download the videos at the specified url.
-        
-        Parameters:
-            url: The url to download the videos from.
-            outtmpl: The filename that the downloaded videos are going to have. The name can be formatted according to the `outtmpl documentation <https://github.com/ytdl-org/youtube-dl/blob/master/README.md#output-template>`_.
-            ytdl_args: Other arguments to be passed to the YoutubeDL object.
-        
-        Returns:
-            A :py:class:`list` of YtdlFiles."""
-        info_list = YtdlInfo.create_from_url(url)
-        return [info.download(outtmpl, **ytdl_args) for info in info_list]
-
-    def _stop_download(self):
-        """I have no clue of what this does, or why is it here. Possibly remove it?
-        
-        Raises:
-            InterruptDownload: ...uhhh, always?"""
-        raise InterruptDownload()
-
-    def delete_video_file(self):
-        """Delete the file located at ``self.video_filename``.
-        
-        Note:
-            No checks are done when deleting, so it may try to delete a non-existing file and raise an exception or do some other weird stuff with weird filenames."""
-        os.remove(self.video_filename)
+import dateparser
+import youtube_dl
+import discord
+import royalnet.utils as u
 
 
 class YtdlInfo:
     """A wrapper around youtube_dl extracted info."""
 
+    _default_ytdl_args = {
+        "quiet": True,  # Do not print messages to stdout.
+        "noplaylist": True,  # Download single video instead of a playlist if in doubt.
+        "no_warnings": True,  # Do not print out anything for warnings.
+        "outtmpl": "%(title)s-%(id)s.%(ext)s"  # Use the default outtmpl.
+    }
+
     def __init__(self, info: typing.Dict[str, typing.Any]):
         """Create a YtdlInfo from the dict returned by the :py:func:`youtube_dl.YoutubeDL.extract_info` function.
 
         Warning:
-            Does not download the info, for that use :py:func:`royalnet.audio.YtdlInfo.create_from_url`."""
+            Does not download the info, for that use :py:func:`royalnet.audio.YtdlInfo.retrieve_for_url`."""
         self.id: typing.Optional[str] = info.get("id")
         self.uploader: typing.Optional[str] = info.get("uploader")
         self.uploader_id: typing.Optional[str] = info.get("uploader_id")
         self.uploader_url: typing.Optional[str] = info.get("uploader_url")
         self.channel_id: typing.Optional[str] = info.get("channel_id")
         self.channel_url: typing.Optional[str] = info.get("channel_url")
-        self.upload_date: typing.Optional[datetime.datetime] = dateparser.parse(ytdldateformat(info.get("upload_date")))
+        self.upload_date: typing.Optional[datetime.datetime] = dateparser.parse(u.ytdldateformat(info.get("upload_date")))
         self.license: typing.Optional[str] = info.get("license")
         self.creator: typing.Optional[...] = info.get("creator")
         self.title: typing.Optional[str] = info.get("title")
@@ -140,26 +78,22 @@ class YtdlInfo:
         self.abr: typing.Optional[int] = info.get("abr")
         self.ext: typing.Optional[str] = info.get("ext")
 
-    @staticmethod
-    def create_from_url(url, **ytdl_args) -> typing.List["YtdlInfo"]:
+    @classmethod
+    def retrieve_for_url(cls, url, **ytdl_args) -> typing.List["YtdlInfo"]:
+        """Fetch the info for an url through YoutubeDL.
+
+        Returns:
+            A :py:class:`list` containing the infos for the requested videos."""
         # So many redundant options!
-        ytdl = YoutubeDL({
-            "logger": log,  # Log messages to a logging.Logger instance.
-            "quiet": True,  # Do not print messages to stdout.
-            "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-            "no_warnings": True,  # Do not print out anything for warnings.
-            **ytdl_args
-        })
+        ytdl = youtube_dl.YoutubeDL({**cls._default_ytdl_args, **ytdl_args})
         first_info = ytdl.extract_info(url=url, download=False)
         # If it is a playlist, create multiple videos!
         if "entries" in first_info:
             return [YtdlInfo(second_info) for second_info in first_info["entries"]]
         return [YtdlInfo(first_info)]
 
-    def download(self, outtmpl="%(title)s-%(id)s.%(ext)s", **ytdl_args) -> YtdlFile:
-        return YtdlFile(self, outtmpl, **ytdl_args)
-
     def to_discord_embed(self) -> discord.Embed:
+        """Return this info as a :py:class:`discord.Embed`."""
         embed = discord.Embed(title=self.title,
                               colour=discord.Colour(0xcc0000),
                               url=self.webpage_url)
@@ -179,6 +113,7 @@ class YtdlInfo:
         return f"<YtdlInfo id={self.id} ...>"
 
     def __str__(self):
+        """Return the video name."""
         if self.title:
             return self.title
         if self.webpage_url:

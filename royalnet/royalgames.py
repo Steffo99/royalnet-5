@@ -23,7 +23,7 @@ log.setLevel(logging.INFO)
 commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, SyncCommand,
             DiarioCommand, RageCommand, ReminderCommand, KvactiveCommand, KvCommand,
             KvrollCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
-            VideochannelCommand, CvCommand, PauseCommand, QueueCommand, RoyalnetprofileCommand]
+            VideochannelCommand, CvCommand, PauseCommand, QueueCommand, RoyalnetprofileCommand, VideoinfoCommand]
 
 # noinspection PyUnreachableCode
 if __debug__:

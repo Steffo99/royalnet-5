@@ -6,9 +6,15 @@ import pickle
 from ..utils import Command, Call, NetworkHandler, asyncify
 from ..network import Request, ResponseSuccess
 from ..error import TooManyFoundError, NoneFoundError
-from ..audio import RoyalPCMAudio
+from ..audio import YtdlDiscord
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
+
+
+ytdl_args = {
+    "format": "bestaudio",
+    "outtmpl": f"./downloads/%(autonumber)s_%(title)s.%(ext)s"
+}
 
 
 class PlayNH(NetworkHandler):
@@ -32,16 +38,16 @@ class PlayNH(NetworkHandler):
             raise Exception("No music_data for this guild")
         # Start downloading
         if data["url"].startswith("http://") or data["url"].startswith("https://"):
-            audio_sources: typing.List[RoyalPCMAudio] = await asyncify(RoyalPCMAudio.create_from_url, data["url"])
+            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url, data["url"], **ytdl_args)
         else:
-            audio_sources = await asyncify(RoyalPCMAudio.create_from_ytsearch, data["url"])
-        await bot.add_to_music_data(audio_sources, guild)
+            dfiles = await asyncify(YtdlDiscord.create_and_ready_from_url, f"ytsearch:{data['url']}", **ytdl_args)
+        await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
             "videos": [{
-                "title": source.rpf.info.title,
-                "discord_embed_pickle": str(pickle.dumps(source.rpf.info.to_discord_embed()))
-            } for source in audio_sources]
+                "title": dfile.info.title,
+                "discord_embed_pickle": str(pickle.dumps(dfile.info.to_discord_embed()))
+            } for dfile in dfiles]
         }
         return ResponseSuccess(response)
 

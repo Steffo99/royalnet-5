@@ -1,9 +1,8 @@
 import typing
-import asyncio
 from ..utils import Command, Call, NetworkHandler
 from ..network import Request, ResponseSuccess
-from ..error import NoneFoundError, TooManyFoundError, CurrentlyDisabledError
-from ..audio import Playlist, Pool
+from ..error import NoneFoundError, TooManyFoundError
+from ..audio.playmodes import Playlist, Pool
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
@@ -30,8 +29,7 @@ class PlaymodeNH(NetworkHandler):
         if data["mode_name"] == "playlist":
             bot.music_data[guild] = Playlist()
         elif data["mode_name"] == "pool":
-            # bot.music_data[guild] = Pool()
-            raise CurrentlyDisabledError("Bug: https://github.com/royal-games/royalnet/issues/61")
+            bot.music_data[guild] = Pool()
         else:
             raise ValueError("No such PlayMode")
         return ResponseSuccess()

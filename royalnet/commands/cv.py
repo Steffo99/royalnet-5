@@ -94,7 +94,7 @@ class CvNH(NetworkHandler):
                         except AttributeError:
                             pass
                     elif member.activity.type == discord.ActivityType.streaming:
-                        message += f" | 📡 {member.activity.url})"
+                        message += f" | 📡 {member.activity.url}"
                     elif member.activity.type == discord.ActivityType.listening:
                         if isinstance(member.activity, discord.Spotify):
                             if member.activity.title == member.activity.album:

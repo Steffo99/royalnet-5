@@ -1,8 +1,9 @@
 """Video and audio downloading related classes, mainly used for Discord voice bots."""
 
-from .playmodes import PlayMode, Playlist, Pool
-from .youtubedl import YtdlFile, YtdlInfo
-from .royalpcmfile import RoyalPCMFile
-from .royalpcmaudio import RoyalPCMAudio
+from . import playmodes
+from .ytdlinfo import YtdlInfo
+from .ytdlfile import YtdlFile
+from .fileaudiosource import FileAudioSource
+from .ytdldiscord import YtdlDiscord
 
-__all__ = ["PlayMode", "Playlist", "Pool", "YtdlFile", "YtdlInfo", "RoyalPCMFile", "RoyalPCMAudio"]
+__all__ = ["playmodes", "YtdlInfo", "YtdlFile", "FileAudioSource", "YtdlDiscord"]
