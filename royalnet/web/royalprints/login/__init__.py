@@ -3,7 +3,7 @@ import flask as f
 import os
 import datetime
 import bcrypt
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error
 from ....database.tables import Royal
 

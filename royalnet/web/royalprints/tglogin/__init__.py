@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import datetime
 import os
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error
 from ....database.tables import Royal, Telegram
 

@@ -2,7 +2,7 @@
 import os
 import flask as f
 import socket
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error
 from mcstatus import MinecraftServer
 

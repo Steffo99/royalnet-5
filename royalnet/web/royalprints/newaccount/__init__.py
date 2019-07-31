@@ -1,9 +1,8 @@
 """A :py:class:`royalnet.web.Royalprint` to create new Royals."""
 import flask as f
 import os
-import datetime
 import bcrypt
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error
 from ....database.tables import Royal, Alias
 

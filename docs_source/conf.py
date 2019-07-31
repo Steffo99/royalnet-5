@@ -21,7 +21,6 @@ project = 'Royalnet'
 copyright = '2019, Stefano Pigozzi'
 author = 'Stefano Pigozzi'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

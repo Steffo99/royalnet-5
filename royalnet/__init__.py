@@ -1,5 +1,3 @@
-from . import audio, bots, commands, database, network, utils, error, web
+from . import audio, bots, commands, database, network, utils, error, web, version
 
-version = "5.0a29"
-
-__all__ = ["audio", "bots", "commands", "database", "network", "utils", "error", "web"]
+__all__ = ["audio", "bots", "commands", "database", "network", "utils", "error", "web", "version"]

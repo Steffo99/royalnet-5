@@ -4,7 +4,7 @@ import uuid
 import os
 import datetime
 import difflib
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error, from_urluuid
 from ....database.tables import Royal, WikiPage, WikiRevision
 

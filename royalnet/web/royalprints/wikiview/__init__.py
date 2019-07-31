@@ -3,9 +3,8 @@
 import flask as f
 import markdown2
 import re
-import uuid
 import os
-from ...royalprint import Royalprint
+from royalprint import Royalprint
 from ...shortcuts import error, from_urluuid
 from ....database.tables import Royal, WikiPage, WikiRevision
 

@@ -20,14 +20,7 @@ stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{m
 log.addHandler(stream_handler)
 log.setLevel(logging.INFO)
 
-commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, SyncCommand,
-            DiarioCommand, RageCommand, ReminderCommand, KvactiveCommand, KvCommand,
-            KvrollCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
-            VideochannelCommand, CvCommand, PauseCommand, QueueCommand, RoyalnetprofileCommand, VideoinfoCommand]
-
-# noinspection PyUnreachableCode
-if __debug__:
-    commands = [DebugCreateCommand, DateparserCommand, AuthorCommand, *commands]
+commands = [PingCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand, PauseCommand, QueueCommand]
 
 address, port = "127.0.0.1", 1234
 

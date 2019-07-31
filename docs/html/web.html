@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="utils.html">royalnet.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="error.html">royalnet.error</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">royalnet.web</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-royalnet.web.royalprints">Royalprints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#royalprints">Royalprints</a></li>
 </ul>
 </li>
 </ul>
@@ -159,39 +159,8 @@
 <h1>royalnet.web<a class="headerlink" href="#royalnet-web" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-royalnet.web"></span><dl class="function">
-<dt id="royalnet.web.create_app">
-<code class="sig-prename descclassname">royalnet.web.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><em class="sig-param">config_obj: Type, blueprints: List[royalnet.web.royalprint.Royalprint]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.create_app" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code> application object.</p>
-<p>Gets the <code class="docutils literal notranslate"><span class="pre">app.secret_key</span></code> from the <code class="docutils literal notranslate"><span class="pre">SECRET_KEY</span></code> envvar.</p>
-<p>Also requires a <code class="docutils literal notranslate"><span class="pre">DB_PATH</span></code> key in <code class="docutils literal notranslate"><span class="pre">config_obj</span></code> to initialize the database connection.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The code for this class was written at 1 AM, and I have no clue of how and why it works or even of if it really does work.
-Use with caution?</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config_obj</strong> – The object to be passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">flask.Flask.config.from_object()</span></code>.</p></li>
-<li><p><strong>blueprints</strong> – A list of blueprints to be registered to the application.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The created <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt id="royalnet.web.Royalprint">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.web.</code><code class="sig-name descname">Royalprint</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">import_name</em>, <em class="sig-param">static_folder=None</em>, <em class="sig-param">static_url_path=None</em>, <em class="sig-param">template_folder=None</em>, <em class="sig-param">url_prefix=None</em>, <em class="sig-param">subdomain=None</em>, <em class="sig-param">url_defaults=None</em>, <em class="sig-param">root_path=None</em>, <em class="sig-param">required_tables: Optional[set] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.Royalprint" title="Permalink to this definition">¶</a></dt>
-<dd><p>An edited <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Blueprint</span></code> containing an additional <code class="docutils literal notranslate"><span class="pre">required_tables</span></code> parameter.</p>
-</dd></dl>
-
-<div class="section" id="module-royalnet.web.royalprints">
-<span id="royalprints"></span><h2>Royalprints<a class="headerlink" href="#module-royalnet.web.royalprints" title="Permalink to this headline">¶</a></h2>
-<p>Some Royalprints that can be used with the Royalnet Flask server.</p>
+<div class="section" id="royalprints">
+<h2>Royalprints<a class="headerlink" href="#royalprints" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
