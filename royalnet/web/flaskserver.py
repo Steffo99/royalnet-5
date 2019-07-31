@@ -3,7 +3,7 @@ import flask as f
 import os
 from sqlalchemy.orm import scoped_session
 from ..database import Alchemy
-from royalprint import Royalprint
+from .royalprint import Royalprint
 
 
 def create_app(config_obj: typing.Type, blueprints: typing.List[Royalprint]):

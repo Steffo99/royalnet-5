@@ -1,6 +1,6 @@
 """Quick docs link :py:class:`royalnet.web.Royalprint`."""
 import flask as f
-from ... import Royalprint
+from ...royalprint import Royalprint
 
 
 rp = Royalprint("docs", __name__, url_prefix="/docs")

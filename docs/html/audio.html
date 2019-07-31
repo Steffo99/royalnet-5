@@ -159,6 +159,165 @@
 <h1>royalnet.audio<a class="headerlink" href="#royalnet-audio" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<span class="target" id="module-royalnet.audio"></span><p>Video and audio downloading related classes, mainly used for Discord voice bots.</p>
+<dl class="class">
+<dt id="royalnet.audio.YtdlInfo">
+<em class="property">class </em><code class="descclassname">royalnet.audio.</code><code class="descname">YtdlInfo</code><span class="sig-paren">(</span><em>info: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper around youtube_dl extracted info.</p>
+<dl class="method">
+<dt id="royalnet.audio.YtdlInfo.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>info: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlInfo.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a YtdlInfo from the dict returned by the <code class="xref py py-func docutils literal notranslate"><span class="pre">youtube_dl.YoutubeDL.extract_info()</span></code> function.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Does not download the info, for that use <a class="reference internal" href="#royalnet.audio.YtdlInfo.retrieve_for_url" title="royalnet.audio.YtdlInfo.retrieve_for_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.audio.YtdlInfo.retrieve_for_url()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.audio.YtdlInfo._default_ytdl_args">
+<code class="descname">_default_ytdl_args</code><em class="property"> = {'no_warnings': True, 'noplaylist': True, 'outtmpl': '%(title)s-%(id)s.%(ext)s', 'quiet': True}</em><a class="headerlink" href="#royalnet.audio.YtdlInfo._default_ytdl_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="royalnet.audio.YtdlInfo.retrieve_for_url">
+<em class="property">classmethod </em><code class="descname">retrieve_for_url</code><span class="sig-paren">(</span><em>url</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; List[royalnet.audio.ytdlinfo.YtdlInfo]<a class="headerlink" href="#royalnet.audio.YtdlInfo.retrieve_for_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the info for an url through YoutubeDL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> containing the infos for the requested videos.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlInfo.to_discord_embed">
+<code class="descname">to_discord_embed</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; discord.embeds.Embed<a class="headerlink" href="#royalnet.audio.YtdlInfo.to_discord_embed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this info as a <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.Embed" title="(in discord.py v1.3.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.Embed</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.audio.YtdlFile">
+<em class="property">class </em><code class="descclassname">royalnet.audio.</code><code class="descname">YtdlFile</code><span class="sig-paren">(</span><em>url: str</em>, <em>info: Optional[royalnet.audio.ytdlinfo.YtdlInfo] = None</em>, <em>filename: Optional[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information about a youtube-dl downloaded file.</p>
+<dl class="attribute">
+<dt id="royalnet.audio.YtdlFile._default_ytdl_args">
+<code class="descname">_default_ytdl_args</code><em class="property"> = {'no_warnings': True, 'noplaylist': True, 'outtmpl': '%(title)s-%(id)s.%(ext)s', 'quiet': True}</em><a class="headerlink" href="#royalnet.audio.YtdlFile._default_ytdl_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlFile.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.download_file">
+<code class="descname">download_file</code><span class="sig-paren">(</span><em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.audio.YtdlFile.download_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="royalnet.audio.YtdlFile.download_from_url">
+<em class="property">classmethod </em><code class="descname">download_from_url</code><span class="sig-paren">(</span><em>url: str</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; List[royalnet.audio.ytdlfile.YtdlFile]<a class="headerlink" href="#royalnet.audio.YtdlFile.download_from_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.has_info">
+<code class="descname">has_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#royalnet.audio.YtdlFile.has_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.is_downloaded">
+<code class="descname">is_downloaded</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#royalnet.audio.YtdlFile.is_downloaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlFile.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlFile.update_info">
+<code class="descname">update_info</code><span class="sig-paren">(</span><em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.audio.YtdlFile.update_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.audio.FileAudioSource">
+<em class="property">class </em><code class="descclassname">royalnet.audio.</code><code class="descname">FileAudioSource</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.FileAudioSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.AudioSource" title="(in discord.py v1.3.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.AudioSource</span></code></a> that uses a <a class="reference external" href="https://docs.python.org/3.7/library/io.html#io.BufferedIOBase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> as an input instead of memory.</p>
+<p>The stream should be in the usual PCM encoding.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This AudioSource will consume (and close) the passed stream.</p>
+</div>
+<dl class="method">
+<dt id="royalnet.audio.FileAudioSource.is_opus">
+<code class="descname">is_opus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.FileAudioSource.is_opus" title="Permalink to this definition">¶</a></dt>
+<dd><p>This audio file isn’t Opus-encoded, but PCM-encoded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.FileAudioSource.read">
+<code class="descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.FileAudioSource.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads 20ms worth of audio.</p>
+<p>If the audio is complete, then returning an empty <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#bytes" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>-like object to signal this is the way to do so.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="royalnet.audio.YtdlDiscord">
+<em class="property">class </em><code class="descclassname">royalnet.audio.</code><code class="descname">YtdlDiscord</code><span class="sig-paren">(</span><em>ytdl_file: royalnet.audio.ytdlfile.YtdlFile</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlDiscord" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="royalnet.audio.YtdlDiscord.convert_to_pcm">
+<code class="descname">convert_to_pcm</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.audio.YtdlDiscord.convert_to_pcm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="royalnet.audio.YtdlDiscord.create_and_ready_from_url">
+<em class="property">classmethod </em><code class="descname">create_and_ready_from_url</code><span class="sig-paren">(</span><em>url</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; List[royalnet.audio.ytdldiscord.YtdlDiscord]<a class="headerlink" href="#royalnet.audio.YtdlDiscord.create_and_ready_from_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="royalnet.audio.YtdlDiscord.create_from_url">
+<em class="property">classmethod </em><code class="descname">create_from_url</code><span class="sig-paren">(</span><em>url</em>, <em>**ytdl_args</em><span class="sig-paren">)</span> &#x2192; List[royalnet.audio.ytdldiscord.YtdlDiscord]<a class="headerlink" href="#royalnet.audio.YtdlDiscord.create_from_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlDiscord.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.audio.YtdlDiscord.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.audio.YtdlDiscord.info">
+<code class="descname">info</code><a class="headerlink" href="#royalnet.audio.YtdlDiscord.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlDiscord.pcm_available">
+<code class="descname">pcm_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlDiscord.pcm_available" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlDiscord.ready_up">
+<code class="descname">ready_up</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.audio.YtdlDiscord.ready_up" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.audio.YtdlDiscord.spawn_audiosource">
+<code class="descname">spawn_audiosource</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; royalnet.audio.fileaudiosource.FileAudioSource<a class="headerlink" href="#royalnet.audio.YtdlDiscord.spawn_audiosource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
