@@ -2,7 +2,7 @@ import typing
 from ..utils import Command, Call, NetworkHandler
 from ..network import Request, ResponseSuccess
 from ..error import NoneFoundError, TooManyFoundError
-from ..audio.playmodes import Playlist, Pool
+from ..audio.playmodes import Playlist, Pool, Layers
 if typing.TYPE_CHECKING:
     from ..bots import DiscordBot
 
@@ -30,6 +30,8 @@ class PlaymodeNH(NetworkHandler):
             bot.music_data[guild] = Playlist()
         elif data["mode_name"] == "pool":
             bot.music_data[guild] = Pool()
+        elif data["mode_name"] == "layers":
+            bot.music_data[guild] = Layers()
         else:
             raise ValueError("No such PlayMode")
         return ResponseSuccess()

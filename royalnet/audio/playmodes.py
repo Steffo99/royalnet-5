@@ -1,6 +1,7 @@
 import math
 import random
 import typing
+from collections import namedtuple
 from .ytdldiscord import YtdlDiscord
 from .fileaudiosource import FileAudioSource
 
@@ -104,7 +105,7 @@ class Playlist(PlayMode):
 
 
 class Pool(PlayMode):
-    """A :py:class:`royalnet.audio.RoyalPCMAudio` pool. :py:class:`royalnet.audio.RoyalPCMAudio` are selected in random order and are not repeated until every song has been played at least once."""
+    """A random pool. :py:class:`royalnet.audio.YtdlDiscord` are selected in random order and are not repeated until every song has been played at least once."""
 
     def __init__(self, starting_pool: typing.List[YtdlDiscord] = None):
         """Create a new Pool.
@@ -148,3 +149,65 @@ class Pool(PlayMode):
         preview_pool = self.pool.copy()
         random.shuffle(preview_pool)
         return preview_pool
+
+
+class Layers(PlayMode):
+    """A playmode for playing a single song with multiple layers."""
+
+    Layer = namedtuple("Layer", ["dfile", "source"])
+
+    def __init__(self, starting_layers: typing.List[YtdlDiscord] = None):
+        super().__init__()
+        if starting_layers is None:
+            starting_layers = []
+        self.layers = []
+        for item in starting_layers:
+            self.add(item)
+
+    def videos_left(self) -> typing.Union[int, float]:
+        return 1 if len(self.layers) > 0 else 0
+
+    async def _generate_generator(self):
+        current_layer = None
+        current_source = None
+        while True:
+            if len(self.layers) == 0:
+                yield None
+                continue
+            if self.now_playing is None:
+                self.now_playing = self.layers[0].dfile
+                current_source = self.layers[0].source
+                current_layer = 0
+                yield current_source
+                continue
+            if current_source.file.closed:
+                self.now_playing = None
+                self.layers = []
+                current_layer = None
+                current_source = None
+                yield None
+                continue
+            current_layer += 1
+            current_position = current_source.file.tell()
+            if current_layer >= len(self.layers):
+                self.now_playing = self.layers[0].dfile
+                current_source = self.layers[0].source
+                current_source.file.seek(current_position)
+                current_layer = 0
+                yield current_source
+                continue
+            self.now_playing = self.layers[current_layer].dfile
+            current_source = self.layers[current_layer].source
+            current_source.file.seek(current_position)
+            yield current_source
+
+    def add(self, item) -> None:
+        self.layers.append(self.Layer(dfile=item, source=item.spawn_audiosource()))
+
+    def delete(self) -> None:
+        for item in self.layers:
+            item.dfile.delete()
+        self.layers = None
+
+    def queue_preview(self) -> typing.List[YtdlDiscord]:
+        return [layer.dfile for layer in self.layers]

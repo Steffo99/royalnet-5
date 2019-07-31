@@ -71,6 +71,11 @@ class QueueCommand(Command):
                 message = f"ℹ️ Questo [c]Pool[/c] è vuoto."
             else:
                 message = f"ℹ️ Questo [c]Pool[/c] contiene {len(data['queue']['strings'])} elementi, tra cui:\n"
+        elif data["type"] == "Layers":
+            if len(data["queue"]["strings"]) == 0:
+                message = f"ℹ️ Nessun elemento è attualmente in riproduzione, pertanto non ci sono [c]Layers[/c]:"
+            else:
+                message = f"ℹ️ I [c]Layers[/c] dell'elemento attualmente in riproduzione sono {len(data['queue']['strings'])}, tra cui:\n"
         else:
             if len(data["queue"]["strings"]) == 0:
                 message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], è vuoto.\n"

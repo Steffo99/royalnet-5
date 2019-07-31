@@ -1,5 +1,4 @@
 import typing
-import discord
 import re
 import ffmpeg
 import os
@@ -37,7 +36,7 @@ class YtdlDiscord:
         if not self.pcm_available():
             self.convert_to_pcm()
 
-    def spawn_audiosource(self) -> discord.AudioSource:
+    def spawn_audiosource(self) -> FileAudioSource:
         if not self.pcm_available():
             raise FileNotFoundError("File hasn't been converted to PCM yet")
         stream = open(self.pcm_filename, "rb")
