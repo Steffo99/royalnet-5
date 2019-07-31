@@ -1,7 +1,8 @@
 import math
 import random
 import typing
-from .royalpcmaudio import RoyalPCMAudio
+from .ytdldiscord import YtdlDiscord
+from .fileaudiosource import FileAudioSource
 
 
 class PlayMode:
@@ -9,14 +10,14 @@ class PlayMode:
 
     def __init__(self):
         """Create a new PlayMode and initialize the generator inside."""
-        self.now_playing: typing.Optional[RoyalPCMAudio] = None
+        self.now_playing: typing.Optional[YtdlDiscord] = None
         self.generator: typing.AsyncGenerator = self._generate_generator()
 
-    async def next(self) -> typing.Optional[RoyalPCMAudio]:
-        """Get the next :py:class:`royalnet.audio.RoyalPCMAudio` from the list and advance it.
+    async def next(self) -> typing.Optional[FileAudioSource]:
+        """Get the next :py:class:`royalnet.audio.FileAudioSource` from the list and advance it.
 
         Returns:
-            The next :py:class:`royalnet.audio.RoyalPCMAudio`."""
+            The next :py:class:`royalnet.audio.FileAudioSource`."""
         return await self.generator.__anext__()
 
     def videos_left(self) -> typing.Union[int, float]:
@@ -27,30 +28,30 @@ class PlayMode:
         raise NotImplementedError()
 
     async def _generate_generator(self):
-        """Factory function for an async generator that changes the ``now_playing`` property either to a :py:class:`discord.audio.RoyalPCMAudio` or to ``None``, then yields the value it changed it to.
+        """Factory function for an async generator that changes the ``now_playing`` property either to a :py:class:`royalnet.audio.FileAudioSource` or to ``None``, then yields the value it changed it to.
 
         Yields:
-            The :py:class:`royalnet.audio.RoyalPCMAudio` to be played next."""
+            The :py:class:`royalnet.audio.FileAudioSource` to be played next."""
         raise NotImplementedError()
         # This is needed to make the coroutine an async generator
         # noinspection PyUnreachableCode
         yield NotImplemented
 
-    def add(self, item: RoyalPCMAudio) -> None:
-        """Add a new :py:class:`royalnet.audio.RoyalPCMAudio` to the PlayMode.
+    def add(self, item: YtdlDiscord) -> None:
+        """Add a new :py:class:`royalnet.audio.YtdlDiscord` to the PlayMode.
 
         Args:
             item: The item to add to the PlayMode."""
         raise NotImplementedError()
 
     def delete(self) -> None:
-        """Delete all :py:class:`royalnet.audio.RoyalPCMAudio` contained inside this PlayMode."""
+        """Delete all :py:class:`royalnet.audio.YtdlDiscord` contained inside this PlayMode."""
         raise NotImplementedError()
 
-    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+    def queue_preview(self) -> typing.List[YtdlDiscord]:
         """Display all the videos in the PlayMode as a list, if possible.
 
-        To be used with `queue` commands, for example.
+        To be used with ``queue`` commands, for example.
 
         Raises:
             NotImplementedError: If a preview can't be generated.
@@ -61,9 +62,9 @@ class PlayMode:
 
 
 class Playlist(PlayMode):
-    """A video list. :py:class:`royalnet.audio.RoyalPCMAudio` played are removed from the list."""
+    """A video list. :py:class:`royalnet.audio.YtdlDiscord` played are removed from the list."""
 
-    def __init__(self, starting_list: typing.List[RoyalPCMAudio] = None):
+    def __init__(self, starting_list: typing.List[YtdlDiscord] = None):
         """Create a new Playlist.
 
         Args:
@@ -71,7 +72,7 @@ class Playlist(PlayMode):
         super().__init__()
         if starting_list is None:
             starting_list = []
-        self.list: typing.List[RoyalPCMAudio] = starting_list
+        self.list: typing.List[YtdlDiscord] = starting_list
 
     def videos_left(self) -> typing.Union[int, float]:
         return len(self.list)
@@ -97,14 +98,14 @@ class Playlist(PlayMode):
         while self.list:
             self.list.pop(0).delete()
 
-    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+    def queue_preview(self) -> typing.List[YtdlDiscord]:
         return self.list
 
 
 class Pool(PlayMode):
     """A :py:class:`royalnet.audio.RoyalPCMAudio` pool. :py:class:`royalnet.audio.RoyalPCMAudio` are selected in random order and are not repeated until every song has been played at least once."""
 
-    def __init__(self, starting_pool: typing.List[RoyalPCMAudio] = None):
+    def __init__(self, starting_pool: typing.List[YtdlDiscord] = None):
         """Create a new Pool.
 
         Args:
@@ -112,8 +113,8 @@ class Pool(PlayMode):
         super().__init__()
         if starting_pool is None:
             starting_pool = []
-        self.pool: typing.List[RoyalPCMAudio] = starting_pool
-        self._pool_copy: typing.List[RoyalPCMAudio] = []
+        self.pool: typing.List[YtdlDiscord] = starting_pool
+        self._pool_copy: typing.List[YtdlDiscord] = []
 
     def videos_left(self) -> typing.Union[int, float]:
         return math.inf
@@ -142,7 +143,7 @@ class Pool(PlayMode):
         self.pool = None
         self._pool_copy = None
 
-    def queue_preview(self) -> typing.List[RoyalPCMAudio]:
+    def queue_preview(self) -> typing.List[YtdlDiscord]:
         preview_pool = self.pool.copy()
         random.shuffle(preview_pool)
         return preview_pool

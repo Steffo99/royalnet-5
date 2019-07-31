@@ -54,12 +54,10 @@ class YtdlFile:
             ytdl.download([self.info.webpage_url])
             self.filename = ytdl.prepare_filename(self.info.__dict__)
 
-    def delete_file(self):
-        """Delete the file located at ``self.filename``."""
-        if not self.is_downloaded():
-            raise FileNotFoundError("The file hasn't been downloaded yet.")
-        os.remove(self.filename)
-        self.filename = None
+    def delete(self):
+        if self.is_downloaded():
+            os.remove(self.filename)
+            self.filename = None
 
     @classmethod
     def download_from_url(cls, url: str, **ytdl_args) -> typing.List["YtdlFile"]:
