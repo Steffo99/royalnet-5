@@ -83,9 +83,10 @@ class Playlist(PlayMode):
                 next_video = self.list.pop(0)
             except IndexError:
                 self.now_playing = None
+                yield None
             else:
                 self.now_playing = next_video
-            yield self.now_playing
+                yield next_video.spawn_audiosource()
             if self.now_playing is not None:
                 self.now_playing.delete()
 
@@ -130,7 +131,7 @@ class Pool(PlayMode):
             while self._pool_copy:
                 next_video = self._pool_copy.pop(0)
                 self.now_playing = next_video
-                yield next_video
+                yield next_video.spawn_audiosource()
 
     def add(self, item) -> None:
         self.pool.append(item)

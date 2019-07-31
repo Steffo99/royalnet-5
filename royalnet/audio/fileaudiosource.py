@@ -7,7 +7,7 @@ class FileAudioSource(discord.AudioSource):
     The stream should be in the usual PCM encoding.
 
     Warning:
-        This AudioSource will consume (and close) the passed stream"""
+        This AudioSource will consume (and close) the passed stream."""
 
     def __init__(self, file):
         self.file = file
@@ -29,10 +29,10 @@ class FileAudioSource(discord.AudioSource):
         """Reads 20ms worth of audio.
 
         If the audio is complete, then returning an empty :py:class:`bytes`-like object to signal this is the way to do so."""
-        data: bytes = self.file.read(discord.opus.Encoder.FRAME_SIZE)
         # If the stream is closed, it should stop playing immediatly
         if self.file.closed:
             return b""
+        data: bytes = self.file.read(discord.opus.Encoder.FRAME_SIZE)
         # If there is no more data to be streamed
         if len(data) != discord.opus.Encoder.FRAME_SIZE:
             # Close the file

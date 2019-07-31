@@ -8,7 +8,7 @@ from ..utils import asyncify, Call, Command, discord_escape
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
 from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
-from ..audio import PlayMode, Playlist, RoyalPCMAudio
+from ..audio import playmodes, YtdlDiscord
 
 log = _logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class DiscordBot(GenericBot):
     def _init_voice(self):
         """Initialize the variables needed for the connection to voice chat."""
         log.debug(f"Creating music_data dict")
-        self.music_data: typing.Dict[discord.Guild, PlayMode] = {}
+        self.music_data: typing.Dict[discord.Guild, playmodes.PlayMode] = {}
 
     def _call_factory(self) -> typing.Type[Call]:
         log.debug(f"Creating DiscordCall")
@@ -100,7 +100,7 @@ class DiscordBot(GenericBot):
                 # Create a music_data entry, if it doesn't exist; default is a Playlist
                 if not self.music_data.get(channel.guild):
                     log.debug(f"Creating music_data for {channel.guild}")
-                    self.music_data[channel.guild] = Playlist()
+                    self.music_data[channel.guild] = playmodes.Playlist()
 
             @staticmethod
             async def on_message(message: discord.Message):
@@ -216,12 +216,12 @@ class DiscordBot(GenericBot):
         await self.client.connect()
         # TODO: how to stop?
 
-    async def add_to_music_data(self, audio_sources: typing.List[RoyalPCMAudio], guild: discord.Guild):
-        """Add a file to the corresponding music_data object."""
+    async def add_to_music_data(self, dfiles: typing.List[YtdlDiscord], guild: discord.Guild):
+        """Add a list of :py:class:`royalnet.audio.YtdlDiscord` to the corresponding music_data object."""
         guild_music_data = self.music_data[guild]
-        for audio_source in audio_sources:
-            log.debug(f"Adding {audio_source} to music_data")
-            guild_music_data.add(audio_source)
+        for dfile in dfiles:
+            log.debug(f"Adding {dfile} to music_data")
+            guild_music_data.add(dfile)
         if guild_music_data.now_playing is None:
             await self.advance_music_data(guild)
 
@@ -229,7 +229,7 @@ class DiscordBot(GenericBot):
         """Try to play the next song, while it exists. Otherwise, just return."""
         guild_music_data = self.music_data[guild]
         voice_client = self.client.find_voice_client_by_guild(guild)
-        next_source: RoyalPCMAudio = await guild_music_data.next()
+        next_source: discord.AudioSource = await guild_music_data.next()
         await self.update_activity_with_source_title()
         if next_source is None:
             log.debug(f"Ending playback chain")
@@ -252,16 +252,14 @@ class DiscordBot(GenericBot):
             log.debug(f"Updating current Activity: setting to None, as multiple guilds are using the bot")
             await self.client.change_presence(status=discord.Status.online)
             return
-        # FIXME: PyCharm faulty inspection?
-        # noinspection PyUnresolvedReferences
-        play_mode: PlayMode = list(self.music_data.items())[0][1]
+        play_mode: playmodes.PlayMode = self.music_data[list(self.music_data)[0]]
         now_playing = play_mode.now_playing
         if now_playing is None:
             # No songs are playing now
             log.debug(f"Updating current Activity: setting to None, as nothing is currently being played")
             await self.client.change_presence(status=discord.Status.online)
             return
-        log.debug(f"Updating current Activity: listening to {now_playing.rpf.info.title}")
-        await self.client.change_presence(activity=discord.Activity(name=now_playing.rpf.info.title,
+        log.debug(f"Updating current Activity: listening to {now_playing.info.title}")
+        await self.client.change_presence(activity=discord.Activity(name=now_playing.info.title,
                                                                     type=discord.ActivityType.listening),
                                           status=discord.Status.online)

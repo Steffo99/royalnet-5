@@ -12,7 +12,7 @@ class VideoinfoCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         url = call.args[0]
-        info_list = await asyncify(YtdlInfo.create_from_url, url)
+        info_list = await asyncify(YtdlInfo.retrieve_for_url, url)
         for info in info_list:
             info_dict = info.__dict__
             message = f"🔍 Dati di [b]{info}[/b]:\n"

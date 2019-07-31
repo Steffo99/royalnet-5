@@ -37,8 +37,8 @@ class QueueNH(NetworkHandler):
             "type": playmode.__class__.__name__,
             "queue":
             {
-                "strings": [str(element.rpf.info) for element in queue],
-                "pickled_embeds": str(pickle.dumps([element.rpf.info.to_discord_embed() for element in queue]))
+                "strings": [str(dfile.info) for dfile in queue],
+                "pickled_embeds": str(pickle.dumps([dfile.info.to_discord_embed() for dfile in queue]))
             }
         })
 
