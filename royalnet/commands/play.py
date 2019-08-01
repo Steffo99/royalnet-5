@@ -1,7 +1,5 @@
 import typing
 import asyncio
-import youtube_dl
-import ffmpeg
 import pickle
 from ..utils import Command, Call, NetworkHandler, asyncify
 from ..network import Request, ResponseSuccess
