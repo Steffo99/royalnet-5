@@ -75,41 +75,6 @@ class PlayCommand(Command):
         notify_task = call.loop.create_task(notify_on_timeout(call, url, time=30, repeat=True))
         try:
             data: dict = await download_task
-        except Exception as exc:
-            # RoyalPCMFile errors
-            if isinstance(exc, FileExistsError):
-                await call.reply(f"❌ Scaricare [c]{url}[/c] significherebbe sovrascrivere un file già esistente.\nQuesto è un bug, e non dovrebbe mai succedere. Se è appena successo, segnalate il problema a https://github.com/Steffo99/royalnet/issues.\n[p]{exc}[/p]")
-                return
-            # ffmpeg errors
-            if isinstance(exc, ffmpeg.Error):
-                await call.reply(f"⚠️ Errore durante la conversione a PCM di [c]{url}[/c]:\n[p]{exc}[/p]")
-                return
-            # youtube_dl errors
-            if isinstance(exc, youtube_dl.utils.ContentTooShortError):
-                await call.reply(f"⚠️ Mentre era in corso il download di [c]{url}[/c], la connessione è stata interrotta, quindi la riproduzione è stata annullata.\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.UnavailableVideoError):
-                await call.reply(f"⚠️ Non è disponibile nessun audio su [c]{url}[/c].\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.SameFileError):
-                await call.reply(f"❌ Scaricare [c]{url}[/c] significherebbe scaricare due file diversi sullo stesso nome.\nQuesto è un bug, e non dovrebbe mai succedere. Se è appena successo, segnalate il problema a https://github.com/Steffo99/royalnet/issues.\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.GeoRestrictedError):
-                await call.reply(f"⚠️ [c]{url}[/c] non può essere visualizzato nel paese in cui si trova il bot e non può essere scaricato.\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.UnsupportedError):
-                await call.reply(f"⚠️ [c]{url}[/c] non è supportato da YoutubeDL e non può essere scaricato.\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.ExtractorError):
-                await call.reply(f"⚠️ Errore nella ricerca di info per [c]{url}[/c]:\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.DownloadError):
-                await call.reply(f"⚠️ Errore nel download di [c]{url}[/c]:\n[p]{exc}[/p]")
-                return
-            if isinstance(exc, youtube_dl.utils.YoutubeDLError):
-                await call.reply(f"⚠️ Errore di youtube_dl per [c]{url}[/c]:\n[p]{exc}[/p]")
-                return
-            raise
         finally:
             notify_task.cancel()
         for video in data["videos"]:
