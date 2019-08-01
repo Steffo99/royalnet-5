@@ -8,8 +8,8 @@
 @fg-ten: fade(@fg, 10%);
 @fg-twenty: fade(@fg, 20%);
 
-@fg-ten-hard: overlay(@bg, @fg-ten);
-@fg-twenty-hard: overlay(@bg, @fg-twenty);
+@fg-ten-hard: screen(@bg, @fg-ten);
+@fg-twenty-hard: screen(@bg, @fg-twenty);
 
 @pastel-red: #ff7d7d;
 @pastel-orange: #ffbb7d;
@@ -424,13 +424,13 @@ form.full {
 //Markdown editor
 .CodeMirror {
     font-family: "Consolas", monospace !important;
-    background-color: transparent;
-    color: @fg;
-    border-top: 0;
-    border-bottom: 0;
-    border-left: 1px solid @fg-twenty;
-    border-right: 1px solid @fg-twenty;
-    border-radius: 0;
+    background-color: @bg !important;
+    color: @fg !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 1px solid @fg-twenty !important;
+    border-right: 1px solid @fg-twenty !important;
+    border-radius: 0 !important;
 
     .cm-link {
         color: @pastel-cyan !important;
@@ -465,30 +465,43 @@ form.full {
     }
 }
 .editor-toolbar, .editor-statusbar {
-    background-color: @fg-twenty-hard;
+    background-color: @fg-ten-hard !important;
     color: @fg !important;
-    border: 0;
     opacity: 1 !important;
 
     a {
         color: @fg !important;
-        border: 0;
+        border: 0 !important;
 
         &:hover {
-            background-color: @fg-twenty;
+            background-color: @fg-twenty !important;
             color: lighten(@fg, 25%) !important;
         }
 
         &.active {
-            background-color: fade(@fg, 30%);
+            background-color: fade(@fg, 30%) !important;
             color: white !important;
 
             &:hover {
-                background-color: @fg-twenty;
+                background-color: @fg-twenty !important;
                 color: lighten(@fg, 25%) !important;
             }
         }
     }
+}
+.editor-toolbar {
+    border-top: 1px solid @fg-twenty-hard !important;
+    border-left: 1px solid @fg-twenty-hard !important;
+    border-right: 1px solid @fg-twenty-hard !important;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+.editor-statusbar {
+    border-bottom: 1px solid @fg-twenty-hard !important;
+    border-left: 1px solid @fg-twenty-hard !important;
+    border-right: 1px solid @fg-twenty-hard !important;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 //Horizontal container, should contain elements such as main and sidebar

@@ -339,13 +339,13 @@ form.full label.label-big * {
 /*** Custom elements ***/
 .CodeMirror {
   font-family: "Consolas", monospace !important;
-  background-color: transparent;
-  color: #a0ccff;
-  border-top: 0;
-  border-bottom: 0;
-  border-left: 1px solid rgba(160, 204, 255, 0.2);
-  border-right: 1px solid rgba(160, 204, 255, 0.2);
-  border-radius: 0;
+  background-color: #0d193b !important;
+  color: #a0ccff !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 1px solid rgba(160, 204, 255, 0.2) !important;
+  border-right: 1px solid rgba(160, 204, 255, 0.2) !important;
+  border-radius: 0 !important;
 }
 .CodeMirror .cm-link {
   color: #7dffff !important;
@@ -373,30 +373,43 @@ form.full label.label-big * {
 }
 .editor-toolbar,
 .editor-statusbar {
-  background-color: #0e1c47;
+  background-color: #1c2b4f !important;
   color: #a0ccff !important;
-  border: 0;
   opacity: 1 !important;
 }
 .editor-toolbar a,
 .editor-statusbar a {
   color: #a0ccff !important;
-  border: 0;
+  border: 0 !important;
 }
 .editor-toolbar a:hover,
 .editor-statusbar a:hover {
-  background-color: rgba(160, 204, 255, 0.2);
+  background-color: rgba(160, 204, 255, 0.2) !important;
   color: #ffffff !important;
 }
 .editor-toolbar a.active,
 .editor-statusbar a.active {
-  background-color: rgba(160, 204, 255, 0.3);
+  background-color: rgba(160, 204, 255, 0.3) !important;
   color: white !important;
 }
 .editor-toolbar a.active:hover,
 .editor-statusbar a.active:hover {
-  background-color: rgba(160, 204, 255, 0.2);
+  background-color: rgba(160, 204, 255, 0.2) !important;
   color: #ffffff !important;
+}
+.editor-toolbar {
+  border-top: 1px solid #2b3e62 !important;
+  border-left: 1px solid #2b3e62 !important;
+  border-right: 1px solid #2b3e62 !important;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.editor-statusbar {
+  border-bottom: 1px solid #2b3e62 !important;
+  border-left: 1px solid #2b3e62 !important;
+  border-right: 1px solid #2b3e62 !important;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 .horizontal-container-main {
   display: flex;
