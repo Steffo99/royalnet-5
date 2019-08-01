@@ -9,11 +9,11 @@
         <h1>
             {{ royal.username }}
         </h1>
-        <div class="doublebox profile-links">
-            <div class="top">
+        <div class="dbox profile-links">
+            <div class="dbox-top">
                 <span class="left">Account collegati</span>
             </div>
-            <div class="bot">
+            <div class="dbox-bot">
                 <ul class="links-list">
                     <li><span class="links-item links-linked">royalnet:{{ royal.username }}</span></li>
                     {% for telegram in royal.telegram %}
@@ -33,11 +33,11 @@
                 </ul>
             </div>
         </div>
-        <div class="doublebox profile-stats">
-            <div class="top">
+        <div class="dbox profile-stats">
+            <div class="dbox-top">
                 <span class="left">Statistiche</span>
             </div>
-            <div class="bot">
+            <div class="dbox-bot">
                 <ul class="stats-list">
                     <li><span class="stats-info">Righe del diario create</span>: <span class="stats-value">{{ royal.diario_created|length }}</span></li>
                     <li><span class="stats-info">Righe del diario in cui è menzionato</span>: <span class="stats-value">{{ royal.diario_quoted|length }}</span></li>
@@ -45,16 +45,16 @@
                     {% if royal.active_kv_group %}
                         <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value">{{ royal.active_kv_group[0].group_name }}</span></li>
                     {% else %}
-                        <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value faded">Nessuno</span></li>
+                        <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value disabled">Nessuno</span></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
-        <div class="doublebox profile-aliases">
-            <div class="top">
+        <div class="dbox profile-aliases">
+            <div class="dbox-top">
                 <span class="left">Alias</span>
             </div>
-            <div class="bot">
+            <div class="dbox-bot">
                 <ul class="alias-list">
                     {% for alias in royal.aliases %}
                         <li>{{ alias.alias|capitalize }}</li>

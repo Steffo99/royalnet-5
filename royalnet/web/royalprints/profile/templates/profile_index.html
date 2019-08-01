@@ -5,13 +5,13 @@
 {% endblock %}
 
 {% block content %}
-    <div class="doublebox">
-        <div class="top">
+    <div class="dbox">
+        <div class="dbox-top">
             <span class="left">
                 Elenco profili
             </span>
         </div>
-        <div class="bot">
+        <div class="dbox-bot">
             <ul>
                 {% for royal in royals %}
                     <li><a href="{{ url_for("profile.profile_by_username", username=royal.username) }}">{{ royal.username }}</a></li>

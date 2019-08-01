@@ -228,27 +228,27 @@ nav .nav-sitename {
 nav .nav-login-unavailable {
   opacity: 0.25;
 }
-.h-container {
+.horizontal-container {
   display: flex;
   justify-content: center;
   align-content: center;
   flex-direction: column;
 }
 @media (min-width: 800px) {
-  .h-container {
+  .horizontal-container {
     flex-direction: row;
   }
 }
-.main-container {
+.vertical-main {
   width: 100%;
 }
 @media (min-width: 800px) {
-  .main-container {
+  .vertical-main {
     width: 800px;
   }
 }
 @media (min-width: 1200px) {
-  .main-container {
+  .vertical-main {
     width: 1200px;
   }
 }
@@ -259,10 +259,10 @@ nav .nav-login-unavailable {
   padding: 4px;
   margin: 8px;
 }
-.doublebox {
+.dbox {
   margin: 8px;
 }
-.doublebox .top {
+.dbox .dbox-top {
   display: flex;
   justify-content: space-between;
   background-color: #9a4713;
@@ -272,27 +272,27 @@ nav .nav-login-unavailable {
   font-family: "TF2 Build", sans-serif;
   font-weight: normal;
 }
-.doublebox .top .left {
+.dbox .dbox-top .left {
   align-self: flex-start;
 }
-.doublebox .top .right {
+.dbox .dbox-top .right {
   align-self: flex-end;
 }
-.doublebox .top a {
+.dbox .dbox-top a {
   color: #00caca;
 }
-.doublebox .bot {
+.dbox .dbox-bot {
   background-color: #d2cdc8;
   color: black;
   padding: 8px;
   border-radius: 0 0 4px 4px;
 }
-.doublebox .bot h1,
-.doublebox .bot h2,
-.doublebox .bot h3,
-.doublebox .bot h4,
-.doublebox .bot h5,
-.doublebox .bot h6 {
+.dbox .dbox-bot h1,
+.dbox .dbox-bot h2,
+.dbox .dbox-bot h3,
+.dbox .dbox-bot h4,
+.dbox .dbox-bot h5,
+.dbox .dbox-bot h6 {
   color: black;
 }
 .spoiler {
@@ -303,7 +303,7 @@ nav .nav-login-unavailable {
 .spoiler:hover {
   color: #d2cdc8;
 }
-.faded {
+.disabled {
   opacity: 0.3;
 }
 /*# sourceMappingURL=tf2.css.map */

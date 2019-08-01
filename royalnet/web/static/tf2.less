@@ -275,7 +275,7 @@ nav {
 
 //Elements
 
-.h-container {
+.horizontal-container {
     display: flex;
     justify-content: center;
     align-content: center;
@@ -287,7 +287,7 @@ nav {
     }
 }
 
-.main-container {
+.vertical-main {
     width: 100%;
 
     @media (min-width: 800px)
@@ -309,10 +309,10 @@ nav {
     margin: 8px;
 }
 
-.doublebox {
+.dbox {
     margin: 8px;
 
-    .top {
+    .dbox-top {
         display: flex;
         justify-content: space-between;
         background-color: @li;
@@ -335,7 +335,7 @@ nav {
         }
     }
 
-    .bot {
+    .dbox-bot {
         background-color: @fg;
         color: black;
         padding: 8px;
@@ -357,6 +357,6 @@ nav {
     }
 }
 
-.faded {
+.disabled {
     opacity: 0.3;
 }

@@ -1,3 +1,5 @@
+/*** Variables ***/
+/*** Standard elements ***/
 body {
   font-family: "Arial", "Helvetica Neue", sans-serif;
   background-color: #0d193b;
@@ -116,6 +118,14 @@ a:not(.no-icon)[href^="magnet:"]::before {
   content: "\f076";
   margin-right: 4px;
 }
+b,
+strong {
+  color: #ffff7d;
+}
+i,
+em {
+  color: #ffbb7d;
+}
 h1,
 h2,
 h3,
@@ -128,11 +138,17 @@ h6 {
   font-weight: normal;
 }
 pre {
-  color: lightgray;
-  border: 1px solid rgba(160, 204, 255, 0.1);
-  background-color: rgba(160, 204, 255, 0.1);
   padding: 2px 4px 2px 8px;
   margin: 8px;
+  color: lightgray;
+  border: 1px solid rgba(211, 211, 211, 0.2);
+  background-color: rgba(211, 211, 211, 0.1);
+  font-family: "Consolas", "Source Code Pro", monospace;
+}
+*:not(pre) > code {
+  color: lightgray;
+  border: 1px solid rgba(211, 211, 211, 0.2);
+  background-color: rgba(211, 211, 211, 0.1);
 }
 code {
   font-family: "Consolas", "Source Code Pro", monospace;
@@ -298,27 +314,106 @@ table tbody tr:last-child td:first-child {
 table tbody tr:last-child td:last-child {
   border-radius: 0 0 4px 0;
 }
-.h-container {
+form.fullsize label {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+}
+form.fullsize label .label-text {
+  margin-right: 12px;
+  min-width: 60px;
+}
+form.fullsize label input {
+  flex-grow: 1;
+}
+form.fullsize label.label-big {
+  font-size: x-large;
+}
+form.fullsize label.label-big * {
+  font-size: x-large;
+}
+*[disabled=""],
+.disabled {
+  opacity: 0.3;
+}
+/*** Custom elements ***/
+.CodeMirror {
+  font-family: "Consolas", monospace !important;
+  background-color: transparent;
+  color: #a0ccff;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 1px solid rgba(160, 204, 255, 0.2);
+  border-right: 1px solid rgba(160, 204, 255, 0.2);
+  border-radius: 0;
+}
+.CodeMirror .cm-link {
+  color: #7dffff !important;
+}
+.CodeMirror .cm-url {
+  color: #00caca !important;
+}
+.CodeMirror .cm-tag {
+  color: #ff7dff !important;
+}
+.CodeMirror .cm-strong {
+  color: #ffff7d !important;
+}
+.CodeMirror .cm-em {
+  color: #ffbb7d !important;
+}
+.CodeMirror .cm-quote {
+  color: #7dff7d !important;
+}
+.CodeMirror .cm-comment {
+  color: lightgray !important;
+}
+.CodeMirror .cm-header {
+  color: #ffffff !important;
+}
+.editor-toolbar,
+.editor-statusbar {
+  background-color: #0e1c47;
+  color: #a0ccff !important;
+  border: 0;
+  opacity: 1 !important;
+}
+.editor-toolbar a,
+.editor-statusbar a {
+  color: #a0ccff !important;
+  border: 0;
+}
+.editor-toolbar a:hover,
+.editor-statusbar a:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.editor-toolbar a.active,
+.editor-statusbar a.active {
+  background-color: rgba(160, 204, 255, 0.3);
+  color: white !important;
+}
+.editor-toolbar a.active:hover,
+.editor-statusbar a.active:hover {
+  background-color: rgba(160, 204, 255, 0.2);
+  color: #ffffff !important;
+}
+.horizontal-container {
   display: flex;
   justify-content: center;
   align-content: center;
-  flex-direction: column;
+  flex-direction: row;
 }
-@media (min-width: 800px) {
-  .h-container {
-    flex-direction: row;
+@media (max-width: 799px) {
+  .horizontal-container {
+    flex-direction: column;
   }
 }
-.main-container {
+.vertical-main {
   width: 100%;
 }
-@media (min-width: 800px) {
-  .main-container {
-    width: 800px;
-  }
-}
 @media (min-width: 1200px) {
-  .main-container {
+  .vertical-main {
     width: 1200px;
   }
 }
@@ -328,10 +423,10 @@ table tbody tr:last-child td:last-child {
   padding: 8px;
   margin: 8px;
 }
-.doublebox {
+.dbox {
   margin: 8px;
 }
-.doublebox .top {
+.dbox .dbox-top {
   display: flex;
   justify-content: space-between;
   background-color: rgba(160, 204, 255, 0.2);
@@ -342,41 +437,27 @@ table tbody tr:last-child td:last-child {
   font-weight: bold;
   height: 16px;
 }
-.doublebox .top .left {
+.dbox .dbox-top .left {
   align-self: flex-start;
 }
-.doublebox .top .right {
+.dbox .dbox-top .right {
   align-self: flex-end;
 }
-.doublebox .bot {
+.dbox .dbox-bot {
   background-color: rgba(160, 204, 255, 0.1);
   padding: 8px;
   border-radius: 0 0 4px 4px;
 }
-.doublebox.doublebox-red .top {
-  background-color: rgba(255, 125, 125, 0.2);
-  color: #ff7d7d;
-}
-.doublebox.doublebox-red .bot {
-  background-color: rgba(255, 125, 125, 0.1);
-  color: #ff7d7d;
-}
-.multirow {
-  list-style-type: none;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-left: 0;
-}
-.palette-color {
+.color {
   border-radius: 4px;
   width: 32px;
   height: 32px;
   display: inline-block;
 }
-.palette-color.light {
+.color.color-light {
   border: 1px solid black;
 }
-.palette-color.dark {
+.color.color-dark {
   border: 1px solid white;
 }
 .proscons {
@@ -487,7 +568,7 @@ table tbody tr:last-child td:last-child {
   content: "\f0c8";
   margin-right: 6px;
 }
-.proscons.big {
+.proscons.label-big {
   font-size: xx-large;
 }
 .spoiler {
@@ -499,154 +580,34 @@ table tbody tr:last-child td:last-child {
 .spoiler:hover {
   color: #a0ccff;
 }
-.faded,
-input[disabled=""],
-button[disabled=""] {
-  opacity: 0.3;
-}
-form.fullsize label {
-  margin-top: 4px;
-  margin-bottom: 4px;
-  display: flex;
-}
-form.fullsize label .label-text {
-  margin-right: 12px;
-  min-width: 60px;
-}
-form.fullsize label input {
-  flex-grow: 1;
-}
-form.fullsize label[for="wikiedit-title"] {
-  font-size: x-large;
-}
-form.fullsize label[for="wikiedit-title"] * {
-  font-size: x-large;
-}
-form.fullsize .editor-toolbar,
-form.fullsize .editor-statusbar {
-  background-color: #0e1c47;
-  color: #a0ccff !important;
-  border: 0;
-  opacity: 1 !important;
-}
-form.fullsize .editor-toolbar a,
-form.fullsize .editor-statusbar a {
-  color: #a0ccff !important;
-  border: 0;
-}
-form.fullsize .editor-toolbar a:hover,
-form.fullsize .editor-statusbar a:hover {
-  background-color: rgba(160, 204, 255, 0.2);
-  color: #ffffff !important;
-}
-form.fullsize .editor-toolbar a.active,
-form.fullsize .editor-statusbar a.active {
-  background-color: rgba(160, 204, 255, 0.3);
-  color: white !important;
-}
-form.fullsize .editor-toolbar a.active:hover,
-form.fullsize .editor-statusbar a.active:hover {
-  background-color: rgba(160, 204, 255, 0.2);
-  color: #ffffff !important;
-}
-form.fullsize .CodeMirror {
-  font-family: "Consolas", monospace !important;
-  background-color: transparent;
-  color: #a0ccff;
-  border-top: 0;
-  border-bottom: 0;
-  border-left: 1px solid rgba(160, 204, 255, 0.2);
-  border-right: 1px solid rgba(160, 204, 255, 0.2);
-  border-radius: 0;
-}
-form.fullsize .CodeMirror .cm-link {
-  color: #7dffff !important;
-}
-form.fullsize .CodeMirror .cm-url {
-  color: #00caca !important;
-}
-form.fullsize .CodeMirror .cm-tag {
-  color: #ff7dff !important;
-}
-form.fullsize .CodeMirror .cm-strong {
-  color: #ffff7d !important;
-}
-form.fullsize .CodeMirror .cm-em {
-  color: #ffbb7d !important;
-}
-form.fullsize .CodeMirror .cm-quote {
-  color: #7dff7d !important;
-}
-form.fullsize .CodeMirror .cm-comment {
-  color: lightgray !important;
-}
-form.fullsize .CodeMirror .cm-header {
-  color: #ffffff !important;
-}
-.mcstatus-grid {
-  display: grid;
-  grid-template-columns: 64px auto auto;
-  grid-column-gap: 12px;
-  align-items: center;
-}
-.mcstatus-grid .mcstatus-icon {
-  grid-column: 1;
-  grid-row-start: 1;
-  grid-row-end: 3;
-  width: 64px;
-  height: 64px;
-}
-.mcstatus-grid .mcstatus-icon .mcstatus-icon-img {
-  width: 64px;
-  height: 64px;
-}
-.mcstatus-grid .mcstatus-address {
-  font-weight: bold;
-  grid-column: 2;
-  justify-self: start;
-  grid-row: 1;
-}
-.mcstatus-grid .mcstatus-address .server-up {
-  color: #7dff7d;
-}
-.mcstatus-grid .mcstatus-address .server-down {
-  color: #ff7d7d;
-}
-.mcstatus-grid .mcstatus-description {
-  grid-column: 2;
-  justify-self: start;
-  grid-row: 2;
-}
-.mcstatus-grid .mcstatus-players {
-  grid-column: 3;
-  justify-self: end;
-  grid-row: 1;
-}
-.mcstatus-grid .mcstatus-version {
-  grid-column: 3;
-  justify-self: end;
-  grid-row: 2;
-}
-.wikiview-doublebox .bot {
+.wiki .wiki-doublebox .dbox-bot {
   background-color: transparent;
   border-top: 0;
   border-bottom: 4px solid rgba(160, 204, 255, 0.2);
   border-left: 4px solid rgba(160, 204, 255, 0.2);
   border-right: 4px solid rgba(160, 204, 255, 0.2);
 }
-.wikiview-doublebox .bot .wikiview-title {
+.wiki .wiki-doublebox .dbox-bot .wikiview-title {
   text-align: center;
   font-size: 42px;
   margin-top: 0;
 }
-.wikiview-doublebox .bot h1,
-.wikiview-doublebox .bot h2,
-.wikiview-doublebox .bot h3,
-.wikiview-doublebox .bot h4,
-.wikiview-doublebox .bot h5,
-.wikiview-doublebox .bot h6 {
+.wiki h1,
+.wiki h2,
+.wiki h3,
+.wiki h4,
+.wiki h5,
+.wiki h6 {
   margin-top: revert;
   margin-bottom: revert;
+}
+.error .error-dbox .dbox-top {
+  background-color: rgba(255, 125, 125, 0.2);
+  color: #ff7d7d;
+}
+.error .error-dbox .dbox-bot {
+  background-color: rgba(255, 125, 125, 0.1);
+  color: #ff7d7d;
 }
 .diario {
   display: grid;
@@ -708,6 +669,51 @@ form.fullsize .CodeMirror .cm-header {
 }
 .diario.diario-spoiler:hover {
   color: #ff7d7d;
+}
+/*** Page specific classes ***/
+.mcstatus-grid {
+  display: grid;
+  grid-template-columns: 64px auto auto;
+  grid-column-gap: 12px;
+  align-items: center;
+}
+.mcstatus-grid .mcstatus-icon {
+  grid-column: 1;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  width: 64px;
+  height: 64px;
+}
+.mcstatus-grid .mcstatus-icon .mcstatus-icon-img {
+  width: 64px;
+  height: 64px;
+}
+.mcstatus-grid .mcstatus-address {
+  font-weight: bold;
+  grid-column: 2;
+  justify-self: start;
+  grid-row: 1;
+}
+.mcstatus-grid .mcstatus-address .server-up {
+  color: #7dff7d;
+}
+.mcstatus-grid .mcstatus-address .server-down {
+  color: #ff7d7d;
+}
+.mcstatus-grid .mcstatus-description {
+  grid-column: 2;
+  justify-self: start;
+  grid-row: 2;
+}
+.mcstatus-grid .mcstatus-players {
+  grid-column: 3;
+  justify-self: end;
+  grid-row: 1;
+}
+.mcstatus-grid .mcstatus-version {
+  grid-column: 3;
+  justify-self: end;
+  grid-row: 2;
 }
 .profile .profile-links .links-linked {
   font-family: "Consolas", "Source Code Pro", monospace;

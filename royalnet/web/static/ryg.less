@@ -1,3 +1,5 @@
+/*** Variables ***/
+
 @bg: #0d193b; //Background color
 @fg: #a0ccff; //Foreground color
 @li: #00caca; //Link
@@ -20,7 +22,9 @@
 @main-fonts: "Arial", "Helvetica Neue", sans-serif;
 @monospace-fonts: "Consolas", "Source Code Pro", monospace;
 
-//General
+
+/*** Standard elements ***/
+
 body {
     font-family: @main-fonts;
     background-color: @bg;
@@ -165,6 +169,14 @@ a {
     }
 }
 
+b, strong {
+    color: @pastel-yellow;
+}
+
+i, em {
+    color: @pastel-orange;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: @ec;
     margin-top: 0;
@@ -172,15 +184,21 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
 
-
 pre {
-    color: lightgray;
-    border: 1px solid @fg-ten;
-    background-color: @fg-ten;
     padding: 2px 4px 2px 8px;
     margin: 8px;
+
+    color: lightgray;
+    border: 1px solid fade(lightgray, 20%);
+    background-color: fade(lightgray, 10%);
+    font-family: @monospace-fonts;
 }
 
+*:not(pre) > code {
+    color: lightgray;
+    border: 1px solid fade(lightgray, 20%);
+    background-color: fade(lightgray, 10%);
+}
 code {
     font-family: @monospace-fonts;
 }
@@ -369,28 +387,126 @@ table {
     }
 }
 
+form.fullsize {
 
-//Elements
+    label {
+        margin-top: 4px;
+        margin-bottom: 4px;
+        display: flex;
 
-.h-container {
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    flex-direction: column;
+        .label-text {
+            margin-right: 12px;
+            min-width: 60px;
+        }
 
-    @media (min-width: 800px)
-    {
-        flex-direction: row;
+        input {
+            flex-grow: 1;
+        }
+
+        &.label-big {
+            font-size: x-large;
+
+            * {
+                font-size: x-large;
+            }
+        }
     }
 }
 
-.main-container {
-    width: 100%;
+*[disabled=""], .disabled {
+    opacity: 0.3;
+}
 
-    @media (min-width: 800px)
-    {
-        width: 800px;
+
+
+/*** Custom elements ***/
+
+//Markdown editor
+.CodeMirror {
+    font-family: "Consolas", monospace !important;
+    background-color: transparent;
+    color: @fg;
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 1px solid @fg-twenty;
+    border-right: 1px solid @fg-twenty;
+    border-radius: 0;
+
+    .cm-link {
+        color: @pastel-cyan !important;
     }
+
+    .cm-url {
+        color: @li !important;
+    }
+
+    .cm-tag {
+        color: @pastel-magenta !important;
+    }
+
+    .cm-strong {
+        color: @pastel-yellow !important;
+    }
+
+    .cm-em {
+        color: @pastel-orange !important;
+    }
+
+    .cm-quote {
+        color: @pastel-lime !important;
+    }
+
+    .cm-comment {
+        color: lightgray !important;
+    }
+
+    .cm-header {
+        color: @ec !important;
+    }
+}
+.editor-toolbar, .editor-statusbar {
+    background-color: @fg-twenty-hard;
+    color: @fg !important;
+    border: 0;
+    opacity: 1 !important;
+
+    a {
+        color: @fg !important;
+        border: 0;
+
+        &:hover {
+            background-color: @fg-twenty;
+            color: lighten(@fg, 25%) !important;
+        }
+
+        &.active {
+            background-color: fade(@fg, 30%);
+            color: white !important;
+
+            &:hover {
+                background-color: @fg-twenty;
+                color: lighten(@fg, 25%) !important;
+            }
+        }
+    }
+}
+
+//Horizontal container, should contain elements such as main and sidebar
+.horizontal-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: row;
+
+    @media (max-width: 799px)
+    {
+        flex-direction: column;
+    }
+}
+
+//Vertical main page container
+.vertical-main {
+    width: 100%;
 
     @media (min-width: 1200px)
     {
@@ -398,6 +514,7 @@ table {
     }
 }
 
+//A simple box
 .box {
     background-color: @fg-ten;
     border-radius: 4px;
@@ -405,10 +522,11 @@ table {
     margin: 8px;
 }
 
-.doublebox {
+//A double box
+.dbox {
     margin: 8px;
 
-    .top {
+    .dbox-top {
         display: flex;
         justify-content: space-between;
         background-color: @fg-twenty;
@@ -428,54 +546,36 @@ table {
         }
     }
 
-    .bot {
+    .dbox-bot {
         background-color: @fg-ten;
         padding: 8px;
         border-radius: 0 0 4px 4px;
     }
-
-    &.doublebox-red {
-        .top {
-            background-color: fade(@pastel-red, 20%);
-            color: @pastel-red;
-        }
-
-        .bot {
-            background-color: fade(@pastel-red, 10%);
-            color: @pastel-red;
-        }
-    }
 }
 
-//This is something about the sidebar... better leave it alone.
-.multirow {
-    list-style-type: none;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
-}
-
-.palette-color {
+//A palette color
+.color {
     border-radius: 4px;
     width: 32px;
     height: 32px;
     display: inline-block;
 
-    &.light {
+    &.color-light {
         border: 1px solid black;
     }
 
-    &.dark {
+    &.color-dark {
         border: 1px solid white;
     }
 }
 
-//noinspection CssNoGenericFontName
+//Pros and cons of something
 .proscons {
     padding: 4px 4px 4px 8px;
     margin: 4px;
     border-radius: 4px;
 
+    //noinspection CssNoGenericFontName
     &.plus {
         color: @pastel-lime;
         background-color: fade(@pastel-lime, 10%);
@@ -488,6 +588,7 @@ table {
         }
     }
 
+    //noinspection CssNoGenericFontName
     &.minus {
         color: @pastel-red;
         background-color: fade(@pastel-red, 10%);
@@ -500,6 +601,7 @@ table {
         }
     }
 
+    //noinspection CssNoGenericFontName
     &.stars {
         background-color: fade(@pastel-yellow, 10%);
         color: @pastel-yellow;
@@ -590,6 +692,7 @@ table {
         }
     }
 
+    //noinspection CssNoGenericFontName
     &:not(.plus):not(.minus):not(.stars) {
         color: @fg;
         background-color: @fg-ten;
@@ -602,11 +705,12 @@ table {
         }
     }
 
-    &.big {
+    &.label-big {
         font-size: xx-large;
     }
 }
 
+//A spoiler
 .spoiler {
     color: transparent;
     border: 1px solid @fg-ten;
@@ -618,184 +722,46 @@ table {
     }
 }
 
-.faded, input[disabled=""], button[disabled=""] {
-    opacity: 0.3;
-}
+//Wiki page
+.wiki {
+    .wiki-doublebox {
+        .dbox-bot {
+            background-color: transparent;
+            border-top: 0;
+            border-bottom: 4px solid @fg-twenty;
+            border-left: 4px solid @fg-twenty;
+            border-right: 4px solid @fg-twenty;
 
-form.fullsize {
-
-    label {
-        margin-top: 4px;
-        margin-bottom: 4px;
-        display: flex;
-
-        .label-text {
-            margin-right: 12px;
-            min-width: 60px;
-        }
-
-        input {
-            flex-grow: 1;
-        }
-    }
-
-    label[for="wikiedit-title"] {
-        font-size: x-large;
-
-        * {
-            font-size: x-large;
-        }
-    }
-
-    .editor-toolbar, .editor-statusbar {
-        background-color: @fg-twenty-hard;
-        color: @fg !important;
-        border: 0;
-        opacity: 1 !important;
-
-        a {
-            color: @fg !important;
-            border: 0;
-
-            &:hover {
-                background-color: @fg-twenty;
-                color: lighten(@fg, 25%) !important;
-            }
-
-            &.active {
-                background-color: fade(@fg, 30%);
-                color: white !important;
-
-                &:hover {
-                    background-color: @fg-twenty;
-                    color: lighten(@fg, 25%) !important;
-                }
+            .wikiview-title {
+                text-align: center;
+                font-size: 42px;
+                margin-top: 0;
             }
         }
     }
 
-    .CodeMirror {
-        font-family: "Consolas", monospace !important;
-        background-color: transparent;
-        color: @fg;
-        border-top: 0;
-        border-bottom: 0;
-        border-left: 1px solid @fg-twenty;
-        border-right: 1px solid @fg-twenty;
-        border-radius: 0;
-
-        .cm-link {
-            color: @pastel-cyan !important;
-        }
-
-        .cm-url {
-            color: @li !important;
-        }
-
-        .cm-tag {
-            color: @pastel-magenta !important;
-        }
-
-        .cm-strong {
-            color: @pastel-yellow !important;
-        }
-        
-        .cm-em {
-            color: @pastel-orange !important;
-        }
-
-        .cm-quote {
-            color: @pastel-lime !important;
-        }
-
-        .cm-comment {
-            color: lightgray !important;
-        }
-
-        .cm-header {
-            color: @ec !important;
-        }
-
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: revert;
+        margin-bottom: revert;
     }
 }
 
-.mcstatus-grid {
-    display: grid;
-
-    grid-template-columns: 64px auto auto;
-    grid-column-gap: 12px;
-
-    align-items: center;
-
-    .mcstatus-icon {
-        grid-column: 1;
-        grid-row-start: 1;
-        grid-row-end: 3;
-        width: 64px;
-        height: 64px;
-
-        .mcstatus-icon-img {
-            width: 64px;
-            height: 64px;
-        }
-    }
-
-    .mcstatus-address {
-        font-weight: bold;
-
-        grid-column: 2;
-        justify-self: start;
-        grid-row: 1;
-
-        .server-up {
-            color: @pastel-lime;
+//An error
+.error {
+    .error-dbox {
+        .dbox-top {
+            background-color: fade(@pastel-red, 20%);
+            color: @pastel-red;
         }
 
-        .server-down {
+        .dbox-bot {
+            background-color: fade(@pastel-red, 10%);
             color: @pastel-red;
         }
     }
-
-    .mcstatus-description {
-        grid-column: 2;
-        justify-self: start;
-        grid-row: 2;
-    }
-
-    .mcstatus-players {
-        grid-column: 3;
-        justify-self: end;
-        grid-row: 1;
-    }
-
-    .mcstatus-version {
-        grid-column: 3;
-        justify-self: end;
-        grid-row: 2;
-    }
 }
 
-.wikiview-doublebox {
-    .bot {
-        background-color: transparent;
-        border-top: 0;
-        border-bottom: 4px solid @fg-twenty;
-        border-left: 4px solid @fg-twenty;
-        border-right: 4px solid @fg-twenty;
-
-        .wikiview-title {
-            text-align: center;
-            font-size: 42px;
-            margin-top: 0;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            margin-top: revert;
-            margin-bottom: revert;
-        }
-    }
-}
-
+//A diario entry
 .diario {
     display: grid;
     grid-template-columns: auto auto 40px;
@@ -865,6 +831,66 @@ form.fullsize {
         &:hover {
             color: @pastel-red;
         }
+    }
+}
+
+
+
+/*** Page specific classes ***/
+
+.mcstatus-grid {
+    display: grid;
+
+    grid-template-columns: 64px auto auto;
+    grid-column-gap: 12px;
+
+    align-items: center;
+
+    .mcstatus-icon {
+        grid-column: 1;
+        grid-row-start: 1;
+        grid-row-end: 3;
+        width: 64px;
+        height: 64px;
+
+        .mcstatus-icon-img {
+            width: 64px;
+            height: 64px;
+        }
+    }
+
+    .mcstatus-address {
+        font-weight: bold;
+
+        grid-column: 2;
+        justify-self: start;
+        grid-row: 1;
+
+        .server-up {
+            color: @pastel-lime;
+        }
+
+        .server-down {
+            color: @pastel-red;
+        }
+    }
+
+    .mcstatus-description {
+        grid-column: 2;
+        justify-self: start;
+        grid-row: 2;
+    }
+
+    .mcstatus-players {
+        grid-column: 3;
+        justify-self: end;
+        grid-row: 1;
+    }
+
+    .mcstatus-version {
+        grid-column: 3;
+        justify-self: end;
+        grid-row: 2;
     }
 }
 

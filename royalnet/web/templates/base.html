@@ -48,15 +48,15 @@
                     <span class="nav-login">
                         <a class="no-icon" href="{{ url_for("login.login_index") }}">
                             Login
-                            <img class="nav-image faded" alt="" src="{{ url_for("static", filename="generic.png") }}">
+                            <img class="nav-image disabled" alt="" src="{{ url_for("static", filename="generic.png") }}">
                         </a>
                     </span>
                 {% endif %}
             </span>
         </div>
     </nav>
-    <div class="h-container">
-        <div class="main-container">
+    <div class="horizontal-container">
+        <div class="vertical-main">
             {% block content %}{% endblock %}
         </div>
     </div>

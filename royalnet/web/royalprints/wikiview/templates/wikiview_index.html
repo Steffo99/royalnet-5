@@ -5,13 +5,13 @@
 {% endblock %}
 
 {% block content %}
-    <div class="doublebox">
-        <div class="top">
+    <div class="dbox">
+        <div class="dbox-top">
             <span class="left">
                 Wiki
             </span>
         </div>
-        <div class="bot">
+        <div class="dbox-bot">
             {% if session.royal %}
                 <a href="{{ url_for("wikiedit.wikiedit_newpage") }}" class="btn no-icon">Crea nuova pagina</a>
             {% else %}
