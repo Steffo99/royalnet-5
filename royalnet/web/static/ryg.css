@@ -314,22 +314,22 @@ table tbody tr:last-child td:first-child {
 table tbody tr:last-child td:last-child {
   border-radius: 0 0 4px 0;
 }
-form.fullsize label {
+form.full label {
   margin-top: 4px;
   margin-bottom: 4px;
   display: flex;
 }
-form.fullsize label .label-text {
+form.full label .label-text {
   margin-right: 12px;
   min-width: 60px;
 }
-form.fullsize label input {
+form.full label input {
   flex-grow: 1;
 }
-form.fullsize label.label-big {
+form.full label.label-big {
   font-size: x-large;
 }
-form.fullsize label.label-big * {
+form.full label.label-big * {
   font-size: x-large;
 }
 *[disabled=""],
@@ -398,16 +398,30 @@ form.fullsize label.label-big * {
   background-color: rgba(160, 204, 255, 0.2);
   color: #ffffff !important;
 }
-.horizontal-container {
+.horizontal-container-main {
   display: flex;
   justify-content: center;
   align-content: center;
   flex-direction: row;
 }
-@media (max-width: 799px) {
-  .horizontal-container {
+@media (max-width: 1199px) {
+  .horizontal-container-main {
     flex-direction: column;
   }
+}
+.columns-3 {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: row;
+}
+.columns-3 .column {
+  width: 33.3%;
+}
+.fill {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
 }
 .vertical-main {
   width: 100%;

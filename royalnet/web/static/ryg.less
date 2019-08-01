@@ -387,7 +387,7 @@ table {
     }
 }
 
-form.fullsize {
+form.full {
 
     label {
         margin-top: 4px;
@@ -492,16 +492,35 @@ form.fullsize {
 }
 
 //Horizontal container, should contain elements such as main and sidebar
-.horizontal-container {
+.horizontal-container-main {
     display: flex;
     justify-content: center;
     align-content: center;
     flex-direction: row;
 
-    @media (max-width: 799px)
+    @media (max-width: 1199px)
     {
         flex-direction: column;
     }
+}
+
+//Tripart horizontal container
+.columns-3 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: row;
+    
+    .column {
+        width: 33.3%;
+    }
+}
+
+//Fill the whole parent element and ignore margins
+.fill {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
 }
 
 //Vertical main page container

@@ -228,14 +228,14 @@ nav .nav-sitename {
 nav .nav-login-unavailable {
   opacity: 0.25;
 }
-.horizontal-container {
+.horizontal-container-main {
   display: flex;
   justify-content: center;
   align-content: center;
   flex-direction: column;
 }
 @media (min-width: 800px) {
-  .horizontal-container {
+  .horizontal-container-main {
     flex-direction: row;
   }
 }
