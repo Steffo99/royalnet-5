@@ -28,8 +28,7 @@ class YtdlFile:
         return self.info is not None
 
     def is_downloaded(self) -> bool:
-        # FIXME: Weird characters break everything
-        return self.filename is not None and os.path.exists(self.filename)
+        return self.filename is not None
 
     @contextlib.contextmanager
     def open(self):
