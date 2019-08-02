@@ -13,7 +13,8 @@ class YtdlInfo:
         "quiet": True,  # Do not print messages to stdout.
         "noplaylist": True,  # Download single video instead of a playlist if in doubt.
         "no_warnings": True,  # Do not print out anything for warnings.
-        "outtmpl": "%(title)s-%(id)s.%(ext)s"  # Use the default outtmpl.
+        "outtmpl": "%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
+        "ignoreerrors": True  # Ignore unavailable videos
     }
 
     def __init__(self, info: typing.Dict[str, typing.Any]):
