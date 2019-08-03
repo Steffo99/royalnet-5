@@ -209,18 +209,6 @@ blockquote {
     background-color: fade(@pastel-lime, 10%);
     padding: 2px 4px 2px 8px;
     margin: 8px;
-
-    &.spoiler {
-        color: transparent;
-        background-color: fade(@pastel-red, 10%);
-        border: 1px solid fade(@pastel-red, 10%);
-        border-radius: 2px;
-        padding: 4px;
-
-        &:hover {
-            color: @pastel-red;
-        }
-    }
 }
 
 textarea {
@@ -440,6 +428,7 @@ form.full {
     border-left: 1px solid @fg-twenty !important;
     border-right: 1px solid @fg-twenty !important;
     border-radius: 0 !important;
+    caret-color: white;
 
     .cm-link {
         color: @pastel-cyan !important;
@@ -472,6 +461,10 @@ form.full {
     .cm-header {
         color: @ec !important;
     }
+
+    .CodeMirror-cursor {
+        border-left: 1px solid @fg !important;
+    }
 }
 .editor-toolbar, .editor-statusbar {
     background-color: @fg-ten-hard !important;
@@ -495,6 +488,18 @@ form.full {
                 background-color: @fg-twenty !important;
                 color: lighten(@fg, 25%) !important;
             }
+        }
+    }
+
+    .fas, .far, .fab {
+        color: @fg !important;
+
+        &:hover {
+            color: @fg !important;
+        }
+
+        &:active {
+            color: white !important;
         }
     }
 }
@@ -754,17 +759,31 @@ form.full {
 //A spoiler
 .spoiler {
     color: transparent;
-    border: 1px solid @fg-ten;
+    background-color: fade(@pastel-red, 10%);
+    border: 1px solid fade(@pastel-red, 10%);
     border-radius: 2px;
     padding: 4px;
 
+    b, strong, i, em {
+        color: inherit;
+
+        &:hover {
+            color: inherit;
+        }
+    }
+
+    &blockquote {
+        border-radius: 2px;
+        padding: 4px;
+    }
+
     &:hover {
-        color: @fg;
+        color: @pastel-red;
     }
 }
 
 //Wiki page
-.wiki {
+.wiki, .profile-bio {
     .wiki-doublebox {
         .dbox-bot {
             background-color: transparent;

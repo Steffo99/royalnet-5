@@ -36,7 +36,7 @@
         <div class="nav-right">
             <span>
                 {% if session["royal"] %}
-                    <a href="{{ url_for("profile.profile_by_username", username=session["royal"]["username"]) }}" class="no-icon nav-profile">
+                    <a href="{{ url_for("profile.profile_page", username=session["royal"]["username"]) }}" class="no-icon nav-profile">
                         <span class="nav-accountname">{{ session["royal"]["username"] }}</span>
                         {% if session["royal"]["avatar"] %}
                             <img class="nav-image" alt="" src="{{ session["royal"]["avatar"] }}">

@@ -22,7 +22,7 @@ class WikiPage:
         return Column(String, nullable=False)
 
     @declared_attr
-    def content(self):
+    def contents(self):
         return Column(Text)
 
     @declared_attr

@@ -24,12 +24,12 @@ def wikiedit_newpage():
 
     elif f.request.method == "POST":
         fd = f.request.form
-        if not ("title" in fd and "content" in fd and "css" in fd):
+        if not ("title" in fd and "contents" in fd and "css" in fd):
             return error(400, "Uno dei campi obbligatori non è stato compilato. Controlla e riprova!")
         alchemy, alchemy_session = f.current_app.config["ALCHEMY"], f.current_app.config["ALCHEMY_SESSION"]
         page = alchemy.WikiPage(page_id=uuid.uuid4(),
                                 title=fd["title"],
-                                content=fd["content"],
+                                contents=fd["contents"],
                                 format="markdown",
                                 css=fd["css"] if fd["css"] != "None" else None)
         revision = alchemy.WikiRevision(revision_id=uuid.uuid4(),
@@ -37,7 +37,7 @@ def wikiedit_newpage():
                                         author_id=f.session["royal"]["uid"],
                                         timestamp=datetime.datetime.now(),
                                         reason=fd.get("reason"),
-                                        diff="\n".join(difflib.unified_diff([], page.content.split("\n"))))
+                                        diff="\n".join(difflib.unified_diff([], page.contents.split("\n"))))
         alchemy_session.add(page)
         alchemy_session.add(revision)
         alchemy_session.commit()
@@ -61,7 +61,7 @@ def wikiedit_by_id(page_id: str, title: str):
 
     elif f.request.method == "POST":
         fd = f.request.form
-        if not ("title" in fd and "content" in fd and "css" in fd):
+        if not ("title" in fd and "contents" in fd and "css" in fd):
             return error(400, "Uno dei campi obbligatori non è stato compilato. Controlla e riprova!")
         # Create new revision
         revision = alchemy.WikiRevision(revision_id=uuid.uuid4(),
@@ -69,10 +69,10 @@ def wikiedit_by_id(page_id: str, title: str):
                                         author_id=f.session["royal"]["uid"],
                                         timestamp=datetime.datetime.now(),
                                         reason=fd.get("reason"),
-                                        diff="\n".join(difflib.unified_diff(page.content.split("\n"), fd["content"].split("\n"))))
+                                        diff="\n".join(difflib.unified_diff(page.contents.split("\n"), fd["contents"].split("\n"))))
         alchemy_session.add(revision)
         # Apply changes
-        page.content = fd["content"]
+        page.contents = fd["contents"]
         page.title = fd["title"]
         page.css = fd["css"] if fd["css"] != "None" else None
         alchemy_session.commit()

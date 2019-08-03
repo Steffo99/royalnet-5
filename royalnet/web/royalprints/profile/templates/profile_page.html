@@ -9,6 +9,29 @@
         <h1>
             {{ royal.username }}
         </h1>
+        <div class="profile-bio">
+            <div class="dbox">
+                <div class="dbox-top">
+                    <span class="left">
+                        Bio
+                    </span>
+                    <span class="right">
+                        {% if session["royal"]["uid"] == royal.uid or session["royal"]["role"] == "Admin" %}
+                            <a class="edit no-icon" href="{{ url_for("profile.profile_editbio", username=royal.username) }}">Modifica</a>
+                        {% else %}
+                            <a class="edit no-icon disabled" title="Non sei autorizzato a modificare questa bio.">Modifica</a>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="dbox-bot">
+                    {% if parsed_bio %}
+                        {{ parsed_bio }}
+                    {% else %}
+                        <span class="disabled">Questo utente non ha nessuna bio.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         <div class="columns-3">
             <div class="column">
                 <div class="dbox profile-links">
@@ -17,7 +40,7 @@
                     </div>
                     <div class="dbox-bot">
                         <ul class="links-list">
-                            <li><span class="links-item links-linked">royalnet:{{ royal.username }}</span></li>
+                            <li><span class="links-item links-linked" title="{{ royal.uid }}">royalnet:{{ royal.username }}</span></li>
                             {% for telegram in royal.telegram %}
                                 {% if telegram.username %}
                                     <li><a class="links-item links-linked" href="https://t.me/{{ telegram.username }}">telegram:{{ telegram.mention() }}</a></li>
@@ -70,11 +93,5 @@
                 </div>
             </div>
         </div>
-        <h2>
-            Medals
-        </h2>
-        <p>
-            TODO
-        </p>
     </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ page.title }} - RYGwikieditor
+    {{ royal.username }} - RYGbioeditor
 {% endblock %}
 
 {% block head %}
@@ -13,34 +13,15 @@
     <div class="dbox">
         <div class="dbox-top">
             <span class="left">
-                Editor Wiki
+                Editor Bio
             </span>
         </div>
         <div class="dbox-bot">
-            <form method="POST" class="wikiedit-form full">
-                <label for="wikiedit-title" class="label-big">
-                    <span class="label-text">Titolo</span>
-                    <input id="wikiedit-title" type="text" name="title" value="{{ page.title }}">
-                </label>
-                <label for="wikiedit-format">
-                    <span class="label-text">Formato</span>
-                    <input id="wikiedit-format" type="text" name="format" disabled value="markdown">
-                </label>
+            <form method="POST" class="full">
                 <!--suppress HtmlFormInputWithoutLabel -->
-                <textarea id="wikiedit-contents" name="contents">{{ page.contents }}</textarea>
-                <label for="wikiedit-css">
-                    <span class="label-text">Tema</span>
-                    <select id="wikiedit-css" name="css">
-                        <option value="None" {% if page.css == None %}selected{% endif %}>Royal Games</option>
-                        <option value="tf2.css" {% if page.css == "tf2.css" %}selected{% endif %}>Team Fortress 2</option>
-                    </select>
-                </label>
-                <label for="wikiedit-reason">
-                    <span class="label-text">Motivo</span>
-                    <input id="wikiedit-reason" type="text" name="reason">
-                </label>
-                <label for="wikiedit-submit">
-                    <input id="wikiedit-submit" type="submit" value="Salva">
+                <textarea id="profile-editbio-contents" name="contents">{{ royal.bio.contents }}</textarea>
+                <label for="profile-editbio-submit">
+                    <input id="profile-editbio-submit" type="submit" value="Salva">
                 </label>
             </form>
         </div>
@@ -51,7 +32,7 @@
     <script>
         //TODO: maybe enable autosave?
         let simplemde = new SimpleMDE({
-            element: document.getElementById("wikiedit-contents"),
+            element: document.getElementById("profile-editbio-contents"),
             blockStyles: {
                 italic: "_"
             },

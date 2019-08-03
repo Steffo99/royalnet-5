@@ -160,16 +160,6 @@ blockquote {
   padding: 2px 4px 2px 8px;
   margin: 8px;
 }
-blockquote.spoiler {
-  color: transparent;
-  background-color: rgba(255, 125, 125, 0.1);
-  border: 1px solid rgba(255, 125, 125, 0.1);
-  border-radius: 2px;
-  padding: 4px;
-}
-blockquote.spoiler:hover {
-  color: #ff7d7d;
-}
 textarea {
   background-color: rgba(160, 204, 255, 0.1);
   color: #a0ccff;
@@ -353,6 +343,7 @@ form.full label.label-big * {
   border-left: 1px solid rgba(160, 204, 255, 0.2) !important;
   border-right: 1px solid rgba(160, 204, 255, 0.2) !important;
   border-radius: 0 !important;
+  caret-color: white;
 }
 .CodeMirror .cm-link {
   color: #7dffff !important;
@@ -377,6 +368,9 @@ form.full label.label-big * {
 }
 .CodeMirror .cm-header {
   color: #ffffff !important;
+}
+.CodeMirror .CodeMirror-cursor {
+  border-left: 1px solid #a0ccff !important;
 }
 .editor-toolbar,
 .editor-statusbar {
@@ -403,6 +397,30 @@ form.full label.label-big * {
 .editor-statusbar a.active:hover {
   background-color: rgba(160, 204, 255, 0.2) !important;
   color: #ffffff !important;
+}
+.editor-toolbar .fas,
+.editor-statusbar .fas,
+.editor-toolbar .far,
+.editor-statusbar .far,
+.editor-toolbar .fab,
+.editor-statusbar .fab {
+  color: #a0ccff !important;
+}
+.editor-toolbar .fas:hover,
+.editor-statusbar .fas:hover,
+.editor-toolbar .far:hover,
+.editor-statusbar .far:hover,
+.editor-toolbar .fab:hover,
+.editor-statusbar .fab:hover {
+  color: #a0ccff !important;
+}
+.editor-toolbar .fas:active,
+.editor-statusbar .fas:active,
+.editor-toolbar .far:active,
+.editor-statusbar .far:active,
+.editor-toolbar .fab:active,
+.editor-statusbar .fab:active {
+  color: white !important;
 }
 .editor-toolbar {
   border-top: 1px solid #2b3e62 !important;
@@ -607,31 +625,56 @@ form.full label.label-big * {
 }
 .spoiler {
   color: transparent;
-  border: 1px solid rgba(160, 204, 255, 0.1);
+  background-color: rgba(255, 125, 125, 0.1);
+  border: 1px solid rgba(255, 125, 125, 0.1);
+  border-radius: 2px;
+  padding: 4px;
+}
+.spoiler b,
+.spoiler strong,
+.spoiler i,
+.spoiler em {
+  color: inherit;
+}
+.spoiler b:hover,
+.spoiler strong:hover,
+.spoiler i:hover,
+.spoiler em:hover {
+  color: inherit;
+}
+.spoilerblockquote {
   border-radius: 2px;
   padding: 4px;
 }
 .spoiler:hover {
-  color: #a0ccff;
+  color: #ff7d7d;
 }
-.wiki .wiki-doublebox .dbox-bot {
+.wiki .wiki-doublebox .dbox-bot,
+.profile-bio .wiki-doublebox .dbox-bot {
   background-color: transparent;
   border-top: 0;
   border-bottom: 4px solid rgba(160, 204, 255, 0.2);
   border-left: 4px solid rgba(160, 204, 255, 0.2);
   border-right: 4px solid rgba(160, 204, 255, 0.2);
 }
-.wiki .wiki-doublebox .dbox-bot .wikiview-title {
+.wiki .wiki-doublebox .dbox-bot .wikiview-title,
+.profile-bio .wiki-doublebox .dbox-bot .wikiview-title {
   text-align: center;
   font-size: 42px;
   margin-top: 0;
 }
 .wiki h1,
+.profile-bio h1,
 .wiki h2,
+.profile-bio h2,
 .wiki h3,
+.profile-bio h3,
 .wiki h4,
+.profile-bio h4,
 .wiki h5,
-.wiki h6 {
+.profile-bio h5,
+.wiki h6,
+.profile-bio h6 {
   margin-top: revert;
   margin-bottom: revert;
 }

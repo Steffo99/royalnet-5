@@ -17,8 +17,6 @@
                     {% else %}
                         <a class="edit no-icon disabled" title="Devi fare il login per modificare pagine!">Modifica</a>
                     {% endif %}
-                    |
-                    <a class="permalink no-icon" href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title) }}">Permalink</a>
                 </span>
             </div>
             <div class="dbox-bot">
@@ -26,8 +24,8 @@
                     <h1 class="wikiview-title">
                         {{ page.title }}
                     </h1>
-                    <div class="wikiview-content">
-                        {{ parsed_content }}
+                    <div class="wikiview-contents">
+                        {{ parsed_contents }}
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@ from sqlalchemy import Column, \
                        Integer, \
                        Text, \
                        ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declared_attr
 from .royals import Royal
 
@@ -16,11 +16,11 @@ class Bio:
 
     @declared_attr
     def royal(self):
-        return relationship("Royal")
+        return relationship("Royal", backref=backref("bio", uselist=False))
 
     @declared_attr
     def contents(self):
-        return Column(Text, unique=True, nullable=False)
+        return Column(Text, nullable=False, default="")
 
     def __repr__(self):
         return f"<Bio of {self.royal}>"
