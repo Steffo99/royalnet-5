@@ -23,9 +23,12 @@ class DlmusicCommand(Command):
     @classmethod
     async def common(cls, call: Call):
         url = call.args[0]
-        files: typing.List[YtdlVorbis] = await asyncify(YtdlVorbis.create_and_ready_from_url, url, **ytdl_args)
-        for file in files:
-            await call.reply(f"⬇️ https://scaleway.steffo.eu/musicbot_cache/{urllib.parse.quote(file.vorbis_filename)}")
+        if url.startswith("http://") or url.startswith("https://"):
+            vfiles: typing.List[YtdlVorbis] = await asyncify(YtdlVorbis.create_and_ready_from_url, url, **ytdl_args)
+        else:
+            vfiles = await asyncify(YtdlVorbis.create_and_ready_from_url, f"ytsearch:{url}", **ytdl_args)
+        for vfile in vfiles:
+            await call.reply(f"⬇️ https://scaleway.steffo.eu/musicbot_cache/{urllib.parse.quote(vfile.vorbis_filename)}")
         await asyncio.sleep(seconds_before_deletion)
-        for file in files:
-            file.delete()
+        for vfile in vfiles:
+            vfile.delete()
