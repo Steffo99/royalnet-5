@@ -236,6 +236,7 @@ nav {
   justify-content: space-between;
   height: 50px;
   line-height: 50px;
+  min-width: 400px;
 }
 nav .nav-left {
   text-align: left;
@@ -452,9 +453,11 @@ form.full label.label-big * {
   justify-content: center;
   align-content: center;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 .columns-3 .column {
   width: 33.3%;
+  min-width: 400px;
 }
 .fill {
   width: 100%;
@@ -463,11 +466,8 @@ form.full label.label-big * {
 }
 .vertical-main {
   width: 100%;
-}
-@media (min-width: 1200px) {
-  .vertical-main {
-    width: 1200px;
-  }
+  min-width: 400px;
+  max-width: 1200px;
 }
 .box {
   background-color: rgba(160, 204, 255, 0.1);
@@ -746,6 +746,10 @@ form.full label.label-big * {
 }
 .diario.diario-spoiler:hover {
   color: #ff7d7d;
+}
+ul.multicolumn,
+ol.multicolumn {
+  column-width: 300px;
 }
 /*** Page specific classes ***/
 .mcstatus-grid {

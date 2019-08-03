@@ -17,7 +17,7 @@
             {% else %}
                 <button disabled title="Devi fare il login per creare nuove pagine!">Crea nuova pagina</button>
             {% endif %}
-            <ul>
+            <ul class="multicolumn">
                 {% for page in pages %}
                     <li><a href="{{ url_for("wikiview.wikiview_by_id", page_id=page.page_short_id, title=page.title) }}">{{ page.title }}</a></li>
                 {% endfor %}

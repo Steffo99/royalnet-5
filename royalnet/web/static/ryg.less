@@ -287,6 +287,7 @@ nav {
     justify-content: space-between;
     height: 50px;
     line-height: 50px;
+    min-width: 400px;
 
     .nav-left {
         text-align: left;
@@ -537,9 +538,11 @@ form.full {
     justify-content: center;
     align-content: center;
     flex-direction: row;
+    flex-wrap: wrap;
     
     .column {
         width: 33.3%;
+        min-width: 400px;
     }
 }
 
@@ -553,11 +556,8 @@ form.full {
 //Vertical main page container
 .vertical-main {
     width: 100%;
-
-    @media (min-width: 1200px)
-    {
-        width: 1200px;
-    }
+    min-width: 400px;
+    max-width: 1200px;
 }
 
 //A simple box
@@ -894,6 +894,10 @@ form.full {
     }
 }
 
+//Multicolumn lists
+ul.multicolumn, ol.multicolumn {
+    column-width: 300px;
+}
 
 
 /*** Page specific classes ***/
