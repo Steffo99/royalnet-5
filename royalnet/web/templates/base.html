@@ -26,9 +26,9 @@
                 <span class="nav-sitename">{{ config["SITE_NAME"] }}</span>
             </a>
             <span class="nav-modules">
+                <a class="no-icon" href="{{ url_for("profile.profile_index") }}">Noi</a>
                 <a class="no-icon" href="{{ url_for("wikiview.wikiview_index") }}">Wiki</a>
                 <a class="no-icon" href="{{ url_for("diarioview.diarioview_page", page=1) }}">Diario</a>
-                <a class="no-icon" href="{{ url_for("profile.profile_index") }}">Profili</a>
             </span>
         </div>
         <div class="nav-center">
