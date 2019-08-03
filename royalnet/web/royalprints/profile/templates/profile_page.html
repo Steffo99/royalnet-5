@@ -16,7 +16,7 @@
                         Bio
                     </span>
                     <span class="right">
-                        {% if session["royal"]["uid"] == royal.uid or session["royal"]["role"] == "Admin" %}
+                        {% if session["royal"] and (session["royal"]["uid"] == royal.uid or session["royal"]["role"] == "Admin") %}
                             <a class="edit no-icon" href="{{ url_for("profile.profile_editbio", username=royal.username) }}">Modifica</a>
                         {% else %}
                             <a class="edit no-icon disabled" title="Non sei autorizzato a modificare questa bio.">Modifica</a>
