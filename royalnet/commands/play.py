@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
 
 ytdl_args = {
     "format": "bestaudio",
-    "outtmpl": f"./downloads/%(epoch)s_%(title)s.%(ext)s"
+    "outtmpl": f"./downloads/%(title)s.%(ext)s"
 }
 
 
