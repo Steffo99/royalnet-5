@@ -16,8 +16,8 @@ rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tabl
 
 @rp.route("/")
 def tglogin_index():
-    if f.request.url_root != "https://ryg.steffo.eu/":
-        return error(404, "Il login tramite Telegram non è possibile su questo dominio.")
+    #if f.request.url_root != "https://ryg.steffo.eu/":
+    #    return error(404, "Il login tramite Telegram non è possibile su questo dominio.")
     f.session.pop("royal", None)
     return f.render_template("tglogin_index.html")
 

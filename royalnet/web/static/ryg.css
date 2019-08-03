@@ -336,6 +336,13 @@ form.full label.label-big * {
 .disabled {
   opacity: 0.3;
 }
+/*** Modifiers ***/
+.tiny {
+  font-size: xx-small;
+}
+.center {
+  margin: auto;
+}
 /*** Custom elements ***/
 .CodeMirror {
   font-family: "Consolas", monospace !important;
@@ -750,5 +757,9 @@ form.full label.label-big * {
 }
 .profile .profile-stats .stats-value {
   font-weight: bold;
+}
+.tg-login-container {
+  width: 238px;
+  height: 40px;
 }
 /*# sourceMappingURL=ryg.css.map */
