@@ -8,5 +8,9 @@ from .keygroups import Keygroup
 from .discord import Discord
 from .wikipages import WikiPage
 from .wikirevisions import WikiRevision
+from .medals import Medal
+from .medalawards import MedalAward
+from .bios import Bio
 
-__all__ = ["Royal", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage", "WikiRevision"]
+__all__ = ["Royal", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage",
+           "WikiRevision", "Medal", "MedalAward", "Bio"]
