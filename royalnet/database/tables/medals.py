@@ -27,7 +27,11 @@ class Medal:
 
     @declared_attr
     def classes(self):
-        return Column(String)
+        return Column(String, nullable=False, default="")
+
+    @declared_attr
+    def score(self):
+        return Column(Integer, nullable=False)
 
     def __str__(self):
         return self.name
