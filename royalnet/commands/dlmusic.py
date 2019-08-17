@@ -22,7 +22,7 @@ class DlmusicCommand(Command):
 
     @classmethod
     async def common(cls, call: Call):
-        url = call.args[0]
+        url = call.args.joined()
         if url.startswith("http://") or url.startswith("https://"):
             vfiles: typing.List[YtdlVorbis] = await asyncify(YtdlVorbis.create_and_ready_from_url, url, **ytdl_args)
         else:
