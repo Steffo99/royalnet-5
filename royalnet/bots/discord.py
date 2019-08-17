@@ -2,7 +2,6 @@ import discord
 import typing
 import logging as _logging
 from .generic import GenericBot
-from royalnet.commands import NullCommand
 from ..utils import asyncify, Call, Command, discord_escape
 from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
 from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
@@ -32,7 +31,7 @@ class DiscordBot(GenericBot):
         log.debug(f"Creating music_data dict")
         self.music_data: typing.Dict[discord.Guild, playmodes.PlayMode] = {}
 
-    def _call_factory(self) -> typing.Type[Call]:
+    def _interface_factory(self) -> typing.Type[Call]:
         log.debug(f"Creating DiscordCall")
 
         # noinspection PyMethodParameters

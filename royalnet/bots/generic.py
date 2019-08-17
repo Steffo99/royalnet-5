@@ -2,10 +2,11 @@ import sys
 import typing
 import asyncio
 import logging
-from ..utils import Command, NetworkHandler, Call
-from royalnet.commands import NullCommand
-from ..network import RoyalnetLink, Request, Response, ResponseError, RoyalnetConfig
+from ..utils import NetworkHandler
+from ..network import RoyalnetLink, Request, Response, ResponseSuccess, ResponseError, RoyalnetConfig
 from ..database import Alchemy, DatabaseConfig, relationshiplinkchain
+from ..commands import Command, CommandInterface
+from ..error import *
 
 
 log = logging.getLogger(__name__)
@@ -28,17 +29,40 @@ class GenericBot:
         for command in commands:
             lower_command_name = command.command_name.lower()
             self.commands[f"{command_prefix}{lower_command_name}"] = command
-            self.network_handlers = {**self.network_handlers, **command.network_handler_dict()}
         self.missing_command: typing.Type[Command] = missing_command
         self.error_command: typing.Type[Command] = error_command
         log.debug(f"Successfully generated commands")
 
-    def _call_factory(self) -> typing.Type[Call]:
-        """Create the TelegramCall class, representing a command call. It should inherit from :py:class:`royalnet.utils.Call`.
+    def _interface_factory(self) -> typing.Type[CommandInterface]:
+        """Create a :py:class:`royalnet.commands.CommandInterface` type and return it.
 
         Returns:
-            The created TelegramCall class."""
-        raise NotImplementedError()
+            The created :py:class:`royalnet.commands.CommandInterface` type."""
+
+        # noinspection PyAbstractClass,PyMethodParameters
+        class GenericInterface(CommandInterface):
+            alchemy = self.alchemy
+            bot = self
+
+            def register_net_handler(ci, message_type: str, network_handler: typing.Callable):
+                self.network_handlers[message_type] = network_handler
+
+            async def net_request(ci, request: Request, destination: str) -> dict:
+                if self.network is None:
+                    raise InvalidConfigError("Royalnet is not enabled on this bot")
+                response_dict: dict = await self.network.request(request.to_dict(), destination)
+                if "type" not in response_dict:
+                    raise RoyalnetResponseError("Response is missing a type")
+                elif response_dict["type"] == "ResponseSuccess":
+                    response: typing.Union[ResponseSuccess, ResponseError] = ResponseSuccess.from_dict(response_dict)
+                elif response_dict["type"] == "ResponseError":
+                    response = ResponseError.from_dict(response_dict)
+                else:
+                    raise RoyalnetResponseError("Response type is unknown")
+                response.raise_on_error()
+                return response.data
+
+        return GenericInterface
 
     def _init_royalnet(self, royalnet_config: RoyalnetConfig):
         """Create a :py:class:`royalnet.network.RoyalnetLink`, and run it as a :py:class:`asyncio.Task`."""
@@ -117,7 +141,7 @@ class GenericBot:
         if commands is None:
             commands = []
         self._init_commands(command_prefix, commands, missing_command=missing_command, error_command=error_command)
-        self._Call = self._call_factory()
+        self._Call = self._interface_factory()
         if royalnet_config is None:
             self.network = None
         else:

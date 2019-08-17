@@ -3,11 +3,11 @@ import telegram.utils.request
 import typing
 import logging as _logging
 from .generic import GenericBot
-from royalnet.commands import NullCommand
-from ..utils import asyncify, Call, Command, telegram_escape
+from ..utils import asyncify, telegram_escape
 from ..error import UnregisteredError, InvalidConfigError, RoyalnetResponseError
 from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
 from ..database import DatabaseConfig
+from ..commands import CommandInterface
 
 
 log = _logging.getLogger(__name__)
@@ -21,7 +21,6 @@ class TelegramConfig:
 
 class TelegramBot(GenericBot):
     """A bot that connects to `Telegram <https://telegram.org/>`_."""
-    interface_name = "telegram"
 
     def _init_client(self):
         """Create the :py:class:`telegram.Bot`, and set the starting offset."""
@@ -30,43 +29,29 @@ class TelegramBot(GenericBot):
         self.client = telegram.Bot(self._telegram_config.token, request=request)
         self._offset: int = -100
 
-    def _call_factory(self) -> typing.Type[Call]:
+    def _interface_factory(self) -> typing.Type[CommandInterface]:
+        GenericInterface = super()._interface_factory()
+
         # noinspection PyMethodParameters
-        class TelegramCall(Call):
-            interface_name = self.interface_name
-            interface_obj = self
-            interface_prefix = "/"
+        class TelegramInterface(GenericInterface):
+            name = "telegram"
+            prefix = "/"
 
             alchemy = self.alchemy
 
-            async def reply(call, text: str):
-                await asyncify(call.channel.send_message, telegram_escape(text),
+            async def reply(ci, extra: dict, text: str):
+                await asyncify(ci.channel.send_message, telegram_escape(text),
                                parse_mode="HTML",
                                disable_web_page_preview=True)
 
-            async def net_request(call, request: Request, destination: str) -> dict:
-                if self.network is None:
-                    raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response_dict: dict = await self.network.request(request.to_dict(), destination)
-                if "type" not in response_dict:
-                    raise RoyalnetResponseError("Response is missing a type")
-                elif response_dict["type"] == "ResponseSuccess":
-                    response: typing.Union[ResponseSuccess, ResponseError] = ResponseSuccess.from_dict(response_dict)
-                elif response_dict["type"] == "ResponseError":
-                    response = ResponseError.from_dict(response_dict)
-                else:
-                    raise RoyalnetResponseError("Response type is unknown")
-                response.raise_on_error()
-                return response.data
-
-            async def get_author(call, error_if_none=False):
-                update: telegram.Update = call.kwargs["update"]
+            async def get_author(ci, extra: dict, error_if_none=False):
+                update: telegram.Update = extra["update"]
                 user: telegram.User = update.effective_user
                 if user is None:
                     if error_if_none:
                         raise UnregisteredError("No author for this message")
                     return None
-                query = call.session.query(self.master_table)
+                query = ci.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
