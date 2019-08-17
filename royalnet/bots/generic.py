@@ -3,7 +3,7 @@ import typing
 import asyncio
 import logging
 from ..utils import Command, NetworkHandler, Call
-from ..commands import NullCommand
+from royalnet.commands import NullCommand
 from ..network import RoyalnetLink, Request, Response, ResponseError, RoyalnetConfig
 from ..database import Alchemy, DatabaseConfig, relationshiplinkchain
 

@@ -6,8 +6,8 @@ import logging
 from royalnet.bots import DiscordBot, DiscordConfig, TelegramBot, TelegramConfig
 from royalnet.commands import *
 # noinspection PyUnresolvedReferences
-from royalnet.commands.debug_create import DebugCreateCommand
-from royalnet.commands.error_handler import ErrorHandlerCommand
+from royalnet.commands import DebugCreateCommand
+from royalnet.commands import ErrorHandlerCommand
 from royalnet.network import RoyalnetServer, RoyalnetConfig
 from royalnet.database import DatabaseConfig
 from royalnet.database.tables import Royal, Telegram, Discord
