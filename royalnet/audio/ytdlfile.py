@@ -13,7 +13,7 @@ class YtdlFile:
         "quiet": True,  # Do not print messages to stdout.
         "noplaylist": True,  # Download single video instead of a playlist if in doubt.
         "no_warnings": True,  # Do not print out anything for warnings.
-        "outtmpl": "%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
+        "outtmpl": "%(epoch)s-%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
         "ignoreerrors": True  # Ignore unavailable videos
     }
 
@@ -52,8 +52,9 @@ class YtdlFile:
         if self.is_downloaded():
             raise AlreadyDownloadedError()
         with youtube_dl.YoutubeDL({**self._default_ytdl_args, **ytdl_args}) as ytdl:
+            filename = ytdl.prepare_filename(self.info.__dict__)
             ytdl.download([self.info.webpage_url])
-            self.filename = ytdl.prepare_filename(self.info.__dict__)
+            self.filename = filename
 
     def delete(self):
         if self.is_downloaded():
