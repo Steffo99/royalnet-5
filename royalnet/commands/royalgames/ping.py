@@ -1,21 +1,21 @@
-import asyncio
-from ..utils import Command, Call
-from ..error import InvalidInputError
+import typing
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
 
 
 class PingCommand(Command):
+    name: str = "ping"
 
-    command_name = "ping"
-    command_description = "Ping pong dopo un po' di tempo!"
-    command_syntax = "[time_to_wait]"
+    description: str = "Replies with a Pong!"
 
-    @classmethod
-    async def common(cls, call: Call):
-        try:
-            time = int(call.args[0])
-        except InvalidInputError:
-            time = 0
-        except ValueError:
-            raise InvalidInputError("time_to_wait is not a number")
-        await asyncio.sleep(time)
-        await call.reply("🏓 Pong!")
+    syntax: str = ""
+
+    require_alchemy_tables: typing.Set = set()
+
+    def __init__(self, interface: CommandInterface):
+        super().__init__(interface)
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        await data.reply("Pong!")

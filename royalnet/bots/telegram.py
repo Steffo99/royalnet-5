@@ -3,11 +3,11 @@ import telegram.utils.request
 import typing
 import logging as _logging
 from .generic import GenericBot
-from ..utils import asyncify, telegram_escape
-from ..error import UnregisteredError, InvalidConfigError, RoyalnetResponseError
-from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
-from ..database import DatabaseConfig
-from ..commands import CommandInterface
+from ..utils import *
+from ..error import *
+from ..network import *
+from ..database import *
+from ..commands import *
 
 
 log = _logging.getLogger(__name__)
@@ -30,28 +30,35 @@ class TelegramBot(GenericBot):
         self._offset: int = -100
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:
+        # noinspection PyPep8Naming
         GenericInterface = super()._interface_factory()
 
-        # noinspection PyMethodParameters
+        # noinspection PyMethodParameters,PyAbstractClass
         class TelegramInterface(GenericInterface):
             name = "telegram"
             prefix = "/"
 
-            alchemy = self.alchemy
+        return TelegramInterface
 
-            async def reply(ci, extra: dict, text: str):
-                await asyncify(ci.channel.send_message, telegram_escape(text),
+    def _data_factory(self) -> typing.Type[CommandData]:
+        # noinspection PyMethodParameters,PyAbstractClass
+        class TelegramData(CommandData):
+            def __init__(data, interface: CommandInterface, update: telegram.Update):
+                data._interface = interface
+                data.update = update
+
+            async def reply(data, text: str):
+                await asyncify(data.update.effective_chat.send_message, telegram_escape(text),
                                parse_mode="HTML",
                                disable_web_page_preview=True)
 
-            async def get_author(ci, extra: dict, error_if_none=False):
-                update: telegram.Update = extra["update"]
-                user: telegram.User = update.effective_user
+            async def get_author(data, error_if_none=False):
+                user: telegram.User = data.update.effective_user
                 if user is None:
                     if error_if_none:
                         raise UnregisteredError("No author for this message")
                     return None
-                query = ci.session.query(self.master_table)
+                query = data._interface.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -60,22 +67,16 @@ class TelegramBot(GenericBot):
                     raise UnregisteredError("Author is not registered")
                 return result
 
-        return TelegramCall
+        return TelegramData
 
     def __init__(self, *,
                  telegram_config: TelegramConfig,
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
-                 command_prefix: str = "/",
-                 commands: typing.List[typing.Type[Command]] = None,
-                 missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand):
+                 commands: typing.List[typing.Type[Command]] = None):
         super().__init__(royalnet_config=royalnet_config,
                          database_config=database_config,
-                         command_prefix=command_prefix,
-                         commands=commands,
-                         missing_command=missing_command,
-                         error_command=error_command)
+                         commands=commands)
         self._telegram_config = telegram_config
         self._init_client()
 
@@ -92,15 +93,21 @@ class TelegramBot(GenericBot):
         if text is None:
             return
         # Skip non-command updates
-        if not text.startswith(self.command_prefix):
+        if not text.startswith("/"):
             return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()
         # Send a typing notification
         self.client.send_chat_action(update.message.chat, telegram.ChatAction.TYPING)
-        # Call the command
-        await self.call(command_name, update.message.chat, parameters, update=update)
+        # Find the command
+        try:
+            command = self.commands[command_name]
+        except KeyError:
+            # Skip the message
+            return
+        # Run the command
+        await command.run(CommandArgs(parameters), self._Data(interface=command.interface, update=update))
 
     async def run(self):
         while True:
@@ -119,11 +126,3 @@ class TelegramBot(GenericBot):
             except IndexError:
                 pass
 
-    @property
-    def botfather_command_string(self) -> str:
-        """Generate a string to be pasted in the "Edit Commands" BotFather prompt."""
-        string = ""
-        for command_key in self.commands:
-            command = self.commands[command_key]
-            string += f"{command.command_name} - {command.command_description}\n"
-        return string

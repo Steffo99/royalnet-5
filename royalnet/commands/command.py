@@ -2,6 +2,7 @@ import typing
 from ..error import UnsupportedError
 from .commandinterface import CommandInterface
 from .commandargs import CommandArgs
+from .commanddata import CommandData
 
 
 class Command:
@@ -22,5 +23,5 @@ class Command:
     def __init__(self, interface: CommandInterface):
         self.interface = interface
 
-    async def run(self, args: CommandArgs, **extra) -> None:
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
         raise UnsupportedError(f"Command {self.name} can't be called on {self.interface.name}.")
