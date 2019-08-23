@@ -13,7 +13,7 @@ class Command:
     description: str = NotImplemented
     """A small description of the command, to be displayed when the command is being autocompleted."""
 
-    syntax: str = NotImplemented
+    syntax: str = ""
     """The syntax of the command, to be displayed when a :py:exc:`royalnet.error.InvalidInputError` is raised,
      in the format ``(required_arg) [optional_arg]``."""
 

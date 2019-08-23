@@ -1,13 +1,11 @@
-import discord
 import typing
-from ..command import Command
-from ..commandinterface import CommandInterface
-from ..commandargs import CommandArgs
-from ..commanddata import CommandData
-from ...network import Request, ResponseSuccess
-from ...utils import NetworkHandler, andformat
-from ...bots import DiscordBot
-from ...error import *
+import discord
+import asyncio
+from ..utils import Command, Call, NetworkHandler, andformat
+from ..network import Request, ResponseSuccess
+from ..error import NoneFoundError, TooManyFoundError
+if typing.TYPE_CHECKING:
+    from ..bots import DiscordBot
 
 
 class CvNH(NetworkHandler):
@@ -43,14 +41,14 @@ class CvNH(NetworkHandler):
         # Edit the message, sorted by channel
         for channel in sorted(channels, key=lambda c: -c):
             members_in_channels[channel].sort(key=lambda x: x.nick if x.nick is not None else x.name)
-            if channel == 0 and len(members_in_channels[0]) > 0:
+            if channel == 0:
                 message += "[b]Non in chat vocale:[/b]\n"
             else:
                 message += f"[b]In #{channels[channel].name}:[/b]\n"
             for member in members_in_channels[channel]:
                 member: typing.Union[discord.User, discord.Member]
                 # Ignore not-connected non-notable members
-                if not data["everyone"] and channel == 0 and len(member.roles) < 2:
+                if not data["full"] and channel == 0 and len(member.roles) < 2:
                     continue
                 # Ignore offline members
                 if member.status == discord.Status.offline and member.voice is None:
@@ -115,20 +113,15 @@ class CvNH(NetworkHandler):
 
 
 class CvCommand(Command):
-    name: str = "cv"
 
-    description: str = "Elenca le persone attualmente connesse alla chat vocale."
+    command_name = "cv"
+    command_description = "Elenca le persone attualmente connesse alla chat vocale."
+    command_syntax = "[guildname]"
 
-    syntax: str = "[guildname] "
+    network_handlers = [CvNH]
 
-    def __init__(self, interface: CommandInterface):
-        super().__init__(interface)
-        interface.register_net_handler("discord_cv", CvNH)
-
-    async def run(self, args: CommandArgs, data: CommandData) -> None:
-        # noinspection PyTypeChecker
-        guild_name, everyone = args.match(r"(?:\[(.+)])?\s*(\S+)?\s*")
-        response = await self.interface.net_request(Request("discord_cv", {"guild_name": guild_name,
-                                                                           "everyone": bool(everyone)}),
-                                                    destination="discord")
-        await data.reply(response["response"])
+    @classmethod
+    async def common(cls, call: Call):
+        guild_name = call.args.optional(0)
+        response = await call.net_request(Request("discord_cv", {"guild_name": guild_name, "full": False}), "discord")
+        await call.reply(response["response"])

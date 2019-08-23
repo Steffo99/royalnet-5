@@ -16,7 +16,10 @@ stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
 
-commands = [PingCommand]
+commands = [PingCommand,
+            ColorCommand,
+            CiaoruoziCommand,
+            CvCommand]
 
 # noinspection PyUnreachableCode
 if __debug__:

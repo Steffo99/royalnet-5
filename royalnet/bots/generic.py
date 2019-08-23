@@ -24,10 +24,10 @@ class GenericBot:
         self._Interface = self._interface_factory()
         self._Data = self._data_factory()
         self.commands = {}
+        self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
         for SelectedCommand in commands:
             interface = self._Interface()
             self.commands[f"{interface.prefix}{SelectedCommand.name}"] = SelectedCommand(interface)
-        self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
         log.debug(f"Successfully bound commands")
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:

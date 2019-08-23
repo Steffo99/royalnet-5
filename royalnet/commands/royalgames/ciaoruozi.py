@@ -1,22 +1,25 @@
-from ..utils import Command, Call
-from telegram import Update, User
+import typing
+import telegram
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
 
 
 class CiaoruoziCommand(Command):
+    name: str = "ciaoruozi"
 
-    command_name = "ciaoruozi"
-    command_description = "Saluta Ruozi, anche se non è più in RYG."
-    command_syntax = ""
+    description: str = "Saluta Ruozi, un leggendario essere che una volta era in Royal Games."
 
-    @classmethod
-    async def common(cls, call: "Call"):
-        await call.reply("👋 Ciao Ruozi!")
+    syntax: str = ""
 
-    @classmethod
-    async def telegram(cls, call: Call):
-        update: Update = call.kwargs["update"]
-        user: User = update.effective_user
-        if user.id == 112437036:
-            await call.reply("👋 Ciao me!")
-        else:
-            await call.reply("👋 Ciao Ruozi!")
+    require_alchemy_tables: typing.Set = set()
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        if self.interface.name == "telegram":
+            update: telegram.Update = data.update
+            user: telegram.User = update.effective_user
+            if user.id == 112437036:
+                await data.reply("👋 Ciao me!")
+                return
+        await data.reply("👋 Ciao Ruozi!")

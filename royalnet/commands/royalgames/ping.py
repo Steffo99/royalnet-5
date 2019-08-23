@@ -10,12 +10,5 @@ class PingCommand(Command):
 
     description: str = "Replies with a Pong!"
 
-    syntax: str = ""
-
-    require_alchemy_tables: typing.Set = set()
-
-    def __init__(self, interface: CommandInterface):
-        super().__init__(interface)
-
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        await data.reply("Pong!")
+        await data.reply("🏓 Pong!")

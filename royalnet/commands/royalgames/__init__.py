@@ -4,5 +4,11 @@ These probably won't suit your needs, as they are tailored for the bots of the R
  may be useful to develop new ones."""
 
 from .ping import PingCommand
+from .ciaoruozi import CiaoruoziCommand
+from .color import ColorCommand
+from .cv import CvCommand
 
-__all__ = ["PingCommand"]
+__all__ = ["PingCommand",
+           "CiaoruoziCommand",
+           "ColorCommand",
+           "CvCommand"]

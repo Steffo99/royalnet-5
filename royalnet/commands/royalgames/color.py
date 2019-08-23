@@ -1,14 +1,16 @@
-from ..utils import Command, Call
+import typing
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
 
 
 class ColorCommand(Command):
+    name: str = "color"
 
-    command_name = "color"
-    command_description = "Invia un colore in chat...?"
-    command_syntax = ""
+    description: str = "Invia un colore in chat...?"
 
-    @classmethod
-    async def common(cls, call: Call):
-        await call.reply("""
-        [i]I am sorry, unknown error occured during working with your request, Admin were notified[/i]
-        """)
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        await data.reply("""
+                         [i]I am sorry, unknown error occured during working with your request, Admin were notified[/i]
+                         """)
