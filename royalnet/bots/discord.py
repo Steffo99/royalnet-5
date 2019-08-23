@@ -24,6 +24,7 @@ class DiscordConfig:
 
 class DiscordBot(GenericBot):
     """A bot that connects to `Discord <https://discordapp.com/>`_."""
+    interface_name = "discord"
 
     def _init_voice(self):
         """Initialize the variables needed for the connection to voice chat."""
@@ -36,7 +37,7 @@ class DiscordBot(GenericBot):
 
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordInterface(GenericInterface):
-            name = "discord"
+            name = self.interface_name
             prefix = "!"
 
         return DiscordInterface

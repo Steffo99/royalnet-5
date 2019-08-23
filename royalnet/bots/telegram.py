@@ -21,6 +21,7 @@ class TelegramConfig:
 
 class TelegramBot(GenericBot):
     """A bot that connects to `Telegram <https://telegram.org/>`_."""
+    interface_name = "telegram"
 
     def _init_client(self):
         """Create the :py:class:`telegram.Bot`, and set the starting offset."""
@@ -35,7 +36,7 @@ class TelegramBot(GenericBot):
 
         # noinspection PyMethodParameters,PyAbstractClass
         class TelegramInterface(GenericInterface):
-            name = "telegram"
+            name = self.interface_name
             prefix = "/"
 
         return TelegramInterface
@@ -99,7 +100,7 @@ class TelegramBot(GenericBot):
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()
         # Send a typing notification
-        self.client.send_chat_action(update.message.chat, telegram.ChatAction.TYPING)
+        update.message.chat.send_action(telegram.ChatAction.TYPING)
         # Find the command
         try:
             command = self.commands[command_name]
@@ -125,4 +126,3 @@ class TelegramBot(GenericBot):
                 self._offset = last_updates[-1].update_id + 1
             except IndexError:
                 pass
-

@@ -24,7 +24,7 @@ class GenericBot:
         self._Interface = self._interface_factory()
         self._Data = self._data_factory()
         self.commands = {}
-        for SelectedCommand in self.commands:
+        for SelectedCommand in commands:
             interface = self._Interface()
             self.commands[f"{interface.prefix}{SelectedCommand.name}"] = SelectedCommand(interface)
         self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
@@ -107,7 +107,7 @@ class GenericBot:
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then,
         find the chain that links the ``master_table`` to the ``identity_table``. """
         log.debug(f"Initializing database")
-        required_tables = set()
+        required_tables = {database_config.master_table, database_config.identity_table}
         for command in commands:
             required_tables = required_tables.union(command.require_alchemy_tables)
         log.debug(f"Found {len(required_tables)} required tables")
