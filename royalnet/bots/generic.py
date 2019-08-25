@@ -35,6 +35,7 @@ class GenericBot:
         class GenericInterface(CommandInterface):
             alchemy = self.alchemy
             bot = self
+            loop = self.loop
 
             def register_net_handler(ci, message_type: str, network_handler: typing.Callable):
                 self.network_handlers[message_type] = network_handler

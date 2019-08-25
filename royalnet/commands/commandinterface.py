@@ -1,4 +1,5 @@
 import typing
+import asyncio
 if typing.TYPE_CHECKING:
     from ..database import Alchemy
     from ..bots import GenericBot
@@ -9,6 +10,7 @@ class CommandInterface:
     prefix: str = NotImplemented
     alchemy: "Alchemy" = NotImplemented
     bot: "GenericBot" = NotImplemented
+    loop: asyncio.AbstractEventLoop = NotImplemented
 
     def __init__(self):
         self.session = self.alchemy.Session()

@@ -19,7 +19,15 @@ log.addHandler(stream_handler)
 commands = [PingCommand,
             ColorCommand,
             CiaoruoziCommand,
-            CvCommand]
+            CvCommand,
+            DiarioCommand,
+            Mp3Command,
+            SummonCommand,
+            PauseCommand,
+            PlayCommand,
+            PlaymodeCommand,
+            QueueCommand,
+            ReminderCommand]
 
 # noinspection PyUnreachableCode
 if __debug__:

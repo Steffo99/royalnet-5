@@ -5,6 +5,6 @@ from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
 from .fileaudiosource import FileAudioSource
 from .ytdldiscord import YtdlDiscord
-from .ytdlvorbis import YtdlVorbis
+from .ytdlmp3 import YtdlMp3
 
-__all__ = ["playmodes", "YtdlInfo", "YtdlFile", "FileAudioSource", "YtdlDiscord", "YtdlVorbis"]
+__all__ = ["playmodes", "YtdlInfo", "YtdlFile", "FileAudioSource", "YtdlDiscord", "YtdlMp3"]

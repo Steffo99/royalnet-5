@@ -1,6 +1,5 @@
 import typing
 from ..command import Command
-from ..commandinterface import CommandInterface
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 
