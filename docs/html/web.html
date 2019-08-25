@@ -33,6 +33,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/rygdocs.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="royalnet.error" href="error.html" /> 
@@ -161,7 +162,7 @@
 </div>
 <span class="target" id="module-royalnet.web"></span><dl class="function">
 <dt id="royalnet.web.create_app">
-<code class="descclassname">royalnet.web.</code><code class="descname">create_app</code><span class="sig-paren">(</span><em>config_obj: Type[CT_co], blueprints: List[royalnet.web.royalprint.Royalprint]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.create_app" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">royalnet.web.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><em class="sig-param">config_obj: Type, blueprints: List[royalnet.web.royalprint.Royalprint]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.create_app" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code> application object.</p>
 <p>Gets the <code class="docutils literal notranslate"><span class="pre">app.secret_key</span></code> from the <code class="docutils literal notranslate"><span class="pre">SECRET_KEY</span></code> envvar.</p>
 <p>Also requires a <code class="docutils literal notranslate"><span class="pre">DB_PATH</span></code> key in <code class="docutils literal notranslate"><span class="pre">config_obj</span></code> to initialize the database connection.</p>
@@ -185,7 +186,7 @@ Use with caution?</p>
 
 <dl class="class">
 <dt id="royalnet.web.Royalprint">
-<em class="property">class </em><code class="descclassname">royalnet.web.</code><code class="descname">Royalprint</code><span class="sig-paren">(</span><em>name</em>, <em>import_name</em>, <em>static_folder=None</em>, <em>static_url_path=None</em>, <em>template_folder=None</em>, <em>url_prefix=None</em>, <em>subdomain=None</em>, <em>url_defaults=None</em>, <em>root_path=None</em>, <em>required_tables: Optional[set] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.Royalprint" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.web.</code><code class="sig-name descname">Royalprint</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">import_name</em>, <em class="sig-param">static_folder=None</em>, <em class="sig-param">static_url_path=None</em>, <em class="sig-param">template_folder=None</em>, <em class="sig-param">url_prefix=None</em>, <em class="sig-param">subdomain=None</em>, <em class="sig-param">url_defaults=None</em>, <em class="sig-param">root_path=None</em>, <em class="sig-param">required_tables: Optional[set] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.web.Royalprint" title="Permalink to this definition">¶</a></dt>
 <dd><p>An edited <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Blueprint</span></code> containing an additional <code class="docutils literal notranslate"><span class="pre">required_tables</span></code> parameter.</p>
 </dd></dl>
 
