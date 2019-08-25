@@ -42,6 +42,7 @@ def skip(app, what, name: str, obj, would_skip, options):
 
 def setup(app):
     app.connect("autodoc-skip-member", skip)
+    app.add_stylesheet('rygdocs.css')
 
 
 # Add any paths that contain templates here, relative to this directory.
