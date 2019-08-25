@@ -16,18 +16,25 @@ stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
 
-commands = [PingCommand,
-            ColorCommand,
-            CiaoruoziCommand,
-            CvCommand,
-            DiarioCommand,
-            Mp3Command,
-            SummonCommand,
-            PauseCommand,
-            PlayCommand,
-            PlaymodeCommand,
-            QueueCommand,
-            ReminderCommand]
+commands = [
+    CiaoruoziCommand,
+    ColorCommand,
+    CvCommand,
+    DiarioCommand,
+    Mp3Command,
+    PauseCommand,
+    PingCommand,
+    PlayCommand,
+    PlaymodeCommand,
+    QueueCommand,
+    RageCommand,
+    ReminderCommand,
+    ShipCommand,
+    SkipCommand,
+    SmecdsCommand,
+    SummonCommand,
+    VideochannelCommand
+]
 
 # noinspection PyUnreachableCode
 if __debug__:

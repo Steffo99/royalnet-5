@@ -3,28 +3,40 @@
 These probably won't suit your needs, as they are tailored for the bots of the Royal Games gaming community, but they
  may be useful to develop new ones."""
 
-from .ping import PingCommand
 from .ciaoruozi import CiaoruoziCommand
 from .color import ColorCommand
 from .cv import CvCommand
 from .diario import DiarioCommand
 from .mp3 import Mp3Command
-from .summon import SummonCommand
 from .pause import PauseCommand
+from .ping import PingCommand
 from .play import PlayCommand
 from .playmode import PlaymodeCommand
 from .queue import QueueCommand
+from .rage import RageCommand
 from .reminder import ReminderCommand
+from .ship import ShipCommand
+from .skip import SkipCommand
+from .smecds import SmecdsCommand
+from .summon import SummonCommand
+from .videochannel import VideochannelCommand
 
-__all__ = ["PingCommand",
-           "CiaoruoziCommand",
-           "ColorCommand",
-           "CvCommand",
-           "DiarioCommand",
-           "Mp3Command",
-           "SummonCommand",
-           "PauseCommand",
-           "PlayCommand",
-           "PlaymodeCommand",
-           "QueueCommand",
-           "ReminderCommand"]
+__all__ = [
+    "CiaoruoziCommand",
+    "ColorCommand",
+    "CvCommand",
+    "DiarioCommand",
+    "Mp3Command",
+    "PauseCommand",
+    "PingCommand",
+    "PlayCommand",
+    "PlaymodeCommand",
+    "QueueCommand",
+    "RageCommand",
+    "ReminderCommand",
+    "ShipCommand",
+    "SkipCommand",
+    "SmecdsCommand",
+    "SummonCommand",
+    "VideochannelCommand"
+]
