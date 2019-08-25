@@ -1,22 +1,23 @@
+import typing
 import re
-from ..utils import Command, Call, safeformat
-
-
-SHIP_RESULT = "💕 {one} + {two} = [b]{result}[/b]"
+from ..command import Command
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
+from ...utils import safeformat
 
 
 class ShipCommand(Command):
+    name: str = "ship"
 
-    command_name = "ship"
-    command_description = "Crea una ship tra due cose."
-    command_syntax = "(uno) (due)"
+    description: str = "Crea una ship tra due nomi."
 
-    @classmethod
-    async def common(cls, call: Call):
-        name_one = call.args[0]
-        name_two = call.args[1]
+    syntax = "(nomeuno) (nomedue)"
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        name_one = args[0]
+        name_two = args[1]
         if name_two == "+":
-            name_two = call.args[2]
+            name_two = args[2]
         name_one = name_one.lower()
         name_two = name_two.lower()
         # Get all letters until the first vowel, included
@@ -33,7 +34,7 @@ class ShipCommand(Command):
             part_two = match_two.group(0)
         # Combine the two name parts
         mixed = part_one + part_two
-        await call.reply(safeformat(SHIP_RESULT,
+        await data.reply(safeformat("💕 {one} + {two} = [b]{result}[/b]",
                                     one=name_one.capitalize(),
                                     two=name_two.capitalize(),
                                     result=mixed.capitalize()))

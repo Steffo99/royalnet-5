@@ -4,10 +4,7 @@ import os
 import asyncio
 import logging
 from royalnet.bots import DiscordBot, DiscordConfig, TelegramBot, TelegramConfig
-from royalnet.commands import *
-# noinspection PyUnresolvedReferences
-from royalnet.commands.debug_create import DebugCreateCommand
-from royalnet.commands.error_handler import ErrorHandlerCommand
+from royalnet.commands.royalgames import *
 from royalnet.network import RoyalnetServer, RoyalnetConfig
 from royalnet.database import DatabaseConfig
 from royalnet.database.tables import Royal, Telegram, Discord
@@ -19,15 +16,21 @@ stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
 
-commands = [PingCommand, ShipCommand, SmecdsCommand, ColorCommand, CiaoruoziCommand, SyncCommand,
-            DiarioCommand, RageCommand, ReminderCommand, KvactiveCommand, KvCommand,
-            KvrollCommand, SummonCommand, PlayCommand, SkipCommand, PlaymodeCommand,
-            VideochannelCommand, CvCommand, PauseCommand, QueueCommand, RoyalnetprofileCommand, VideoinfoCommand,
-            IdCommand, DlmusicCommand]
+commands = [PingCommand,
+            ColorCommand,
+            CiaoruoziCommand,
+            CvCommand,
+            DiarioCommand,
+            Mp3Command,
+            SummonCommand,
+            PauseCommand,
+            PlayCommand,
+            PlaymodeCommand,
+            QueueCommand,
+            ReminderCommand]
 
 # noinspection PyUnreachableCode
 if __debug__:
-    commands = [DebugCreateCommand, DateparserCommand, AuthorCommand, *commands]
     log.setLevel(logging.DEBUG)
 else:
     log.setLevel(logging.INFO)
@@ -42,15 +45,11 @@ print("Starting bots...")
 ds_bot = DiscordBot(discord_config=DiscordConfig(os.environ["DS_AK"]),
                     royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
                     database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id"),
-                    commands=commands,
-                    error_command=ErrorHandlerCommand,
-                    missing_command=MissingCommand)
+                    commands=commands)
 tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
                      database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id"),
-                     commands=commands,
-                     error_command=ErrorHandlerCommand,
-                     missing_command=MissingCommand)
+                     commands=commands)
 loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())
 

@@ -1,10 +1,16 @@
 import typing
+import pickle
 import discord
-from ..network import Request, ResponseSuccess
-from ..utils import Command, Call, NetworkHandler
-from ..error import TooManyFoundError, NoneFoundError
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
+from ...utils import NetworkHandler, asyncify
+from ...network import Request, ResponseSuccess
+from ...error import *
+from ...audio import YtdlDiscord
 if typing.TYPE_CHECKING:
-    from ..bots import DiscordBot
+    from ...bots import DiscordBot
 
 
 class SkipNH(NetworkHandler):
@@ -31,15 +37,17 @@ class SkipNH(NetworkHandler):
 
 
 class SkipCommand(Command):
+    name: str = "skip"
 
-    command_name = "skip"
-    command_description = "Salta la canzone attualmente in riproduzione in chat vocale."
-    command_syntax = "[ [guild] ]"
+    description: str = "Salta la canzone attualmente in riproduzione in chat vocale."
 
-    network_handlers = [SkipNH]
+    syntax: str = "[ [guild] ]"
 
-    @classmethod
-    async def common(cls, call: Call):
-        guild, = call.args.match(r"(?:\[(.+)])?")
-        await call.net_request(Request("music_skip", {"guild_name": guild}), "discord")
-        await call.reply(f"✅ Richiesto lo skip della canzone attuale.")
+    def __init__(self, interface: CommandInterface):
+        super().__init__(interface)
+        interface.register_net_handler(SkipNH.message_type, SkipNH)
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        guild, = args.match(r"(?:\[(.+)])?")
+        await self.interface.net_request(Request(SkipNH.message_type, {"guild_name": guild}), "discord")
+        await data.reply(f"⏩ Richiesto lo skip della canzone attuale.")

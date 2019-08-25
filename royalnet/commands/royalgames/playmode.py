@@ -1,10 +1,15 @@
 import typing
-from ..utils import Command, Call, NetworkHandler
-from ..network import Request, ResponseSuccess
-from ..error import NoneFoundError, TooManyFoundError
-from ..audio.playmodes import Playlist, Pool, Layers
+import pickle
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
+from ...utils import NetworkHandler
+from ...network import Request, ResponseSuccess
+from ...error import *
+from ...audio.playmodes import Playlist, Pool, Layers
 if typing.TYPE_CHECKING:
-    from ..bots import DiscordBot
+    from ...bots import DiscordBot
 
 
 class PlaymodeNH(NetworkHandler):
@@ -38,14 +43,19 @@ class PlaymodeNH(NetworkHandler):
 
 
 class PlaymodeCommand(Command):
-    command_name = "playmode"
-    command_description = "Cambia modalità di riproduzione per la chat vocale."
-    command_syntax = "[ [guild] ] (mode)"
+    name: str = "playmode"
 
-    network_handlers = [PlaymodeNH]
+    description: str = "Cambia modalità di riproduzione per la chat vocale."
 
-    @classmethod
-    async def common(cls, call: Call):
-        guild_name, mode_name = call.args.match(r"(?:\[(.+)])?\s*(\S+)\s*")
-        await call.net_request(Request("music_playmode", {"mode_name": mode_name, "guild_name": guild_name}), "discord")
-        await call.reply(f"✅ Modalità di riproduzione [c]{mode_name}[/c].")
+    syntax = "[ [guild] ] (mode)"
+
+    def __init__(self, interface: CommandInterface):
+        super().__init__(interface)
+        interface.register_net_handler(PlaymodeNH.message_type, PlaymodeNH)
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        guild_name, mode_name = args.match(r"(?:\[(.+)])?\s*(\S+)\s*")
+        await self.interface.net_request(Request(PlaymodeNH.message_type, {"mode_name": mode_name,
+                                                                           "guild_name": guild_name}),
+                                         "discord")
+        await data.reply(f"🔃 Impostata la modalità di riproduzione a: [c]{mode_name}[/c].")

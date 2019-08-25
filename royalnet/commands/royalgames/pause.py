@@ -1,10 +1,14 @@
 import typing
 import discord
-from ..network import Request, ResponseSuccess
-from ..utils import Command, Call, NetworkHandler
-from ..error import TooManyFoundError, NoneFoundError
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
+from ...utils import NetworkHandler
+from ...network import Request, ResponseSuccess
+from ...error import NoneFoundError
 if typing.TYPE_CHECKING:
-    from ..bots import DiscordBot
+    from ...bots import DiscordBot
 
 
 class PauseNH(NetworkHandler):
@@ -32,22 +36,24 @@ class PauseNH(NetworkHandler):
             voice_client._player.resume()
         else:
             voice_client._player.pause()
-        return ResponseSuccess({"resume": resume})
+        return ResponseSuccess({"resumed": resume})
 
 
 class PauseCommand(Command):
+    name: str = "pause"
 
-    command_name = "pause"
-    command_description = "Mette in pausa o riprende la riproduzione della canzone attuale."
-    command_syntax = "[ [guild] ]"
+    description: str = "Mette in pausa o riprende la riproduzione della canzone attuale."
 
-    network_handlers = [PauseNH]
+    syntax = "[ [guild] ]"
 
-    @classmethod
-    async def common(cls, call: Call):
-        guild, = call.args.match(r"(?:\[(.+)])?")
-        response = await call.net_request(Request("music_pause", {"guild_name": guild}), "discord")
-        if response["resume"]:
-            await call.reply(f"▶️ Riproduzione ripresa.")
+    def __init__(self, interface: CommandInterface):
+        super().__init__(interface)
+        interface.register_net_handler(PauseNH.message_type, PauseNH)
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        guild, = args.match(r"(?:\[(.+)])?")
+        response = await self.interface.net_request(Request("music_pause", {"guild_name": guild}), "discord")
+        if response["resumed"]:
+            await data.reply(f"▶️ Riproduzione ripresa.")
         else:
-            await call.reply(f"⏸ Riproduzione messa in pausa.")
+            await data.reply(f"⏸ Riproduzione messa in pausa.")

@@ -1,14 +1,13 @@
 import discord
-import asyncio
 import typing
 import logging as _logging
 from .generic import GenericBot
-from ..commands import NullCommand
-from ..utils import asyncify, Call, Command, discord_escape
-from ..error import UnregisteredError, NoneFoundError, TooManyFoundError, InvalidConfigError, RoyalnetResponseError
-from ..network import RoyalnetConfig, Request, ResponseSuccess, ResponseError
-from ..database import DatabaseConfig
-from ..audio import playmodes, YtdlDiscord
+from ..utils import *
+from ..error import *
+from ..network import *
+from ..database import *
+from ..audio import *
+from ..commands import *
 
 log = _logging.getLogger(__name__)
 
@@ -25,7 +24,6 @@ class DiscordConfig:
 
 class DiscordBot(GenericBot):
     """A bot that connects to `Discord <https://discordapp.com/>`_."""
-
     interface_name = "discord"
 
     def _init_voice(self):
@@ -33,40 +31,30 @@ class DiscordBot(GenericBot):
         log.debug(f"Creating music_data dict")
         self.music_data: typing.Dict[discord.Guild, playmodes.PlayMode] = {}
 
-    def _call_factory(self) -> typing.Type[Call]:
-        log.debug(f"Creating DiscordCall")
+    def _interface_factory(self) -> typing.Type[CommandInterface]:
+        # noinspection PyPep8Naming
+        GenericInterface = super()._interface_factory()
 
-        # noinspection PyMethodParameters
-        class DiscordCall(Call):
-            interface_name = self.interface_name
-            interface_obj = self
-            interface_prefix = "!"
+        # noinspection PyMethodParameters,PyAbstractClass
+        class DiscordInterface(GenericInterface):
+            name = self.interface_name
+            prefix = "!"
 
-            alchemy = self.alchemy
+        return DiscordInterface
 
-            async def reply(call, text: str):
-                # TODO: don't escape characters inside [c][/c] blocks
-                await call.channel.send(discord_escape(text))
+    def _data_factory(self) -> typing.Type[CommandData]:
+        # noinspection PyMethodParameters,PyAbstractClass
+        class DiscordData(CommandData):
+            def __init__(data, interface: CommandInterface, message: discord.Message):
+                data._interface = interface
+                data.message = message
 
-            async def net_request(call, request: Request, destination: str) -> dict:
-                if self.network is None:
-                    raise InvalidConfigError("Royalnet is not enabled on this bot")
-                response_dict: dict = await self.network.request(request.to_dict(), destination)
-                if "type" not in response_dict:
-                    raise RoyalnetResponseError("Response is missing a type")
-                elif response_dict["type"] == "ResponseSuccess":
-                    response: typing.Union[ResponseSuccess, ResponseError] = ResponseSuccess.from_dict(response_dict)
-                elif response_dict["type"] == "ResponseError":
-                    response = ResponseError.from_dict(response_dict)
-                else:
-                    raise RoyalnetResponseError("Response type is unknown")
-                response.raise_on_error()
-                return response.data
+            async def reply(data, text: str):
+                await data.message.channel.send(discord_escape(text))
 
-            async def get_author(call, error_if_none=False):
-                message: discord.Message = call.kwargs["message"]
-                user: discord.Member = message.author
-                query = call.session.query(self.master_table)
+            async def get_author(data, error_if_none=False):
+                user: discord.Member = data.message.author
+                query = data._interface.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -75,7 +63,7 @@ class DiscordBot(GenericBot):
                     raise UnregisteredError("Author is not registered")
                 return result
 
-        return DiscordCall
+        return DiscordData
 
     def _bot_factory(self) -> typing.Type[discord.Client]:
         """Create a custom DiscordClient class inheriting from :py:class:`discord.Client`."""
@@ -109,20 +97,25 @@ class DiscordBot(GenericBot):
                 if not text:
                     return
                 # Skip non-command updates
-                if not text.startswith(self.command_prefix):
+                if not text.startswith("!"):
                     return
                 # Skip bot messages
                 author: typing.Union[discord.User] = message.author
                 if author.bot:
                     return
-                # Start typing
+                # Find and clean parameters
+                command_text, *parameters = text.split(" ")
+                # Don't use a case-sensitive command name
+                command_name = command_text.lower()
+                # Find the command
+                try:
+                    command = self.commands[command_name]
+                except KeyError:
+                    # Skip the message
+                    return
+                # Call the command
                 with message.channel.typing():
-                    # Find and clean parameters
-                    command_text, *parameters = text.split(" ")
-                    # Don't use a case-sensitive command name
-                    command_name = command_text.lower()
-                    # Call the command
-                    await self.call(command_name, message.channel, parameters, message=message)
+                    await command.run(CommandArgs(parameters), self._Data(interface=command.interface, message=message))
 
             async def on_ready(cli):
                 log.debug("Connection successful, client is ready")
@@ -148,12 +141,14 @@ class DiscordBot(GenericBot):
             def find_channel_by_name(cli,
                                      name: str,
                                      guild: typing.Optional[discord.Guild] = None) -> discord.abc.GuildChannel:
-                """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the specified name.
+                """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the
+                specified name.
 
                 Case-insensitive.
 
-                Guild is optional, but the method will raise a :py:exc:`TooManyFoundError` if none is specified and there is more than one channel with the same name.
-                Will also raise a :py:exc:`NoneFoundError` if no channels are found."""
+                Guild is optional, but the method will raise a :py:exc:`TooManyFoundError` if none is specified and
+                there is more than one channel with the same name. Will also raise a :py:exc:`NoneFoundError` if no
+                channels are found. """
                 if guild is not None:
                     all_channels = guild.channels
                 else:
@@ -194,16 +189,10 @@ class DiscordBot(GenericBot):
                  discord_config: DiscordConfig,
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
-                 command_prefix: str = "!",
-                 commands: typing.List[typing.Type[Command]] = None,
-                 missing_command: typing.Type[Command] = NullCommand,
-                 error_command: typing.Type[Command] = NullCommand):
+                 commands: typing.List[typing.Type[Command]] = None):
         super().__init__(royalnet_config=royalnet_config,
                          database_config=database_config,
-                         command_prefix=command_prefix,
-                         commands=commands,
-                         missing_command=missing_command,
-                         error_command=error_command)
+                         commands=commands)
         self._discord_config = discord_config
         self._init_client()
         self._init_voice()

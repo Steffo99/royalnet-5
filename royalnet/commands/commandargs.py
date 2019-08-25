@@ -38,7 +38,7 @@ class CommandArgs(list):
             raise InvalidInputError("Not enough arguments")
         return " ".join(self)
 
-    def match(self, pattern: typing.Pattern) -> typing.Sequence[typing.AnyStr]:
+    def match(self, pattern: typing.Union[str, typing.Pattern]) -> typing.Sequence[typing.AnyStr]:
         """Match the :py:func:`royalnet.utils.commandargs.joined` to a regex pattern.
 
         Parameters:

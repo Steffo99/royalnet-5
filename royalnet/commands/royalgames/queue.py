@@ -1,10 +1,14 @@
 import typing
 import pickle
-from ..network import Request, ResponseSuccess
-from ..utils import Command, Call, NetworkHandler, numberemojiformat
-from ..error import TooManyFoundError, NoneFoundError
+from ..command import Command
+from ..commandinterface import CommandInterface
+from ..commandargs import CommandArgs
+from ..commanddata import CommandData
+from ...utils import NetworkHandler, numberemojiformat
+from ...network import Request, ResponseSuccess
+from ...error import *
 if typing.TYPE_CHECKING:
-    from ..bots import DiscordBot
+    from ...bots import DiscordBot
 
 
 class QueueNH(NetworkHandler):
@@ -44,22 +48,24 @@ class QueueNH(NetworkHandler):
 
 
 class QueueCommand(Command):
+    name: str = "queue"
 
-    command_name = "queue"
-    command_description = "Visualizza un'anteprima della coda di riproduzione attuale."
-    command_syntax = "[ [guild] ]"
+    description: str = "Visualizza la coda di riproduzione attuale."
 
-    network_handlers = [QueueNH]
+    syntax = "[ [guild] ]"
 
-    @classmethod
-    async def common(cls, call: Call):
-        guild, = call.args.match(r"(?:\[(.+)])?")
-        data = await call.net_request(Request("music_queue", {"guild_name": guild}), "discord")
+    def __init__(self, interface: CommandInterface):
+        super().__init__(interface)
+        interface.register_net_handler(QueueNH.message_type, QueueNH)
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        guild, = args.match(r"(?:\[(.+)])?")
+        data = await self.interface.net_request(Request(QueueNH.message_type, {"guild_name": guild}), "discord")
         if data["type"] is None:
-            await call.reply("ℹ️ Non c'è nessuna coda di riproduzione attiva al momento.")
+            await data.reply("ℹ️ Non c'è nessuna coda di riproduzione attiva al momento.")
             return
         elif "queue" not in data:
-            await call.reply(f"ℹ️ La coda di riproduzione attuale ([c]{data['type']}[/c]) non permette l'anteprima.")
+            await data.reply(f"ℹ️ La coda di riproduzione attuale ([c]{data['type']}[/c]) non permette l'anteprima.")
             return
         if data["type"] == "Playlist":
             if len(data["queue"]["strings"]) == 0:
@@ -81,10 +87,10 @@ class QueueCommand(Command):
                 message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], è vuoto.\n"
             else:
                 message = f"ℹ️ Il PlayMode attuale, [c]{data['type']}[/c], contiene {len(data['queue']['strings'])} elementi:\n"
-        if call.interface_name == "discord":
-            await call.reply(message)
+        if self.interface.name == "discord":
+            await data.reply(message)
             for embed in pickle.loads(eval(data["queue"]["pickled_embeds"]))[:5]:
-                await call.channel.send(embed=embed)
+                await data.message.channel.send(embed=embed)
         else:
             message += numberemojiformat(data["queue"]["strings"][:10])
-            await call.reply(message)
+            await data.reply(message)
