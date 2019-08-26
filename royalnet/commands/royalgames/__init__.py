@@ -20,6 +20,7 @@ from .skip import SkipCommand
 from .smecds import SmecdsCommand
 from .summon import SummonCommand
 from .videochannel import VideochannelCommand
+from .dnditem import DnditemCommand
 
 __all__ = [
     "CiaoruoziCommand",
@@ -38,5 +39,6 @@ __all__ = [
     "SkipCommand",
     "SmecdsCommand",
     "SummonCommand",
-    "VideochannelCommand"
+    "VideochannelCommand",
+    "DnditemCommand"
 ]

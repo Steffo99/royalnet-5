@@ -70,3 +70,11 @@ def numberemojiformat(l: typing.List[str]) -> str:
         except IndexError:
             result += f"{extra_emoji} {element}\n"
     return result
+
+
+def splitstring(s: str, max: int) -> typing.List[str]:
+    l = []
+    while s:
+        l.append(s[:max])
+        s = s[max:]
+    return l

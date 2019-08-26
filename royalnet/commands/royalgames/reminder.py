@@ -34,9 +34,9 @@ class ReminderCommand(Command):
                      .all()
         )
         for reminder in reminders:
-            interface.loop.create_task(self.remind(reminder))
+            interface.loop.create_task(self._remind(reminder))
 
-    async def remind(self, reminder):
+    async def _remind(self, reminder):
         await sleep_until(reminder.datetime)
         if self.interface.name == "telegram":
             chat_id: int = pickle.loads(reminder.interface_data)
@@ -74,6 +74,6 @@ class ReminderCommand(Command):
                                                    interface_data=interface_data,
                                                    datetime=date,
                                                    message=reminder_text)
-        self.interface.loop.create_task(self.remind(reminder))
+        self.interface.loop.create_task(self._remind(reminder))
         self.interface.session.add(reminder)
         await asyncify(self.interface.session.commit)

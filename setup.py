@@ -28,7 +28,8 @@ setuptools.setup(
                       "werkzeug>=0.15.4",
                       "flask>=1.0.3",
                       "markdown2>=2.3.8",
-                      "mcstatus>=2.2.1"],
+                      "mcstatus>=2.2.1",
+                      "sortedcontainers>=2.1.0"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",

@@ -33,7 +33,8 @@ commands = [
     SkipCommand,
     SmecdsCommand,
     SummonCommand,
-    VideochannelCommand
+    VideochannelCommand,
+    DnditemCommand
 ]
 
 # noinspection PyUnreachableCode
