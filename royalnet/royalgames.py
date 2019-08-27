@@ -11,7 +11,7 @@ from royalnet.database.tables import Royal, Telegram, Discord
 
 loop = asyncio.get_event_loop()
 
-log = logging.root
+log = logging.getLogger("royalnet.bots")
 stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)

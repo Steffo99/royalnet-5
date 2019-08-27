@@ -21,10 +21,20 @@ class DnditemCommand(Command):
         interface.loop.create_task(self._fetch_dnddata())
 
     async def _fetch_dnddata(self):
+        self._dnddata = self._dnddata = sortedcontainers.SortedKeyList([], key=lambda i: i["name"].lower())
         async with aiohttp.ClientSession() as session:
-            async with session.get("https://scaleway.steffo.eu/dnd/items.json") as response:
+            async with session.get("https://5e.tools/data/items.json") as response:
                 j = await response.json()
-        self._dnddata = sortedcontainers.SortedKeyList(j["item"], key=lambda i: i["name"].lower())
+                for item in j["item"]:
+                    self._dnddata.add(item)
+            async with session.get("https://5e.tools/data/fluff-items.json") as response:
+                j = await response.json()
+                for item in j["item"]:
+                    self._dnddata.add(item)
+            async with session.get("https://5e.tools/data/items-base.json") as response:
+                j = await response.json()
+                for item in j["baseitem"]:
+                    self._dnddata.add(item)
 
     def _parse_entry(self, entry):
         if isinstance(entry, str):
@@ -58,14 +68,15 @@ class DnditemCommand(Command):
             return
         search = args.joined().lower()
         result = self._dnddata[self._dnddata.bisect_key_left(search)]
-        string = f'[b]{result["name"]}[/b]\n' \
-                 f'[i]{result["source"]}, page {result["page"]}[/i]\n' \
-                 f'\n' \
-                 f'Type: [b]{result.get("type", "None")}[/b]\n' \
-                 f'Value: [b]{result.get("value", "Priceless")}[/b]\n' \
-                 f'Weight: [b]{result.get("weight", "0")} lb[/b]\n' \
-                 f'Rarity: [b]{result["rarity"] if result["rarity"] != "None" else "Mundane"}[/b]\n' \
-                 f'\n'
+        string = f'[b]{result["name"]}[/b]\n'
+        if "source" in result:
+            string += f'[i]{result["source"]}, page {result["page"]}[/i]\n'
+        string += f'\n' \
+                  f'Type: [b]{result.get("type", "None")}[/b]\n' \
+                  f'Value: [b]{result.get("value", "Priceless")}[/b]\n' \
+                  f'Weight: [b]{result.get("weight", "0")} lb[/b]\n' \
+                  f'Rarity: [b]{result["rarity"] if result.get("rarity", "None") != "None" else "Mundane"}[/b]\n' \
+                  f'\n'
         for entry in result.get("entries", []):
             string += self._parse_entry(entry)
             string += "\n\n"
