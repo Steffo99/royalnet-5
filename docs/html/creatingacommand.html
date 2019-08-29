@@ -84,6 +84,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Royalnet Commands</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-a-new-command">Creating a new Command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a></li>
@@ -178,7 +179,7 @@ It’s the name your command will be called with: for example, the “spaghetti�
 Try to keep the name as short as possible, while staying specific enough so no other command will have the same name.</p>
 <p>Next, create a new Python file with the <code class="docutils literal notranslate"><span class="pre">name</span></code> you have thought of.
 The previously mentioned “spaghetti” command should have a file called <code class="docutils literal notranslate"><span class="pre">spaghetti.py</span></code>.</p>
-<p>Then, in the first row of the file, import the <a class="reference internal" href="apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> class from <code class="xref py py-mod docutils literal notranslate"><span class="pre">royalnet</span></code>, and create a new class inheriting from it:</p>
+<p>Then, in the first row of the file, import the <a class="reference internal" href="apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> class from royalnet, and create a new class inheriting from it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
 
 <span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
@@ -204,10 +205,38 @@ The previously mentioned “spaghetti” command should have a file called <code
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;🍝&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;🍝&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And it’s done! The command is now ready to be used in a bot!</p>
+<p>And… it’s done! The command is ready to be added to a bot!</p>
+</div>
+<div class="section" id="coroutines-and-slow-operations">
+<h2>Coroutines and slow operations<a class="headerlink" href="#coroutines-and-slow-operations" title="Permalink to this headline">¶</a></h2>
+<p>You may have noticed that in the previous example I wrote <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">data.reply(&quot;🍝&quot;)</span></code> instead of just <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>.</p>
+<dl>
+<dt>This is because <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> isn’t a simple method: it is a coroutine, a special kind of function that</dt><dd><p>can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.</p>
+</dd>
+<dt>By adding the <code class="docutils literal notranslate"><span class="pre">await</span></code> keyword before the <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>, we tell the bot that it can do other things, like</dt><dd><p>receiving new messages, while the message is being sent.</p>
+</dd>
+<dt>You should avoid running slow normal functions inside bot commands, as they will stop the bot from working until they</dt><dd><p>are finished and may cause bugs in other parts of the code!</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="c1"># Don&#39;t do this!</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">download_1_terabyte_of_spaghetti</span><span class="p">(</span><span class="s2">&quot;right_now&quot;</span><span class="p">,</span> <span class="n">from</span><span class="o">=</span><span class="s2">&quot;italy&quot;</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt>If the slow function you want does not cause any side effect, you can wrap it with the <span class="xref std std-ref">royalnet.utils.asyncify</span></dt><dd><p>function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="c1"># If the called function has no side effect, you can do this!</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">download_1_terabyte_of_spaghetti</span><span class="p">,</span> <span class="s2">&quot;right_now&quot;</span><span class="p">,</span> <span class="n">from</span><span class="o">=</span><span class="s2">&quot;italy&quot;</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt>Avoid using <a class="reference external" href="https://docs.python.org/3.7/library/time.html#time.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.sleep()</span></code></a> function, as it is considered a slow operation: use instead <a class="reference external" href="https://docs.python.org/3.7/library/asyncio-task.html#asyncio.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.sleep()</span></code></a>,</dt><dd><p>a coroutine that does the same exact thing.</p>
+</dd>
+</dl>
 </div>
 </div>
 
