@@ -65,8 +65,8 @@ class PlayCommand(Command):
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, url = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
-        await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
-        for video in data["videos"]:
+        response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
+        for video in response["videos"]:
             if self.interface.name == "discord":
                 # This is one of the unsafest things ever
                 embed = pickle.loads(eval(video["discord_embed_pickle"]))
