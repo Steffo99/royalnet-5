@@ -117,14 +117,16 @@ class DiscordBot(GenericBot):
                 # Prepare data
                 data = self._Data(interface=command.interface, message=message)
                 # Call the command
+                log.debug(f"Calling command '{command.name}'")
                 with message.channel.typing():
                     try:
                         await command.run(CommandArgs(parameters), data=data)
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
-                        error_message = f"⛔️ {e.__class__.__name__}\n"
+                        error_message = f"{e.__class__.__name__}\n"
                         error_message += '\n'.join(e.args)
-                        await data.reply(error_message)
+                        log.error(f"Error in {command.name}: {error_message}")
+                        await data.reply(f"⛔️ {error_message}")
 
             async def on_ready(cli):
                 log.debug("Connection successful, client is ready")
@@ -210,9 +212,9 @@ class DiscordBot(GenericBot):
 
     async def run(self):
         """Login to Discord, then run the bot."""
-        log.debug(f"Logging in to Discord")
+        log.info(f"Logging in to Discord")
         await self.client.login(self._discord_config.token)
-        log.debug(f"Connecting to Discord")
+        log.info(f"Connecting to Discord")
         await self.client.connect()
         # TODO: how to stop?
 
@@ -237,7 +239,8 @@ class DiscordBot(GenericBot):
 
         def advance(error=None):
             if error:
-                raise Exception(f"Error while advancing music_data: {error}")
+                log.error(f"Error while advancing music_data: {error}")
+                return
             self.loop.create_task(self.advance_music_data(guild))
 
         log.debug(f"Starting playback of {next_source}")

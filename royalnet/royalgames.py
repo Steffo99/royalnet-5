@@ -69,5 +69,9 @@ tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
 loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())
 
+print("Enabled commands:")
+for command in commands:
+    print(f"{command.name} - {command.description}")
+
 print("Running loop...")
 loop.run_forever()

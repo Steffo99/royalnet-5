@@ -125,13 +125,20 @@ class TelegramBot(GenericBot):
     async def run(self):
         while True:
             # Get the latest 100 updates
+            log.debug("Calling getUpdates...")
             try:
                 last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates,
                                                                             offset=self._offset,
-                                                                            timeout=60)
-            except telegram.error.TelegramError as error:
+                                                                            timeout=30,
+                                                                            read_latency=5.0)
+            except telegram.error.TimedOut as error:
+                log.debug("getUpdates timed out")
+                continue
+            except Exception as error:
+                log.error(f"Error while getting updates: {error.__class__.__name__} {error.args}")
                 sentry_sdk.capture_exception(error)
                 await asyncio.sleep(5)
+                continue
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall
