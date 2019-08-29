@@ -1,17 +1,13 @@
 royalnet
 ====================================
 
+Welcome to the documentation of Royalnet!
+
 .. toctree::
    :maxdepth: 2
 
-   audio
-   bots
-   commands
-   database
-   network
-   utils
-   error
-   web
+   creatingacommand
+   apireference
 
 
 Some useful links
