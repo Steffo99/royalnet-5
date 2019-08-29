@@ -64,19 +64,23 @@ To send a message in the chat the command was called in, you can use the :py:met
 
 And... it's done! The command is ready to be added to a bot!
 
+Command arguments
+------------------------------------
+
+
 Coroutines and slow operations
 ------------------------------------
 
 You may have noticed that in the previous example I wrote ``await data.reply("🍝")`` instead of just ``data.reply("🍝")``.
 
 This is because :py:meth:`CommandData.reply` isn't a simple method: it is a coroutine, a special kind of function that
- can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.
+can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.
 
 By adding the ``await`` keyword before the ``data.reply("🍝")``, we tell the bot that it can do other things, like
- receiving new messages, while the message is being sent.
+receiving new messages, while the message is being sent.
 
 You should avoid running slow normal functions inside bot commands, as they will stop the bot from working until they
- are finished and may cause bugs in other parts of the code! ::
+are finished and may cause bugs in other parts of the code! ::
 
     async def run(self, args, data):
         # Don't do this!
@@ -84,7 +88,7 @@ You should avoid running slow normal functions inside bot commands, as they will
         ...
 
 If the slow function you want does not cause any side effect, you can wrap it with the :ref:`royalnet.utils.asyncify`
- function: ::
+function: ::
 
     async def run(self, args, data):
         # If the called function has no side effect, you can do this!
@@ -92,4 +96,10 @@ If the slow function you want does not cause any side effect, you can wrap it wi
         ...
 
 Avoid using :py:func:`time.sleep` function, as it is considered a slow operation: use instead :py:func:`asyncio.sleep`,
- a coroutine that does the same exact thing.
+a coroutine that does the same exact thing.
+
+Accessing the database
+------------------------------------
+
+Comunicating via Royalnet
+------------------------------------
