@@ -125,7 +125,6 @@ class TelegramBot(GenericBot):
     async def run(self):
         while True:
             # Get the latest 100 updates
-            log.debug("Calling getUpdates...")
             try:
                 last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates,
                                                                             offset=self._offset,
