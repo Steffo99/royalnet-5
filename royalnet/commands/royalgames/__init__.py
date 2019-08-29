@@ -21,6 +21,7 @@ from .smecds import SmecdsCommand
 from .summon import SummonCommand
 from .videochannel import VideochannelCommand
 from .dnditem import DnditemCommand
+from .dndspell import DndspellCommand
 
 __all__ = [
     "CiaoruoziCommand",
@@ -40,5 +41,6 @@ __all__ = [
     "SmecdsCommand",
     "SummonCommand",
     "VideochannelCommand",
-    "DnditemCommand"
+    "DnditemCommand",
+    "DndspellCommand"
 ]

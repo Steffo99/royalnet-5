@@ -78,3 +78,15 @@ def splitstring(s: str, max: int) -> typing.List[str]:
         l.append(s[:max])
         s = s[max:]
     return l
+
+
+def ordinalformat(number: int):
+    if 10 <= number % 100 < 20:
+        return f"{number}th"
+    if number % 10 == 1:
+        return f"{number}st"
+    elif number % 10 == 2:
+        return f"{number}nd"
+    elif number % 10 == 3:
+        return f"{number}rd"
+    return f"{number}th"

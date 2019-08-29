@@ -5,6 +5,7 @@ from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ..commandinterface import CommandInterface
+from ...utils import parse_5etools_entry
 
 
 class DnditemCommand(Command):
@@ -36,32 +37,6 @@ class DnditemCommand(Command):
                 for item in j["baseitem"]:
                     self._dnddata.add(item)
 
-    def _parse_entry(self, entry):
-        if isinstance(entry, str):
-            return entry
-        elif isinstance(entry, dict):
-            string = ""
-            if entry["type"] == "entries":
-                string += f'[b]{entry.get("name", "")}[/b]\n'
-                for subentry in entry["entries"]:
-                    string += self._parse_entry(subentry)
-            elif entry["type"] == "table":
-                string += "[i][table hidden][/i]"
-                # for label in entry["colLabels"]:
-                #     string += f"| {label} "
-                # string += "|"
-                # for row in entry["rows"]:
-                #     for column in row:
-                #         string += f"| {self._parse_entry(column)} "
-                #     string += "|\n"
-            elif entry["type"] == "cell":
-                return self._parse_entry(entry["entry"])
-            else:
-                string += "[i][unknown type][/i]"
-        else:
-            return "[/i][unknown data][/i]"
-        return string
-
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self._dnddata is None:
             await data.reply("⚠️ Il database degli oggetti di D&D non è ancora stato scaricato.")
@@ -78,6 +53,6 @@ class DnditemCommand(Command):
                   f'Rarity: [b]{result["rarity"] if result.get("rarity", "None") != "None" else "Mundane"}[/b]\n' \
                   f'\n'
         for entry in result.get("entries", []):
-            string += self._parse_entry(entry)
+            string += parse_5etools_entry(entry)
             string += "\n\n"
         await data.reply(string)

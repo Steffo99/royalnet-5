@@ -34,7 +34,8 @@ commands = [
     SmecdsCommand,
     SummonCommand,
     VideochannelCommand,
-    DnditemCommand
+    DnditemCommand,
+    DndspellCommand
 ]
 
 # noinspection PyUnreachableCode
