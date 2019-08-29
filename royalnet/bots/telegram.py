@@ -1,6 +1,8 @@
 import telegram
 import telegram.utils.request
 import typing
+import asyncio
+import sentry_sdk
 import logging as _logging
 from .generic import GenericBot
 from ..utils import *
@@ -74,9 +76,11 @@ class TelegramBot(GenericBot):
                  telegram_config: TelegramConfig,
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
+                 sentry_dsn: typing.Optional[str] = None,
                  commands: typing.List[typing.Type[Command]] = None):
         super().__init__(royalnet_config=royalnet_config,
                          database_config=database_config,
+                         sentry_dsn=sentry_dsn,
                          commands=commands)
         self._telegram_config = telegram_config
         self._init_client()
@@ -107,16 +111,27 @@ class TelegramBot(GenericBot):
         except KeyError:
             # Skip the message
             return
+        # Prepare data
+        data = self._Data(interface=command.interface, update=update)
         # Run the command
-        await command.run(CommandArgs(parameters), self._Data(interface=command.interface, update=update))
+        try:
+            await command.run(CommandArgs(parameters), data)
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n"
+            error_message += '\n'.join(e.args)
+            await data.reply(error_message)
 
     async def run(self):
         while True:
             # Get the latest 100 updates
             try:
-                last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates, offset=self._offset, timeout=60)
-            except telegram.error.TimedOut:
-                continue
+                last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates,
+                                                                            offset=self._offset,
+                                                                            timeout=60)
+            except telegram.error.TelegramError as error:
+                sentry_sdk.capture_exception(error)
+                await asyncio.sleep(5)
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall

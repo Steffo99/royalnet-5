@@ -1,5 +1,6 @@
 import discord
 import typing
+import sentry_sdk
 import logging as _logging
 from .generic import GenericBot
 from ..utils import *
@@ -113,9 +114,17 @@ class DiscordBot(GenericBot):
                 except KeyError:
                     # Skip the message
                     return
+                # Prepare data
+                data = self._Data(interface=command.interface, message=message)
                 # Call the command
                 with message.channel.typing():
-                    await command.run(CommandArgs(parameters), self._Data(interface=command.interface, message=message))
+                    try:
+                        await command.run(CommandArgs(parameters), data=data)
+                    except Exception as e:
+                        sentry_sdk.capture_exception(e)
+                        error_message = f"⛔️ {e.__class__.__name__}\n"
+                        error_message += '\n'.join(e.args)
+                        await data.reply(error_message)
 
             async def on_ready(cli):
                 log.debug("Connection successful, client is ready")
@@ -189,9 +198,11 @@ class DiscordBot(GenericBot):
                  discord_config: DiscordConfig,
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
+                 sentry_dsn: typing.Optional[str] = None,
                  commands: typing.List[typing.Type[Command]] = None):
         super().__init__(royalnet_config=royalnet_config,
                          database_config=database_config,
+                         sentry_dsn=sentry_dsn,
                          commands=commands)
         self._discord_config = discord_config
         self._init_client()

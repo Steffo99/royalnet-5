@@ -3,8 +3,10 @@
 import os
 import asyncio
 import logging
+import sentry_sdk
 from royalnet.bots import DiscordBot, DiscordConfig, TelegramBot, TelegramConfig
 from royalnet.commands.royalgames import *
+from royalnet.commands.debug import *
 from royalnet.network import RoyalnetServer, RoyalnetConfig
 from royalnet.database import DatabaseConfig
 from royalnet.database.tables import Royal, Telegram, Discord
@@ -38,9 +40,12 @@ commands = [
     DndspellCommand
 ]
 
+sentry_dsn = os.environ.get("SENTRY_DSN")
+
 # noinspection PyUnreachableCode
 if __debug__:
     log.setLevel(logging.DEBUG)
+    commands = [*commands, DebugErrorCommand]
 else:
     log.setLevel(logging.INFO)
 
@@ -54,10 +59,12 @@ print("Starting bots...")
 ds_bot = DiscordBot(discord_config=DiscordConfig(os.environ["DS_AK"]),
                     royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
                     database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id"),
+                    sentry_dsn=sentry_dsn,
                     commands=commands)
 tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
                      database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id"),
+                     sentry_dsn=sentry_dsn,
                      commands=commands)
 loop.create_task(tg_bot.run())
 loop.create_task(ds_bot.run())

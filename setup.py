@@ -29,7 +29,8 @@ setuptools.setup(
                       "flask>=1.0.3",
                       "markdown2>=2.3.8",
                       "mcstatus>=2.2.1",
-                      "sortedcontainers>=2.1.0"],
+                      "sortedcontainers>=2.1.0",
+                      "sentry-sdk>=0.11.1"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",

@@ -2,6 +2,7 @@ import sys
 import typing
 import asyncio
 import logging
+import sentry_sdk
 from ..utils import *
 from ..network import *
 from ..database import *
@@ -124,25 +125,34 @@ class GenericBot:
                  royalnet_config: typing.Optional[RoyalnetConfig] = None,
                  database_config: typing.Optional[DatabaseConfig] = None,
                  commands: typing.List[typing.Type[Command]] = None,
+                 sentry_dsn: typing.Optional[str] = None,
                  loop: asyncio.AbstractEventLoop = None):
         if loop is None:
             self.loop = asyncio.get_event_loop()
         else:
             self.loop = loop
-        if database_config is None:
-            self.alchemy = None
-            self.master_table = None
-            self.identity_table = None
-            self.identity_column = None
+        if sentry_dsn:
+            log.debug("Sentry int")
+            self.sentry = sentry_sdk.init(sentry_dsn)
         else:
-            self._init_database(commands=commands, database_config=database_config)
-        if commands is None:
-            commands = []
-        self._init_commands(commands)
-        if royalnet_config is None:
-            self.network = None
-        else:
-            self._init_royalnet(royalnet_config=royalnet_config)
+            log.debug("Sentry integration not enabled")
+        try:
+            if database_config is None:
+                self.alchemy = None
+                self.master_table = None
+                self.identity_table = None
+                self.identity_column = None
+            else:
+                self._init_database(commands=commands, database_config=database_config)
+            if commands is None:
+                commands = []
+            self._init_commands(commands)
+            if royalnet_config is None:
+                self.network = None
+            else:
+                self._init_royalnet(royalnet_config=royalnet_config)
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
 
     async def run(self):
         """A blocking coroutine that should make the bot start listening to commands and requests."""
