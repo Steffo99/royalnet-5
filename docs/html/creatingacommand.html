@@ -84,7 +84,13 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Royalnet Commands</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-a-new-command">Creating a new Command</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#command-arguments">Command arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-arguments">Command arguments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#direct-access">Direct access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-access">Optional access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#full-string">Full string</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regular-expressions">Regular expressions</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-the-database">Accessing the database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comunicating-via-royalnet">Comunicating via Royalnet</a></li>
@@ -215,6 +221,81 @@ The previously mentioned “spaghetti” command should have a file called <code
 </div>
 <div class="section" id="command-arguments">
 <h2>Command arguments<a class="headerlink" href="#command-arguments" title="Permalink to this headline">¶</a></h2>
+<p>A command can have some arguments passed by the user: for example, on Telegram an user may type <cite>/spaghetti carbonara al-dente</cite>
+to pass the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <cite>“carbonara al-dente”</cite> to the command code.</p>
+<p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <a class="reference internal" href="apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a>
+method.</p>
+<div class="section" id="direct-access">
+<h3>Direct access<a class="headerlink" href="#direct-access" title="Permalink to this headline">¶</a></h3>
+<p>You can consider arguments as if they were separated by spaces.</p>
+<p>You can then access command arguments directly by number as if the args object was a list of <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+<p>If you request an argument with a certain number, but the argument does not exist, an
+<a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> is raised, making the arguments accessed in this way <strong>required</strong>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># &quot;carbonara&quot;</span>
+
+<span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="c1"># &quot;al-dente&quot;</span>
+
+<span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="c1"># InvalidInputError() is raised</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optional-access">
+<h3>Optional access<a class="headerlink" href="#optional-access" title="Permalink to this headline">¶</a></h3>
+<p>If you don’t want arguments to be required, you can access them through the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.optional" title="royalnet.commands.CommandArgs.optional"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.optional()</span></code></a> method: it
+will return <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code> if the argument wasn’t passed, making it <strong>optional</strong>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># &quot;carbonara&quot;</span>
+
+<span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># &quot;al-dente&quot;</span>
+
+<span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># None</span>
+</pre></div>
+</div>
+<p>You can specify a default result too, so that the method will return it instead of returning <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;banana&quot;</span><span class="p">)</span>
+<span class="c1"># &quot;banana&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="full-string">
+<h3>Full string<a class="headerlink" href="#full-string" title="Permalink to this headline">¶</a></h3>
+<p>If you want the full argument string, you can use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.joined" title="royalnet.commands.CommandArgs.joined"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.joined()</span></code></a> method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">()</span>
+<span class="c1"># &quot;carbonara al-dente&quot;</span>
+</pre></div>
+</div>
+<p>You can specify a minimum number of arguments too, so that an <a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> will be
+raised if not enough arguments are present:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">(</span><span class="n">require_at_least</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># InvalidInputError() is raised</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="regular-expressions">
+<h3>Regular expressions<a class="headerlink" href="#regular-expressions" title="Permalink to this headline">¶</a></h3>
+<p>For more complex commands, you may want to get arguments through <a class="reference external" href="https://regexr.com/">regular expressions</a>.</p>
+<p>You can then use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.match" title="royalnet.commands.CommandArgs.match"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.match()</span></code></a> method, which tries to match a pattern to the command argument string,
+which returns a tuple of the matched groups and raises an <a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> if there is no match.</p>
+<p>To match a pattern, <a class="reference external" href="https://docs.python.org/3.7/library/re.html#re.match" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a> is used, meaning that Python will try to match only at the beginning of the string.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(carb\w+)&quot;</span><span class="p">)</span>
+<span class="c1"># (&quot;carbonara&quot;,)</span>
+
+<span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(al-\w+)&quot;</span><span class="p">)</span>
+<span class="c1"># InvalidInputError() is raised</span>
+
+<span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*(al-\w+)&quot;</span><span class="p">)</span>
+<span class="c1"># (&quot;al-dente&quot;,)</span>
+
+<span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*(carb\w+)\s*(al-\w+)&quot;</span><span class="p">)</span>
+<span class="c1"># (&quot;carbonara&quot;, &quot;al-dente&quot;)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="coroutines-and-slow-operations">
 <h2>Coroutines and slow operations<a class="headerlink" href="#coroutines-and-slow-operations" title="Permalink to this headline">¶</a></h2>
@@ -231,7 +312,7 @@ are finished and may cause bugs in other parts of the code!</p>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>If the slow function you want does not cause any side effect, you can wrap it with the <span class="xref std std-ref">royalnet.utils.asyncify</span>
+<p>If the slow function you want does not cause any side effect, you can wrap it with the <a class="reference internal" href="apireference.html#royalnet.utils.asyncify" title="royalnet.utils.asyncify"><code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code></a>
 function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="c1"># If the called function has no side effect, you can do this!</span>

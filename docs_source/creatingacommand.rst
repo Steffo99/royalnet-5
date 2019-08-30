@@ -67,6 +67,86 @@ And... it's done! The command is ready to be added to a bot!
 Command arguments
 ------------------------------------
 
+A command can have some arguments passed by the user: for example, on Telegram an user may type `/spaghetti carbonara al-dente`
+to pass the :py:class:`str` `"carbonara al-dente"` to the command code.
+
+These arguments can be accessed in multiple ways through the ``args`` parameter passed to the :py:meth:`Command.run`
+method.
+
+Direct access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can consider arguments as if they were separated by spaces.
+
+You can then access command arguments directly by number as if the args object was a list of :py:class:`str`.
+
+If you request an argument with a certain number, but the argument does not exist, an
+:py:exc:`royalnet.error.InvalidInputError` is raised, making the arguments accessed in this way **required**. ::
+
+    args[0]
+    # "carbonara"
+
+    args[1]
+    # "al-dente"
+
+    args[2]
+    # InvalidInputError() is raised
+
+Optional access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you don't want arguments to be required, you can access them through the :py:meth:`CommandArgs.optional` method: it
+will return :py:const:`None` if the argument wasn't passed, making it **optional**. ::
+
+    args.optional(0)
+    # "carbonara"
+
+    args.optional(1)
+    # "al-dente"
+
+    args.optional(2)
+    # None
+
+You can specify a default result too, so that the method will return it instead of returning :py:const:`None`: ::
+
+    args.optional(2, default="banana")
+    # "banana"
+
+Full string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want the full argument string, you can use the :py:meth:`CommandArgs.joined` method. ::
+
+    args.joined()
+    # "carbonara al-dente"
+
+You can specify a minimum number of arguments too, so that an :py:exc:`royalnet.error.InvalidInputError` will be
+raised if not enough arguments are present: ::
+
+    args.joined(require_at_least=3)
+    # InvalidInputError() is raised
+
+Regular expressions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For more complex commands, you may want to get arguments through `regular expressions <https://regexr.com/>`_.
+
+You can then use the :py:meth:`CommandArgs.match` method, which tries to match a pattern to the command argument string,
+which returns a tuple of the matched groups and raises an :py:exc:`royalnet.error.InvalidInputError` if there is no match.
+
+To match a pattern, :py:func:`re.match` is used, meaning that Python will try to match only at the beginning of the string. ::
+
+    args.match(r"(carb\w+)")
+    # ("carbonara",)
+
+    args.match(r"(al-\w+)")
+    # InvalidInputError() is raised
+
+    args.match(r"\s*(al-\w+)")
+    # ("al-dente",)
+
+    args.match(r"\s*(carb\w+)\s*(al-\w+)")
+    # ("carbonara", "al-dente")
 
 Coroutines and slow operations
 ------------------------------------
@@ -87,7 +167,7 @@ are finished and may cause bugs in other parts of the code! ::
         image = download_1_terabyte_of_spaghetti("right_now", from="italy")
         ...
 
-If the slow function you want does not cause any side effect, you can wrap it with the :ref:`royalnet.utils.asyncify`
+If the slow function you want does not cause any side effect, you can wrap it with the :py:func:`royalnet.utils.asyncify`
 function: ::
 
     async def run(self, args, data):
