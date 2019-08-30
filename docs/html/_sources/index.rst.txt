@@ -4,7 +4,7 @@ royalnet
 Welcome to the documentation of Royalnet!
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    creatingacommand
    apireference
