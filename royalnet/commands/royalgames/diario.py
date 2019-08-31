@@ -108,7 +108,7 @@ class DiarioCommand(Command):
                 if raw_text:
                     # Pass the sentence through the diario regex
                     match = re.match(
-                        r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([\w ]+))?(?:, *([^ ].*))?',
+                        r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([^,]+))?(?:, *([^ ].*))?',
                         raw_text)
                     # Find the corresponding matches
                     if match is not None:
@@ -162,7 +162,7 @@ class DiarioCommand(Command):
             # Recreate the full sentence
             raw_text = " ".join(args)
             # Pass the sentence through the diario regex
-            match = re.match(r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([\w ]+))?(?:, *([^ ].*))?',
+            match = re.match(r'(!)? *["«‘“‛‟❛❝〝＂`]([^"]+)["»’”❜❞〞＂`] *(?:(?:-{1,2}|—) *([^,]+))?(?:, *([^ ].*))?',
                              raw_text)
             # Find the corresponding matches
             if match is not None:
