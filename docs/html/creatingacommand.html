@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#regular-expressions">Regular expressions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-the-database">Accessing the database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comunicating-via-royalnet">Comunicating via Royalnet</a></li>
@@ -225,6 +226,22 @@ The previously mentioned “spaghetti” command should have a file called <code
 to pass the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <cite>“carbonara al-dente”</cite> to the command code.</p>
 <p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <a class="reference internal" href="apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a>
 method.</p>
+<p>If you want your command to use arguments, override the <code class="docutils literal notranslate"><span class="pre">syntax</span></code> class attribute with a brief description of the
+syntax of your command, possibly using (round parentheses) for required arguments and [square brackets] for optional
+ones.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
+
+<span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;spaghetti&quot;</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
+
+    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;(requestedpasta)&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{args[0]}</span><span class="s2">!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="section" id="direct-access">
 <h3>Direct access<a class="headerlink" href="#direct-access" title="Permalink to this headline">¶</a></h3>
 <p>You can consider arguments as if they were separated by spaces.</p>
@@ -297,9 +314,40 @@ which returns a tuple of the matched groups and raises an <a class="reference in
 </div>
 </div>
 </div>
+<div class="section" id="running-code-at-the-initialization-of-the-bot">
+<h2>Running code at the initialization of the bot<a class="headerlink" href="#running-code-at-the-initialization-of-the-bot" title="Permalink to this headline">¶</a></h2>
+<p>You can run code while the bot is starting by overriding the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.__init__()</span></code> function.</p>
+<p>You should keep the <code class="docutils literal notranslate"><span class="pre">super().__init__(interface)</span></code> call at the start of it, so that the <a class="reference internal" href="apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> instance is
+initialized properly, then add your code after it.</p>
+<p>You can add fields to the command to keep <strong>shared data between multiple command calls</strong> (but not bot restarts): it may
+be useful for fetching external static data and keeping it until the bot is restarted, or to store references to all the
+<a class="reference external" href="https://docs.python.org/3.7/library/asyncio-task.html#asyncio.Task" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Task</span></code></a> started by the bot.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
+
+<span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;spaghetti&quot;</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
+
+    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;(pasta)&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_pasta</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">pasta</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pasta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested_pasta</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;⚠️ This pasta was already requested before.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_pasta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pasta</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{pasta}</span><span class="s2">!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="coroutines-and-slow-operations">
 <h2>Coroutines and slow operations<a class="headerlink" href="#coroutines-and-slow-operations" title="Permalink to this headline">¶</a></h2>
-<p>You may have noticed that in the previous example I wrote <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">data.reply(&quot;🍝&quot;)</span></code> instead of just <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>.</p>
+<p>You may have noticed that in the previous examples we used <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">data.reply(&quot;🍝&quot;)</span></code> instead of just <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>.</p>
 <p>This is because <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> isn’t a simple method: it is a coroutine, a special kind of function that
 can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.</p>
 <p>By adding the <code class="docutils literal notranslate"><span class="pre">await</span></code> keyword before the <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>, we tell the bot that it can do other things, like
@@ -325,6 +373,8 @@ a coroutine that does the same exact thing.</p>
 </div>
 <div class="section" id="accessing-the-database">
 <h2>Accessing the database<a class="headerlink" href="#accessing-the-database" title="Permalink to this headline">¶</a></h2>
+<p>itself a SQLAlchemy wrapper).</p>
+<p><code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code>, and can access the database session at <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code>.</p>
 </div>
 <div class="section" id="comunicating-via-royalnet">
 <h2>Comunicating via Royalnet<a class="headerlink" href="#comunicating-via-royalnet" title="Permalink to this headline">¶</a></h2>

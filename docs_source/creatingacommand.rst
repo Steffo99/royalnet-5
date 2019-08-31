@@ -73,6 +73,23 @@ to pass the :py:class:`str` `"carbonara al-dente"` to the command code.
 These arguments can be accessed in multiple ways through the ``args`` parameter passed to the :py:meth:`Command.run`
 method.
 
+If you want your command to use arguments, override the ``syntax`` class attribute with a brief description of the
+syntax of your command, possibly using (round parentheses) for required arguments and [square brackets] for optional
+ones. ::
+
+    from royalnet.commands import Command
+
+    class SpaghettiCommand(Command):
+        name = "spaghetti"
+
+        description = "Send a spaghetti emoji in the chat."
+
+        syntax = "(requestedpasta)"
+
+        async def run(self, args, data):
+            await data.reply(f"🍝 Here's your {args[0]}!")
+
+
 Direct access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -148,10 +165,44 @@ To match a pattern, :py:func:`re.match` is used, meaning that Python will try to
     args.match(r"\s*(carb\w+)\s*(al-\w+)")
     # ("carbonara", "al-dente")
 
+Running code at the initialization of the bot
+------------------------------------
+
+You can run code while the bot is starting by overriding the :py:meth:`Command.__init__` function.
+
+You should keep the ``super().__init__(interface)`` call at the start of it, so that the :py:class:`Command` instance is
+initialized properly, then add your code after it.
+
+You can add fields to the command to keep **shared data between multiple command calls** (but not bot restarts): it may
+be useful for fetching external static data and keeping it until the bot is restarted, or to store references to all the
+:py:class:`asyncio.Task` started by the bot. ::
+
+    from royalnet.commands import Command
+
+    class SpaghettiCommand(Command):
+        name = "spaghetti"
+
+        description = "Send a spaghetti emoji in the chat."
+
+        syntax = "(pasta)"
+
+        def __init__(self, interface):
+            super().__init__(interface)
+            self.requested_pasta = []
+
+        async def run(self, args, data):
+            pasta = args[0]
+            if pasta in self.requested_pasta:
+                await data.reply(f"⚠️ This pasta was already requested before.")
+                return
+            self.requested_pasta.append(pasta)
+            await data.reply(f"🍝 Here's your {pasta}!")
+
+
 Coroutines and slow operations
 ------------------------------------
 
-You may have noticed that in the previous example I wrote ``await data.reply("🍝")`` instead of just ``data.reply("🍝")``.
+You may have noticed that in the previous examples we used ``await data.reply("🍝")`` instead of just ``data.reply("🍝")``.
 
 This is because :py:meth:`CommandData.reply` isn't a simple method: it is a coroutine, a special kind of function that
 can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.
@@ -180,6 +231,12 @@ a coroutine that does the same exact thing.
 
 Accessing the database
 ------------------------------------
+
+.. Usually, bots are connected to a PostgreSQL database through a :py:class:`royalnet.database.Alchemy` interface (which is
+itself a SQLAlchemy wrapper).
+
+.. Commands can access the connected database through the :py:class:`royalnet.database.Alchemy` available at
+``self.interface.alchemy``, and can access the database session at ``self.interface.session``.
 
 Comunicating via Royalnet
 ------------------------------------
