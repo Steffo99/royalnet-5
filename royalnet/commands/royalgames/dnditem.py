@@ -43,12 +43,12 @@ class DnditemCommand(Command):
             return
         search = args.joined().lower()
         result = self._dnddata[self._dnddata.bisect_key_left(search)]
-        string = f'[b]{result["name"]}[/b]\n'
+        string = f'📦 [b]{result["name"]}[/b]\n'
         if "source" in result:
             string += f'[i]{result["source"]}, page {result["page"]}[/i]\n'
         string += f'\n' \
                   f'Type: [b]{result.get("type", "None")}[/b]\n' \
-                  f'Value: [b]{result.get("value", "Priceless")}[/b]\n' \
+                  f'Value: [b]{result.get("value", "-")}[/b]\n' \
                   f'Weight: [b]{result.get("weight", "0")} lb[/b]\n' \
                   f'Rarity: [b]{result["rarity"] if result.get("rarity", "None") != "None" else "Mundane"}[/b]\n' \
                   f'\n'
