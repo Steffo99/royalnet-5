@@ -93,7 +93,14 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#accessing-the-database">Accessing the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-database">Using the database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#querying-the-database">Querying the database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-filters-to-the-query">Adding filters to the query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ordering-the-results-of-a-query">Ordering the results of a query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fetching-the-results-of-a-query">Fetching the results of a query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-alchemy">More Alchemy</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#comunicating-via-royalnet">Comunicating via Royalnet</a></li>
 </ul>
 </li>
@@ -371,10 +378,94 @@ function:</p>
 <p>Avoid using <a class="reference external" href="https://docs.python.org/3.7/library/time.html#time.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.sleep()</span></code></a> function, as it is considered a slow operation: use instead <a class="reference external" href="https://docs.python.org/3.7/library/asyncio-task.html#asyncio.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.sleep()</span></code></a>,
 a coroutine that does the same exact thing.</p>
 </div>
-<div class="section" id="accessing-the-database">
-<h2>Accessing the database<a class="headerlink" href="#accessing-the-database" title="Permalink to this headline">¶</a></h2>
-<p>itself a SQLAlchemy wrapper).</p>
-<p><code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code>, and can access the database session at <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code>.</p>
+<div class="section" id="using-the-database">
+<h2>Using the database<a class="headerlink" href="#using-the-database" title="Permalink to this headline">¶</a></h2>
+<p>Bots can be connected to a PostgreSQL database through a special SQLAlchemy interface called
+<a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a>.</p>
+<p>If the connection is established, the <code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code> and <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code> fields will be
+available for use in commands.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code> is an instance of <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a>, which contains the
+<a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/connections.html#sqlalchemy.engine.Engine" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.engine.Engine</span></code></a>, metadata and tables, while <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code> is a
+<a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/session_api.html#sqlalchemy.orm.session.Session" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.session.Session</span></code></a>, and can be interacted in the same way as one.</p>
+<p>If you want to use <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> in your command, you should override the
+<code class="docutils literal notranslate"><span class="pre">require_alchemy_tables</span></code> field with the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#set" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> of Alchemy tables you need.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
+<span class="kn">from</span> <span class="nn">royalnet.database.tables</span> <span class="k">import</span> <span class="n">Royal</span>
+
+<span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;spaghetti&quot;</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
+
+    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;(pasta)&quot;</span>
+
+    <span class="n">requrire_alchemy_tables</span> <span class="o">=</span> <span class="p">{</span><span class="n">Royal</span><span class="p">}</span>
+
+    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="section" id="querying-the-database">
+<h3>Querying the database<a class="headerlink" href="#querying-the-database" title="Permalink to this headline">¶</a></h3>
+<p>You can <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query</span></code></a> the database using the SQLAlchemy ORM.</p>
+<p>The SQLAlchemy tables can be found inside <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> with the same name they were created
+from, if they were specified in <code class="docutils literal notranslate"><span class="pre">require_alchemy_tables</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RoyalTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">alchemy</span><span class="o">.</span><span class="n">Royal</span>
+<span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">RoyalTable</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="adding-filters-to-the-query">
+<h3>Adding filters to the query<a class="headerlink" href="#adding-filters-to-the-query" title="Permalink to this headline">¶</a></h3>
+<p>You can filter the query results with the <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.filter" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.filter()</span></code></a> method.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember to always use a table column as first comparision element, as it won’t work otherwise.</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">RoyalTable</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;Member&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ordering-the-results-of-a-query">
+<h3>Ordering the results of a query<a class="headerlink" href="#ordering-the-results-of-a-query" title="Permalink to this headline">¶</a></h3>
+<p>You can order the query results in <strong>ascending order</strong> with the <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.order_by" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.order_by()</span></code></a> method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">RoyalTable</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, you can append the <cite>.desc()</cite> method to a table column to sort in <strong>descending order</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">RoyalTable</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fetching-the-results-of-a-query">
+<h3>Fetching the results of a query<a class="headerlink" href="#fetching-the-results-of-a-query" title="Permalink to this headline">¶</a></h3>
+<p>You can fetch the query results with the <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.all" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.all()</span></code></a>,
+<a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.first" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.first()</span></code></a>, <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one()</span></code></a> and
+<a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one_or_none" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one_or_none()</span></code></a> methods.</p>
+<p>Remember to use <a class="reference internal" href="apireference.html#royalnet.utils.asyncify" title="royalnet.utils.asyncify"><code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code></a> when fetching results, as it may take a while!</p>
+<p>Use <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.all" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.all()</span></code></a> if you want a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of <strong>all results</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.first" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.first()</span></code></a> if you want <strong>the first result</strong> of the list, or <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code> if
+there are no results:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one()</span></code></a> if you expect to have <strong>a single result</strong>, and you want the command to
+raise an error if any different number of results is returned:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">:</span> <span class="o">...</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">one</span><span class="p">)</span>  <span class="c1"># Raises an error if there are no results or more than a result.</span>
+</pre></div>
+</div>
+<p>Use <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one_or_none" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one_or_none()</span></code></a> if you expect to have <strong>a single result</strong>, or <strong>nothing</strong>, and
+if you want the command to raise an error if the number of results is greater than one.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">)</span>  <span class="c1"># Raises an error if there is more than a result.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-alchemy">
+<h3>More Alchemy<a class="headerlink" href="#more-alchemy" title="Permalink to this headline">¶</a></h3>
+<p>You can read more about <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlalchemy</span></code> at their <a class="reference external" href="https://www.sqlalchemy.org/">website</a>.</p>
+</div>
 </div>
 <div class="section" id="comunicating-via-royalnet">
 <h2>Comunicating via Royalnet<a class="headerlink" href="#comunicating-via-royalnet" title="Permalink to this headline">¶</a></h2>

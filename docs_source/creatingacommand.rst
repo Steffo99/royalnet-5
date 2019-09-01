@@ -166,7 +166,7 @@ To match a pattern, :py:func:`re.match` is used, meaning that Python will try to
     # ("carbonara", "al-dente")
 
 Running code at the initialization of the bot
-------------------------------------
+---------------------------------------------
 
 You can run code while the bot is starting by overriding the :py:meth:`Command.__init__` function.
 
@@ -229,14 +229,102 @@ function: ::
 Avoid using :py:func:`time.sleep` function, as it is considered a slow operation: use instead :py:func:`asyncio.sleep`,
 a coroutine that does the same exact thing.
 
-Accessing the database
+Using the database
 ------------------------------------
 
-.. Usually, bots are connected to a PostgreSQL database through a :py:class:`royalnet.database.Alchemy` interface (which is
-itself a SQLAlchemy wrapper).
+Bots can be connected to a PostgreSQL database through a special SQLAlchemy interface called
+:py:class:`royalnet.database.Alchemy`.
 
-.. Commands can access the connected database through the :py:class:`royalnet.database.Alchemy` available at
-``self.interface.alchemy``, and can access the database session at ``self.interface.session``.
+If the connection is established, the ``self.interface.alchemy`` and ``self.interface.session`` fields will be
+available for use in commands.
+
+``self.interface.alchemy`` is an instance of :py:class:`royalnet.database.Alchemy`, which contains the
+:py:class:`sqlalchemy.engine.Engine`, metadata and tables, while ``self.interface.session`` is a
+:py:class:`sqlalchemy.orm.session.Session`, and can be interacted in the same way as one.
+
+If you want to use :py:class:`royalnet.database.Alchemy` in your command, you should override the
+``require_alchemy_tables`` field with the :py:class:`set` of Alchemy tables you need. ::
+
+    from royalnet.commands import Command
+    from royalnet.database.tables import Royal
+
+    class SpaghettiCommand(Command):
+        name = "spaghetti"
+
+        description = "Send a spaghetti emoji in the chat."
+
+        syntax = "(pasta)"
+
+        requrire_alchemy_tables = {Royal}
+
+        ...
+
+Querying the database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can :py:class:`sqlalchemy.orm.query.Query` the database using the SQLAlchemy ORM.
+
+The SQLAlchemy tables can be found inside :py:class:`royalnet.database.Alchemy` with the same name they were created
+from, if they were specified in ``require_alchemy_tables``. ::
+
+    RoyalTable = self.interface.alchemy.Royal
+    query = self.interface.session.query(RoyalTable)
+
+Adding filters to the query
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can filter the query results with the :py:meth:`sqlalchemy.orm.query.Query.filter` method.
+
+.. note:: Remember to always use a table column as first comparision element, as it won't work otherwise.
+
+::
+
+    query = query.filter(RoyalTable.role == "Member")
+
+
+Ordering the results of a query
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can order the query results in **ascending order** with the :py:meth:`sqlalchemy.orm.query.Query.order_by` method. ::
+
+    query = query.order_by(RoyalTable.username)
+
+Additionally, you can append the `.desc()` method to a table column to sort in **descending order**: ::
+
+    query = query.order_by(RoyalTable.username.desc())
+
+Fetching the results of a query
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can fetch the query results with the :py:meth:`sqlalchemy.orm.query.Query.all`,
+:py:meth:`sqlalchemy.orm.query.Query.first`, :py:meth:`sqlalchemy.orm.query.Query.one` and
+:py:meth:`sqlalchemy.orm.query.Query.one_or_none` methods.
+
+Remember to use :py:func:`royalnet.utils.asyncify` when fetching results, as it may take a while!
+
+Use :py:meth:`sqlalchemy.orm.query.Query.all` if you want a :py:class:`list` of **all results**: ::
+
+    results: list = await asyncify(query.all)
+
+Use :py:meth:`sqlalchemy.orm.query.Query.first` if you want **the first result** of the list, or :py:const:`None` if
+there are no results: ::
+
+    result: typing.Union[..., None] = await asyncify(query.first)
+
+Use :py:meth:`sqlalchemy.orm.query.Query.one` if you expect to have **a single result**, and you want the command to
+raise an error if any different number of results is returned: ::
+
+    result: ... = await asyncify(query.one)  # Raises an error if there are no results or more than a result.
+
+Use :py:meth:`sqlalchemy.orm.query.Query.one_or_none` if you expect to have **a single result**, or **nothing**, and
+if you want the command to raise an error if the number of results is greater than one. ::
+
+    result: typing.Union[..., None] = await asyncify(query.one_or_none)  # Raises an error if there is more than a result.
+
+More Alchemy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can read more about :py:mod:`sqlalchemy` at their `website <https://www.sqlalchemy.org/>`_.
 
 Comunicating via Royalnet
 ------------------------------------
