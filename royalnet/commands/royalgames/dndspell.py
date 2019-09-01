@@ -5,7 +5,7 @@ from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ..commandinterface import CommandInterface
-from ...utils import parse_5etools_entry, ordinalformat
+from ...utils import parse_5etools_entry, ordinalformat, andformat
 
 
 class DndspellCommand(Command):
@@ -75,6 +75,7 @@ class DndspellCommand(Command):
                     string += f'💎 [b]Material[/b] ([i]{spell["components"]["m"]["text"]}[/i]) | '
                 else:
                     string += f'💎 [b]Material[/b] ([i]{spell["components"]["m"]}[/i]) | '
+                string = string.rstrip(" ").rstrip("|")
             string += "\n"
         string += "\n"
         if "duration" in spell:
@@ -85,6 +86,8 @@ class DndspellCommand(Command):
                     string += 'Duration: ☁️ [b]Instantaneous[/b]'
                 elif duration["type"] == "special":
                     string += 'Duration: ⭐️ [b]Special[/b]'
+                elif duration["type"] == "permanent":
+                    string += f"Duration: ♾ [b]Permanent[/b] (ends on {andformat(duration['ends'], final=' or ')})"
                 else:
                     string += f'Duration: ⚠️[b]UNKNOWN[/b]'
                 if duration.get("concentration", False):
