@@ -95,7 +95,7 @@ class DndspellCommand(Command):
                 string += "\n"
         if "meta" in spell:
             if spell["meta"].get("ritual", False):
-                string += "Can be casted as ritual\n"
+                string += "🔮 Can be casted as ritual\n"
         string += "\n"
         for entry in spell.get("entries", []):
             string += parse_5etools_entry(entry)
