@@ -1,6 +1,7 @@
 import telegram
 import telegram.utils.request
 import typing
+import uuid
 import asyncio
 import sentry_sdk
 import logging as _logging
@@ -41,13 +42,23 @@ class TelegramBot(GenericBot):
             name = self.interface_name
             prefix = "/"
 
+            def __init__(self):
+                super().__init__()
+                self.keys_callbacks: typing.Dict[typing.Tuple[int, str], typing.Callable] = {}
+
+            def register_keyboard_key(interface, key_name: str, callback: typing.Callable):
+                interface.keys_callbacks[key_name] = callback
+
+            def unregister_keyboard_key(interface, key_name: str):
+                del interface.keys_callbacks[key_name]
+
         return TelegramInterface
 
     def _data_factory(self) -> typing.Type[CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
         class TelegramData(CommandData):
             def __init__(data, interface: CommandInterface, update: telegram.Update):
-                data._interface = interface
+                data.interface = interface
                 data.update = update
 
             async def reply(data, text: str):
@@ -61,7 +72,7 @@ class TelegramBot(GenericBot):
                     if error_if_none:
                         raise UnregisteredError("No author for this message")
                     return None
-                query = data._interface.session.query(self.master_table)
+                query = data.interface.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -69,6 +80,18 @@ class TelegramBot(GenericBot):
                 if result is None and error_if_none:
                     raise UnregisteredError("Author is not registered")
                 return result
+
+            async def keyboard(data, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
+                tg_keyboard = []
+                for key in keyboard:
+                    press_id = uuid.uuid4()
+                    tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
+                    data.interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
+                await asyncify(data.update.effective_chat.send_message,
+                               telegram_escape(text),
+                               reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
+                               parse_mode="HTML",
+                               disable_web_page_preview=True)
 
         return TelegramData
 
@@ -87,8 +110,12 @@ class TelegramBot(GenericBot):
 
     async def _handle_update(self, update: telegram.Update):
         # Skip non-message updates
-        if update.message is None:
-            return
+        if update.message is not None:
+            await self._handle_message(update)
+        elif update.callback_query is not None:
+            await self._handle_callback_query(update)
+
+    async def _handle_message(self, update: telegram.Update):
         message: telegram.Message = update.message
         text: str = message.text
         # Try getting the caption instead
@@ -121,6 +148,21 @@ class TelegramBot(GenericBot):
             error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
+
+    async def _handle_callback_query(self, update: telegram.Update):
+        query: telegram.CallbackQuery = update.callback_query
+        source: telegram.Message = query.message
+        for command in self.commands.values():
+            try:
+                callback = command.interface.keys_callbacks[query.data]
+            except KeyError:
+                continue
+            await callback(data=self._Data(interface=command.interface, update=update))
+            await asyncify(query.answer)
+            break
+        else:
+            await asyncify(source.edit_reply_markup, reply_markup=None)
+            await asyncify(query.answer, text="⛔️ This keyboard has expired.")
 
     async def run(self):
         while True:

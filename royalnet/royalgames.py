@@ -18,35 +18,39 @@ stream_handler = logging.StreamHandler()
 stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
 log.addHandler(stream_handler)
 
-commands = [
-    CiaoruoziCommand,
-    ColorCommand,
-    CvCommand,
-    DiarioCommand,
-    Mp3Command,
-    PauseCommand,
-    PingCommand,
-    PlayCommand,
-    PlaymodeCommand,
-    QueueCommand,
-    RageCommand,
-    ReminderCommand,
-    ShipCommand,
-    SkipCommand,
-    SmecdsCommand,
-    SummonCommand,
-    VideochannelCommand,
-    DnditemCommand,
-    DndspellCommand
-]
+
 
 sentry_dsn = os.environ.get("SENTRY_DSN")
 
 # noinspection PyUnreachableCode
 if __debug__:
+    commands = [
+        DebugErrorCommand,
+        DebugKeyboardCommand
+    ]
     log.setLevel(logging.DEBUG)
-    commands = [*commands, DebugErrorCommand]
 else:
+    commands = [
+        CiaoruoziCommand,
+        ColorCommand,
+        CvCommand,
+        DiarioCommand,
+        Mp3Command,
+        PauseCommand,
+        PingCommand,
+        PlayCommand,
+        PlaymodeCommand,
+        QueueCommand,
+        RageCommand,
+        ReminderCommand,
+        ShipCommand,
+        SkipCommand,
+        SmecdsCommand,
+        SummonCommand,
+        VideochannelCommand,
+        DnditemCommand,
+        DndspellCommand
+    ]
     log.setLevel(logging.INFO)
 
 address, port = "127.0.0.1", 1234

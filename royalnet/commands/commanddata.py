@@ -1,3 +1,6 @@
+import typing
+
+
 class CommandData:
     async def reply(self, text: str) -> None:
         """Send a text message to the channel where the call was made.
@@ -15,4 +18,10 @@ class CommandData:
 
         Raises:
              :py:exc:`royalnet.error.UnregisteredError` if ``error_if_none`` is set to True and no author is found."""
+        raise NotImplementedError()
+
+    async def keyboard(self, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
+        """Send a keyboard having the keys of the dict as keys and calling the correspondent values on a press.
+
+        The function should be passed the :py:class:`CommandData` instance as a argument."""
         raise NotImplementedError()

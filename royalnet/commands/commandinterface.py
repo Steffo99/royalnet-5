@@ -31,3 +31,9 @@ class CommandInterface:
             message: The data to be sent. Must be :py:mod:`pickle`-able.
             destination: The destination of the request, either in UUID format or node name."""
         raise NotImplementedError()
+
+    def register_keyboard_key(self, key_name: str, callback: typing.Callable):
+        raise NotImplementedError()
+
+    def unregister_keyboard_key(self, key_name: str):
+        raise NotImplementedError()

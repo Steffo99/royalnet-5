@@ -132,10 +132,10 @@ class GenericBot:
         else:
             self.loop = loop
         if sentry_dsn:
-            log.debug("Sentry int")
+            log.debug("Sentry integration enabled")
             self.sentry = sentry_sdk.init(sentry_dsn)
         else:
-            log.debug("Sentry integration not enabled")
+            log.debug("Sentry integration disabled")
         try:
             if database_config is None:
                 self.alchemy = None
