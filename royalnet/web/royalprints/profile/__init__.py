@@ -12,7 +12,7 @@ from ....utils.wikirender import prepare_page_markdown, RenderError
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 rp = Royalprint("profile", __name__, url_prefix="/profile", template_folder=tmpl_dir,
                 required_tables={Royal, ActiveKvGroup, Alias, Diario, Discord, Keygroup, Keyvalue, Telegram, WikiPage,
-                                 WikiRevision, Bio})
+                                 WikiRevision, Bio, TriviaScore})
 
 
 @rp.route("/")

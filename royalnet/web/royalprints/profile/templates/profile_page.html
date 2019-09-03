@@ -74,6 +74,11 @@
                             {% else %}
                                 <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value disabled">Nessuno</span></li>
                             {% endif %}
+                            {% if royal.trivia_score %}
+                                <li><span class="stats-info">Punteggio trivia</span>: <span class="stats-value">{{ royal.trivia_score.correct_answers }}/{{ royal.trivia_score.total_answers }}</span></li>
+                            {% else %}
+                                <li><span class="stats-info">Punteggio trivia</span>: <span class="stats-value disabled">0/0</span></li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
