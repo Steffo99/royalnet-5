@@ -27,6 +27,7 @@ class GenericBot:
         self.commands = {}
         self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
         for SelectedCommand in commands:
+            log.debug(f"Binding {SelectedCommand.name}...")
             interface = self._Interface()
             self.commands[f"{interface.prefix}{SelectedCommand.name}"] = SelectedCommand(interface)
         log.debug(f"Successfully bound commands")

@@ -19,14 +19,12 @@ stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{m
 log.addHandler(stream_handler)
 
 
-
 sentry_dsn = os.environ.get("SENTRY_DSN")
 
 # noinspection PyUnreachableCode
 if __debug__:
     commands = [
-        DebugErrorCommand,
-        DebugKeyboardCommand
+
     ]
     log.setLevel(logging.DEBUG)
 else:
@@ -49,7 +47,8 @@ else:
         SummonCommand,
         VideochannelCommand,
         DnditemCommand,
-        DndspellCommand
+        DndspellCommand,
+        TriviaCommand
     ]
     log.setLevel(logging.INFO)
 

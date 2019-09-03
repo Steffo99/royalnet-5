@@ -49,3 +49,7 @@ class FileTooBigError(Exception):
 
 class CurrentlyDisabledError(Exception):
     """This feature is temporarely disabled and is not available right now."""
+
+
+class KeyboardExpiredError(Exception):
+    """A special type of exception that can be raised in keyboard handlers to mark a specific keyboard as expired."""

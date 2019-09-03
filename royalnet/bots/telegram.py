@@ -152,17 +152,30 @@ class TelegramBot(GenericBot):
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query
         source: telegram.Message = query.message
+        callback: typing.Optional[typing.Callable] = None
+        command: typing.Optional[Command] = None
         for command in self.commands.values():
-            try:
+            if query.data in command.interface.keys_callbacks:
                 callback = command.interface.keys_callbacks[query.data]
-            except KeyError:
-                continue
-            await callback(data=self._Data(interface=command.interface, update=update))
-            await asyncify(query.answer)
-            break
-        else:
+                break
+        if callback is None:
             await asyncify(source.edit_reply_markup, reply_markup=None)
             await asyncify(query.answer, text="⛔️ This keyboard has expired.")
+            return
+        try:
+            response = await callback(data=self._Data(interface=command.interface, update=update))
+        except KeyboardExpiredError:
+            # FIXME: May cause a memory leak, as keys are not deleted after use
+            await asyncify(source.edit_reply_markup, reply_markup=None)
+            await asyncify(query.answer, text="⛔️ This keyboard has expired.")
+            return
+        except Exception as e:
+            error_text = f"⛔️ {e.__class__.__name__}\n"
+            error_text += '\n'.join(e.args)
+            await asyncify(query.answer, text=error_text)
+            return
+        else:
+            await asyncify(query.answer, text=response)
 
     async def run(self):
         while True:
