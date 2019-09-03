@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import random
 import uuid
+import html
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
@@ -41,7 +42,7 @@ class TriviaCommand(Command):
             raise ExternalError(f"OpenTDB returned {j['response_code']} response_code")
         question = j["results"][0]
         text = f'❓ [b]{question["category"]} - {question["difficulty"].capitalize()}[/b]\n' \
-               f'{question["question"]}'
+               f'{html.unescape(question["question"])}'
         # Prepare answers
         correct_answer: str = question["correct_answer"]
         wrong_answers: typing.List[str] = question["incorrect_answers"]
@@ -56,7 +57,7 @@ class TriviaCommand(Command):
             raise ValueError("correct_index not found")
         # Add emojis
         for index, answer in enumerate(answers):
-            answers[index] = f"{self._letter_emojis[index]} {answers[index]}"
+            answers[index] = f"{self._letter_emojis[index]} {html.unescape(answers[index])}"
         # Create the question id
         question_id = uuid.uuid4()
         self._answerers[question_id] = {}
@@ -90,6 +91,10 @@ class TriviaCommand(Command):
         results = f"❗️ Tempo scaduto!\n" \
                   f"La risposta corretta era [b]{answers[correct_index]}[/b]!\n\n"
         for answerer in self._answerers[question_id]:
+            if answerer.trivia_score is None:
+                ts = self.interface.alchemy.TriviaScore(royal=answerer)
+                self.interface.session.add(ts)
+                self.interface.session.commit()
             if self._answerers[question_id][answerer]:
                 results += self._correct_emoji
                 answerer.trivia_score.correct_answers += 1
