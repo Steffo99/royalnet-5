@@ -25,7 +25,7 @@ class TriviaCommand(Command):
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        self.answerers: typing.Dict[uuid.UUID, typing.Dict[..., bool]] = {}
+        self._answerers: typing.Dict[uuid.UUID, typing.Dict[..., bool]] = {}
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         # Fetch the question
@@ -55,13 +55,13 @@ class TriviaCommand(Command):
             answers[index] = f"{self._letter_emojis[index]} {answers[index]}"
         # Create the question id
         question_id = uuid.uuid4()
-        self.answerers[question_id] = {}
+        self._answerers[question_id] = {}
 
         # Create the correct and wrong functions
         async def correct(data: CommandData):
             answerer_ = await data.get_author(error_if_none=True)
             try:
-                self.answerers[question_id][answerer_] = True
+                self._answerers[question_id][answerer_] = True
             except KeyError:
                 raise KeyboardExpiredError("Question time ran out.")
             return "🆗 Hai risposto alla domanda. Ora aspetta un attimo per i risultati!"
@@ -69,7 +69,7 @@ class TriviaCommand(Command):
         async def wrong(data: CommandData):
             answerer_ = await data.get_author(error_if_none=True)
             try:
-                self.answerers[question_id][answerer_] = False
+                self._answerers[question_id][answerer_] = False
             except KeyError:
                 raise KeyboardExpiredError("Question time ran out.")
             return "🆗 Hai risposto alla domanda. Ora aspetta un attimo per i risultati!"
@@ -85,10 +85,11 @@ class TriviaCommand(Command):
         await asyncio.sleep(self._answer_time)
         results = f"❗️ Tempo scaduto!\n" \
                   f"La risposta corretta era [b]{answers[correct_index]}[/b]!\n\n"
-        for answerer in self.answerers[question_id]:
-            if self.answerers[question_id][answerer]:
+        for answerer in self._answerers[question_id]:
+            if self._answerers[question_id][answerer]:
                 results += self._correct_emoji
             else:
                 results += self._wrong_emoji
             results += f" {answerer}"
         await data.reply(results)
+        del self._answerers[question_id]
