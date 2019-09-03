@@ -51,6 +51,7 @@ class TriviaCommand(Command):
             random.shuffle(answers)
         elif question["type"] == "boolean":
             answers.sort(key=lambda a: a)
+            answers.reverse()
         else:
             raise NotImplementedError("Unknown question type")
         # Find the correct index
