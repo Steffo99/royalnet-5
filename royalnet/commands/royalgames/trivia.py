@@ -47,6 +47,7 @@ class TriviaCommand(Command):
         correct_answer: str = question["correct_answer"]
         wrong_answers: typing.List[str] = question["incorrect_answers"]
         answers = [correct_answer, *wrong_answers]
+        if question["type"] == "multiple"
         random.shuffle(answers)
         # Find the correct index
         for index, answer in enumerate(answers):
@@ -101,7 +102,7 @@ class TriviaCommand(Command):
             else:
                 results += self._wrong_emoji
                 answerer.trivia_score.wrong_answers += 1
-            results += f" {answerer} ({answerer.trivia_score.correct_answers}|{answerer.trivia_score.wrong_answers})\n"
+            results += f" {answerer} ({answerer.trivia_score.correct_answers}/{answerer.trivia_score.total_answers})\n"
         await data.reply(results)
         del self._answerers[question_id]
         await asyncify(self.interface.session.commit)

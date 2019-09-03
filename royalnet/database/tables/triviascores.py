@@ -25,5 +25,13 @@ class TriviaScore:
     def wrong_answers(self):
         return Column(Integer, nullable=False, default=0)
 
+    @property
+    def total_answers(self):
+        return self.correct_answers + self.wrong_answers
+
+    @property
+    def offset(self):
+        return self.correct_answers - self.wrong_answers
+
     def __repr__(self):
         return f"<TriviaScore of {self.royal}: ({self.correct_answers}|{self.wrong_answers})>"
