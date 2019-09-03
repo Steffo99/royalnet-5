@@ -90,6 +90,6 @@ class TriviaCommand(Command):
                 results += self._correct_emoji
             else:
                 results += self._wrong_emoji
-            results += f" {answerer}"
+            results += f" {answerer}\n"
         await data.reply(results)
         del self._answerers[question_id]
