@@ -12,6 +12,7 @@ from .medals import Medal
 from .medalawards import MedalAward
 from .bios import Bio
 from .reminders import Reminder
+from .triviascores import TriviaScore
 
 __all__ = ["Royal", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage",
-           "WikiRevision", "Medal", "MedalAward", "Bio", "Reminder"]
+           "WikiRevision", "Medal", "MedalAward", "Bio", "Reminder", "TriviaScore"]

@@ -7,7 +7,9 @@ from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ..commandinterface import CommandInterface
+from ...utils import asyncify
 from ...error import *
+from ...database.tables import TriviaScore
 
 
 class TriviaCommand(Command):
@@ -15,13 +17,15 @@ class TriviaCommand(Command):
 
     description: str = "Manda una domanda dell'OpenTDB in chat."
 
+    require_alchemy_tables = {TriviaScore}
+
     _letter_emojis = ["🇦", "🇧", "🇨", "🇩"]
 
     _correct_emoji = "✅"
 
     _wrong_emoji = "❌"
 
-    _answer_time = 15
+    _answer_time = 18
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
@@ -88,8 +92,11 @@ class TriviaCommand(Command):
         for answerer in self._answerers[question_id]:
             if self._answerers[question_id][answerer]:
                 results += self._correct_emoji
+                answerer.trivia_score.correct_answers += 1
             else:
                 results += self._wrong_emoji
-            results += f" {answerer}\n"
+                answerer.trivia_score.wrong_answers += 1
+            results += f" {answerer} ({answerer.trivia_score.correct_answers}|{answerer.trivia_score.wrong_answers})\n"
         await data.reply(results)
         del self._answerers[question_id]
+        await asyncify(self.interface.session.commit)
