@@ -376,6 +376,16 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="royalnet.bots.TelegramBot._handle_callback_query">
+<em class="property">async </em><code class="sig-name descname">_handle_callback_query</code><span class="sig-paren">(</span><em class="sig-param">update: telegram.update.Update</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.TelegramBot._handle_callback_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.bots.TelegramBot._handle_message">
+<em class="property">async </em><code class="sig-name descname">_handle_message</code><span class="sig-paren">(</span><em class="sig-param">update: telegram.update.Update</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.TelegramBot._handle_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="royalnet.bots.TelegramBot._handle_update">
 <em class="property">async </em><code class="sig-name descname">_handle_update</code><span class="sig-paren">(</span><em class="sig-param">update: telegram.update.Update</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bots.TelegramBot._handle_update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -586,10 +596,20 @@ find the chain that links the <code class="docutils literal notranslate"><span c
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="royalnet.commands.CommandInterface.register_keyboard_key">
+<code class="sig-name descname">register_keyboard_key</code><span class="sig-paren">(</span><em class="sig-param">key_name: str</em>, <em class="sig-param">callback: Callable</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandInterface.register_keyboard_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="royalnet.commands.CommandInterface.register_net_handler">
 <code class="sig-name descname">register_net_handler</code><span class="sig-paren">(</span><em class="sig-param">message_type: str</em>, <em class="sig-param">network_handler: Callable</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandInterface.register_net_handler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a new handler for messages received through Royalnet.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="royalnet.commands.CommandInterface.unregister_keyboard_key">
+<code class="sig-name descname">unregister_keyboard_key</code><span class="sig-paren">(</span><em class="sig-param">key_name: str</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandInterface.unregister_keyboard_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="royalnet.commands.CommandInterface.unregister_net_handler">
@@ -651,6 +671,13 @@ That probably means, the database row identifying the user.</p>
 <dd class="field-even"><p><a class="reference internal" href="#royalnet.error.UnregisteredError" title="royalnet.error.UnregisteredError"><strong>royalnet.error.UnregisteredError</strong></a> – </p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.commands.CommandData.keyboard">
+<em class="property">async </em><code class="sig-name descname">keyboard</code><span class="sig-paren">(</span><em class="sig-param">text: str, keyboard: Dict[str, Callable]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.commands.CommandData.keyboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a keyboard having the keys of the dict as keys and calling the correspondent values on a press.</p>
+<p>The function should be passed the <a class="reference internal" href="#royalnet.commands.CommandData" title="royalnet.commands.CommandData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData</span></code></a> instance as a argument.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1297,6 +1324,12 @@ Use with caution?</p>
 <dt id="royalnet.error.InvalidInputError">
 <em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">InvalidInputError</code><a class="headerlink" href="#royalnet.error.InvalidInputError" title="Permalink to this definition">¶</a></dt>
 <dd><p>The command has received invalid input and cannot complete.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="royalnet.error.KeyboardExpiredError">
+<em class="property">exception </em><code class="sig-prename descclassname">royalnet.error.</code><code class="sig-name descname">KeyboardExpiredError</code><a class="headerlink" href="#royalnet.error.KeyboardExpiredError" title="Permalink to this definition">¶</a></dt>
+<dd><p>A special type of exception that can be raised in keyboard handlers to mark a specific keyboard as expired.</p>
 </dd></dl>
 
 <dl class="exception">
