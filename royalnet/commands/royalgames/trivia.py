@@ -46,9 +46,13 @@ class TriviaCommand(Command):
         # Prepare answers
         correct_answer: str = question["correct_answer"]
         wrong_answers: typing.List[str] = question["incorrect_answers"]
-        answers = [correct_answer, *wrong_answers]
-        if question["type"] == "multiple"
-        random.shuffle(answers)
+        answers: typing.List[str] = [correct_answer, *wrong_answers]
+        if question["type"] == "multiple":
+            random.shuffle(answers)
+        elif question["type"] == "boolean":
+            answers.sort(key=lambda a: a)
+        else:
+            raise NotImplementedError("Unknown question type")
         # Find the correct index
         for index, answer in enumerate(answers):
             if answer == correct_answer:
