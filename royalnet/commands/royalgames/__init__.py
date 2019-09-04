@@ -23,6 +23,7 @@ from .videochannel import VideochannelCommand
 from .dnditem import DnditemCommand
 from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
+from .mm import MmCommand
 
 __all__ = [
     "CiaoruoziCommand",
@@ -44,5 +45,6 @@ __all__ = [
     "VideochannelCommand",
     "DnditemCommand",
     "DndspellCommand",
-    "TriviaCommand"
+    "TriviaCommand",
+    "MmCommand"
 ]

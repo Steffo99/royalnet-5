@@ -127,6 +127,8 @@ class DiscordBot(GenericBot):
                         error_message += '\n'.join(e.args)
                         log.error(f"Error in {command.name}: {error_message}")
                         await data.reply(f"⛔️ {error_message}")
+                        if __debug__:
+                            raise
 
             async def on_ready(cli):
                 log.debug("Connection successful, client is ready")

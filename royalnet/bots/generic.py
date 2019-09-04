@@ -154,6 +154,8 @@ class GenericBot:
                 self._init_royalnet(royalnet_config=royalnet_config)
         except Exception as e:
             sentry_sdk.capture_exception(e)
+            log.error(f"{e.__class__.__name__} while initializing Royalnet: {' | '.join(e.args)}")
+            raise
 
     async def run(self):
         """A blocking coroutine that should make the bot start listening to commands and requests."""

@@ -13,6 +13,10 @@ from .medalawards import MedalAward
 from .bios import Bio
 from .reminders import Reminder
 from .triviascores import TriviaScore
+from .mmdecisions import MMDecision
+from .mmevents import MMEvent
+from .mmresponse import MMResponse
 
 __all__ = ["Royal", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage",
-           "WikiRevision", "Medal", "MedalAward", "Bio", "Reminder", "TriviaScore"]
+           "WikiRevision", "Medal", "MedalAward", "Bio", "Reminder", "TriviaScore", "MMDecision", "MMEvent",
+           "MMResponse"]

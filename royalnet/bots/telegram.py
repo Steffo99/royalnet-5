@@ -67,7 +67,12 @@ class TelegramBot(GenericBot):
                                disable_web_page_preview=True)
 
             async def get_author(data, error_if_none=False):
-                user: telegram.User = data.update.effective_user
+                if data.update.message is not None:
+                    user: telegram.User = data.update.message.from_user
+                elif data.update.callback_query is not None:
+                    user: telegram.user = data.update.callback_query.from_user
+                else:
+                    raise UnregisteredError("Author can not be determined")
                 if user is None:
                     if error_if_none:
                         raise UnregisteredError("No author for this message")
@@ -148,6 +153,8 @@ class TelegramBot(GenericBot):
             error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
+            if __debug__:
+                raise
 
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query

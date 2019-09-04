@@ -61,6 +61,9 @@ class ReminderCommand(Command):
         if date is None:
             await data.reply("⚠️ La data che hai inserito non è valida.")
             return
+        if date <= datetime.datetime.now():
+            await data.reply("⚠️ La data che hai specificato è nel passato.")
+            return
         await data.reply(f"✅ Promemoria impostato per [b]{date.strftime('%Y-%m-%d %H:%M:%S')}[/b]")
         if self.interface.name == "telegram":
             interface_data = pickle.dumps(data.update.effective_chat.id)
