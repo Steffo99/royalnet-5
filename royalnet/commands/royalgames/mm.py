@@ -71,7 +71,11 @@ class MmCommand(Command):
             raise UnsupportedError("mm is supported only on Telegram")
         client: telegram.Bot = self.interface.bot.client
         creator = await data.get_author(error_if_none=True)
-        timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*")
+
+        try:
+            timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*")
+        except InvalidInputError:
+            timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*")
 
         try:
             dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring)

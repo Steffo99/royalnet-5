@@ -53,7 +53,11 @@ class ReminderCommand(Command):
             await channel.send(discord_escape(f"❗️ {reminder.message}"))
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        date_str, reminder_text = args.match(r"\[ *(.+?) *] *(.+?) *$")
+        try:
+            date_str, reminder_text = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*")
+        except InvalidInputError:
+            date_str, reminder_text = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*")
+
         try:
             date: typing.Optional[datetime.datetime] = dateparser.parse(date_str)
         except OverflowError:
