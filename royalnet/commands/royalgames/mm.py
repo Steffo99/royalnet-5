@@ -252,6 +252,9 @@ class MmCommand(Command):
             # Wait
             await asyncio.sleep(300)
 
+            if mmevent.state == "STARTED":
+                return
+
             # Advance cycle
             for mmresponse in mmevent.responses:
                 if mmresponse.response is None:
