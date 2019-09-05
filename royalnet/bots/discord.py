@@ -121,6 +121,9 @@ class DiscordBot(GenericBot):
                 with message.channel.typing():
                     try:
                         await command.run(CommandArgs(parameters), data=data)
+                    except InvalidInputError as e:
+                        await data.reply(f":warning: {' '.join(e.args)}\n"
+                                         f"Syntax: [c]/{command.name} {command.syntax}[/c]")
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
                         error_message = f"{e.__class__.__name__}\n"

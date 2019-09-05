@@ -174,6 +174,9 @@ class TelegramBot(GenericBot):
         # Run the command
         try:
             await command.run(CommandArgs(parameters), data)
+        except InvalidInputError as e:
+            await data.reply(f"⚠️ {' '.join(e.args)}\n"
+                             f"Syntax: [c]/{command.name} {command.syntax}[/c]")
         except Exception as e:
             sentry_sdk.capture_exception(e)
             error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n"
