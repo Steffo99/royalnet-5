@@ -29,7 +29,7 @@ class TelegramBot(GenericBot):
     def _init_client(self):
         """Create the :py:class:`telegram.Bot`, and set the starting offset."""
         # https://github.com/python-telegram-bot/python-telegram-bot/issues/341
-        request = telegram.utils.request.Request(5)
+        request = telegram.utils.request.Request(20, read_timeout=15)
         self.client = telegram.Bot(self._telegram_config.token, request=request)
         self._offset: int = -100
 
@@ -62,9 +62,10 @@ class TelegramBot(GenericBot):
                 data.update = update
 
             async def reply(data, text: str):
-                await asyncify(data.update.effective_chat.send_message, telegram_escape(text),
-                               parse_mode="HTML",
-                               disable_web_page_preview=True)
+                await TelegramBot.safe_api_call(data.update.effective_chat.send_message,
+                                                telegram_escape(text),
+                                                parse_mode="HTML",
+                                                disable_web_page_preview=True)
 
             async def get_author(data, error_if_none=False):
                 if data.update.message is not None:
@@ -92,11 +93,11 @@ class TelegramBot(GenericBot):
                     press_id = uuid.uuid4()
                     tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
                     data.interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
-                await asyncify(data.update.effective_chat.send_message,
-                               telegram_escape(text),
-                               reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
-                               parse_mode="HTML",
-                               disable_web_page_preview=True)
+                await TelegramBot.safe_api_call(data.update.effective_chat.send_message,
+                                                telegram_escape(text),
+                                                reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
+                                                parse_mode="HTML",
+                                                disable_web_page_preview=True)
 
         return TelegramData
 
@@ -112,6 +113,31 @@ class TelegramBot(GenericBot):
                          commands=commands)
         self._telegram_config = telegram_config
         self._init_client()
+
+    @staticmethod
+    async def safe_api_call(f: typing.Callable, *args, **kwargs) -> typing.Optional:
+        while True:
+            try:
+                return await asyncify(f, *args, **kwargs)
+            except telegram.error.TimedOut as error:
+                log.debug(f"Timed out during {f.__qualname__} (retrying in 15s): {error}")
+                await asyncio.sleep(15)
+                continue
+            except telegram.error.NetworkError as error:
+                log.warning(f"Network error during {f.__qualname__} (retrying in 15s): {error}")
+                await asyncio.sleep(15)
+                continue
+            except telegram.error.Unauthorized as error:
+                log.info(f"Unauthorized to run {f.__qualname__} (skipping): {error}")
+                break
+            except telegram.error.RetryAfter as error:
+                log.warning(f"Rate limited during {f.__qualname__} (retrying in 15s): {error}")
+                await asyncio.sleep(15)
+            except telegram.error.TelegramError as error:
+                log.error(f"{error.__class__.__qualname__} during {f} (skipping): {error}")
+                sentry_sdk.capture_exception(error)
+                break
+        return None
 
     async def _handle_update(self, update: telegram.Update):
         # Skip non-message updates
@@ -136,7 +162,7 @@ class TelegramBot(GenericBot):
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()
         # Send a typing notification
-        update.message.chat.send_action(telegram.ChatAction.TYPING)
+        await self.safe_api_call(update.message.chat.send_action, telegram.ChatAction.TYPING)
         # Find the command
         try:
             command = self.commands[command_name]
@@ -166,40 +192,31 @@ class TelegramBot(GenericBot):
                 callback = command.interface.keys_callbacks[query.data]
                 break
         if callback is None:
-            await asyncify(source.edit_reply_markup, reply_markup=None)
-            await asyncify(query.answer, text="⛔️ This keyboard has expired.")
+            await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
+            await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
             return
         try:
             response = await callback(data=self._Data(interface=command.interface, update=update))
         except KeyboardExpiredError:
             # FIXME: May cause a memory leak, as keys are not deleted after use
-            await asyncify(source.edit_reply_markup, reply_markup=None)
-            await asyncify(query.answer, text="⛔️ This keyboard has expired.")
+            await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
+            await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
             return
         except Exception as e:
             error_text = f"⛔️ {e.__class__.__name__}\n"
             error_text += '\n'.join(e.args)
-            await asyncify(query.answer, text=error_text)
+            await self.safe_api_call(query.answer, text=error_text)
             return
         else:
-            await asyncify(query.answer, text=response)
+            await self.safe_api_call(query.answer, text=response)
 
     async def run(self):
         while True:
             # Get the latest 100 updates
-            try:
-                last_updates: typing.List[telegram.Update] = await asyncify(self.client.get_updates,
-                                                                            offset=self._offset,
-                                                                            timeout=30,
-                                                                            read_latency=5.0)
-            except telegram.error.TimedOut as error:
-                log.debug("getUpdates timed out")
-                continue
-            except Exception as error:
-                log.error(f"Error while getting updates: {error.__class__.__name__} {error.args}")
-                sentry_sdk.capture_exception(error)
-                await asyncio.sleep(5)
-                continue
+            last_updates: typing.List[telegram.Update] = await self.safe_api_call(self.client.get_updates,
+                                                                                  offset=self._offset,
+                                                                                  timeout=30,
+                                                                                  read_latency=5.0)
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall

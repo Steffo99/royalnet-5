@@ -24,6 +24,25 @@ sentry_dsn = os.environ.get("SENTRY_DSN")
 # noinspection PyUnreachableCode
 if __debug__:
     commands = [
+        CiaoruoziCommand,
+        ColorCommand,
+        CvCommand,
+        DiarioCommand,
+        Mp3Command,
+        PauseCommand,
+        PingCommand,
+        PlayCommand,
+        PlaymodeCommand,
+        QueueCommand,
+        RageCommand,
+        ReminderCommand,
+        ShipCommand,
+        SkipCommand,
+        SmecdsCommand,
+        SummonCommand,
+        VideochannelCommand,
+        TriviaCommand,
+        MmCommand
     ]
     log.setLevel(logging.DEBUG)
 else:

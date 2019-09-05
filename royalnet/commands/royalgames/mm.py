@@ -1,4 +1,3 @@
-import typing
 import datetime
 import dateparser
 import os
@@ -24,59 +23,322 @@ class MmCommand(Command):
 
     require_alchemy_tables = {MMEvent, MMDecision, MMResponse}
 
-    @staticmethod
-    def _decision_string(mmevent: MMEvent) -> str:
-        return f"⚫️ Hai detto che forse parteciperai a [b]{mmevent.title}[/b] alle [b]{mmevent.datetime.strftime('%H:%M')}[/b].\n" \
-               f"Confermi di volerci essere?"
+    _cycle_duration = 5
 
     @staticmethod
-    def _decision_keyboard(mmevent: MMEvent) -> telegram.InlineKeyboardMarkup:
-        return telegram.InlineKeyboardMarkup([
-            [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES"),
-             telegram.InlineKeyboardButton("🔴 Non mi interessa...", callback_data=f"mm_{mmevent.mmid}_d_NO")]
-        ])
-
-    @staticmethod
-    def _response_string(mmevent: MMEvent, count: int = 0) -> str:
-        if count == 0:
-            return f"🚩 E' ora di [b]{mmevent.title}[/b]!\n" \
-                   f"Sei pronto?"
+    def _main_keyboard(mmevent: MMEvent) -> typing.Optional[telegram.InlineKeyboardMarkup]:
+        if mmevent.state == "WAITING":
+            return telegram.InlineKeyboardMarkup([
+                [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES")],
+                [telegram.InlineKeyboardButton("⚫️ Forse...", callback_data=f"mm_{mmevent.mmid}_d_MAYBE")],
+                [telegram.InlineKeyboardButton("🔴 Non mi interessa.", callback_data=f"mm_{mmevent.mmid}_d_NO")]
+            ])
+        elif mmevent.state == "DECISION":
+            return telegram.InlineKeyboardMarkup([
+                [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES"),
+                 telegram.InlineKeyboardButton("🔴 Non mi interessa...", callback_data=f"mm_{mmevent.mmid}_d_NO")]
+            ])
+        elif mmevent.state == "READY_CHECK":
+            return telegram.InlineKeyboardMarkup([
+                [telegram.InlineKeyboardButton("🚩 Avvia la partita", callback_data=f"mm_{mmevent.mmid}_start")]
+            ])
+        elif mmevent.state == "STARTED":
+            return None
         else:
-            return f"🕒 Sei in ritardo di [b]{count * 5}[/b] minuti per [b]{mmevent.title}[/b]...\n" \
-                   f"Sei pronto?"
+            raise ValueError(f"state is of an unknown value ({mmevent.state})")
 
     @staticmethod
-    def _response_keyboard(mmevent: MMEvent) -> telegram.InlineKeyboardMarkup:
-        return telegram.InlineKeyboardMarkup([
-            [telegram.InlineKeyboardButton("✅ Ci sono!", callback_data=f"mm_{mmevent.mmid}_r_YES")],
-            [telegram.InlineKeyboardButton("🕒 Aspettatemi 5 minuti!", callback_data=f"mm_{mmevent.mmid}_r_LATER")],
-            [telegram.InlineKeyboardButton("❌ Non ci sono più, mi spiace.", callback_data=f"mm_{mmevent.mmid}_r_NO")]
-        ])
+    def _main_text(mmevent: MMEvent):
+        text = f"🌐 [b]{mmevent.title}[/b] - [b]{mmevent.datetime.strftime('%Y-%m-%d %H:%M')}[/b]\n"
+        if mmevent.description:
+            text += f"{mmevent.description}\n"
+        text += "\n"
+        if mmevent.state == "WAITING" or mmevent.state == "DECISION":
+            for mmdecision in sorted(mmevent.decisions, key=lambda mmd: mmd.royal.username):
+                mmdecision: "MMDecision"
+                if mmdecision.decision == "YES":
+                    text += "🔵 "
+                elif mmdecision.decision == "MAYBE":
+                    text += "⚫️ "
+                elif mmdecision.decision == "NO":
+                    text += "🔴 "
+                else:
+                    raise ValueError(f"decision is of an unknown value ({mmdecision.decision})")
+                text += f"{mmdecision.royal}\n"
+        elif mmevent.state == "READY_CHECK":
+            for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.royal.username):
+                mmresponse: "MMResponse"
+                if mmresponse.response is None:
+                    text += "❔ "
+                elif mmresponse.response == "YES":
+                    text += "✅ "
+                elif mmresponse.response == "LATER":
+                    text += "🕒 "
+                elif mmresponse.response == "NO":
+                    text += "❌ "
+                else:
+                    raise ValueError(f"response is of an unknown value ({mmresponse.response})")
+                text += f"{mmresponse.royal}\n"
+        elif mmevent.state == "STARTED":
+            for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.response, reverse=True):
+                if mmresponse.response == "YES":
+                    text += f"✅ {mmresponse.royal}\n"
+                elif mmresponse.response == "NO":
+                    text += "❌ {mmresponse.royal}\n"
+        return text
 
-    async def _update_message(self, mmevent: MMEvent) -> None:
+    async def _run_mm(self, mmevent: MMEvent) -> None:
         client: telegram.Bot = self.interface.bot.client
-        try:
-            await asyncify(client.edit_message_text,
-                           text=telegram_escape(str(mmevent)),
-                           chat_id=os.environ["MM_CHANNEL_ID"],
-                           message_id=mmevent.message_id,
-                           parse_mode="HTML",
-                           disable_web_page_preview=True,
-                           reply_markup=mmevent.main_keyboard())
-        except telegram.error.BadRequest:
-            pass
+
+        async def update_message() -> None:
+            try:
+                await self.interface.bot.safe_api_call(client.edit_message_text,
+                                                       text=telegram_escape(self._main_text(mmevent)),
+                                                       chat_id=os.environ["MM_CHANNEL_ID"],
+                                                       message_id=mmevent.message_id,
+                                                       parse_mode="HTML",
+                                                       disable_web_page_preview=True,
+                                                       reply_markup=self._main_keyboard(mmevent))
+            except telegram.error.BadRequest:
+                pass
+
+        decision_string = f"⚫️ Hai detto che forse parteciperai a [b]{mmevent.title}[/b]" \
+                          f" alle [b]{mmevent.datetime.strftime('%H:%M')}[/b].\n" \
+                          f"Confermi di volerci essere? (Metti sì anche se arrivi un po' in ritardo!)"
+
+        decision_keyboard = telegram.InlineKeyboardMarkup([
+                [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES"),
+                 telegram.InlineKeyboardButton("🔴 Non mi interessa più.", callback_data=f"mm_{mmevent.mmid}_d_NO")]
+            ])
+
+        async def decision_yes(data: CommandData):
+            royal = await data.get_author()
+            mmdecision: MMDecision = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            if mmdecision is None:
+                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
+                                                                           mmevent=mmevent,
+                                                                           decision="YES")
+                self.interface.session.add(mmdecision)
+            else:
+                mmdecision.decision = "YES"
+            await asyncify(self.interface.session.commit)
+            await update_message()
+            return "🔵 Hai detto che ci sarai!"
+
+        async def decision_maybe(data: CommandData):
+            royal = await data.get_author()
+            mmdecision: MMDecision = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            if mmdecision is None:
+                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
+                                                                           mmevent=mmevent,
+                                                                           decision="MAYBE")
+                self.interface.session.add(mmdecision)
+            else:
+                mmdecision.decision = "MAYBE"
+            # Can't asyncify this
+            self.interface.session.commit()
+            await update_message()
+            return "⚫️ Hai detto che forse ci sarai. Rispondi al messaggio di conferma 5 minuti prima dell'inizio!"
+
+        async def decision_no(data: CommandData):
+            royal = await data.get_author()
+            mmdecision: MMDecision = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            if mmdecision is None:
+                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
+                                                                           mmevent=mmevent,
+                                                                           decision="NO")
+                self.interface.session.add(mmdecision)
+            else:
+                mmdecision.decision = "NO"
+            # Can't asyncify this
+            self.interface.session.commit()
+            await update_message()
+            return "🔴 Hai detto che non ti interessa."
+
+        def response_string() -> str:
+            delay = (datetime.datetime.now() - mmevent.datetime).total_seconds()
+            if delay > 60:
+                return f"🚩 E' ora di [b]{mmevent.title}[/b]!\n" \
+                       f"Sei pronto?"
+            return f"🕒 Sei in ritardo di [b]{int(delay / 60)} minuti[/b] per [b]{mmevent.title}[/b]...\n" \
+                   f"Sei pronto?"
+
+        response_keyboard = telegram.InlineKeyboardMarkup([
+                [telegram.InlineKeyboardButton("✅ Ci sono!",
+                                               callback_data=f"mm_{mmevent.mmid}_r_YES")],
+                [telegram.InlineKeyboardButton("🕒 Aspettatemi ancora un po'!",
+                                               callback_data=f"mm_{mmevent.mmid}_r_LATER")],
+                [telegram.InlineKeyboardButton("❌ Non vengo più, mi spiace.",
+                                               callback_data=f"mm_{mmevent.mmid}_r_NO")]
+            ])
+
+        async def response_yes(data: CommandData):
+            royal = await data.get_author()
+            mmresponse: MMResponse = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            mmresponse.response = "YES"
+            # Can't asyncify this
+            self.interface.session.commit()
+            await update_message()
+            return "✅ Sei pronto!"
+
+        async def response_later(data: CommandData):
+            royal = await data.get_author()
+            mmresponse: MMResponse = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            mmresponse.response = "LATER"
+            # Can't asyncify this
+            self.interface.session.commit()
+            await update_message()
+            return f"🕒 Hai chiesto agli altri di aspettarti {self._cycle_duration} minuti."
+
+        async def response_no(data: CommandData):
+            royal = await data.get_author()
+            mmresponse: MMResponse = await asyncify(
+                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                          royal=royal).one_or_none)
+            mmresponse.response = "NO"
+            # Can't asyncify this
+            self.interface.session.commit()
+            await update_message()
+            return "❌ Hai detto che non ci sarai."
+
+        def started_string():
+            text = f"🚩 L'evento [b]{mmevent.title}[/b] è iniziato!\n\n" \
+                   f"Parteciperanno:"
+            for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.response, reverse=True):
+                if mmresponse.response == "YES":
+                    text += f"✅ {mmresponse.royal}\n"
+                elif mmresponse.response == "NO":
+                    text += "❌ {mmresponse.royal}\n"
+            return text
+
+        started_without_you_string = f"🚩 Non hai confermato la tua presenza in tempo e [b]{mmevent.title}[/b] è" \
+                                     f" iniziato senza di te.\n" \
+                                     f"Mi dispiace!"
+
+        async def start_event():
+            mmevent.state = "STARTED"
+            for mmresponse in mmevent.responses:
+                if mmresponse.response is None:
+                    mmresponse.response = "NO"
+                if mmresponse.response == "LATER":
+                    mmresponse.response = "NO"
+
+                if mmresponse.response == "YES":
+                    await self.interface.bot.safe_api_call(client.send_message,
+                                                           chat_id=mmresponse.royal.telegram[0].tg_id,
+                                                           text=telegram_escape(started_string()),
+                                                           parse_mode="HTML",
+                                                           disable_webpage_preview=True,
+                                                           reply_markup=response_keyboard)
+                else:
+                    await self.interface.bot.safe_api_call(client.send_message,
+                                                           chat_id=mmresponse.royal.telegram[0].tg_id,
+                                                           text=telegram_escape(started_without_you_string),
+                                                           parse_mode="HTML",
+                                                           disable_webpage_preview=True,
+                                                           reply_markup=response_keyboard)
+            await asyncify(self.interface.session.commit)
+            await update_message()
+
+        async def start_key(data: CommandData):
+            royal = await data.get_author()
+            if royal == mmevent.creator:
+                await start_event()
+
+        if mmevent.state == "WAITING":
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_YES", decision_yes)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_MAYBE", decision_maybe)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_NO", decision_no)
+            await sleep_until(mmevent.datetime - datetime.timedelta(minutes=10))
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_YES")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_MAYBE")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_NO")
+            mmevent.state = "DECISION"
+            for mmdecision in mmevent.decisions:
+                mmdecision: MMDecision
+                if mmdecision.decision == "MAYBE":
+                    await self.interface.bot.safe_api_call(client.send_message,
+                                                           chat_id=mmdecision.royal.telegram[0].tg_id,
+                                                           text=telegram_escape(decision_string),
+                                                           parse_mode="HTML",
+                                                           disable_webpage_preview=True,
+                                                           reply_markup=decision_keyboard)
+            await asyncify(self.interface.session.commit)
+            await update_message()
+
+        if mmevent.state == "DECISION":
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_YES", decision_yes)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_NO", decision_no)
+            await sleep_until(mmevent.datetime)
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_YES")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_NO")
+            mmevent.state = "READY_CHECK"
+            for mmdecision in mmevent.decisions:
+                if mmdecision.decision == "MAYBE":
+                    mmdecision.decision = "NO"
+                elif mmdecision.decision == "YES":
+                    mmresponse: MMResponse = self.interface.alchemy.MMResponse(royal=mmdecision.royal, mmevent=mmevent)
+                    self.interface.session.add(mmresponse)
+            await asyncify(self.interface.session.commit)
+            await update_message()
+
+        if mmevent.state == "READY_CHECK":
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_YES", response_yes)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_LATER", response_later)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_NO", response_no)
+            self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_forcestart", start_key)
+            cycle = 0
+            while True:
+                for mmresponse in mmevent.responses:
+                    # Send messages
+                    if mmresponse.response is None:
+                        await self.interface.bot.safe_api_call(client.send_message,
+                                                               chat_id=mmresponse.royal.telegram[0].tg_id,
+                                                               text=telegram_escape(response_string()),
+                                                               parse_mode="HTML",
+                                                               disable_webpage_preview=True,
+                                                               reply_markup=response_keyboard)
+                # Wait
+                await asyncio.sleep(60 * self._cycle_duration)
+                # Advance cycle
+                for mmresponse in mmevent.responses:
+                    if mmresponse.response is None:
+                        mmresponse.response = "NO"
+                    if mmresponse.response == "LATER":
+                        mmresponse.response = None
+                # Check if the event can start
+                for mmresponse in mmevent.responses:
+                    if mmresponse.response is None:
+                        break
+                else:
+                    break
+                cycle += 1
+
+            await start_event()
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_YES")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_LATER")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_NO")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_start")
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self.interface.name != "telegram":
             raise UnsupportedError("mm is supported only on Telegram")
         client: telegram.Bot = self.interface.bot.client
         creator = await data.get_author(error_if_none=True)
-
         try:
             timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*")
         except InvalidInputError:
             timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*")
-
         try:
             dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring)
         except OverflowError:
@@ -87,7 +349,6 @@ class MmCommand(Command):
         if dt <= datetime.datetime.now():
             await data.reply("⚠️ La data che hai specificato è nel passato.")
             return
-
         mmevent: MMEvent = self.interface.alchemy.MMEvent(creator=creator,
                                                           datetime=dt,
                                                           title=title,
@@ -96,183 +357,15 @@ class MmCommand(Command):
         self.interface.session.add(mmevent)
         await asyncify(self.interface.session.commit)
 
-        async def decision_yes(data: CommandData):
-            royal = await data.get_author()
-            mmdecision: MMDecision = await asyncify(self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            if mmdecision is None:
-                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
-                                                                           mmevent=mmevent,
-                                                                           decision="YES")
-                self.interface.session.add(mmdecision)
-            else:
-                mmdecision.decision = "YES"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "🔵 Hai detto che ci sarai!"
-
-        async def decision_maybe(data: CommandData):
-            royal = await data.get_author()
-            mmdecision: MMDecision = await asyncify(self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            if mmdecision is None:
-                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
-                                                                           mmevent=mmevent,
-                                                                           decision="MAYBE")
-                self.interface.session.add(mmdecision)
-            else:
-                mmdecision.decision = "MAYBE"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "⚫️ Hai detto che forse ci sarai. Rispondi al messaggio di conferma 5 minuti prima dell'inizio!"
-
-        async def decision_no(data: CommandData):
-            royal = await data.get_author()
-            mmdecision: MMDecision = await asyncify(self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            if mmdecision is None:
-                mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
-                                                                           mmevent=mmevent,
-                                                                           decision="NO")
-                self.interface.session.add(mmdecision)
-            else:
-                mmdecision.decision = "NO"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "🔴 Hai detto che non ti interessa."
-
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_YES", decision_yes)
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_MAYBE", decision_maybe)
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_d_NO", decision_no)
-
         message: telegram.Message = await asyncify(client.send_message,
                                                    chat_id=os.environ["MM_CHANNEL_ID"],
-                                                   text=telegram_escape(str(mmevent)),
+                                                   text=telegram_escape(self._main_text(mmevent)),
                                                    parse_mode="HTML",
                                                    disable_webpage_preview=True,
-                                                   reply_markup=mmevent.main_keyboard())
+                                                   reply_markup=self._main_keyboard(mmevent))
 
         mmevent.message_id = message.message_id
         # Can't asyncify this
-        self.interface.session.commit()
-
-        await sleep_until(dt - datetime.timedelta(minutes=10))
-
-        mmevent.state = "DECISION"
-        await asyncify(self.interface.session.commit)
-        for mmdecision in mmevent.decisions:
-            mmdecision: MMDecision
-            if mmdecision.decision == "MAYBE":
-                await asyncify(client.send_message,
-                               chat_id=mmdecision.royal.telegram[0].tg_id,
-                               text=telegram_escape(self._decision_string(mmevent)),
-                               parse_mode="HTML",
-                               disable_webpage_preview=True,
-                               reply_markup=self._decision_keyboard(mmevent))
-        await self._update_message(mmevent)
-
-        await sleep_until(dt)
-
-        async def response_yes(data: CommandData):
-            royal = await data.get_author()
-            mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            mmresponse.response = "YES"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "✅ Sei pronto!"
-
-        async def response_later(data: CommandData):
-            royal = await data.get_author()
-            mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            mmresponse.response = "LATER"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "🕒 Hai chiesto agli altri di aspettarti 5 minuti."
-
-        async def response_no(data: CommandData):
-            royal = await data.get_author()
-            mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent, royal=royal).one_or_none)
-            mmresponse.response = "NO"
-            # Can't asyncify this
-            self.interface.session.commit()
-            await self._update_message(mmevent)
-            return "❌ Hai detto che non ci sarai."
-
-        async def start_now():
-            mmevent.state = "STARTED"
-            for mmresponse in mmevent.responses:
-                if mmresponse.response is None:
-                    mmresponse.response = "NO"
-                if mmresponse.response == "LATER":
-                    mmresponse.response = "NO"
-            await self._update_message(mmevent)
-            await asyncify(self.interface.session.commit)
-            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_YES")
-            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_LATER")
-            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_NO")
-            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_start")
-
-        async def start_key(data: CommandData):
-            royal = await data.get_author()
-            if royal == creator:
-                await start_now()
-
-        mmevent.state = "READY_CHECK"
-
-        self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_YES")
-        self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_MAYBE")
-        self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_d_NO")
-
-        for mmdecision in mmevent.decisions:
-            if mmdecision.decision == "MAYBE":
-                mmdecision.decision = "NO"
-            elif mmdecision.decision == "YES":
-                mmresponse: MMResponse = self.interface.alchemy.MMResponse(royal=mmdecision.royal, mmevent=mmevent)
-                self.interface.session.add(mmresponse)
         await asyncify(self.interface.session.commit)
 
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_YES", response_yes)
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_LATER", response_later)
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_r_NO", response_no)
-        self.interface.register_keyboard_key(f"mm_{mmevent.mmid}_start", start_key)
-
-        count = 0
-        while True:
-            for mmresponse in mmevent.responses:
-                # Send messages
-                if mmresponse.response is None:
-                    await asyncify(client.send_message,
-                                   chat_id=mmresponse.royal.telegram[0].tg_id,
-                                   text=telegram_escape(self._response_string(mmevent, count=count)),
-                                   parse_mode="HTML",
-                                   disable_webpage_preview=True,
-                                   reply_markup=self._response_keyboard(mmevent))
-            await self._update_message(mmevent)
-            # Wait
-            await asyncio.sleep(300)
-
-            if mmevent.state == "STARTED":
-                return
-
-            # Advance cycle
-            for mmresponse in mmevent.responses:
-                if mmresponse.response is None:
-                    mmresponse.response = "NO"
-                if mmresponse.response == "LATER":
-                    mmresponse.response = None
-
-            # Check if the event can start
-            for mmresponse in mmevent.responses:
-                if mmresponse.response is None:
-                    break
-            else:
-                break
-
-            count += 1
-
-        await start_now()
+        await self._run_mm(mmevent)
