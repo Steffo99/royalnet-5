@@ -124,9 +124,8 @@ class TelegramBot(GenericBot):
                 await asyncio.sleep(15)
                 continue
             except telegram.error.NetworkError as error:
-                log.warning(f"Network error during {f.__qualname__} (retrying in 15s): {error}")
-                await asyncio.sleep(15)
-                continue
+                log.debug(f"Network error during {f.__qualname__} (skipping): {error}")
+                break
             except telegram.error.Unauthorized as error:
                 log.info(f"Unauthorized to run {f.__qualname__} (skipping): {error}")
                 break
