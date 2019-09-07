@@ -163,7 +163,7 @@ class MmCommand(Command):
 
         def response_string() -> str:
             delay = (datetime.datetime.now() - mmevent.datetime).total_seconds()
-            if delay > 60:
+            if delay < 60:
                 return f"🚩 E' ora di [b]{mmevent.title}[/b]!\n" \
                        f"Sei pronto?"
             return f"🕒 Sei in ritardo di [b]{int(delay / 60)} minuti[/b] per [b]{mmevent.title}[/b]...\n" \
@@ -213,7 +213,7 @@ class MmCommand(Command):
 
         def started_string():
             text = f"🚩 L'evento [b]{mmevent.title}[/b] è iniziato!\n\n" \
-                   f"Parteciperanno:"
+                   f"Partecipano:\n"
             for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.response, reverse=True):
                 if mmresponse.response == "YES":
                     text += f"✅ {mmresponse.royal}\n"
