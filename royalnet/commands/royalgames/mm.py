@@ -3,6 +3,7 @@ import dateparser
 import os
 import telegram
 import asyncio
+import re
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
@@ -84,7 +85,7 @@ class MmCommand(Command):
                 if mmresponse.response == "YES":
                     text += f"✅ {mmresponse.royal}\n"
                 elif mmresponse.response == "NO":
-                    text += "❌ {mmresponse.royal}\n"
+                    text += f"❌ {mmresponse.royal}\n"
         return text
 
     async def _run_mm(self, mmevent: MMEvent) -> None:
@@ -336,9 +337,9 @@ class MmCommand(Command):
         client: telegram.Bot = self.interface.bot.client
         creator = await data.get_author(error_if_none=True)
         try:
-            timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*")
+            timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
         except InvalidInputError:
-            timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*")
+            timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
         try:
             dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring)
         except OverflowError:
