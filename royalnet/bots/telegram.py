@@ -178,7 +178,7 @@ class TelegramBot(GenericBot):
                              f"Syntax: [c]/{command.name} {command.syntax}[/c]")
         except Exception as e:
             sentry_sdk.capture_exception(e)
-            error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n"
+            error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
             if __debug__:

@@ -126,10 +126,10 @@ class DiscordBot(GenericBot):
                                          f"Syntax: [c]/{command.name} {command.syntax}[/c]")
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
-                        error_message = f"{e.__class__.__name__}\n"
+                        error_message = f"🦀 {e.__class__.__name__} 🦀\n"
                         error_message += '\n'.join(e.args)
                         log.error(f"Error in {command.name}: {error_message}")
-                        await data.reply(f"⛔️ {error_message}")
+                        await data.reply(f"{error_message}")
                         if __debug__:
                             raise
 
