@@ -51,15 +51,15 @@ class ZawarudoNH(NetworkHandler):
         # Get voice client
         vc: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
         channel: discord.VoiceChannel = vc.channel
+        affected: typing.List[typing.Union[discord.User, discord.Member]] = channel.members
         await bot.add_to_music_data(zw_start, guild)
-        for member in channel.members:
-            member: typing.Union[discord.User, discord.Member]
+        for member in affected:
             if member.bot:
                 continue
             await member.edit(mute=True)
         await asyncio.sleep(data["time"])
         await bot.add_to_music_data(zw_end, guild)
-        for member in channel.members:
+        for member in affected:
             member: typing.Union[discord.User, discord.Member]
             if member.bot:
                 continue
@@ -84,5 +84,7 @@ class ZawarudoCommand(Command):
             time = 5
         else:
             time = int(time)
+        if time > 9:
+            raise ValueError("The World can stop time only for 9 seconds.")
         await data.reply(f"🕒 ZA WARUDO! TOKI WO TOMARE!")
         await self.interface.net_request(Request(ZawarudoNH.message_type, {"time": time, "guild_name": guild_name}), "discord")
