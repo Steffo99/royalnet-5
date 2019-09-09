@@ -123,7 +123,7 @@ class DiscordBot(GenericBot):
                         await command.run(CommandArgs(parameters), data=data)
                     except InvalidInputError as e:
                         await data.reply(f":warning: {' '.join(e.args)}\n"
-                                         f"Syntax: [c]/{command.name} {command.syntax}[/c]")
+                                         f"Syntax: [c]!{command.name} {command.syntax}[/c]")
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
                         error_message = f"🦀 {e.__class__.__name__} 🦀\n"
@@ -235,7 +235,7 @@ class DiscordBot(GenericBot):
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
         guild_music_data = self.music_data[guild]
-        voice_client = self.client.find_voice_client_by_guild(guild)
+        voice_client: discord.VoiceClient = self.client.find_voice_client_by_guild(guild)
         next_source: discord.AudioSource = await guild_music_data.next()
         await self.update_activity_with_source_title()
         if next_source is None:
@@ -244,6 +244,7 @@ class DiscordBot(GenericBot):
 
         def advance(error=None):
             if error:
+                voice_client.disconnect(force=True)
                 log.error(f"Error while advancing music_data: {error}")
                 return
             self.loop.create_task(self.advance_music_data(guild))

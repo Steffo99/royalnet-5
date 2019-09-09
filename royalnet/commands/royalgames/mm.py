@@ -334,6 +334,8 @@ class MmCommand(Command):
 
     def __init__(self, interface):
         super().__init__(interface)
+        if self.interface.name != "telegram":
+            return
         log.debug("Loading pending MMEvents from the database")
         mmevents = self.interface.session.query(self.interface.alchemy.MMEvent) \
                                          .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \

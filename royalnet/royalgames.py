@@ -42,7 +42,8 @@ if __debug__:
         SummonCommand,
         VideochannelCommand,
         TriviaCommand,
-        MmCommand
+        MmCommand,
+        ZawarudoCommand
     ]
     log.setLevel(logging.DEBUG)
 else:

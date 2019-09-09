@@ -24,6 +24,7 @@ from .dnditem import DnditemCommand
 from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
 from .mm import MmCommand
+from .zawarudo import ZawarudoCommand
 
 __all__ = [
     "CiaoruoziCommand",
@@ -46,5 +47,6 @@ __all__ = [
     "DnditemCommand",
     "DndspellCommand",
     "TriviaCommand",
-    "MmCommand"
+    "MmCommand",
+    "ZawarudoCommand"
 ]
