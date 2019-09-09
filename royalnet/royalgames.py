@@ -68,7 +68,8 @@ else:
         DnditemCommand,
         DndspellCommand,
         TriviaCommand,
-        MmCommand
+        MmCommand,
+        ZawarudoCommand
     ]
     log.setLevel(logging.INFO)
 
