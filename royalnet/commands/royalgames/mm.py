@@ -4,12 +4,15 @@ import os
 import telegram
 import asyncio
 import re
+import logging
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...database.tables import MMEvent, MMDecision, MMResponse
 from ...error import *
 from ...utils import asyncify, telegram_escape, sleep_until
+
+log = logging.getLogger(__name__)
 
 
 class MmCommand(Command):
@@ -239,15 +242,13 @@ class MmCommand(Command):
                                                            chat_id=mmresponse.royal.telegram[0].tg_id,
                                                            text=telegram_escape(started_string()),
                                                            parse_mode="HTML",
-                                                           disable_webpage_preview=True,
-                                                           reply_markup=response_keyboard)
+                                                           disable_webpage_preview=True)
                 else:
                     await self.interface.bot.safe_api_call(client.send_message,
                                                            chat_id=mmresponse.royal.telegram[0].tg_id,
                                                            text=telegram_escape(started_without_you_string),
                                                            parse_mode="HTML",
-                                                           disable_webpage_preview=True,
-                                                           reply_markup=response_keyboard)
+                                                           disable_webpage_preview=True)
             await asyncify(self.interface.session.commit)
             await update_message()
 
@@ -330,6 +331,16 @@ class MmCommand(Command):
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_LATER")
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_NO")
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_start")
+
+    def __init__(self, interface):
+        super().__init__(interface)
+        log.debug("Loading pending MMEvents from the database")
+        mmevents = self.interface.session.query(self.interface.alchemy.MMEvent) \
+                                         .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \
+                                         .all()
+        log.info(f"Found {len(mmevents)} pending MMEvents")
+        for mmevent in mmevents:
+            interface.loop.create_task(self._run_mm(mmevent))
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self.interface.name != "telegram":
