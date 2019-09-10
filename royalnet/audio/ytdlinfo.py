@@ -88,6 +88,9 @@ class YtdlInfo:
         # So many redundant options!
         ytdl = youtube_dl.YoutubeDL({**cls._default_ytdl_args, **ytdl_args})
         first_info = ytdl.extract_info(url=url, download=False)
+        # No video was found
+        if first_info is None:
+            return []
         # If it is a playlist, create multiple videos!
         if "entries" in first_info:
             return [YtdlInfo(second_info) for second_info in first_info["entries"]]
