@@ -50,7 +50,10 @@ class TelegramBot(GenericBot):
                 interface.keys_callbacks[key_name] = callback
 
             def unregister_keyboard_key(interface, key_name: str):
-                del interface.keys_callbacks[key_name]
+                try:
+                    del interface.keys_callbacks[key_name]
+                except KeyError:
+                    raise KeyError(f"Key '{key_name}' is not registered")
 
         return TelegramInterface
 

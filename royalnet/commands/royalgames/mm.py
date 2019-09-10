@@ -330,7 +330,7 @@ class MmCommand(Command):
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_YES")
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_LATER")
             self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_r_NO")
-            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_start")
+            self.interface.unregister_keyboard_key(f"mm_{mmevent.mmid}_forcestart")
 
     def __init__(self, interface):
         super().__init__(interface)
