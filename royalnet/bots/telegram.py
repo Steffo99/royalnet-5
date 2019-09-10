@@ -2,6 +2,7 @@ import telegram
 import telegram.utils.request
 import typing
 import uuid
+import urllib3
 import asyncio
 import sentry_sdk
 import logging as _logging
@@ -135,7 +136,12 @@ class TelegramBot(GenericBot):
             except telegram.error.RetryAfter as error:
                 log.warning(f"Rate limited during {f.__qualname__} (retrying in 15s): {error}")
                 await asyncio.sleep(15)
-            except telegram.error.TelegramError as error:
+                continue
+            except urllib3.exceptions.HTTPError as error:
+                log.warning(f"urllib3 HTTPError during {f.__qualname__} (retrying in 15s): {error}")
+                await asyncio.sleep(15)
+                continue
+            except Exception as error:
                 log.error(f"{error.__class__.__qualname__} during {f} (skipping): {error}")
                 sentry_sdk.capture_exception(error)
                 break
