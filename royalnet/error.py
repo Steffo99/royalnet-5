@@ -34,6 +34,10 @@ class RoyalnetRequestError(Exception):
     def __init__(self, error: "ResponseError"):
         self.error: "ResponseError" = error
 
+    @property
+    def args(self):
+        return f"{self.error.name}", f"{self.error.description}", f"{self.error.extra_info}"
+
 
 class RoyalnetResponseError(Exception):
     """The :py:class:`royalnet.network.Response` that was received is invalid."""
