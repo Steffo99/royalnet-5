@@ -371,12 +371,12 @@ class MmCommand(Command):
         self.interface.session.add(mmevent)
         await asyncify(self.interface.session.commit)
 
-        message: telegram.Message = await asyncify(client.send_message,
-                                                   chat_id=os.environ["MM_CHANNEL_ID"],
-                                                   text=telegram_escape(self._main_text(mmevent)),
-                                                   parse_mode="HTML",
-                                                   disable_webpage_preview=True,
-                                                   reply_markup=self._main_keyboard(mmevent))
+        message: telegram.Message = await self.interface.bot.safe_api_call(client.send_message,
+                                                                           chat_id=os.environ["MM_CHANNEL_ID"],
+                                                                           text=telegram_escape(self._main_text(mmevent)),
+                                                                           parse_mode="HTML",
+                                                                           disable_webpage_preview=True,
+                                                                           reply_markup=self._main_keyboard(mmevent))
 
         mmevent.message_id = message.message_id
         # Can't asyncify this
