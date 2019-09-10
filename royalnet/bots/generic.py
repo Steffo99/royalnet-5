@@ -3,6 +3,8 @@ import typing
 import asyncio
 import logging
 import sentry_sdk
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from ..utils import *
 from ..network import *
 from ..database import *
@@ -134,7 +136,7 @@ class GenericBot:
             self.loop = loop
         if sentry_dsn:
             log.debug("Sentry integration enabled")
-            self.sentry = sentry_sdk.init(sentry_dsn)
+            self.sentry = sentry_sdk.init(sentry_dsn, integrations=[AioHttpIntegration(), SqlalchemyIntegration()])
         else:
             log.debug("Sentry integration disabled")
         try:
