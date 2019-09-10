@@ -1,5 +1,6 @@
 import typing
 import pickle
+import datetime
 from ..command import Command
 from ..commandinterface import CommandInterface
 from ..commandargs import CommandArgs
@@ -14,11 +15,6 @@ if typing.TYPE_CHECKING:
 
 class PlayNH(NetworkHandler):
     message_type = "music_play"
-
-    ytdl_args = {
-        "format": "bestaudio",
-        "outtmpl": f"./downloads/%(title)s.%(ext)s"
-    }
 
     @classmethod
     async def discord(cls, bot: "DiscordBot", data: dict):
@@ -36,11 +32,16 @@ class PlayNH(NetworkHandler):
         if not bot.music_data.get(guild):
             # TODO: change Exception
             raise Exception("No music_data for this guild")
+        # Create url
+        ytdl_args = {
+            "format": "bestaudio",
+            "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
+        }
         # Start downloading
         if data["url"].startswith("http://") or data["url"].startswith("https://"):
-            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url, data["url"], **cls.ytdl_args)
+            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url, data["url"], **ytdl_args)
         else:
-            dfiles = await asyncify(YtdlDiscord.create_and_ready_from_url, f"ytsearch:{data['url']}", **cls.ytdl_args)
+            dfiles = await asyncify(YtdlDiscord.create_and_ready_from_url, f"ytsearch:{data['url']}", **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {

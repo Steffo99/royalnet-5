@@ -1,6 +1,7 @@
 import typing
 import discord
 import asyncio
+import datetime
 from ..command import Command
 from ..commandinterface import CommandInterface
 from ..commandargs import CommandArgs
@@ -37,13 +38,18 @@ class ZawarudoNH(NetworkHandler):
         if not bot.music_data.get(guild):
             # TODO: change Exception
             raise Exception("No music_data for this guild")
+        # Create url
+        ytdl_args = {
+            "format": "bestaudio",
+            "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
+        }
         # Start downloading
         zw_start: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url,
                                                             "https://scaleway.steffo.eu/jojo/zawarudo_intro.mp3",
-                                                            **cls.ytdl_args)
+                                                            **ytdl_args)
         zw_end: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url,
                                                           "https://scaleway.steffo.eu/jojo/zawarudo_outro.mp3",
-                                                          **cls.ytdl_args)
+                                                          **ytdl_args)
         old_playlist = bot.music_data[guild]
         bot.music_data[guild] = Playlist()
         # Get voice client
