@@ -44,9 +44,7 @@ class ZawarudoNH(NetworkHandler):
         zw_end: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url,
                                                           "https://scaleway.steffo.eu/jojo/zawarudo_outro.mp3",
                                                           **cls.ytdl_args)
-        # Clear playlist
-        if bot.music_data[guild] is not None:
-            bot.music_data[guild].delete()
+        old_playlist = bot.music_data[guild]
         bot.music_data[guild] = Playlist()
         # Get voice client
         vc: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
@@ -64,6 +62,8 @@ class ZawarudoNH(NetworkHandler):
             if member.bot:
                 continue
             await member.edit(mute=False)
+        bot.music_data[guild] = old_playlist
+        await bot.advance_music_data(guild)
         return ResponseSuccess()
 
 
@@ -72,7 +72,7 @@ class ZawarudoCommand(Command):
 
     description: str = "Ferma il tempo!"
 
-    syntax = "[ [guild] ] [durata]"
+    syntax = "[ [guild] ] [1-9]"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
@@ -84,7 +84,9 @@ class ZawarudoCommand(Command):
             time = 5
         else:
             time = int(time)
-        if time > 9:
-            raise ValueError("The World can stop time only for 9 seconds.")
+        if time < 1:
+            raise InvalidInputError("The World can't stop time for less than a second.")
+        if time > 10:
+            raise InvalidInputError("The World can stop time only for 10 seconds.")
         await data.reply(f"🕒 ZA WARUDO! TOKI WO TOMARE!")
         await self.interface.net_request(Request(ZawarudoNH.message_type, {"time": time, "guild_name": guild_name}), "discord")
