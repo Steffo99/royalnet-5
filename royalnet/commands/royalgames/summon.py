@@ -61,7 +61,11 @@ class SummonCommand(Command):
                 channel = matching_channels[0]
             else:
                 author: discord.Member = message.author
-                voice: typing.Optional[discord.VoiceState] = author.voice
+                try:
+                    voice: typing.Optional[discord.VoiceState] = author.voice
+                except AttributeError:
+                    await data.reply("⚠️ Non puoi evocare il bot da una chat privata!")
+                    return
                 if voice is None:
                     await data.reply("⚠️ Non sei connesso a nessun canale vocale!")
                     return
