@@ -53,7 +53,7 @@ class MmCommand(Command):
 
     @staticmethod
     def _main_text(mmevent: MMEvent):
-        text = f"🌐 [b]{mmevent.title}[/b] - [b]{mmevent.datetime.strftime('%Y-%m-%d %H:%M')}[/b]\n"
+        text = f"🌐 [{mmevent.datetime.strftime('%Y-%m-%d %H:%M')}] [b]{mmevent.title}[/b]\n"
         if mmevent.description:
             text += f"{mmevent.description}\n"
         text += "\n"
