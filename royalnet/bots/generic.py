@@ -99,6 +99,9 @@ class GenericBot:
             response: Response = await getattr(network_handler, self.interface_name)(self, request.data)
             return response.to_dict()
         except Exception:
+            if __debug__:
+                raise
+                exit(1)
             _, exc, _ = sys.exc_info()
             log.debug(f"Exception {exc} in {network_handler}")
             return ResponseError("exception_in_handler",

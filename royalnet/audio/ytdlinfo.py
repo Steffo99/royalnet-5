@@ -93,7 +93,12 @@ class YtdlInfo:
             return []
         # If it is a playlist, create multiple videos!
         if "entries" in first_info:
-            return [YtdlInfo(second_info) for second_info in first_info["entries"]]
+            second_info_list = []
+            for second_info in first_info["entries"]:
+                if second_info is None:
+                    continue
+                second_info_list.append(YtdlInfo(second_info))
+            return second_info_list
         return [YtdlInfo(first_info)]
 
     def to_discord_embed(self) -> discord.Embed:
