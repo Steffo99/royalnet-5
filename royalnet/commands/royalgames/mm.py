@@ -27,7 +27,7 @@ class MmCommand(Command):
 
     require_alchemy_tables = {MMEvent, MMDecision, MMResponse}
 
-    _cycle_duration = 5
+    _cycle_duration = 10
 
     @staticmethod
     def _main_keyboard(mmevent: MMEvent) -> typing.Optional[telegram.InlineKeyboardMarkup]:
@@ -146,7 +146,7 @@ class MmCommand(Command):
             # Can't asyncify this
             self.interface.session.commit()
             await update_message()
-            return "⚫️ Hai detto che forse ci sarai. Rispondi al messaggio di conferma 5 minuti prima dell'inizio!"
+            return f"⚫️ Hai detto che forse ci sarai. Rispondi al messaggio di conferma {self._cycle_duration} minuti prima dell'inizio!"
 
         async def decision_no(data: CommandData):
             royal = await data.get_author()
@@ -193,6 +193,11 @@ class MmCommand(Command):
             await update_message()
             return "✅ Sei pronto!"
 
+        def later_string(royal) -> str:
+            return f"🕒 {royal.username} ha chiesto di aspettare {self._cycle_duration} prima di iniziare la" \
+                   f" partita.\n\n" \
+                   f"Se vuoi iniziare la partita senza aspettarlo, premi Avvia partita su Royal Matchmaking!"
+
         async def response_later(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
@@ -201,6 +206,11 @@ class MmCommand(Command):
             mmresponse.response = "LATER"
             # Can't asyncify this
             self.interface.session.commit()
+            await self.interface.bot.safe_api_call(client.send_message,
+                                                   chat_id=mmevent.creator.telegram[0].tg_id,
+                                                   text=telegram_escape(later_string(royal)),
+                                                   parse_mode="HTML",
+                                                   disable_webpage_preview=True)
             await update_message()
             return f"🕒 Hai chiesto agli altri di aspettarti {self._cycle_duration} minuti."
 
@@ -222,7 +232,7 @@ class MmCommand(Command):
                 if mmresponse.response == "YES":
                     text += f"✅ {mmresponse.royal}\n"
                 elif mmresponse.response == "NO":
-                    text += "❌ {mmresponse.royal}\n"
+                    text += f"❌ {mmresponse.royal}\n"
             return text
 
         started_without_you_string = f"🚩 Non hai confermato la tua presenza in tempo e [b]{mmevent.title}[/b] è" \
