@@ -59,7 +59,9 @@ class ReminderCommand(Command):
             date_str, reminder_text = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*")
 
         try:
-            date: typing.Optional[datetime.datetime] = dateparser.parse(date_str)
+            date: typing.Optional[datetime.datetime] = dateparser.parse(date_str, settings={
+                "PREFER_DATES_FROM": "future"
+            })
         except OverflowError:
             date = None
         if date is None:

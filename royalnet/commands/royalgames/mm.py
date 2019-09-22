@@ -364,7 +364,9 @@ class MmCommand(Command):
         except InvalidInputError:
             timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
         try:
-            dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring)
+            dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring, settings={
+                "PREFER_DATES_FROM": "future"
+            })
         except OverflowError:
             dt = None
         if dt is None:
