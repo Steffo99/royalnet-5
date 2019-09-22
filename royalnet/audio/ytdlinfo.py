@@ -106,9 +106,8 @@ class YtdlInfo:
         embed = discord.Embed(title=self.title,
                               colour=discord.Colour(0xcc0000),
                               url=self.webpage_url)
-        embed.set_thumbnail(
-            url=self.thumbnail)
-        embed.set_author(name=self.uploader, url=self.uploader_url)
+        embed.set_thumbnail(url=self.thumbnail)
+        embed.set_author(name=self.uploader, url=self.uploader_url if self.uploader_url is not None else discord.embeds.EmptyEmbed)
         # embed.set_footer(text="Source: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
         embed.add_field(name="Duration", value=str(self.duration), inline=True)
         embed.add_field(name="Published on", value=self.upload_date.strftime("%d %b %Y"), inline=True)
