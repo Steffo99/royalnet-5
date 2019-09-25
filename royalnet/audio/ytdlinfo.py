@@ -103,14 +103,24 @@ class YtdlInfo:
 
     def to_discord_embed(self) -> discord.Embed:
         """Return this info as a :py:class:`discord.Embed`."""
+        colors = {
+            "youtube": 0xCC0000,
+            "soundcloud": 0xFF5400,
+            "Clyp": 0x3DBEB3,
+            "Bandcamp": 0x1DA0C3
+        }
         embed = discord.Embed(title=self.title,
-                              colour=discord.Colour(0xcc0000),
-                              url=self.webpage_url)
-        embed.set_thumbnail(url=self.thumbnail)
-        embed.set_author(name=self.uploader, url=self.uploader_url if self.uploader_url is not None else discord.embeds.EmptyEmbed)
+                              colour=discord.Colour(colors.get(self.extractor, 0x4F545C)),
+                              url=self.webpage_url if self.webpage_url is not None else discord.embeds.EmptyEmbed)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
+        if self.uploader:
+            embed.set_author(name=self.uploader, url=self.uploader_url if self.uploader_url is not None else discord.embeds.EmptyEmbed)
         # embed.set_footer(text="Source: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
-        embed.add_field(name="Duration", value=str(self.duration), inline=True)
-        embed.add_field(name="Published on", value=self.upload_date.strftime("%d %b %Y"), inline=True)
+        if self.duration:
+            embed.add_field(name="Duration", value=str(self.duration), inline=True)
+        if self.upload_date:
+            embed.add_field(name="Published on", value=self.upload_date.strftime("%d %b %Y"), inline=True)
         return embed
 
     def __repr__(self):
