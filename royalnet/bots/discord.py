@@ -64,6 +64,9 @@ class DiscordBot(GenericBot):
                     raise UnregisteredError("Author is not registered")
                 return result
 
+            async def delete_invoking(data, error_if_unavailable=False):
+                await data.message.delete()
+
         return DiscordData
 
     def _bot_factory(self) -> typing.Type[discord.Client]:

@@ -103,6 +103,10 @@ class TelegramBot(GenericBot):
                                                 parse_mode="HTML",
                                                 disable_web_page_preview=True)
 
+            async def delete_invoking(data, error_if_unavailable=False) -> None:
+                message: telegram.Message = data.update.message
+                await TelegramBot.safe_api_call(message.delete)
+
         return TelegramData
 
     def __init__(self, *,

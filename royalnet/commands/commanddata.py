@@ -25,3 +25,13 @@ class CommandData:
 
         The function should be passed the :py:class:`CommandData` instance as a argument."""
         raise NotImplementedError()
+
+    async def delete_invoking(self, error_if_unavailable=False):
+        """Delete the invoking message, if supported by the interface.
+
+        The invoking message is the message send by the user that contains the command.
+
+        Parameters:
+            error_if_unavailable: if True, raise NotImplementedError() if the message cannot been deleted"""
+        if error_if_unavailable:
+            raise NotImplementedError()
