@@ -354,3 +354,5 @@ You can read more about :py:mod:`sqlalchemy` at their `website <https://www.sqla
 
 Comunicating via Royalnet
 ------------------------------------
+
+This section will be changed soon; as such, it will not be documented.
