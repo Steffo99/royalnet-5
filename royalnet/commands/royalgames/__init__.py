@@ -26,27 +26,31 @@ from .trivia import TriviaCommand
 from .mm import MmCommand
 from .zawarudo import ZawarudoCommand
 
-__all__ = [
-    "CiaoruoziCommand",
-    "ColorCommand",
-    "CvCommand",
-    "DiarioCommand",
-    "Mp3Command",
-    "PauseCommand",
-    "PingCommand",
-    "PlayCommand",
-    "PlaymodeCommand",
-    "QueueCommand",
-    "RageCommand",
-    "ReminderCommand",
-    "ShipCommand",
-    "SkipCommand",
-    "SmecdsCommand",
-    "SummonCommand",
-    "VideochannelCommand",
-    "DnditemCommand",
-    "DndspellCommand",
-    "TriviaCommand",
-    "MmCommand",
-    "ZawarudoCommand"
+
+commands = [
+    CiaoruoziCommand,
+    ColorCommand,
+    CvCommand,
+    DiarioCommand,
+    Mp3Command,
+    PauseCommand,
+    PingCommand,
+    PlayCommand,
+    PlaymodeCommand,
+    QueueCommand,
+    RageCommand,
+    ReminderCommand,
+    ShipCommand,
+    SkipCommand,
+    SmecdsCommand,
+    SummonCommand,
+    VideochannelCommand,
+    DnditemCommand,
+    DndspellCommand,
+    TriviaCommand,
+    MmCommand,
+    ZawarudoCommand
 ]
+
+
+__all__ = [command.__name__ for command in commands]
