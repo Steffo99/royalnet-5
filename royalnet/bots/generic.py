@@ -32,7 +32,10 @@ class GenericBot:
         for SelectedCommand in commands:
             log.debug(f"Binding {SelectedCommand.name}...")
             interface = self._Interface()
-            self.commands[f"{interface.prefix}{SelectedCommand.name}"] = SelectedCommand(interface)
+            try:
+                self.commands[f"{interface.prefix}{SelectedCommand.name}"] = SelectedCommand(interface)
+            except Exception as e:
+                log.error(f"{e} during the initialization of {SelectedCommand.name}, skipping...")
         log.debug(f"Successfully bound commands")
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:

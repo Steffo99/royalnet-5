@@ -229,6 +229,32 @@ function: ::
 Avoid using :py:func:`time.sleep` function, as it is considered a slow operation: use instead :py:func:`asyncio.sleep`,
 a coroutine that does the same exact thing.
 
+Delete the invoking message
+------------------------------------
+
+The invoking message of a command is the message that the user sent that the bot recognized as a command; for example,
+the message ``/spaghetti carbonara`` is the invoking message for the ``spaghetti`` command run.
+
+You can have the bot delete the invoking message for a command by calling the :py:class:`CommandData.delete_invoking`
+method: ::
+
+    async def run(self, args, data):
+        await data.delete_invoking()
+
+Not all interfaces support deleting messages; by default, if the interface does not support deletions, the call is
+ignored.
+
+You can have the method raise an error if the message can't be deleted by setting the ``error_if_unavailable`` parameter
+to True: ::
+
+    async def run(self, args, data):
+        try:
+            await data.delete_invoking(error_if_unavailable=True)
+        except royalnet.error.UnsupportedError:
+            await data.reply("🚫 The message could not be deleted.")
+        else:
+            await data.reply("✅ The message was deleted!")
+
 Using the database
 ------------------------------------
 

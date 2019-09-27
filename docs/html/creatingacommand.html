@@ -93,6 +93,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-the-invoking-message">Delete the invoking message</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-the-database">Using the database</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#querying-the-database">Querying the database</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#adding-filters-to-the-query">Adding filters to the query</a></li>
@@ -377,6 +378,30 @@ function:</p>
 </div>
 <p>Avoid using <a class="reference external" href="https://docs.python.org/3.7/library/time.html#time.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.sleep()</span></code></a> function, as it is considered a slow operation: use instead <a class="reference external" href="https://docs.python.org/3.7/library/asyncio-task.html#asyncio.sleep" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.sleep()</span></code></a>,
 a coroutine that does the same exact thing.</p>
+</div>
+<div class="section" id="delete-the-invoking-message">
+<h2>Delete the invoking message<a class="headerlink" href="#delete-the-invoking-message" title="Permalink to this headline">¶</a></h2>
+<p>The invoking message of a command is the message that the user sent that the bot recognized as a command; for example,
+the message <code class="docutils literal notranslate"><span class="pre">/spaghetti</span> <span class="pre">carbonara</span></code> is the invoking message for the <code class="docutils literal notranslate"><span class="pre">spaghetti</span></code> command run.</p>
+<p>You can have the bot delete the invoking message for a command by calling the <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.delete_invoking" title="royalnet.commands.CommandData.delete_invoking"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData.delete_invoking</span></code></a>
+method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_invoking</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Not all interfaces support deleting messages; by default, if the interface does not support deletions, the call is
+ignored.</p>
+<p>You can have the method raise an error if the message can’t be deleted by setting the <code class="docutils literal notranslate"><span class="pre">error_if_unavailable</span></code> parameter
+to True:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_invoking</span><span class="p">(</span><span class="n">error_if_unavailable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">royalnet</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">UnsupportedError</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;🚫 The message could not be deleted.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;✅ The message was deleted!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="using-the-database">
 <h2>Using the database<a class="headerlink" href="#using-the-database" title="Permalink to this headline">¶</a></h2>

@@ -4,7 +4,7 @@ from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 
 
-class DebugKeyboardCommand(Command):
+class DebugInvokingCommand(Command):
     name: str = "debug_invoking"
 
     description: str = "Elimina il messaggio di invocazione."

@@ -43,7 +43,8 @@ if __debug__:
         VideochannelCommand,
         TriviaCommand,
         MmCommand,
-        ZawarudoCommand
+        ZawarudoCommand,
+        DebugInvokingCommand
     ]
     log.setLevel(logging.DEBUG)
 else:
@@ -82,12 +83,12 @@ loop.run_until_complete(master.start())
 print("Starting bots...")
 ds_bot = DiscordBot(discord_config=DiscordConfig(os.environ["DS_AK"]),
                     royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
-                    database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Discord, "discord_id"),
+                    database_config=None,
                     sentry_dsn=sentry_dsn,
                     commands=commands)
 tg_bot = TelegramBot(telegram_config=TelegramConfig(os.environ["TG_AK"]),
                      royalnet_config=RoyalnetConfig(f"ws://{address}:{port}", os.environ["MASTER_KEY"]),
-                     database_config=DatabaseConfig(os.environ["DB_PATH"], Royal, Telegram, "tg_id"),
+                     database_config=None,
                      sentry_dsn=sentry_dsn,
                      commands=commands)
 loop.create_task(tg_bot.run())
