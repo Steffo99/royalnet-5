@@ -4,7 +4,7 @@ from sqlalchemy import Column, \
                        ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
-from .royals import Royal
+from .royals import User
 from .mmevents import MMEvent
 
 
@@ -13,11 +13,11 @@ class MMDecision:
 
     @declared_attr
     def royal_id(self):
-        return Column(Integer, ForeignKey("royals.uid"), primary_key=True)
+        return Column(Integer, ForeignKey("users.uid"), primary_key=True)
 
     @declared_attr
     def royal(self):
-        return relationship("Royal", backref="mmdecisions_taken")
+        return relationship("User", backref="mmdecisions_taken")
 
     @declared_attr
     def mmevent_id(self):

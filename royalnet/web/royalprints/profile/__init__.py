@@ -11,7 +11,7 @@ from ....utils.wikirender import prepare_page_markdown, RenderError
 # Maybe some of these tables are optional...
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 rp = Royalprint("profile", __name__, url_prefix="/profile", template_folder=tmpl_dir,
-                required_tables={Royal, ActiveKvGroup, Alias, Diario, Discord, Keygroup, Keyvalue, Telegram, WikiPage,
+                required_tables={User, ActiveKvGroup, Alias, Diario, Discord, Keygroup, Keyvalue, Telegram, WikiPage,
                                  WikiRevision, Bio, TriviaScore})
 
 

@@ -24,7 +24,7 @@ class YtdlDiscord:
             ffmpeg.input(self.ytdl_file.filename)
                   .output(destination_filename, format="s16le", ac=2, ar="48000")
                   .overwrite_output()
-                  .run(quiet=True)
+                  .run_async(quiet=True)
         )
         self.pcm_filename = destination_filename
 

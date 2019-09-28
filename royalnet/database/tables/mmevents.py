@@ -9,7 +9,7 @@ from sqlalchemy import Column, \
                        BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
-from .royals import Royal
+from .royals import User
 if typing.TYPE_CHECKING:
     from .mmdecisions import MMDecision
     from .mmresponse import MMResponse
@@ -20,11 +20,11 @@ class MMEvent:
 
     @declared_attr
     def creator_id(self):
-        return Column(Integer, ForeignKey("royals.uid"), nullable=False)
+        return Column(Integer, ForeignKey("users.uid"), nullable=False)
 
     @declared_attr
     def creator(self):
-        return relationship("Royal", backref="mmevents_created")
+        return relationship("User", backref="mmevents_created")
 
     @declared_attr
     def mmid(self):

@@ -1,4 +1,4 @@
-from .royals import Royal
+from .royals import User
 from .telegram import Telegram
 from .diario import Diario
 from .aliases import Alias
@@ -17,6 +17,6 @@ from .mmdecisions import MMDecision
 from .mmevents import MMEvent
 from .mmresponse import MMResponse
 
-__all__ = ["Royal", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage",
+__all__ = ["User", "Telegram", "Diario", "Alias", "ActiveKvGroup", "Keyvalue", "Keygroup", "Discord", "WikiPage",
            "WikiRevision", "Medal", "MedalAward", "Bio", "Reminder", "TriviaScore", "MMDecision", "MMEvent",
            "MMResponse"]

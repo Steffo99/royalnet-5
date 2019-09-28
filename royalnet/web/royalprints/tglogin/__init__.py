@@ -6,11 +6,11 @@ import datetime
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import Royal, Telegram
+from ....database.tables import User, Telegram
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={Royal, Telegram},
+rp = Royalprint("tglogin", __name__, url_prefix="/login/telegram", required_tables={User, Telegram},
                 template_folder=tmpl_dir)
 
 
@@ -38,7 +38,7 @@ def tglogin_done():
         return error(400, "L'autenticazione è fallita: l'hash ricevuto non coincide con quello calcolato.")
     tg_user = alchemy_session.query(alchemy.Telegram).filter(alchemy.Telegram.tg_id == f.request.args["id"]).one_or_none()
     if tg_user is None:
-        return error(404, "L'account Telegram con cui hai fatto il login non è connesso a nessun account Royal Games. Se sei un membro Royal Games, assicurati di aver syncato con il bot il tuo account di Telegram!")
+        return error(404, "L'account Telegram con cui hai fatto il login non è connesso a nessun account User Games. Se sei un membro User Games, assicurati di aver syncato con il bot il tuo account di Telegram!")
     royal_user = tg_user.royal
     f.session["royal"] = {
         "uid": royal_user.uid,

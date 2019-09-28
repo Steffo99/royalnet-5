@@ -7,7 +7,7 @@ from sqlalchemy import Column, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
-from .royals import Royal
+from .royals import User
 
 
 class Reminder:
@@ -19,11 +19,11 @@ class Reminder:
 
     @declared_attr
     def creator_id(self):
-        return Column(Integer, ForeignKey("royals.uid"))
+        return Column(Integer, ForeignKey("users.uid"))
 
     @declared_attr
     def creator(self):
-        return relationship("Royal", backref="reminders_created")
+        return relationship("User", backref="reminders_created")
 
     @declared_attr
     def interface_name(self):

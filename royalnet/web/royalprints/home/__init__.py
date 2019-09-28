@@ -1,4 +1,4 @@
-"""Homepage :py:class:`royalnet.web.Royalprint` of the Royal Games website."""
+"""Homepage :py:class:`royalnet.web.Royalprint` of the User Games website."""
 import flask as f
 import os
 from ...royalprint import Royalprint

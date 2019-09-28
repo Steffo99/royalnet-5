@@ -9,7 +9,7 @@ setuptools.setup(
     version=royalnet.version.semantic,
     author="Stefano Pigozzi",
     author_email="ste.pigozzi@gmail.com",
-    description="The great bot network of the Royal Games community",
+    description="The great bot network of the User Games community",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/royal-games/royalnet",
@@ -31,7 +31,8 @@ setuptools.setup(
                       "mcstatus>=2.2.1",
                       "sortedcontainers>=2.1.0",
                       "sentry-sdk>=0.11.1",
-                      "click>=7.0"],
+                      "click>=7.0",
+                      "keyring>=19.2.0"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",

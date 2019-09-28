@@ -2,17 +2,17 @@
 from .request import Request
 from .response import Response, ResponseSuccess, ResponseError
 from .package import Package
-from .royalnetlink import RoyalnetLink, NetworkError, NotConnectedError, NotIdentifiedError, ConnectionClosedError
-from .royalnetserver import RoyalnetServer
-from .royalnetconfig import RoyalnetConfig
+from .networklink import NetworkLink, NetworkError, NotConnectedError, NotIdentifiedError, ConnectionClosedError
+from .networkserver import NetworkServer
+from .networkconfig import NetworkConfig
 
-__all__ = ["RoyalnetLink",
+__all__ = ["NetworkLink",
            "NetworkError",
            "NotConnectedError",
            "NotIdentifiedError",
            "Package",
-           "RoyalnetServer",
-           "RoyalnetConfig",
+           "NetworkServer",
+           "NetworkConfig",
            "ConnectionClosedError",
            "Request",
            "Response",

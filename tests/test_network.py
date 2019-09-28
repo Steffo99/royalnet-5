@@ -2,7 +2,7 @@ import pytest
 import uuid
 import asyncio
 import logging
-from royalnet.network import Package, RoyalnetLink, RoyalnetServer, ConnectionClosedError, Request
+from royalnet.network import Package, NetworkLink, NetworkServer, ConnectionClosedError, Request
 
 
 log = logging.root
@@ -41,16 +41,16 @@ def test_request_creation():
 
 def test_links(async_loop: asyncio.AbstractEventLoop):
     address, port = "127.0.0.1", 1235
-    master = RoyalnetServer(address, port, "test")
+    master = NetworkServer(address, port, "test")
     async_loop.run_until_complete(master.start())
     # Test invalid secret
-    wrong_secret_link = RoyalnetLink("ws://127.0.0.1:1235", "invalid", "test", echo_request_handler, loop=async_loop)
+    wrong_secret_link = NetworkLink("ws://127.0.0.1:1235", "invalid", "test", echo_request_handler, loop=async_loop)
     with pytest.raises(ConnectionClosedError):
         async_loop.run_until_complete(wrong_secret_link.run())
     # Test regular connection
-    link1 = RoyalnetLink("ws://127.0.0.1:1235", "test", "one", echo_request_handler, loop=async_loop)
+    link1 = NetworkLink("ws://127.0.0.1:1235", "test", "one", echo_request_handler, loop=async_loop)
     async_loop.create_task(link1.run())
-    link2 = RoyalnetLink("ws://127.0.0.1:1235", "test", "two", echo_request_handler, loop=async_loop)
+    link2 = NetworkLink("ws://127.0.0.1:1235", "test", "two", echo_request_handler, loop=async_loop)
     async_loop.create_task(link2.run())
     message = {"ciao": "ciao"}
     response = async_loop.run_until_complete(link1.request(message, "two"))

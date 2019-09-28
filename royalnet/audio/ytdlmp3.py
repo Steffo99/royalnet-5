@@ -24,7 +24,7 @@ class YtdlMp3:
             ffmpeg.input(self.ytdl_file.filename)
                   .output(destination_filename, format="mp3")
                   .overwrite_output()
-                  .run()
+                  .run_async()
         )
         self.mp3_filename = destination_filename
 

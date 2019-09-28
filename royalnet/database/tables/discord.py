@@ -6,7 +6,7 @@ from sqlalchemy import Column, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
-from .royals import Royal
+from .royals import User
 
 
 class Discord:
@@ -14,7 +14,7 @@ class Discord:
 
     @declared_attr
     def royal_id(self):
-        return Column(Integer, ForeignKey("royals.uid"))
+        return Column(Integer, ForeignKey("users.uid"))
 
     @declared_attr
     def discord_id(self):
@@ -34,7 +34,7 @@ class Discord:
 
     @declared_attr
     def royal(self):
-        return relationship("Royal", backref="discord")
+        return relationship("User", backref="discord")
 
     def __repr__(self):
         return f"<Discord {str(self)}>"

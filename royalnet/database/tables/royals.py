@@ -5,8 +5,8 @@ from sqlalchemy import Column, \
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class Royal:
-    __tablename__ = "royals"
+class User:
+    __tablename__ = "users"
 
     @declared_attr
     def uid(self):
@@ -29,7 +29,7 @@ class Royal:
         return Column(LargeBinary)
 
     def __repr__(self):
-        return f"<Royal {self.username}>"
+        return f"<User {self.username}>"
 
     def __str__(self):
-        return f"[c]royalnet:{self.username}[/c]"
+        return self.username

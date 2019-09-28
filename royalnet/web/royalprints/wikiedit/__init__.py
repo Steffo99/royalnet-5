@@ -1,4 +1,4 @@
-"""A Royal Games Wiki viewer :py:class:`royalnet.web.Royalprint`. Doesn't support any kind of edit."""
+"""A User Games Wiki viewer :py:class:`royalnet.web.Royalprint`. Doesn't support any kind of edit."""
 import flask as f
 import uuid
 import os
@@ -6,12 +6,12 @@ import datetime
 import difflib
 from ...royalprint import Royalprint
 from ...shortcuts import error, from_urluuid
-from ....database.tables import Royal, WikiPage, WikiRevision
+from ....database.tables import User, WikiPage, WikiRevision
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 rp = Royalprint("wikiedit", __name__, url_prefix="/wiki/edit", template_folder=tmpl_dir,
-                required_tables={Royal, WikiPage, WikiRevision})
+                required_tables={User, WikiPage, WikiRevision})
 
 
 @rp.route("/newpage", methods=["GET", "POST"])
