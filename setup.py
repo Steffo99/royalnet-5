@@ -15,13 +15,13 @@ setuptools.setup(
     url="https://github.com/royal-games/royalnet",
     packages=setuptools.find_packages(),
     install_requires=["python-telegram-bot>=11.1.0",
-                      "websockets>=7.0",
+                      "discord.py>=1.0.1",
+                      "websockets>=6.0",
                       "psycopg2-binary>=2.8",
                       "aiohttp>=3.5.4",
                       "sqlalchemy>=1.3.2",
                       "Markdown>=3.1",
                       "dateparser>=0.7.1",
-                      "discord.py>=1.0.1",
                       "youtube_dl>=2019.4.24",
                       "ffmpeg-python>=0.1.17",
                       "PyNaCl>=1.3.0",
@@ -45,5 +45,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License"
     ],
     include_package_data=True,
-    zip_safe=False,
+    zip_safe=False
 )

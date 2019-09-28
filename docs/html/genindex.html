@@ -81,6 +81,7 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="runningroyalnet.html">Running Royalnet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="creatingacommand.html">Royalnet Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a></li>
 </ul>
@@ -206,12 +207,12 @@
       </ul></li>
       <li><a href="apireference.html#royalnet.bots.TelegramBot._handle_callback_query">_handle_callback_query() (royalnet.bots.TelegramBot method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apireference.html#royalnet.bots.TelegramBot._handle_message">_handle_message() (royalnet.bots.TelegramBot method)</a>
 </li>
       <li><a href="apireference.html#royalnet.bots.TelegramBot._handle_update">_handle_update() (royalnet.bots.TelegramBot method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apireference.html#royalnet.bots.DiscordBot._init_client">_init_client() (royalnet.bots.DiscordBot method)</a>
 
       <ul>
@@ -222,10 +223,22 @@
 </li>
       <li><a href="apireference.html#royalnet.bots.GenericBot._init_database">_init_database() (royalnet.bots.GenericBot method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.bots.GenericBot._init_royalnet">_init_royalnet() (royalnet.bots.GenericBot method)</a>
+      <li><a href="apireference.html#royalnet.bots.GenericBot._init_loop">_init_loop() (royalnet.bots.GenericBot method)</a>
+</li>
+      <li><a href="apireference.html#royalnet.bots.GenericBot._init_network">_init_network() (royalnet.bots.GenericBot method)</a>
+</li>
+      <li><a href="apireference.html#royalnet.bots.GenericBot._init_sentry">_init_sentry() (royalnet.bots.GenericBot method)</a>
 </li>
       <li><a href="apireference.html#royalnet.bots.DiscordBot._init_voice">_init_voice() (royalnet.bots.DiscordBot method)</a>
 </li>
+      <li><a href="apireference.html#royalnet.bots.DiscordBot._initialize">_initialize() (royalnet.bots.DiscordBot method)</a>
+
+      <ul>
+        <li><a href="apireference.html#royalnet.bots.GenericBot._initialize">(royalnet.bots.GenericBot method)</a>
+</li>
+        <li><a href="apireference.html#royalnet.bots.TelegramBot._initialize">(royalnet.bots.TelegramBot method)</a>
+</li>
+      </ul></li>
       <li><a href="apireference.html#royalnet.bots.DiscordBot._interface_factory">_interface_factory() (royalnet.bots.DiscordBot method)</a>
 
       <ul>
@@ -282,7 +295,7 @@
 </li>
       <li><a href="apireference.html#royalnet.commands.CommandInterface">CommandInterface (class in royalnet.commands)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink.connect">connect() (royalnet.network.RoyalnetLink method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink.connect">connect() (royalnet.network.NetworkLink method)</a>
 </li>
       <li><a href="apireference.html#royalnet.network.ConnectionClosedError">ConnectionClosedError</a>
 </li>
@@ -334,8 +347,6 @@
 </li>
       <li><a href="apireference.html#royalnet.bots.DiscordBot">DiscordBot (class in royalnet.bots)</a>
 </li>
-      <li><a href="apireference.html#royalnet.bots.DiscordConfig">DiscordConfig (class in royalnet.bots)</a>
-</li>
       <li><a href="apireference.html#royalnet.audio.YtdlFile.download_file">download_file() (royalnet.audio.YtdlFile method)</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlFile.download_from_url">download_from_url() (royalnet.audio.YtdlFile class method)</a>
@@ -360,9 +371,9 @@
 </li>
       <li><a href="apireference.html#royalnet.error.FileTooBigError">FileTooBigError</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.find_client">find_client() (royalnet.network.RoyalnetServer method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkServer.find_client">find_client() (royalnet.network.NetworkServer method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.find_destination">find_destination() (royalnet.network.RoyalnetServer method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkServer.find_destination">find_destination() (royalnet.network.NetworkServer method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -390,6 +401,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apireference.html#royalnet.commands.CommandData.get_author">get_author() (royalnet.commands.CommandData method)</a>
 </li>
+      <li><a href="apireference.html#royalnet.bots.GenericBot.get_secret">get_secret() (royalnet.bots.GenericBot method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -404,7 +417,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink.identify">identify() (royalnet.network.RoyalnetLink method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink.identify">identify() (royalnet.network.NetworkLink method)</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlDiscord.info">info() (royalnet.audio.YtdlDiscord property)</a>
 
@@ -456,7 +469,7 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.listener">listener() (royalnet.network.RoyalnetServer method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkServer.listener">listener() (royalnet.network.NetworkServer method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -488,11 +501,17 @@
       </ul></li>
       <li><a href="apireference.html#royalnet.commands.CommandInterface.net_request">net_request() (royalnet.commands.CommandInterface method)</a>
 </li>
+      <li><a href="apireference.html#royalnet.network.NetworkConfig">NetworkConfig (class in royalnet.network)</a>
+</li>
       <li><a href="apireference.html#royalnet.network.NetworkError">NetworkError</a>
+</li>
+      <li><a href="apireference.html#royalnet.utils.NetworkHandler">NetworkHandler (class in royalnet.utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.utils.NetworkHandler">NetworkHandler (class in royalnet.utils)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink">NetworkLink (class in royalnet.network)</a>
+</li>
+      <li><a href="apireference.html#royalnet.network.NetworkServer">NetworkServer (class in royalnet.network)</a>
 </li>
       <li><a href="apireference.html#royalnet.error.NoneFoundError">NoneFoundError</a>
 </li>
@@ -560,7 +579,7 @@
         <li><a href="apireference.html#royalnet.audio.YtdlMp3.ready_up">(royalnet.audio.YtdlMp3 method)</a>
 </li>
       </ul></li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink.receive">receive() (royalnet.network.RoyalnetLink method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink.receive">receive() (royalnet.network.NetworkLink method)</a>
 </li>
       <li><a href="apireference.html#royalnet.commands.CommandInterface.register_keyboard_key">register_keyboard_key() (royalnet.commands.CommandInterface method)</a>
 </li>
@@ -576,7 +595,7 @@
       </ul></li>
       <li><a href="apireference.html#royalnet.network.Request">Request (class in royalnet.network)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink.request">request() (royalnet.network.RoyalnetLink method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink.request">request() (royalnet.network.NetworkLink method)</a>
 </li>
       <li><a href="apireference.html#royalnet.commands.Command.require_alchemy_tables">require_alchemy_tables (royalnet.commands.Command attribute)</a>
 </li>
@@ -590,7 +609,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.route_package">route_package() (royalnet.network.RoyalnetServer method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkServer.route_package">route_package() (royalnet.network.NetworkServer method)</a>
 </li>
       <li><a href="apireference.html#module-royalnet.audio">royalnet.audio (module)</a>
 </li>
@@ -608,15 +627,9 @@
 </li>
       <li><a href="apireference.html#module-royalnet.web">royalnet.web (module)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetConfig">RoyalnetConfig (class in royalnet.network)</a>
-</li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink">RoyalnetLink (class in royalnet.network)</a>
-</li>
       <li><a href="apireference.html#royalnet.error.RoyalnetRequestError">RoyalnetRequestError</a>
 </li>
       <li><a href="apireference.html#royalnet.error.RoyalnetResponseError">RoyalnetResponseError</a>
-</li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer">RoyalnetServer (class in royalnet.network)</a>
 </li>
       <li><a href="apireference.html#royalnet.web.Royalprint">Royalprint (class in royalnet.web)</a>
 </li>
@@ -629,7 +642,15 @@
 </li>
         <li><a href="apireference.html#royalnet.commands.Command.run">(royalnet.commands.Command method)</a>
 </li>
-        <li><a href="apireference.html#royalnet.network.RoyalnetLink.run">(royalnet.network.RoyalnetLink method)</a>
+        <li><a href="apireference.html#royalnet.network.NetworkLink.run">(royalnet.network.NetworkLink method)</a>
+</li>
+        <li><a href="apireference.html#royalnet.network.NetworkServer.run">(royalnet.network.NetworkServer method)</a>
+</li>
+      </ul></li>
+      <li><a href="apireference.html#royalnet.bots.GenericBot.run_blocking">run_blocking() (royalnet.bots.GenericBot method)</a>
+
+      <ul>
+        <li><a href="apireference.html#royalnet.network.NetworkServer.run_blocking">(royalnet.network.NetworkServer method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -642,9 +663,9 @@
 </li>
       <li><a href="apireference.html#royalnet.utils.safeformat">safeformat() (in module royalnet.utils)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetLink.send">send() (royalnet.network.RoyalnetLink method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkLink.send">send() (royalnet.network.NetworkLink method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.serve">serve() (royalnet.network.RoyalnetServer method)</a>
+      <li><a href="apireference.html#royalnet.network.NetworkServer.serve">serve() (royalnet.network.NetworkServer method)</a>
 </li>
       <li><a href="apireference.html#royalnet.database.Alchemy.session_acm">session_acm() (royalnet.database.Alchemy method)</a>
 </li>
@@ -652,13 +673,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apireference.html#royalnet.database.Alchemy.session_cm">session_cm() (royalnet.database.Alchemy method)</a>
 </li>
+      <li><a href="apireference.html#royalnet.bots.GenericBot.set_secret">set_secret() (royalnet.bots.GenericBot method)</a>
+</li>
       <li><a href="apireference.html#royalnet.utils.sleep_until">sleep_until() (in module royalnet.utils)</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlDiscord.spawn_audiosource">spawn_audiosource() (royalnet.audio.YtdlDiscord method)</a>
 </li>
       <li><a href="apireference.html#royalnet.utils.splitstring">splitstring() (in module royalnet.utils)</a>
-</li>
-      <li><a href="apireference.html#royalnet.network.RoyalnetServer.start">start() (royalnet.network.RoyalnetServer method)</a>
 </li>
       <li><a href="apireference.html#royalnet.commands.Command.syntax">syntax (royalnet.commands.Command attribute)</a>
 </li>
@@ -671,8 +692,6 @@
       <li><a href="apireference.html#royalnet.utils.telegram_escape">telegram_escape() (in module royalnet.utils)</a>
 </li>
       <li><a href="apireference.html#royalnet.bots.TelegramBot">TelegramBot (class in royalnet.bots)</a>
-</li>
-      <li><a href="apireference.html#royalnet.bots.TelegramConfig">TelegramConfig (class in royalnet.bots)</a>
 </li>
       <li><a href="apireference.html#royalnet.network.Package.to_dict">to_dict() (royalnet.network.Package method)</a>
 
