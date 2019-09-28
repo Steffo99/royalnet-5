@@ -4,11 +4,11 @@ import os
 import bcrypt
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import Royal, Alias
+from ....database.tables import User, Alias
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("newaccount", __name__, url_prefix="/newaccount", required_tables={Royal, Alias},
+rp = Royalprint("newaccount", __name__, url_prefix="/newaccount", required_tables={User, Alias},
                 template_folder=tmpl_dir)
 
 

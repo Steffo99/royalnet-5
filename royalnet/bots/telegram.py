@@ -1,6 +1,5 @@
 import telegram
 import telegram.utils.request
-import typing
 import uuid
 import urllib3
 import asyncio
@@ -9,18 +8,10 @@ import logging as _logging
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
-from ..network import *
-from ..database import *
 from ..commands import *
 
 
 log = _logging.getLogger(__name__)
-
-
-class TelegramConfig:
-    """The specific configuration to be used for :py:class:`royalnet.database.TelegramBot`."""
-    def __init__(self, token: str):
-        self.token: str = token
 
 
 class TelegramBot(GenericBot):
@@ -30,8 +21,9 @@ class TelegramBot(GenericBot):
     def _init_client(self):
         """Create the :py:class:`telegram.Bot`, and set the starting offset."""
         # https://github.com/python-telegram-bot/python-telegram-bot/issues/341
-        request = telegram.utils.request.Request(20, read_timeout=15)
-        self.client = telegram.Bot(self._telegram_config.token, request=request)
+        request = telegram.utils.request.Request(5, read_timeout=30)
+        token = self.get_secret("telegram")
+        self.client = telegram.Bot(token, request=request)
         self._offset: int = -100
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:
@@ -108,19 +100,6 @@ class TelegramBot(GenericBot):
                 await TelegramBot.safe_api_call(message.delete)
 
         return TelegramData
-
-    def __init__(self, *,
-                 telegram_config: TelegramConfig,
-                 royalnet_config: typing.Optional[RoyalnetConfig] = None,
-                 database_config: typing.Optional[DatabaseConfig] = None,
-                 sentry_dsn: typing.Optional[str] = None,
-                 commands: typing.List[typing.Type[Command]] = None):
-        super().__init__(royalnet_config=royalnet_config,
-                         database_config=database_config,
-                         sentry_dsn=sentry_dsn,
-                         commands=commands)
-        self._telegram_config = telegram_config
-        self._init_client()
 
     @staticmethod
     async def safe_api_call(f: typing.Callable, *args, **kwargs) -> typing.Optional:
@@ -225,7 +204,13 @@ class TelegramBot(GenericBot):
         else:
             await self.safe_api_call(query.answer, text=response)
 
+    def _initialize(self):
+        super()._initialize()
+        self._init_client()
+
     async def run(self):
+        if not self.initialized:
+            self._initialize()
         while True:
             # Get the latest 100 updates
             last_updates: typing.List[telegram.Update] = await self.safe_api_call(self.client.get_updates,

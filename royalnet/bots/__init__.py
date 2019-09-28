@@ -1,7 +1,7 @@
 """Various bot interfaces, and a generic class to create new ones."""
 
 from .generic import GenericBot
-from .telegram import TelegramBot, TelegramConfig
-from .discord import DiscordBot, DiscordConfig
+from .telegram import TelegramBot
+from .discord import DiscordBot
 
-__all__ = ["TelegramBot", "TelegramConfig", "DiscordBot", "DiscordConfig", "GenericBot"]
+__all__ = ["TelegramBot", "DiscordBot", "GenericBot"]

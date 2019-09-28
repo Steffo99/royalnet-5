@@ -1,15 +1,15 @@
-"""A Royal Games Diario viewer :py:class:`royalnet.web.Royalprint`."""
+"""A User Games Diario viewer :py:class:`royalnet.web.Royalprint`."""
 
 import flask as f
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import Royal, Diario
+from ....database.tables import User, Diario
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 rp = Royalprint("diarioview", __name__, url_prefix="/diario", template_folder=tmpl_dir,
-                required_tables={Royal, Diario})
+                required_tables={User, Diario})
 
 
 @rp.route("/", defaults={"page": 1})

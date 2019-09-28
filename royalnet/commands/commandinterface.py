@@ -28,7 +28,7 @@ class CommandInterface:
         raise UnsupportedError()
 
     async def net_request(self, message, destination: str) -> dict:
-        """Send data through a :py:class:`royalnet.network.RoyalnetLink` and wait for a
+        """Send data through a :py:class:`royalnet.network.NetworkLink` and wait for a
         :py:class:`royalnet.network.Reply`.
 
         Parameters:

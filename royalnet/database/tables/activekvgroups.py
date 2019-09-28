@@ -5,7 +5,7 @@ from sqlalchemy import Column, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
-from .royals import Royal
+from .royals import User
 # noinspection PyUnresolvedReferences
 from .keygroups import Keygroup
 
@@ -15,7 +15,7 @@ class ActiveKvGroup:
 
     @declared_attr
     def royal_id(self):
-        return Column(Integer, ForeignKey("royals.uid"), primary_key=True)
+        return Column(Integer, ForeignKey("users.uid"), primary_key=True)
 
     @declared_attr
     def group_name(self):
@@ -23,7 +23,7 @@ class ActiveKvGroup:
 
     @declared_attr
     def royal(self):
-        return relationship("Royal", backref="active_kv_group")
+        return relationship("User", backref="active_kv_group")
 
     @declared_attr
     def group(self):

@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
 from .wikipages import WikiPage
 # noinspection PyUnresolvedReferences
-from .royals import Royal
+from .royals import User
 
 
 class WikiRevision:
@@ -33,11 +33,11 @@ class WikiRevision:
 
     @declared_attr
     def author_id(self):
-        return Column(Integer, ForeignKey("royals.uid"), nullable=False)
+        return Column(Integer, ForeignKey("users.uid"), nullable=False)
 
     @declared_attr
     def author(self):
-        return relationship("Royal", foreign_keys=self.author_id, backref="wiki_contributions")
+        return relationship("User", foreign_keys=self.author_id, backref="wiki_contributions")
 
     @declared_attr
     def timestamp(self):

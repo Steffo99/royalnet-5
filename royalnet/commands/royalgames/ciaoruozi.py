@@ -8,7 +8,7 @@ from ..commanddata import CommandData
 class CiaoruoziCommand(Command):
     name: str = "ciaoruozi"
 
-    description: str = "Saluta Ruozi, un leggendario essere che una volta era in Royal Games."
+    description: str = "Saluta Ruozi, un leggendario essere che una volta era in User Games."
 
     syntax: str = ""
 

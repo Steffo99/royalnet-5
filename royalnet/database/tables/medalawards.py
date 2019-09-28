@@ -4,7 +4,7 @@ from sqlalchemy import Column, \
                        ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
-from .royals import Royal
+from .royals import User
 from .medals import Medal
 
 
@@ -25,7 +25,7 @@ class MedalAward:
 
     @declared_attr
     def royal_id(self):
-        return Column(Integer, ForeignKey("royal.uid"), nullable=False)
+        return Column(Integer, ForeignKey("users.uid"), nullable=False)
 
     @declared_attr
     def medal(self):
@@ -33,7 +33,7 @@ class MedalAward:
 
     @declared_attr
     def royal(self):
-        return relationship("Royal", backref="medals_received")
+        return relationship("User", backref="medals_received")
 
     def __repr__(self):
         return f"<MedalAward of {self.medal} to {self.royal} on {self.date}>"

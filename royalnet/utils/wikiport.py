@@ -4,11 +4,11 @@ import datetime
 import difflib
 import uuid
 from royalnet.database import Alchemy
-from royalnet.database.tables import Royal, WikiPage, WikiRevision
+from royalnet.database.tables import User, WikiPage, WikiRevision
 
 
 if __name__ == "__main__":
-    alchemy = Alchemy(os.environ["DB_PATH"], {Royal, WikiPage, WikiRevision})
+    alchemy = Alchemy(os.environ["DB_PATH"], {User, WikiPage, WikiRevision})
     with open(r"data.txt") as file, alchemy.session_cm() as session:
         for line in file.readlines():
             match = re.match("^([^\t]+)\t([^\t]+)\t([tf])$", line)

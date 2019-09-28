@@ -1,6 +1,5 @@
 import datetime
 import dateparser
-import os
 import telegram
 import asyncio
 import re
@@ -98,7 +97,7 @@ class MmCommand(Command):
             try:
                 await self.interface.bot.safe_api_call(client.edit_message_text,
                                                        text=telegram_escape(self._main_text(mmevent)),
-                                                       chat_id=os.environ["MM_CHANNEL_ID"],
+                                                       chat_id=-1001224004974,
                                                        message_id=mmevent.message_id,
                                                        parse_mode="HTML",
                                                        disable_web_page_preview=True,
@@ -384,7 +383,7 @@ class MmCommand(Command):
         await asyncify(self.interface.session.commit)
 
         message: telegram.Message = await self.interface.bot.safe_api_call(client.send_message,
-                                                                           chat_id=os.environ["MM_CHANNEL_ID"],
+                                                                           chat_id=-1001224004974,
                                                                            text=telegram_escape(self._main_text(mmevent)),
                                                                            parse_mode="HTML",
                                                                            disable_webpage_preview=True,

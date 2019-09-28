@@ -1,12 +1,9 @@
 import discord
-import typing
 import sentry_sdk
 import logging as _logging
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
-from ..network import *
-from ..database import *
 from ..audio import *
 from ..commands import *
 
@@ -15,12 +12,6 @@ log = _logging.getLogger(__name__)
 # TODO: Load the opus library
 if not discord.opus.is_loaded():
     log.error("Opus is not loaded. Weird behaviour might emerge.")
-
-
-class DiscordConfig:
-    """The specific configuration to be used for :py:class:`royalnet.bots.DiscordBot`."""
-    def __init__(self, token: str):
-        self.token = token
 
 
 class DiscordBot(GenericBot):
@@ -204,24 +195,19 @@ class DiscordBot(GenericBot):
         self._Client = self._bot_factory()
         self.client = self._Client()
 
-    def __init__(self, *,
-                 discord_config: DiscordConfig,
-                 royalnet_config: typing.Optional[RoyalnetConfig] = None,
-                 database_config: typing.Optional[DatabaseConfig] = None,
-                 sentry_dsn: typing.Optional[str] = None,
-                 commands: typing.List[typing.Type[Command]] = None):
-        super().__init__(royalnet_config=royalnet_config,
-                         database_config=database_config,
-                         sentry_dsn=sentry_dsn,
-                         commands=commands)
-        self._discord_config = discord_config
+    def _initialize(self):
+        super()._initialize()
         self._init_client()
         self._init_voice()
 
     async def run(self):
         """Login to Discord, then run the bot."""
+        if not self.initialized:
+            self._initialize()
+        log.debug("Getting Discord secret")
+        token = self.get_secret("discord")
         log.info(f"Logging in to Discord")
-        await self.client.login(self._discord_config.token)
+        await self.client.login(token)
         log.info(f"Connecting to Discord")
         await self.client.connect()
         # TODO: how to stop?

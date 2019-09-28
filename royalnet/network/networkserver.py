@@ -12,7 +12,7 @@ log = _logging.getLogger(__name__)
 
 
 class ConnectedClient:
-    """The :py:class:`royalnet.network.RoyalnetServer`-side representation of a connected :py:class:`royalnet.network.RoyalnetLink`."""
+    """The :py:class:`royalnet.network.NetworkServer`-side representation of a connected :py:class:`royalnet.network.NetworkLink`."""
     def __init__(self, socket: websockets.WebSocketServerProtocol):
         self.socket: websockets.WebSocketServerProtocol = socket
         self.nid: typing.Optional[str] = None
@@ -30,11 +30,11 @@ class ConnectedClient:
                                 destination=self.nid))
 
     async def send(self, package: Package):
-        """Send a :py:class:`royalnet.network.Package` to the :py:class:`royalnet.network.RoyalnetLink`."""
+        """Send a :py:class:`royalnet.network.Package` to the :py:class:`royalnet.network.NetworkLink`."""
         await self.socket.send(package.to_json_bytes())
 
 
-class RoyalnetServer:
+class NetworkServer:
     def __init__(self, address: str, port: int, required_secret: str, *, loop: asyncio.AbstractEventLoop = None):
         self.address: str = address
         self.port: int = port
@@ -131,9 +131,12 @@ class RoyalnetServer:
     async def serve(self):
         await websockets.serve(self.listener, host=self.address, port=self.port)
 
-    async def start(self):
+    async def run(self):
         log.debug(f"Starting main server loop for <server> on ws://{self.address}:{self.port}")
         # noinspection PyAsyncCall
         self._loop.create_task(self.serve())
         # Just to be sure it has started on Linux
         await asyncio.sleep(0.5)
+
+    def run_blocking(self):
+        self._loop.run_until_complete(self.run())

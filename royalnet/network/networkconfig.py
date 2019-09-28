@@ -1,4 +1,4 @@
-class RoyalnetConfig:
+class NetworkConfig:
     def __init__(self,
                  master_uri: str,
                  master_secret: str):

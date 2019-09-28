@@ -2,26 +2,21 @@ import typing
 import re
 import datetime
 import telegram
-import os
 import aiohttp
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
-from ...database.tables import Royal, Diario, Alias
+from ...database.tables import User, Diario, Alias
 from ...utils import asyncify
 from ...error import *
 
 
-async def to_imgur(photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
+async def to_imgur(imgur_api_key, photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
     # Select the largest photo
     largest_photo = sorted(photosizes, key=lambda p: p.width * p.height)[-1]
     # Get the photo url
     photo_file: telegram.File = await asyncify(largest_photo.get_file)
     # Forward the url to imgur, as an upload
-    try:
-        imgur_api_key = os.environ["IMGUR_CLIENT_ID"]
-    except KeyError:
-        raise InvalidConfigError("Missing IMGUR_CLIENT_ID envvar, can't upload images to imgur.")
     async with aiohttp.request("post", "https://api.imgur.com/3/upload", data={
         "image": photo_file.file_path,
         "type": "URL",
@@ -43,7 +38,7 @@ class DiarioCommand(Command):
 
     syntax = "[!] \"(testo)\" --[autore], [contesto]"
 
-    require_alchemy_tables = {Royal, Diario, Alias}
+    require_alchemy_tables = {User, Diario, Alias}
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self.interface.name == "telegram":
@@ -74,7 +69,8 @@ class DiarioCommand(Command):
                 if photosizes:
                     # Text is a caption
                     text = reply.caption
-                    media_url = await to_imgur(photosizes, text if text is not None else "")
+                    media_url = await to_imgur(self.interface.bot.get_secret("imgur"),
+                                               photosizes, text if text is not None else "")
                 else:
                     media_url = None
                 # Ensure there is a text or an image
@@ -101,7 +97,8 @@ class DiarioCommand(Command):
                 # Check if there's an image associated with the reply
                 photosizes: typing.Optional[typing.List[telegram.PhotoSize]] = message.photo
                 if photosizes:
-                    media_url = await to_imgur(photosizes, raw_text if raw_text is not None else "")
+                    media_url = await to_imgur(self.interface.bot.get_secret("imgur"),
+                                               photosizes, raw_text if raw_text is not None else "")
                 else:
                     media_url = None
                 # Parse the text, if it exists

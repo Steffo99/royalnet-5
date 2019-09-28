@@ -9,7 +9,7 @@ from sqlalchemy import Column, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
-from .royals import Royal
+from .royals import User
 
 
 class Diario:
@@ -21,11 +21,11 @@ class Diario:
 
     @declared_attr
     def creator_id(self):
-        return Column(Integer, ForeignKey("royals.uid"))
+        return Column(Integer, ForeignKey("users.uid"))
 
     @declared_attr
     def quoted_account_id(self):
-        return Column(Integer, ForeignKey("royals.uid"))
+        return Column(Integer, ForeignKey("users.uid"))
 
     @declared_attr
     def quoted(self):
@@ -53,11 +53,11 @@ class Diario:
 
     @declared_attr
     def creator(self):
-        return relationship("Royal", foreign_keys=self.creator_id, backref="diario_created")
+        return relationship("User", foreign_keys=self.creator_id, backref="diario_created")
 
     @declared_attr
     def quoted_account(self):
-        return relationship("Royal", foreign_keys=self.quoted_account_id, backref="diario_quoted")
+        return relationship("User", foreign_keys=self.quoted_account_id, backref="diario_quoted")
 
     def __repr__(self):
         return f"<Diario diario_id={self.diario_id}" \

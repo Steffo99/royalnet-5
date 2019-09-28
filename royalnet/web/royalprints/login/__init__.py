@@ -5,11 +5,11 @@ import datetime
 import bcrypt
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import Royal
+from ....database.tables import User
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-rp = Royalprint("login", __name__, url_prefix="/login/password", required_tables={Royal},
+rp = Royalprint("login", __name__, url_prefix="/login/password", required_tables={User},
                 template_folder=tmpl_dir)
 
 

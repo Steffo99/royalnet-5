@@ -1,6 +1,6 @@
 """Commands that can be used in bots.
 
-These probably won't suit your needs, as they are tailored for the bots of the Royal Games gaming community, but they
+These probably won't suit your needs, as they are tailored for the bots of the User Games gaming community, but they
  may be useful to develop new ones."""
 
 from .ciaoruozi import CiaoruoziCommand

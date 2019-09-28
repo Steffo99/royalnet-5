@@ -1,5 +1,5 @@
 class Request:
-    """A request sent from a :py:class:`royalnet.network.RoyalnetLink` to another.
+    """A request sent from a :py:class:`royalnet.network.NetworkLink` to another.
 
      It contains the name of the requested handler, in addition to the data."""
 

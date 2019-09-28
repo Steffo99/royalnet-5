@@ -13,19 +13,19 @@ log = _logging.getLogger(__name__)
 
 
 class NotConnectedError(Exception):
-    """The :py:class:`royalnet.network.RoyalnetLink` is not connected to a :py:class:`royalnet.network.RoyalnetServer`."""
+    """The :py:class:`royalnet.network.NetworkLink` is not connected to a :py:class:`royalnet.network.NetworkServer`."""
 
 
 class NotIdentifiedError(Exception):
-    """The :py:class:`royalnet.network.RoyalnetLink` has not identified yet to a :py:class:`royalnet.network.RoyalnetServer`."""
+    """The :py:class:`royalnet.network.NetworkLink` has not identified yet to a :py:class:`royalnet.network.NetworkServer`."""
 
 
 class ConnectionClosedError(Exception):
-    """The :py:class:`royalnet.network.RoyalnetLink`'s connection was closed unexpectedly. The link can't be used anymore."""
+    """The :py:class:`royalnet.network.NetworkLink`'s connection was closed unexpectedly. The link can't be used anymore."""
 
 
 class InvalidServerResponseError(Exception):
-    """The :py:class:`royalnet.network.RoyalnetServer` sent invalid data to the :py:class:`royalnet.network.RoyalnetLink`."""
+    """The :py:class:`royalnet.network.NetworkServer` sent invalid data to the :py:class:`royalnet.network.NetworkLink`."""
 
 
 class NetworkError(Exception):
@@ -69,7 +69,7 @@ def requires_identification(func):
     return new_func
 
 
-class RoyalnetLink:
+class NetworkLink:
     def __init__(self, master_uri: str, secret: str, link_type: str, request_handler, *,
                  loop: asyncio.AbstractEventLoop = None):
         if ":" in link_type:
@@ -90,7 +90,7 @@ class RoyalnetLink:
         self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)
 
     async def connect(self):
-        """Connect to the :py:class:`royalnet.network.RoyalnetServer` at ``self.master_uri``."""
+        """Connect to the :py:class:`royalnet.network.NetworkServer` at ``self.master_uri``."""
         log.info(f"Connecting to {self.master_uri}...")
         self.websocket = await websockets.connect(self.master_uri, loop=self._loop)
         self.connect_event.set()
@@ -98,7 +98,7 @@ class RoyalnetLink:
 
     @requires_connection
     async def receive(self) -> Package:
-        """Recieve a :py:class:`Package` from the :py:class:`royalnet.network.RoyalnetServer`.
+        """Recieve a :py:class:`Package` from the :py:class:`royalnet.network.NetworkServer`.
 
         Raises:
             :py:exc:`royalnet.network.royalnetlink.ConnectionClosedError` if the connection closes."""
@@ -113,7 +113,7 @@ class RoyalnetLink:
             # What to do now? Let's just reraise.
             raise ConnectionClosedError()
         if self.identify_event.is_set() and package.destination != self.nid:
-            raise InvalidServerResponseError("Package is not addressed to this RoyalnetLink.")
+            raise InvalidServerResponseError("Package is not addressed to this NetworkLink.")
         log.debug(f"Received package: {package}")
         return package
 
