@@ -63,13 +63,6 @@ class YtdlDiscord:
             dfiles.append(dfile)
         return dfiles
 
-    @classmethod
-    def create_and_ready_from_url(cls, url, **ytdl_args) -> typing.List["YtdlDiscord"]:
-        dfiles = cls.create_from_url(url, **ytdl_args)
-        for dfile in dfiles:
-            dfile.ready_up()
-        return dfiles
-
     @property
     def info(self) -> typing.Optional[YtdlInfo]:
         return self.ytdl_file.info

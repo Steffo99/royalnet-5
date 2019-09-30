@@ -44,10 +44,10 @@ class ZawarudoNH(NetworkHandler):
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        zw_start: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url,
+        zw_start: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url,
                                                             "https://scaleway.steffo.eu/jojo/zawarudo_intro.mp3",
                                                             **ytdl_args)
-        zw_end: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url,
+        zw_end: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url,
                                                           "https://scaleway.steffo.eu/jojo/zawarudo_outro.mp3",
                                                           **ytdl_args)
         old_playlist = bot.music_data[guild]

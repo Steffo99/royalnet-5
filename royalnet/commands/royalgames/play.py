@@ -39,9 +39,9 @@ class PlayNH(NetworkHandler):
         }
         # Start downloading
         if data["url"].startswith("http://") or data["url"].startswith("https://"):
-            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_and_ready_from_url, data["url"], **ytdl_args)
+            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
         else:
-            dfiles = await asyncify(YtdlDiscord.create_and_ready_from_url, f"ytsearch:{data['url']}", **ytdl_args)
+            dfiles = await asyncify(YtdlDiscord.create_from_url, f"ytsearch:{data['url']}", **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {

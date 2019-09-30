@@ -17,17 +17,20 @@ import keyring
               help="The names of the command pack modules that should be imported.")
 @click.option("-n", "--network-address", type=str, default=None,
               help="The Network server URL to connect to.")
-@click.option("--local-network-server/--no-local-network-server", default=True,
-              help="Locally run a Network server, bind it to port 44444.")
+@click.option("-l", "--local-network-server", is_flag=True, default=False,
+              help="Locally run a Network server and bind it to port 44444. Overrides -n.")
 @click.option("-s", "--secrets-name", type=str, default="__default__",
               help="The name in the keyring that the secrets are stored with.")
+@click.option("-v", "--verbose", is_flag=True, default=False,
+              help="Print all possible debug information.")
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
         database: typing.Optional[str],
         command_packs: typing.List[str],
         network_address: typing.Optional[str],
         local_network_server: bool,
-        secrets_name: str):
+        secrets_name: str,
+        verbose: bool):
 
     # Get the network password
     network_password = keyring.get_password(f"Royalnet/{secrets_name}", "network")
@@ -62,7 +65,7 @@ def run(telegram: typing.Optional[bool],
         server_process = multiprocessing.Process(name="Network Server",
                                                  target=r.network.NetworkServer("0.0.0.0",
                                                                                 44444,
-                                                                                network_password).run_blocking(),
+                                                                                network_password).run_blocking,
                                                  daemon=True)
         server_process.start()
         network_address = "ws://127.0.0.1:44444/"
@@ -106,6 +109,7 @@ def run(telegram: typing.Optional[bool],
                                           secrets_name=secrets_name)
         telegram_process = multiprocessing.Process(name="Telegram Interface",
                                                    target=telegram_bot.run_blocking,
+                                                   args=(verbose,),
                                                    daemon=True)
         telegram_process.start()
 
@@ -118,6 +122,7 @@ def run(telegram: typing.Optional[bool],
                                         secrets_name=secrets_name)
         discord_process = multiprocessing.Process(name="Discord Interface",
                                                   target=discord_bot.run_blocking,
+                                                  args=(verbose,),
                                                   daemon=True)
         discord_process.start()
 

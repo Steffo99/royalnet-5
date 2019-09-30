@@ -190,6 +190,13 @@ class GenericBot:
         """A blocking coroutine that should make the bot start listening to commands and requests."""
         raise NotImplementedError()
 
-    def run_blocking(self):
+    def run_blocking(self, verbose=False):
+        if verbose:
+            core_logger = logging.getLogger("royalnet")
+            core_logger.setLevel(logging.DEBUG)
+            stream_handler = logging.StreamHandler()
+            stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
+            core_logger.addHandler(stream_handler)
+            core_logger.debug("Logging setup complete.")
         self._initialize()
         self.loop.run_until_complete(self.run())

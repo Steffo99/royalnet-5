@@ -217,6 +217,7 @@ class DiscordBot(GenericBot):
         guild_music_data = self.music_data[guild]
         for dfile in dfiles:
             log.debug(f"Adding {dfile} to music_data")
+            dfile.ready_up()
             guild_music_data.add(dfile)
         if guild_music_data.now_playing is None:
             await self.advance_music_data(guild)

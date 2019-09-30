@@ -40,10 +40,7 @@ class NetworkServer:
         self.port: int = port
         self.required_secret: str = required_secret
         self.identified_clients: typing.List[ConnectedClient] = []
-        if loop is None:
-            self._loop = asyncio.get_event_loop()
-        else:
-            self._loop = loop
+        self.loop = loop
 
     def find_client(self, *, nid: str = None, link_type: str = None) -> typing.List[ConnectedClient]:
         assert not (nid and link_type)
@@ -91,7 +88,7 @@ class NetworkServer:
                 pass
             # Otherwise, route the package to its destination
             # noinspection PyAsyncCall
-            self._loop.create_task(self.route_package(package))
+            self.loop.create_task(self.route_package(package))
 
     def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
         """Find a list of destinations for the package.
@@ -129,14 +126,25 @@ class NetworkServer:
             await destination.send(specific_package)
 
     async def serve(self):
-        await websockets.serve(self.listener, host=self.address, port=self.port)
+        log.debug(f"Serving on ws://{self.address}:{self.port}")
+        await websockets.serve(self.listener, host=self.address, port=self.port, loop=self.loop)
+        log.debug(f"Serve has finished?!")
 
     async def run(self):
-        log.debug(f"Starting main server loop for <server> on ws://{self.address}:{self.port}")
+        if self.loop is None:
+            self.loop = asyncio.get_event_loop()
+        log.debug(f"Starting main server loop on ws://{self.address}:{self.port}")
         # noinspection PyAsyncCall
-        self._loop.create_task(self.serve())
-        # Just to be sure it has started on Linux
-        await asyncio.sleep(0.5)
+        await self.serve()
 
-    def run_blocking(self):
-        self._loop.run_until_complete(self.run())
+    def run_blocking(self, verbose=False):
+        if verbose:
+            core_logger = _logging.getLogger("royalnet")
+            core_logger.setLevel(_logging.DEBUG)
+            stream_handler = _logging.StreamHandler()
+            stream_handler.formatter = _logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
+            core_logger.addHandler(stream_handler)
+            core_logger.debug("Logging setup complete.")
+        if self.loop is None:
+            self.loop = asyncio.get_event_loop()
+        self.loop.run_until_complete(self.run())
