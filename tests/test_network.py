@@ -41,8 +41,8 @@ def test_request_creation():
 
 def test_links(async_loop: asyncio.AbstractEventLoop):
     address, port = "127.0.0.1", 1235
-    master = NetworkServer(address, port, "test")
-    async_loop.run_until_complete(master.start())
+    master = NetworkServer(address, port, "test", loop=async_loop)
+    run_server_task = async_loop.create_task(master.run())
     # Test invalid secret
     wrong_secret_link = NetworkLink("ws://127.0.0.1:1235", "invalid", "test", echo_request_handler, loop=async_loop)
     with pytest.raises(ConnectionClosedError):

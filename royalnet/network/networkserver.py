@@ -125,17 +125,13 @@ class NetworkServer:
                                        destination_conv_id=package.destination_conv_id)
             await destination.send(specific_package)
 
-    async def serve(self):
+    def serve(self):
         log.debug(f"Serving on ws://{self.address}:{self.port}")
-        await websockets.serve(self.listener, host=self.address, port=self.port, loop=self.loop)
-        log.debug(f"Serve has finished?!")
-
-    async def run(self):
-        if self.loop is None:
-            self.loop = asyncio.get_event_loop()
-        log.debug(f"Starting main server loop on ws://{self.address}:{self.port}")
-        # noinspection PyAsyncCall
-        await self.serve()
+        server = self.loop.run_until_complete(websockets.serve(self.listener,
+                                                               host=self.address,
+                                                               port=self.port,
+                                                               loop=self.loop))
+        self.loop.run_forever()
 
     def run_blocking(self, verbose=False):
         if verbose:
@@ -147,4 +143,4 @@ class NetworkServer:
             core_logger.debug("Logging setup complete.")
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
-        self.loop.run_until_complete(self.run())
+        self.serve()

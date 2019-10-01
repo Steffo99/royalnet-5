@@ -89,6 +89,16 @@ class NetworkLink:
         self.connect_event: asyncio.Event = asyncio.Event(loop=self._loop)
         self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)
 
+    def __repr__(self):
+        if self.identify_event.is_set():
+            return f"<{self.__class__.__name__} (identified)>"
+        elif self.connect_event.is_set():
+            return f"<{self.__class__.__name__} (connected)>"
+        elif self.error_event.is_set():
+            return f"<{self.__class__.__name__} (error)>"
+        else:
+            return f"<{self.__class__.__name__} (disconnected)>"
+
     async def connect(self):
         """Connect to the :py:class:`royalnet.network.NetworkServer` at ``self.master_uri``."""
         log.info(f"Connecting to {self.master_uri}...")
@@ -149,13 +159,12 @@ class NetworkLink:
         log.debug(f"Received response: {request} -> {response}")
         return response
 
-    async def run(self, loops: numbers.Real = math.inf):
+    async def run(self):
         """Blockingly run the Link."""
         log.debug(f"Running main client loop for {self.nid}.")
         if self.error_event.is_set():
             raise ConnectionClosedError("RoyalnetLinks can't be rerun after an error.")
-        while loops:
-            loops -= 1
+        while True:
             if not self.connect_event.is_set():
                 await self.connect()
             if not self.identify_event.is_set():

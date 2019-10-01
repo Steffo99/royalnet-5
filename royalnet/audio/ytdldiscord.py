@@ -13,6 +13,10 @@ class YtdlDiscord:
         self.pcm_filename: typing.Optional[str] = None
         self._fas_spawned: typing.List[FileAudioSource] = []
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.info.title or 'Unknown Title'} ({'ready' if self.pcm_available() else 'not ready'}," \
+               f" {len(self._fas_spawned)} audiosources spawned)>"
+
     def pcm_available(self):
         return self.pcm_filename is not None and os.path.exists(self.pcm_filename)
 
@@ -24,7 +28,7 @@ class YtdlDiscord:
             ffmpeg.input(self.ytdl_file.filename)
                   .output(destination_filename, format="s16le", ac=2, ar="48000")
                   .overwrite_output()
-                  .run_async(quiet=True)
+                  .run(quiet=True)
         )
         self.pcm_filename = destination_filename
 
