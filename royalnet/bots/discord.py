@@ -86,7 +86,7 @@ class DiscordBot(GenericBot):
                     self.music_data[channel.guild] = playmodes.Playlist()
 
             async def on_message(cli, message: discord.Message):
-                self.loop.create_task(self._handle_message(message))
+                self.loop.create_task(cli._handle_message(message))
 
             async def _handle_message(cli, message: discord.Message):
                 text = message.content
