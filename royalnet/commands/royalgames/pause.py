@@ -6,7 +6,7 @@ from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...utils import NetworkHandler
 from ...network import Request, ResponseSuccess
-from ...error import NoneFoundError
+from ...error import NoneFoundError, TooManyFoundError
 if typing.TYPE_CHECKING:
     from ...bots import DiscordBot
 

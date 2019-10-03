@@ -76,6 +76,8 @@ class ZawarudoNH(NetworkHandler):
 class ZawarudoCommand(Command):
     name: str = "zawarudo"
 
+    aliases = ["theworld", "world"]
+
     description: str = "Ferma il tempo!"
 
     syntax = "[ [guild] ] [1-9]"

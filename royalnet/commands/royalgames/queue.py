@@ -50,6 +50,8 @@ class QueueNH(NetworkHandler):
 class QueueCommand(Command):
     name: str = "queue"
 
+    aliases = ["q"]
+
     description: str = "Visualizza la coda di riproduzione attuale."
 
     syntax = "[ [guild] ]"

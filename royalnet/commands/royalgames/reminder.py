@@ -17,6 +17,8 @@ from ...error import *
 class ReminderCommand(Command):
     name: str = "reminder"
 
+    aliases = ["calendar"]
+
     description: str = "Ti ricorda di fare qualcosa dopo un po' di tempo."
 
     syntax: str = "[ (data) ] (messaggio)"

@@ -56,6 +56,8 @@ class PlayNH(NetworkHandler):
 class PlayCommand(Command):
     name: str = "play"
 
+    aliases = ["p"]
+
     description: str = "Aggiunge una canzone alla coda della chat vocale."
 
     syntax = "[ [guild] ] (url)"

@@ -11,6 +11,8 @@ from ...utils import parse_5etools_entry, ordinalformat, andformat
 class DndspellCommand(Command):
     name: str = "dndspell"
 
+    aliases = ["spell"]
+
     description: str = "Ottieni informazioni su una magia di D&D5e."
 
     syntax = "(nomemagia)"

@@ -9,6 +9,8 @@ from ...utils import safeformat
 class ShipCommand(Command):
     name: str = "ship"
 
+    aliases = ["⛵️"]
+
     description: str = "Crea una ship tra due nomi."
 
     syntax = "(nomeuno) (nomedue)"

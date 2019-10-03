@@ -10,7 +10,7 @@ class Command:
     """The main name of the command.
      To have ``/example`` on Telegram, the name should be ``example``."""
 
-    aliases: typing.List[str] = NotImplemented
+    aliases: typing.List[str] = []
     """A list of possible aliases for a command.
     To have ``/e`` as alias for ``/example``, one should set aliases to ``["e"]``."""
 

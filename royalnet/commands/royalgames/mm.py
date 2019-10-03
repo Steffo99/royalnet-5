@@ -20,6 +20,8 @@ class MmCommand(Command):
     Requires the MM_CHANNEL_ID envvar to be set."""
     name: str = "mm"
 
+    aliases = ["matchmaking", "matchmake"]
+
     description: str = "Trova giocatori per una partita a qualcosa."
 
     syntax: str = "[ (data) ] (nomegioco)\n[descrizione]"
