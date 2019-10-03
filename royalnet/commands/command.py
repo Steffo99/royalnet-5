@@ -10,6 +10,10 @@ class Command:
     """The main name of the command.
      To have ``/example`` on Telegram, the name should be ``example``."""
 
+    aliases: typing.List[str] = NotImplemented
+    """A list of possible aliases for a command.
+    To have ``/e`` as alias for ``/example``, one should set aliases to ``["e"]``."""
+
     description: str = NotImplemented
     """A small description of the command, to be displayed when the command is being autocompleted."""
 
