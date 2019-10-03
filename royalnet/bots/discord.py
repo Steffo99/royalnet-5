@@ -85,8 +85,10 @@ class DiscordBot(GenericBot):
                     log.debug(f"Creating music_data for {channel.guild}")
                     self.music_data[channel.guild] = playmodes.Playlist()
 
-            @staticmethod
-            async def on_message(message: discord.Message):
+            async def on_message(cli, message: discord.Message):
+                self.loop.create_task(self._handle_message(message))
+
+            async def _handle_message(cli, message: discord.Message):
                 text = message.content
                 # Skip non-text messages
                 if not text:
