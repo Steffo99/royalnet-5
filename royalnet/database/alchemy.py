@@ -4,8 +4,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from contextlib import contextmanager, asynccontextmanager
 from ..utils import asyncify
-# noinspection PyUnresolvedReferences
-from ..error import InvalidConfigError
 
 
 class Alchemy:

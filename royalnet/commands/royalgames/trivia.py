@@ -9,7 +9,7 @@ from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ..commandinterface import CommandInterface
 from ...utils import asyncify
-from ...error import *
+from ..commanderrors import CommandError, KeyboardExpiredError
 from ...database.tables import TriviaScore
 
 
@@ -39,7 +39,7 @@ class TriviaCommand(Command):
                 j = await response.json()
         # Parse the question
         if j["response_code"] != 0:
-            raise ExternalError(f"OpenTDB returned {j['response_code']} response_code")
+            raise CommandError(f"OpenTDB returned an error response_code ({j['response_code']}).")
         question = j["results"][0]
         text = f'❓ [b]{question["category"]} - {question["difficulty"].capitalize()}[/b]\n' \
                f'{html.unescape(question["question"])}'

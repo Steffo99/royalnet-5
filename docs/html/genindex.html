@@ -155,7 +155,6 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
- | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -261,9 +260,11 @@
 </li>
       <li><a href="apireference.html#royalnet.database.Alchemy">Alchemy (class in royalnet.database)</a>
 </li>
+      <li><a href="apireference.html#royalnet.commands.CommandInterface.alchemy">alchemy (royalnet.commands.CommandInterface attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.commands.CommandInterface.alchemy">alchemy (royalnet.commands.CommandInterface attribute)</a>
+      <li><a href="apireference.html#royalnet.commands.Command.aliases">aliases (royalnet.commands.Command attribute)</a>
 </li>
       <li><a href="apireference.html#royalnet.utils.andformat">andformat() (in module royalnet.utils)</a>
 </li>
@@ -293,24 +294,22 @@
 </li>
       <li><a href="apireference.html#royalnet.commands.CommandData">CommandData (class in royalnet.commands)</a>
 </li>
+      <li><a href="apireference.html#royalnet.commands.CommandError">CommandError</a>
+</li>
       <li><a href="apireference.html#royalnet.commands.CommandInterface">CommandInterface (class in royalnet.commands)</a>
 </li>
       <li><a href="apireference.html#royalnet.network.NetworkLink.connect">connect() (royalnet.network.NetworkLink method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.network.ConnectionClosedError">ConnectionClosedError</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apireference.html#royalnet.network.ConnectionClosedError">ConnectionClosedError</a>
+</li>
       <li><a href="apireference.html#royalnet.audio.YtdlMp3.convert_to_mp3">convert_to_mp3() (royalnet.audio.YtdlMp3 method)</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlDiscord.convert_to_pcm">convert_to_pcm() (royalnet.audio.YtdlDiscord method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.audio.YtdlDiscord.create_and_ready_from_url">create_and_ready_from_url() (royalnet.audio.YtdlDiscord class method)</a>
-
-      <ul>
-        <li><a href="apireference.html#royalnet.audio.YtdlMp3.create_and_ready_from_url">(royalnet.audio.YtdlMp3 class method)</a>
+      <li><a href="apireference.html#royalnet.audio.YtdlMp3.create_and_ready_from_url">create_and_ready_from_url() (royalnet.audio.YtdlMp3 class method)</a>
 </li>
-      </ul></li>
       <li><a href="apireference.html#royalnet.web.create_app">create_app() (in module royalnet.web)</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlDiscord.create_from_url">create_from_url() (royalnet.audio.YtdlDiscord class method)</a>
@@ -319,8 +318,6 @@
         <li><a href="apireference.html#royalnet.audio.YtdlMp3.create_from_url">(royalnet.audio.YtdlMp3 class method)</a>
 </li>
       </ul></li>
-      <li><a href="apireference.html#royalnet.error.CurrentlyDisabledError">CurrentlyDisabledError</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -354,22 +351,12 @@
   </ul></td>
 </tr></table>
 
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.error.ExternalError">ExternalError</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apireference.html#royalnet.audio.FileAudioSource">FileAudioSource (class in royalnet.audio)</a>
 </li>
       <li><a href="apireference.html#royalnet.utils.fileformat">fileformat() (in module royalnet.utils)</a>
-</li>
-      <li><a href="apireference.html#royalnet.error.FileTooBigError">FileTooBigError</a>
 </li>
       <li><a href="apireference.html#royalnet.network.NetworkServer.find_client">find_client() (royalnet.network.NetworkServer method)</a>
 </li>
@@ -435,9 +422,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.error.InvalidConfigError">InvalidConfigError</a>
-</li>
-      <li><a href="apireference.html#royalnet.error.InvalidInputError">InvalidInputError</a>
+      <li><a href="apireference.html#royalnet.commands.InvalidInputError">InvalidInputError</a>
 </li>
       <li><a href="apireference.html#royalnet.audio.YtdlFile.is_downloaded">is_downloaded() (royalnet.audio.YtdlFile method)</a>
 </li>
@@ -461,7 +446,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.error.KeyboardExpiredError">KeyboardExpiredError</a>
+      <li><a href="apireference.html#royalnet.commands.KeyboardExpiredError">KeyboardExpiredError</a>
 </li>
   </ul></td>
 </tr></table>
@@ -505,15 +490,13 @@
 </li>
       <li><a href="apireference.html#royalnet.network.NetworkError">NetworkError</a>
 </li>
-      <li><a href="apireference.html#royalnet.utils.NetworkHandler">NetworkHandler (class in royalnet.utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apireference.html#royalnet.utils.NetworkHandler">NetworkHandler (class in royalnet.utils)</a>
+</li>
       <li><a href="apireference.html#royalnet.network.NetworkLink">NetworkLink (class in royalnet.network)</a>
 </li>
       <li><a href="apireference.html#royalnet.network.NetworkServer">NetworkServer (class in royalnet.network)</a>
-</li>
-      <li><a href="apireference.html#royalnet.error.NoneFoundError">NoneFoundError</a>
 </li>
       <li><a href="apireference.html#royalnet.network.NotConnectedError">NotConnectedError</a>
 </li>
@@ -644,8 +627,6 @@
 </li>
         <li><a href="apireference.html#royalnet.network.NetworkLink.run">(royalnet.network.NetworkLink method)</a>
 </li>
-        <li><a href="apireference.html#royalnet.network.NetworkServer.run">(royalnet.network.NetworkServer method)</a>
-</li>
       </ul></li>
       <li><a href="apireference.html#royalnet.bots.GenericBot.run_blocking">run_blocking() (royalnet.bots.GenericBot method)</a>
 
@@ -709,8 +690,6 @@
 </li>
       <li><a href="apireference.html#royalnet.network.Package.to_json_string">to_json_string() (royalnet.network.Package method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.error.TooManyFoundError">TooManyFoundError</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -721,11 +700,9 @@
 </li>
       <li><a href="apireference.html#royalnet.commands.CommandInterface.unregister_net_handler">unregister_net_handler() (royalnet.commands.CommandInterface method)</a>
 </li>
-      <li><a href="apireference.html#royalnet.error.UnregisteredError">UnregisteredError</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apireference.html#royalnet.error.UnsupportedError">UnsupportedError</a>
+      <li><a href="apireference.html#royalnet.commands.UnsupportedError">UnsupportedError</a>
 </li>
       <li><a href="apireference.html#royalnet.bots.DiscordBot.update_activity_with_source_title">update_activity_with_source_title() (royalnet.bots.DiscordBot method)</a>
 </li>

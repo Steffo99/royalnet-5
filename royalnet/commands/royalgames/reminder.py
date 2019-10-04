@@ -11,8 +11,7 @@ from ..commandinterface import CommandInterface
 from ..commanddata import CommandData
 from ...utils import sleep_until, asyncify, telegram_escape, discord_escape
 from ...database.tables import Reminder
-from ...error import *
-
+from ..commanderrors import InvalidInputError, UnsupportedError
 
 class ReminderCommand(Command):
     name: str = "reminder"
@@ -76,7 +75,7 @@ class ReminderCommand(Command):
         elif self.interface.name == "discord":
             interface_data = pickle.dumps(data.message.channel.id)
         else:
-            raise UnsupportedError("Interface not supported")
+            raise UnsupportedError("This command does not support the current interface.")
         creator = await data.get_author()
         reminder = self.interface.alchemy.Reminder(creator=creator,
                                                    interface_name=self.interface.name,

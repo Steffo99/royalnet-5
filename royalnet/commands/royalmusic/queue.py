@@ -1,12 +1,13 @@
 import typing
 import pickle
+import discord
 from ..command import Command
 from ..commandinterface import CommandInterface
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...utils import NetworkHandler, numberemojiformat
 from ...network import Request, ResponseSuccess
-from ...error import *
+from ..commanderrors import CommandError
 if typing.TYPE_CHECKING:
     from ...bots import DiscordBot
 
@@ -18,13 +19,14 @@ class QueueNH(NetworkHandler):
     async def discord(cls, bot: "DiscordBot", data: dict):
         # Find the matching guild
         if data["guild_name"]:
-            guild = bot.client.find_guild_by_name(data["guild_name"])
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
         else:
-            if len(bot.music_data) == 0:
-                raise NoneFoundError("No voice clients active")
-            if len(bot.music_data) > 1:
-                raise TooManyFoundError("Multiple guilds found")
-            guild = list(bot.music_data)[0]
+            guilds = bot.client.guilds
+        if len(guilds) == 0:
+            raise CommandError("No guilds with the specified name found.")
+        if len(guilds) > 1:
+            raise CommandError("Multiple guilds with the specified name found.")
+        guild = list(bot.client.guilds)[0]
         # Check if the guild has a PlayMode
         playmode = bot.music_data.get(guild)
         if not playmode:

@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#regular-expressions">Regular expressions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#raising-errors">Raising errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#delete-the-invoking-message">Delete the invoking message</a></li>
@@ -256,7 +257,7 @@ ones.</p>
 <p>You can consider arguments as if they were separated by spaces.</p>
 <p>You can then access command arguments directly by number as if the args object was a list of <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
 <p>If you request an argument with a certain number, but the argument does not exist, an
-<a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> is raised, making the arguments accessed in this way <strong>required</strong>.</p>
+<code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code> is raised, making the arguments accessed in this way <strong>required</strong>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="c1"># &quot;carbonara&quot;</span>
 
@@ -295,7 +296,7 @@ will return <code class="xref py py-const docutils literal notranslate"><span cl
 <span class="c1"># &quot;carbonara al-dente&quot;</span>
 </pre></div>
 </div>
-<p>You can specify a minimum number of arguments too, so that an <a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> will be
+<p>You can specify a minimum number of arguments too, so that an <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> will be
 raised if not enough arguments are present:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">(</span><span class="n">require_at_least</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="c1"># InvalidInputError() is raised</span>
@@ -306,7 +307,7 @@ raised if not enough arguments are present:</p>
 <h3>Regular expressions<a class="headerlink" href="#regular-expressions" title="Permalink to this headline">¶</a></h3>
 <p>For more complex commands, you may want to get arguments through <a class="reference external" href="https://regexr.com/">regular expressions</a>.</p>
 <p>You can then use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.match" title="royalnet.commands.CommandArgs.match"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.match()</span></code></a> method, which tries to match a pattern to the command argument string,
-which returns a tuple of the matched groups and raises an <a class="reference internal" href="apireference.html#royalnet.error.InvalidInputError" title="royalnet.error.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">royalnet.error.InvalidInputError</span></code></a> if there is no match.</p>
+which returns a tuple of the matched groups and raises an <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> if there is no match.</p>
 <p>To match a pattern, <a class="reference external" href="https://docs.python.org/3.7/library/re.html#re.match" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a> is used, meaning that Python will try to match only at the beginning of the string.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(carb\w+)&quot;</span><span class="p">)</span>
 <span class="c1"># (&quot;carbonara&quot;,)</span>
@@ -321,6 +322,25 @@ which returns a tuple of the matched groups and raises an <a class="reference in
 <span class="c1"># (&quot;carbonara&quot;, &quot;al-dente&quot;)</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="section" id="raising-errors">
+<h2>Raising errors<a class="headerlink" href="#raising-errors" title="Permalink to this headline">¶</a></h2>
+<p>If you want to display an error message to the user, you can raise a <a class="reference internal" href="apireference.html#royalnet.commands.CommandError" title="royalnet.commands.CommandError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code></a> using the error message as argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">kitchen</span><span class="o">.</span><span class="n">is_open</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="n">CommandError</span><span class="p">(</span><span class="s2">&quot;The kitchen is closed. Come back later!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also manually raise <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> to redisplay the command syntax, along with your error message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_pasta</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">InvalidInputError</span><span class="p">(</span><span class="s2">&quot;The specified pasta type is invalid.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you need a Royalnet feature that’s not available on the current interface, you can raise an
+<a class="reference internal" href="apireference.html#royalnet.commands.UnsupportedError" title="royalnet.commands.UnsupportedError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedError</span></code></a> with a brief description of what’s missing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;telegram&quot;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">UnsupportedError</span><span class="p">(</span><span class="s2">&quot;This command can only be run on Telegram interfaces.&quot;</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="running-code-at-the-initialization-of-the-bot">

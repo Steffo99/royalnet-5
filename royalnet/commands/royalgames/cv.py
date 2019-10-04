@@ -7,7 +7,7 @@ from ..commanddata import CommandData
 from ...network import Request, ResponseSuccess
 from ...utils import NetworkHandler, andformat
 from ...bots import DiscordBot
-from ...error import *
+from ..commanderrors import CommandError
 
 
 class CvNH(NetworkHandler):
@@ -17,13 +17,14 @@ class CvNH(NetworkHandler):
     async def discord(cls, bot: "DiscordBot", data: dict):
         # Find the matching guild
         if data["guild_name"]:
-            guild: discord.Guild = bot.client.find_guild_by_name(data["guild_name"])
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
         else:
-            if len(bot.client.guilds) == 0:
-                raise NoneFoundError("No guilds found")
-            if len(bot.client.guilds) > 1:
-                raise TooManyFoundError("Multiple guilds found")
-            guild = list(bot.client.guilds)[0]
+            guilds = bot.client.guilds
+        if len(guilds) == 0:
+            raise CommandError("No guilds with the specified name found.")
+        if len(guilds) > 1:
+            raise CommandError("Multiple guilds with the specified name found.")
+        guild = list(bot.client.guilds)[0]
         # Edit the message, sorted by channel
         discord_members = list(guild.members)
         channels = {0: None}
@@ -119,7 +120,7 @@ class CvCommand(Command):
 
     description: str = "Elenca le persone attualmente connesse alla chat vocale."
 
-    syntax: str = "[guildname] "
+    syntax: str = "[guildname] ['all']"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)

@@ -3,7 +3,7 @@ import discord
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
-from ...error import *
+from ..commanderrors import CommandError, UnsupportedError
 
 
 class VideochannelCommand(Command):
@@ -30,18 +30,15 @@ class VideochannelCommand(Command):
                         if channel.name == channel_name:
                             matching_channels.append(channel)
                 if len(matching_channels) == 0:
-                    await data.reply("⚠️ Non esiste alcun canale vocale con il nome specificato.")
-                    return
+                    raise CommandError("Non esiste alcun canale vocale con il nome specificato.")
                 elif len(matching_channels) > 1:
-                    await data.reply("⚠️ Esiste più di un canale vocale con il nome specificato.")
-                    return
+                    raise CommandError("Esiste più di un canale vocale con il nome specificato.")
                 channel = matching_channels[0]
             else:
                 author: discord.Member = message.author
                 voice: typing.Optional[discord.VoiceState] = author.voice
                 if voice is None:
-                    await data.reply("⚠️ Non sei connesso a nessun canale vocale!")
-                    return
+                    raise CommandError("Non sei connesso a nessun canale vocale.")
                 channel = voice.channel
                 if author.is_on_mobile():
                     await data.reply(f"📹 Per entrare in modalità video, clicca qui: <https://discordapp.com/channels/{channel.guild.id}/{channel.id}>\n[b]Attenzione: la modalità video non funziona su Discord per Android e iOS![/b]")

@@ -137,7 +137,7 @@ If you want the full argument string, you can use the :py:meth:`CommandArgs.join
     args.joined()
     # "carbonara al-dente"
 
-You can specify a minimum number of arguments too, so that an :py:exc:`royalnet.error.InvalidInputError` will be
+You can specify a minimum number of arguments too, so that an :py:exc:`InvalidInputError` will be
 raised if not enough arguments are present: ::
 
     args.joined(require_at_least=3)
@@ -149,7 +149,7 @@ Regular expressions
 For more complex commands, you may want to get arguments through `regular expressions <https://regexr.com/>`_.
 
 You can then use the :py:meth:`CommandArgs.match` method, which tries to match a pattern to the command argument string,
-which returns a tuple of the matched groups and raises an :py:exc:`royalnet.error.InvalidInputError` if there is no match.
+which returns a tuple of the matched groups and raises an :py:exc:`InvalidInputError` if there is no match.
 
 To match a pattern, :py:func:`re.match` is used, meaning that Python will try to match only at the beginning of the string. ::
 
@@ -164,6 +164,25 @@ To match a pattern, :py:func:`re.match` is used, meaning that Python will try to
 
     args.match(r"\s*(carb\w+)\s*(al-\w+)")
     # ("carbonara", "al-dente")
+
+Raising errors
+---------------------------------------------
+
+If you want to display an error message to the user, you can raise a :py:exc:`CommandError` using the error message as argument: ::
+
+    if not kitchen.is_open():
+        raise CommandError("The kitchen is closed. Come back later!")
+
+You can also manually raise :py:exc:`InvalidInputError` to redisplay the command syntax, along with your error message: ::
+
+    if args[0] not in allowed_pasta:
+        raise InvalidInputError("The specified pasta type is invalid.")
+
+If you need a Royalnet feature that's not available on the current interface, you can raise an
+:py:exc:`UnsupportedError` with a brief description of what's missing: ::
+
+    if interface.name != "telegram":
+        raise UnsupportedError("This command can only be run on Telegram interfaces.")
 
 Running code at the initialization of the bot
 ---------------------------------------------

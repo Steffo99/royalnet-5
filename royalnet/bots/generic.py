@@ -103,18 +103,15 @@ class GenericBot:
             log.debug(f"Using {network_handler} as handler for {request.handler}")
             response: Response = await getattr(network_handler, self.interface_name)(self, request.data)
             return response.to_dict()
-        except Exception:
-            if __debug__:
-                raise
-                exit(1)
-            _, exc, _ = sys.exc_info()
-            log.debug(f"Exception {exc} in {network_handler}")
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            log.debug(f"Exception {e} in {network_handler}")
             return ResponseError("exception_in_handler",
                                  f"An exception was raised in {network_handler} for {request.handler}. Check "
                                  f"extra_info for details.",
                                  extra_info={
-                                     "type": exc.__class__.__name__,
-                                     "str": str(exc)
+                                     "type": e.__class__.__name__,
+                                     "str": str(e)
                                  }).to_dict()
 
     def _init_database(self):
@@ -127,8 +124,8 @@ class GenericBot:
                 required_tables = required_tables.union(command.require_alchemy_tables)
             log.debug(f"Found {len(required_tables)} required tables")
             self.alchemy = Alchemy(self.uninitialized_database_config.database_uri, required_tables)
-            self.master_table = self.alchemy.__getattribute__(self.uninitialized_database_config.master_table.__name__)
-            self.identity_table = self.alchemy.__getattribute__(self.uninitialized_database_config.identity_table.__name__)
+            self.master_table = self.alchemy.__getattribute__(self.uninitialized_database_config.master_table.__qualname__)
+            self.identity_table = self.alchemy.__getattribute__(self.uninitialized_database_config.identity_table.__qualname__)
             self.identity_column = self.identity_table.__getattribute__(self.identity_table,
                                                                         self.uninitialized_database_config.identity_column_name)
             self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)

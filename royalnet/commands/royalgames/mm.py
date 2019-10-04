@@ -4,11 +4,12 @@ import telegram
 import asyncio
 import re
 import logging
+import typing
 from ..command import Command
 from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...database.tables import MMEvent, MMDecision, MMResponse
-from ...error import *
+from ..commanderrors import InvalidInputError, UnsupportedError
 from ...utils import asyncify, telegram_escape, sleep_until
 
 log = logging.getLogger(__name__)

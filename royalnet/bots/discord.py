@@ -52,7 +52,7 @@ class DiscordBot(GenericBot):
                 query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
-                    raise UnregisteredError("Author is not registered")
+                    raise CommandError("You must be registered to use this command.")
                 return result
 
             async def delete_invoking(data, error_if_unavailable=False):
@@ -115,52 +115,42 @@ class DiscordBot(GenericBot):
                 # Call the command
                 log.debug(f"Calling command '{command.name}'")
                 with message.channel.typing():
+                    # Run the command
                     try:
-                        await command.run(CommandArgs(parameters), data=data)
+                        await command.run(CommandArgs(parameters), data)
                     except InvalidInputError as e:
-                        await data.reply(f":warning: {' '.join(e.args)}\n"
-                                         f"Syntax: [c]!{command.name} {command.syntax}[/c]")
+                        await data.reply(f"⚠️ {e.message}\n"
+                                         f"Syntax: [c]/{command.name} {command.syntax}[/c]")
+                    except UnsupportedError as e:
+                        await data.reply(f"⚠️ {e.message}")
+                    except CommandError as e:
+                        await data.reply(f"⚠️ {e.message}")
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
-                        error_message = f"🦀 {e.__class__.__name__} 🦀\n"
+                        error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
                         error_message += '\n'.join(e.args)
-                        log.error(f"Error in {command.name}: {error_message}")
-                        await data.reply(f"{error_message}")
-                        if __debug__:
-                            raise
+                        await data.reply(error_message)
 
-            async def on_ready(cli):
+            async def on_ready(cli) -> None:
                 log.debug("Connection successful, client is ready")
                 await cli.change_presence(status=discord.Status.online)
 
-            def find_guild_by_name(cli, name: str) -> discord.Guild:
-                """Find the :py:class:`discord.Guild` with the specified name. Case-insensitive.
-
-                Raises:
-                     :py:exc:`NoneFoundError` if no channels are found.
-                     :py:exc:`TooManyFoundError` if more than one is found."""
+            def find_guild_by_name(cli, name: str) -> typing.List[discord.Guild]:
+                """Find the :py:class:`discord.Guild` with the specified name (case insensitive)."""
                 all_guilds: typing.List[discord.Guild] = cli.guilds
                 matching_channels: typing.List[discord.Guild] = []
                 for guild in all_guilds:
                     if guild.name.lower() == name.lower():
                         matching_channels.append(guild)
-                if len(matching_channels) == 0:
-                    raise NoneFoundError("No channels were found")
-                elif len(matching_channels) > 1:
-                    raise TooManyFoundError("Too many channels were found")
-                return matching_channels[0]
+                return matching_channels
 
             def find_channel_by_name(cli,
                                      name: str,
-                                     guild: typing.Optional[discord.Guild] = None) -> discord.abc.GuildChannel:
+                                     guild: typing.Optional[discord.Guild] = None) -> typing.List[discord.abc.GuildChannel]:
                 """Find the :py:class:`TextChannel`, :py:class:`VoiceChannel` or :py:class:`CategoryChannel` with the
-                specified name.
+                specified name (case insensitive).
 
-                Case-insensitive.
-
-                Guild is optional, but the method will raise a :py:exc:`TooManyFoundError` if none is specified and
-                there is more than one channel with the same name. Will also raise a :py:exc:`NoneFoundError` if no
-                channels are found. """
+                You can specify a guild to only find channels in that specific guild."""
                 if guild is not None:
                     all_channels = guild.channels
                 else:
@@ -173,21 +163,14 @@ class DiscordBot(GenericBot):
                         continue
                     if channel.name.lower() == name.lower():
                         matching_channels.append(channel)
-                if len(matching_channels) == 0:
-                    raise NoneFoundError("No channels were found")
-                elif len(matching_channels) > 1:
-                    raise TooManyFoundError("Too many channels were found")
-                return matching_channels[0]
+                return matching_channels
 
-            def find_voice_client_by_guild(cli, guild: discord.Guild):
-                """Find the :py:class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`.
-
-                Raises:
-                     :py:exc:`NoneFoundError` if the :py:class:`discord.Guild` currently has no :py:class:`discord.VoiceClient`."""
+            def find_voice_client_by_guild(cli, guild: discord.Guild) -> typing.Optional[discord.VoiceClient]:
+                """Find the :py:class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`."""
                 for voice_client in cli.voice_clients:
                     if voice_client.guild == guild:
                         return voice_client
-                raise NoneFoundError("No voice clients found")
+                return None
 
         return DiscordClient
 

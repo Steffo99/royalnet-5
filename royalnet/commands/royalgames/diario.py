@@ -8,7 +8,7 @@ from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...database.tables import User, Diario, Alias
 from ...utils import asyncify
-from ...error import *
+from ..commanderrors import CommandError, InvalidInputError
 
 
 async def to_imgur(imgur_api_key, photosizes: typing.List[telegram.PhotoSize], caption="") -> str:
@@ -27,7 +27,7 @@ async def to_imgur(imgur_api_key, photosizes: typing.List[telegram.PhotoSize], c
     }) as request:
         response = await request.json()
         if not response["success"]:
-            raise ExternalError("imgur returned an error in the image upload.")
+            raise CommandError("Imgur returned an error in the image upload.")
         return response["data"]["link"]
 
 

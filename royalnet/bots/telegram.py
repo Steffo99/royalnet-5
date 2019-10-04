@@ -166,15 +166,17 @@ class TelegramBot(GenericBot):
         try:
             await command.run(CommandArgs(parameters), data)
         except InvalidInputError as e:
-            await data.reply(f"⚠️ {' '.join(e.args)}\n"
+            await data.reply(f"⚠️ {e.message}\n"
                              f"Syntax: [c]/{command.name} {command.syntax}[/c]")
+        except UnsupportedError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except CommandError as e:
+            await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             sentry_sdk.capture_exception(e)
             error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
-            if __debug__:
-                raise
 
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query

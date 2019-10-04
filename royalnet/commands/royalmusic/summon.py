@@ -6,7 +6,7 @@ from ..commandargs import CommandArgs
 from ..commanddata import CommandData
 from ...utils import NetworkHandler
 from ...network import Request, ResponseSuccess
-from ...error import NoneFoundError
+from ..commanderrors import CommandError
 if typing.TYPE_CHECKING:
     from ...bots import DiscordBot
 
@@ -18,9 +18,10 @@ class SummonNH(NetworkHandler):
     async def discord(cls, bot: "DiscordBot", data: dict):
         """Handle a summon Royalnet request.
          That is, join a voice channel, or move to a different one if that is not possible."""
-        channel = bot.client.find_channel_by_name(data["channel_name"])
+        channels = bot.client.find_channel_by_name(data["channel_name"])
+        channel = channels[0]
         if not isinstance(channel, discord.VoiceChannel):
-            raise NoneFoundError("Channel is not a voice channel")
+            raise CommandError("Channel is not a voice channel")
         bot.loop.create_task(bot.client.vc_connect_or_move(channel))
         return ResponseSuccess()
 

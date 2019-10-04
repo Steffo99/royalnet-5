@@ -14,8 +14,8 @@ if typing.TYPE_CHECKING:
     from ...bots import DiscordBot
 
 
-class PlayNH(NetworkHandler):
-    message_type = "music_play"
+class YoutubeNH(NetworkHandler):
+    message_type = "music_youtube"
 
     @classmethod
     async def discord(cls, bot: "DiscordBot", data: dict):
@@ -32,15 +32,14 @@ class PlayNH(NetworkHandler):
         guild = list(bot.client.guilds)[0]
         # Ensure the guild has a PlayMode before adding the file to it
         if not bot.music_data.get(guild):
-            # TODO: change Exception
-            raise Exception("No music_data for this guild")
+            raise KeyError("No music data available for this guild.")
         # Create url
         ytdl_args = {
             "format": "bestaudio",
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        dfiles: typing. List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
+        dfiles: typing. List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, f'ytsearch:{data["search"]}', **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
@@ -52,24 +51,27 @@ class PlayNH(NetworkHandler):
         return ResponseSuccess(response)
 
 
-class PlayCommand(Command):
-    name: str = "play"
+class YoutubeCommand(Command):
+    name: str = "youtube"
 
-    description: str = "Aggiunge un url alla coda della chat vocale."
+    aliases = ["yt"]
+
+    description: str = "Cerca un video su YouTube e lo aggiunge alla coda della chat vocale."
 
     syntax = "[ [guild] ] (url)"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(PlayNH.message_type, PlayNH)
+        interface.register_net_handler(YoutubeNH.message_type, YoutubeNH)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        guild_name, url = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise CommandError("PlayCommand only accepts URLs.\n"
-                               "If you want to search a song on YouTube or Soundcloud, please use YoutubeCommand"
-                               " or SoundcloudCommand!")
-        response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
+        guild_name, search = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
+        if search.startswith("http://") or search.startswith("https://"):
+            raise CommandError("YoutubeCommand only accepts search queries, and you've sent an URL.\n"
+                               "If you want to add a song from an url, please use PlayCommand!")
+        response = await self.interface.net_request(Request("music_youtube", {"search": search,
+                                                                              "guild_name": guild_name}),
+                                                    "discord")
         if len(response["videos"]) == 0:
             await data.reply(f"⚠️ Nessun video trovato.")
         for video in response["videos"]:
