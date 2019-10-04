@@ -38,10 +38,7 @@ class PlayNH(NetworkHandler):
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        if data["url"].startswith("http://") or data["url"].startswith("https://"):
-            dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
-        else:
-            dfiles = await asyncify(YtdlDiscord.create_from_url, f"ytsearch:{data['url']}", **ytdl_args)
+        dfiles: typing. List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
@@ -66,6 +63,8 @@ class PlayCommand(Command):
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, url = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise
         response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
         if len(response["videos"]) == 0:
             await data.reply(f"⚠️ Nessun video trovato.")

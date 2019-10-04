@@ -1,6 +1,6 @@
 import re
 import typing
-from royalnet.error import InvalidInputError
+from .commanderrors import InvalidInputError
 
 
 class CommandArgs(list):
