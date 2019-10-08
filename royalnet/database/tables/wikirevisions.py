@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
 from .wikipages import WikiPage
 # noinspection PyUnresolvedReferences
-from .royals import User
+from .users import User
 
 
 class WikiRevision:

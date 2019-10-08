@@ -5,7 +5,7 @@ from sqlalchemy import Column, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 # noinspection PyUnresolvedReferences
-from .royals import User
+from .users import User
 # noinspection PyUnresolvedReferences
 from .keygroups import Keygroup
 

@@ -25,7 +25,7 @@ def login_done():
     fd = f.request.form
     if "username" not in fd:
         return error(400, "Nessun username inserito.")
-    royal_user = alchemy_session.query(alchemy.Royal).filter_by(username=fd["username"]).one_or_none()
+    royal_user = alchemy_session.query(alchemy.User).filter_by(username=fd["username"]).one_or_none()
     if royal_user is None:
         return error(404, "L'username inserito non corrisponde a nessun account registrato.")
     if "password" not in fd:
