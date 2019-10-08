@@ -23,7 +23,7 @@ def login_index():
             return error(400, "Non è stato inserito nessun username.")
         if "password" not in fd:
             return error(400, "Non è stata inserita nessuna password.")
-        royal = alchemy_session.query(alchemy.Royal).filter_by(username=fd["username"]).one_or_none()
+        royal = alchemy_session.query(alchemy.User).filter_by(username=fd["username"]).one_or_none()
         if royal is not None:
             return error(403, "Esiste già un utente con quell'username.")
         alias = alchemy_session.query(alchemy.Alias).filter_by(alias=fd["username"]).one_or_none()

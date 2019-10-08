@@ -11,6 +11,8 @@ from ...utils import parse_5etools_entry
 class DnditemCommand(Command):
     name: str = "dnditem"
 
+    aliases = ["item"]
+
     description: str = "Ottieni informazioni su un oggetto di D&D5e."
 
     syntax = "(nomeoggetto)"

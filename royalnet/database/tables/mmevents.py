@@ -9,7 +9,7 @@ from sqlalchemy import Column, \
                        BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
-from .royals import User
+from .users import User
 if typing.TYPE_CHECKING:
     from .mmdecisions import MMDecision
     from .mmresponse import MMResponse

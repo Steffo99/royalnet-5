@@ -6,7 +6,9 @@ from ..commanddata import CommandData
 
 
 class RageCommand(Command):
-    name: str = "ship"
+    name: str = "rage"
+
+    aliases = ["balurage", "madden"]
 
     description: str = "Arrabbiati per qualcosa, come una software house californiana."
 

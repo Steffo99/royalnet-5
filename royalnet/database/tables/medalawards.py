@@ -4,7 +4,7 @@ from sqlalchemy import Column, \
                        ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
-from .royals import User
+from .users import User
 from .medals import Medal
 
 

@@ -29,6 +29,8 @@ class SummonNH(NetworkHandler):
 class SummonCommand(Command):
     name: str = "summon"
 
+    aliases = ["cv"]
+
     description: str = "Evoca il bot in un canale vocale."
 
     syntax: str = "[nomecanale]"

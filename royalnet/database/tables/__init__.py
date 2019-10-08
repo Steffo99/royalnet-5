@@ -1,4 +1,4 @@
-from .royals import User
+from .users import User
 from .telegram import Telegram
 from .diario import Diario
 from .aliases import Alias

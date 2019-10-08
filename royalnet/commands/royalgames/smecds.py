@@ -9,6 +9,8 @@ from ...utils import safeformat
 class SmecdsCommand(Command):
     name: str = "smecds"
 
+    aliases = ["secondomeecolpadellostagista"]
+
     description: str = "Secondo me, è colpa dello stagista..."
 
     syntax = ""

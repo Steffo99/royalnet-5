@@ -16,6 +16,8 @@ from ...database.tables import TriviaScore
 class TriviaCommand(Command):
     name: str = "trivia"
 
+    aliases = ["t"]
+
     description: str = "Manda una domanda dell'OpenTDB in chat."
 
     require_alchemy_tables = {TriviaScore}

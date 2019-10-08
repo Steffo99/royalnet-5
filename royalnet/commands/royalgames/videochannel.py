@@ -9,6 +9,8 @@ from ..commanderrors import CommandError, UnsupportedError
 class VideochannelCommand(Command):
     name: str = "videochannel"
 
+    aliases = ["golive", "live", "video"]
+
     description: str = "Converti il canale vocale in un canale video."
 
     syntax = "[channelname]"

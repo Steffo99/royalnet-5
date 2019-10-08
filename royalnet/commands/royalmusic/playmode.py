@@ -47,6 +47,8 @@ class PlaymodeNH(NetworkHandler):
 class PlaymodeCommand(Command):
     name: str = "playmode"
 
+    aliases = ["pm", "mode"]
+
     description: str = "Cambia modalità di riproduzione per la chat vocale."
 
     syntax = "[ [guild] ] (mode)"

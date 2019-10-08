@@ -11,6 +11,8 @@ from ...audio import YtdlMp3
 class Mp3Command(Command):
     name: str = "mp3"
 
+    aliases = ["dlmusic"]
+
     description: str = "Scarica un video con youtube-dl e invialo in chat."
 
     syntax = "(ytdlstring)"

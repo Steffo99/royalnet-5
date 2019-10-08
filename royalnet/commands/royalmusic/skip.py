@@ -40,6 +40,8 @@ class SkipNH(NetworkHandler):
 class SkipCommand(Command):
     name: str = "skip"
 
+    aliases = ["s", "next", "n"]
+
     description: str = "Salta la canzone attualmente in riproduzione in chat vocale."
 
     syntax: str = "[ [guild] ]"
