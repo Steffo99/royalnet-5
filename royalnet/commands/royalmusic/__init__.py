@@ -9,6 +9,9 @@ from .playmode import PlaymodeCommand
 from .queue import QueueCommand
 from .skip import SkipCommand
 from .summon import SummonCommand
+from .youtube import YoutubeCommand
+from .soundcloud import SoundcloudCommand
+from .zawarudo import ZawarudoCommand
 
 
 commands = [
@@ -18,6 +21,9 @@ commands = [
     QueueCommand,
     SkipCommand,
     SummonCommand,
+    YoutubeCommand,
+    SoundcloudCommand,
+    ZawarudoCommand
 ]
 
 

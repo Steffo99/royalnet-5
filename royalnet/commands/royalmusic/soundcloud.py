@@ -68,7 +68,7 @@ class SoundcloudCommand(Command):
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, search = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
         if search.startswith("http://") or search.startswith("https://"):
-            raise CommandError("YoutubeCommand only accepts search queries, and you've sent an URL.\n"
+            raise CommandError("SoundcloudCommand only accepts search queries, and you've sent an URL.\n"
                                "If you want to add a song from an url, please use PlayCommand!")
         response = await self.interface.net_request(Request("music_soundcloud", {"search": search,
                                                                               "guild_name": guild_name}),

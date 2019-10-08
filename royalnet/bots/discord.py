@@ -69,8 +69,9 @@ class DiscordBot(GenericBot):
             async def vc_connect_or_move(cli, channel: discord.VoiceChannel):
                 # Connect to voice chat
                 try:
-                    await channel.connect()
                     log.debug(f"Connecting to Voice in {channel}")
+                    await channel.connect()
+                    log.debug(f"Connected to Voice in {channel}")
                 except discord.errors.ClientException:
                     # Move to the selected channel, instead of connecting
                     # noinspection PyUnusedLocal
@@ -119,12 +120,12 @@ class DiscordBot(GenericBot):
                     try:
                         await command.run(CommandArgs(parameters), data)
                     except InvalidInputError as e:
-                        await data.reply(f"⚠️ {e.message}\n"
+                        await data.reply(f":warning: {e.message}\n"
                                          f"Syntax: [c]/{command.name} {command.syntax}[/c]")
                     except UnsupportedError as e:
-                        await data.reply(f"⚠️ {e.message}")
+                        await data.reply(f":warning: {e.message}")
                     except CommandError as e:
-                        await data.reply(f"⚠️ {e.message}")
+                        await data.reply(f":warning: {e.message}")
                     except Exception as e:
                         sentry_sdk.capture_exception(e)
                         error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"

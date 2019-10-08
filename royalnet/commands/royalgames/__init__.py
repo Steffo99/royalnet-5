@@ -7,7 +7,6 @@ from .ciaoruozi import CiaoruoziCommand
 from .color import ColorCommand
 from .cv import CvCommand
 from .diario import DiarioCommand
-from .mp3 import Mp3Command
 from .ping import PingCommand
 from .rage import RageCommand
 from .reminder import ReminderCommand
@@ -18,7 +17,6 @@ from .dnditem import DnditemCommand
 from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
 from .mm import MmCommand
-from .zawarudo import ZawarudoCommand
 
 
 commands = [
@@ -26,7 +24,6 @@ commands = [
     ColorCommand,
     CvCommand,
     DiarioCommand,
-    Mp3Command,
     PingCommand,
     RageCommand,
     ReminderCommand,
@@ -37,7 +34,6 @@ commands = [
     DndspellCommand,
     TriviaCommand,
     MmCommand,
-    ZawarudoCommand
 ]
 
 
