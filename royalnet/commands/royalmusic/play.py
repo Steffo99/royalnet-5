@@ -40,7 +40,7 @@ class PlayNH(NetworkHandler):
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        dfiles: typing. List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
+        dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
@@ -54,6 +54,8 @@ class PlayNH(NetworkHandler):
 
 class PlayCommand(Command):
     name: str = "play"
+
+    aliases = ["p"]
 
     description: str = "Aggiunge un url alla coda della chat vocale."
 
