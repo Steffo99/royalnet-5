@@ -59,4 +59,14 @@ Now that all tokens are configured, you're ready to launch the bot!
 Running the bots
 ------------------------------------
 
-TODO
+You can run the main ``royalnet`` process by running: ::
+
+    python3.7 -m royalnet
+
+To see all available options, you can run: ::
+
+    python3.7 -m royalnet --help
+
+.. note:: All royalnet options should be specified **after** the word ``royalnet``, or else they will be passed to
+          the Python interpreter.
+
