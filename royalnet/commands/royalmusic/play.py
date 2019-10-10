@@ -73,7 +73,7 @@ class PlayCommand(Command):
                                " or SoundcloudCommand!")
         response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
         if len(response["videos"]) == 0:
-            await data.reply(f"⚠️ Nessun video trovato.")
+            raise CommandError(f"Nessun file trovato.")
         for video in response["videos"]:
             if self.interface.name == "discord":
                 # This is one of the unsafest things ever

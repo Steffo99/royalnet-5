@@ -73,7 +73,7 @@ class YoutubeCommand(Command):
                                                                               "guild_name": guild_name}),
                                                     "discord")
         if len(response["videos"]) == 0:
-            await data.reply(f"⚠️ Nessun video trovato.")
+            raise CommandError(f"Il bot non è riuscito a scaricare il video richiesto a causa di un blocco imposto da YouTube.")
         for video in response["videos"]:
             if self.interface.name == "discord":
                 # This is one of the unsafest things ever
