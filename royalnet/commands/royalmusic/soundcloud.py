@@ -10,6 +10,7 @@ from ...utils import NetworkHandler, asyncify
 from ...network import Request, ResponseSuccess
 from ..commanderrors import CommandError
 from ...audio import YtdlDiscord
+
 if typing.TYPE_CHECKING:
     from ...bots import DiscordBot
 
@@ -39,8 +40,8 @@ class SoundcloudNH(NetworkHandler):
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        dfiles: typing. List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, f'scsearch:{data["search"]}',
-                                                           **ytdl_args)
+        dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, f'scsearch:{data["search"]}',
+                                                          **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
@@ -71,10 +72,10 @@ class SoundcloudCommand(Command):
             raise CommandError("SoundcloudCommand only accepts search queries, and you've sent an URL.\n"
                                "If you want to add a song from an url, please use PlayCommand!")
         response = await self.interface.net_request(Request("music_soundcloud", {"search": search,
-                                                                              "guild_name": guild_name}),
+                                                                                 "guild_name": guild_name}),
                                                     "discord")
         if len(response["videos"]) == 0:
-            raise CommandError(f"Nessun audio trovato.")
+            raise CommandError(f"Il video non può essere scaricato a causa di un blocco imposto da Soundcloud.")
         for video in response["videos"]:
             if self.interface.name == "discord":
                 # This is one of the unsafest things ever

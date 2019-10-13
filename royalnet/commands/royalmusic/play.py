@@ -71,7 +71,8 @@ class PlayCommand(Command):
             raise CommandError("PlayCommand only accepts URLs.\n"
                                "If you want to search a song on YouTube or Soundcloud, please use YoutubeCommand"
                                " or SoundcloudCommand!")
-        response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}), "discord")
+        response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}),
+                                                    "discord")
         if len(response["videos"]) == 0:
             raise CommandError(f"Nessun file trovato.")
         for video in response["videos"]:
