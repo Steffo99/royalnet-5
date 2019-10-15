@@ -64,7 +64,7 @@ class GenericBot:
 
             async def net_request(ci, request: rh.Request, destination: str) -> dict:
                 if self.network is None:
-                    raise InvalidConfigError("Royalnet is not enabled on this bot")
+                    raise Exception("Royalnet is not enabled on this bot")
                 response_dict: dict = await self.network.request(request.to_dict(), destination)
                 if "type" not in response_dict:
                     raise RoyalnetResponseError("Response is missing a type")
@@ -117,13 +117,13 @@ class GenericBot:
         except Exception as e:
             sentry_sdk.capture_exception(e)
             log.debug(f"Exception {e} in {network_handler}")
-            return rh.ResponseError("exception_in_handler",
-                                    f"An exception was raised in {network_handler} for {request.handler}. Check "
-                                    f"extra_info for details.",
-                                    extra_info={
-                                        "type": e.__class__.__name__,
-                                        "str": str(e)
-                                    }).to_dict()
+            return rh.ResponseFailure("exception_in_handler",
+                                      f"An exception was raised in {network_handler} for {request.handler}. Check "
+                                      f"extra_info for details.",
+                                      extra_info={
+                                          "type": e.__class__.__name__,
+                                          "str": str(e)
+                                      }).to_dict()
 
     def _init_database(self):
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then,

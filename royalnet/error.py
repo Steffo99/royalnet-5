@@ -1,14 +1,13 @@
 import typing
-if typing.TYPE_CHECKING:
-    from .network import ResponseError
+import royalherald as rh
 
 
 class RoyalnetRequestError(Exception):
     """An error was raised while handling the Royalnet request.
 
-    This exception contains the :py:class:`royalnet.network.ResponseError` that was returned by the other Link."""
-    def __init__(self, error: "ResponseError"):
-        self.error: "ResponseError" = error
+    This exception contains the :py:class:`royalherald.ResponseFailure` that was returned by the other Link."""
+    def __init__(self, error: rh.ResponseFailure):
+        self.error: rh.ResponseFailure = error
 
     @property
     def args(self):
@@ -16,4 +15,4 @@ class RoyalnetRequestError(Exception):
 
 
 class RoyalnetResponseError(Exception):
-    """The :py:class:`royalnet.network.Response` that was received is invalid."""
+    """The :py:class:`royalherald.Response` that was received is invalid."""
