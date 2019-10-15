@@ -10,9 +10,9 @@ class YtdlFile:
     """Information about a youtube-dl downloaded file."""
 
     _default_ytdl_args = {
-        "quiet": True,  # Do not print messages to stdout.
+        "quiet": not __debug__,  # Do not print messages to stdout.
         "noplaylist": True,  # Download single video instead of a playlist if in doubt.
-        "no_warnings": True,  # Do not print out anything for warnings.
+        "no_warnings": not __debug__,  # Do not print out anything for warnings.
         "outtmpl": "%(epoch)s-%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
         "ignoreerrors": True  # Ignore unavailable videos
     }

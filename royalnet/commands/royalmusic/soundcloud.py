@@ -36,7 +36,7 @@ class SoundcloudNH(NetworkHandler):
             raise KeyError("No music data available for this guild.")
         # Create url
         ytdl_args = {
-            "format": "bestaudio",
+            "format": "bestaudio/best",
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading

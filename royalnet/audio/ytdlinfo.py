@@ -92,7 +92,7 @@ class YtdlInfo:
         if first_info is None:
             return []
         # If it is a playlist, create multiple videos!
-        if "entries" in first_info:
+        if "entries" in first_info and first_info["entries"][0] is not None:
             second_info_list = []
             for second_info in first_info["entries"]:
                 if second_info is None:
@@ -107,11 +107,12 @@ class YtdlInfo:
             "youtube": 0xCC0000,
             "soundcloud": 0xFF5400,
             "Clyp": 0x3DBEB3,
-            "Bandcamp": 0x1DA0C3
+            "Bandcamp": 0x1DA0C3,
+            "Peertube": 0x0A193C,
         }
         embed = discord.Embed(title=self.title,
                               colour=discord.Colour(colors.get(self.extractor, 0x4F545C)),
-                              url=self.webpage_url if self.webpage_url is not None else discord.embeds.EmptyEmbed)
+                              url=self.webpage_url if self.webpage_url is not None and self.webpage_url.startswith("http") else discord.embeds.EmptyEmbed)
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         if self.uploader:

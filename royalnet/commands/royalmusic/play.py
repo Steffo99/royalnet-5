@@ -36,7 +36,7 @@ class PlayNH(NetworkHandler):
             raise Exception("No music_data for this guild")
         # Create url
         ytdl_args = {
-            "format": "bestaudio",
+            "format": "bestaudio/best",
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading

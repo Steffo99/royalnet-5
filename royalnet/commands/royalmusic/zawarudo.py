@@ -19,7 +19,7 @@ class ZawarudoNH(NetworkHandler):
     message_type = "music_zawarudo"
 
     ytdl_args = {
-        "format": "bestaudio",
+        "format": "bestaudio/best",
         "outtmpl": f"./downloads/%(title)s.%(ext)s"
     }
 
