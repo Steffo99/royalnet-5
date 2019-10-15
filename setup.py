@@ -16,7 +16,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=["python-telegram-bot>=11.1.0",
                       "discord.py>=1.0.1",
-                      "websockets>=6.0",
+                      "royalherald>=5.0b4",
                       "psycopg2-binary>=2.8",
                       "aiohttp>=3.5.4",
                       "sqlalchemy>=1.3.2",

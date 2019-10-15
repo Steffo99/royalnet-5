@@ -1,7 +1,7 @@
 bcrypt>=3.1.7
 discord.py>=1.2.2
 python-telegram-bot>=11.1.0
-websockets>=6.0
+royalherald>=5.0b4
 pytest>=4.3.1
 psycopg2-binary>=2.8
 aiohttp>=3.5.4
