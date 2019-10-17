@@ -32,7 +32,8 @@ setuptools.setup(
                       "sortedcontainers>=2.1.0",
                       "sentry-sdk>=0.11.1",
                       "click>=7.0",
-                      "keyring>=19.2.0"],
+                      "keyring>=19.2.0",
+                      "feedparser>=5.2.1"],
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",
