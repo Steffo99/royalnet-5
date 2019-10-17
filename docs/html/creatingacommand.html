@@ -199,7 +199,7 @@ It’s the name your command will be called with: for example, the “spaghetti�
 Try to keep the name as short as possible, while staying specific enough so no other command will have the same name.</p>
 <p>Next, create a new Python file with the <code class="docutils literal notranslate"><span class="pre">name</span></code> you have thought of.
 The previously mentioned “spaghetti” command should have a file called <code class="docutils literal notranslate"><span class="pre">spaghetti.py</span></code>.</p>
-<p>Then, in the first row of the file, import the <a class="reference internal" href="apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> class from royalnet, and create a new class inheriting from it:</p>
+<p>Then, in the first row of the file, import the <code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code> class from royalnet, and create a new class inheriting from it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
 
 <span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
@@ -215,8 +215,8 @@ The previously mentioned “spaghetti” command should have a file called <code
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
 </pre></div>
 </div>
-<p>Now override the <a class="reference internal" href="apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a> method, adding the code you want the bot to run when the command is called.</p>
-<p>To send a message in the chat the command was called in, you can use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> method:</p>
+<p>Now override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code> method, adding the code you want the bot to run when the command is called.</p>
+<p>To send a message in the chat the command was called in, you can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code> method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
 
 <span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
@@ -234,7 +234,7 @@ The previously mentioned “spaghetti” command should have a file called <code
 <h2>Command arguments<a class="headerlink" href="#command-arguments" title="Permalink to this headline">¶</a></h2>
 <p>A command can have some arguments passed by the user: for example, on Telegram an user may type <cite>/spaghetti carbonara al-dente</cite>
 to pass the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <cite>“carbonara al-dente”</cite> to the command code.</p>
-<p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <a class="reference internal" href="apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a>
+<p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code>
 method.</p>
 <p>If you want your command to use arguments, override the <code class="docutils literal notranslate"><span class="pre">syntax</span></code> class attribute with a brief description of the
 syntax of your command, possibly using (round parentheses) for required arguments and [square brackets] for optional
@@ -271,7 +271,7 @@ ones.</p>
 </div>
 <div class="section" id="optional-access">
 <h3>Optional access<a class="headerlink" href="#optional-access" title="Permalink to this headline">¶</a></h3>
-<p>If you don’t want arguments to be required, you can access them through the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.optional" title="royalnet.commands.CommandArgs.optional"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.optional()</span></code></a> method: it
+<p>If you don’t want arguments to be required, you can access them through the <code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.optional()</span></code> method: it
 will return <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code> if the argument wasn’t passed, making it <strong>optional</strong>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="c1"># &quot;carbonara&quot;</span>
@@ -291,12 +291,12 @@ will return <code class="xref py py-const docutils literal notranslate"><span cl
 </div>
 <div class="section" id="full-string">
 <h3>Full string<a class="headerlink" href="#full-string" title="Permalink to this headline">¶</a></h3>
-<p>If you want the full argument string, you can use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.joined" title="royalnet.commands.CommandArgs.joined"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.joined()</span></code></a> method.</p>
+<p>If you want the full argument string, you can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.joined()</span></code> method.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">()</span>
 <span class="c1"># &quot;carbonara al-dente&quot;</span>
 </pre></div>
 </div>
-<p>You can specify a minimum number of arguments too, so that an <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> will be
+<p>You can specify a minimum number of arguments too, so that an <code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code> will be
 raised if not enough arguments are present:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">(</span><span class="n">require_at_least</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="c1"># InvalidInputError() is raised</span>
@@ -306,8 +306,8 @@ raised if not enough arguments are present:</p>
 <div class="section" id="regular-expressions">
 <h3>Regular expressions<a class="headerlink" href="#regular-expressions" title="Permalink to this headline">¶</a></h3>
 <p>For more complex commands, you may want to get arguments through <a class="reference external" href="https://regexr.com/">regular expressions</a>.</p>
-<p>You can then use the <a class="reference internal" href="apireference.html#royalnet.commands.CommandArgs.match" title="royalnet.commands.CommandArgs.match"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.match()</span></code></a> method, which tries to match a pattern to the command argument string,
-which returns a tuple of the matched groups and raises an <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> if there is no match.</p>
+<p>You can then use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.match()</span></code> method, which tries to match a pattern to the command argument string,
+which returns a tuple of the matched groups and raises an <code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code> if there is no match.</p>
 <p>To match a pattern, <a class="reference external" href="https://docs.python.org/3.7/library/re.html#re.match" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a> is used, meaning that Python will try to match only at the beginning of the string.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(carb\w+)&quot;</span><span class="p">)</span>
 <span class="c1"># (&quot;carbonara&quot;,)</span>
@@ -326,18 +326,18 @@ which returns a tuple of the matched groups and raises an <a class="reference in
 </div>
 <div class="section" id="raising-errors">
 <h2>Raising errors<a class="headerlink" href="#raising-errors" title="Permalink to this headline">¶</a></h2>
-<p>If you want to display an error message to the user, you can raise a <a class="reference internal" href="apireference.html#royalnet.commands.CommandError" title="royalnet.commands.CommandError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code></a> using the error message as argument:</p>
+<p>If you want to display an error message to the user, you can raise a <code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code> using the error message as argument:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">kitchen</span><span class="o">.</span><span class="n">is_open</span><span class="p">():</span>
     <span class="k">raise</span> <span class="n">CommandError</span><span class="p">(</span><span class="s2">&quot;The kitchen is closed. Come back later!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>You can also manually raise <a class="reference internal" href="apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> to redisplay the command syntax, along with your error message:</p>
+<p>You can also manually raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code> to redisplay the command syntax, along with your error message:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_pasta</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">InvalidInputError</span><span class="p">(</span><span class="s2">&quot;The specified pasta type is invalid.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If you need a Royalnet feature that’s not available on the current interface, you can raise an
-<a class="reference internal" href="apireference.html#royalnet.commands.UnsupportedError" title="royalnet.commands.UnsupportedError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedError</span></code></a> with a brief description of what’s missing:</p>
+<code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedError</span></code> with a brief description of what’s missing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;telegram&quot;</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">UnsupportedError</span><span class="p">(</span><span class="s2">&quot;This command can only be run on Telegram interfaces.&quot;</span><span class="p">)</span>
 </pre></div>
@@ -346,7 +346,7 @@ which returns a tuple of the matched groups and raises an <a class="reference in
 <div class="section" id="running-code-at-the-initialization-of-the-bot">
 <h2>Running code at the initialization of the bot<a class="headerlink" href="#running-code-at-the-initialization-of-the-bot" title="Permalink to this headline">¶</a></h2>
 <p>You can run code while the bot is starting by overriding the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.__init__()</span></code> function.</p>
-<p>You should keep the <code class="docutils literal notranslate"><span class="pre">super().__init__(interface)</span></code> call at the start of it, so that the <a class="reference internal" href="apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> instance is
+<p>You should keep the <code class="docutils literal notranslate"><span class="pre">super().__init__(interface)</span></code> call at the start of it, so that the <code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code> instance is
 initialized properly, then add your code after it.</p>
 <p>You can add fields to the command to keep <strong>shared data between multiple command calls</strong> (but not bot restarts): it may
 be useful for fetching external static data and keeping it until the bot is restarted, or to store references to all the
@@ -377,7 +377,7 @@ be useful for fetching external static data and keeping it until the bot is rest
 <div class="section" id="coroutines-and-slow-operations">
 <h2>Coroutines and slow operations<a class="headerlink" href="#coroutines-and-slow-operations" title="Permalink to this headline">¶</a></h2>
 <p>You may have noticed that in the previous examples we used <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">data.reply(&quot;🍝&quot;)</span></code> instead of just <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>.</p>
-<p>This is because <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> isn’t a simple method: it is a coroutine, a special kind of function that
+<p>This is because <code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code> isn’t a simple method: it is a coroutine, a special kind of function that
 can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.</p>
 <p>By adding the <code class="docutils literal notranslate"><span class="pre">await</span></code> keyword before the <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>, we tell the bot that it can do other things, like
 receiving new messages, while the message is being sent.</p>
@@ -389,7 +389,7 @@ are finished and may cause bugs in other parts of the code!</p>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>If the slow function you want does not cause any side effect, you can wrap it with the <a class="reference internal" href="apireference.html#royalnet.utils.asyncify" title="royalnet.utils.asyncify"><code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code></a>
+<p>If the slow function you want does not cause any side effect, you can wrap it with the <code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code>
 function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="c1"># If the called function has no side effect, you can do this!</span>
@@ -404,7 +404,7 @@ a coroutine that does the same exact thing.</p>
 <h2>Delete the invoking message<a class="headerlink" href="#delete-the-invoking-message" title="Permalink to this headline">¶</a></h2>
 <p>The invoking message of a command is the message that the user sent that the bot recognized as a command; for example,
 the message <code class="docutils literal notranslate"><span class="pre">/spaghetti</span> <span class="pre">carbonara</span></code> is the invoking message for the <code class="docutils literal notranslate"><span class="pre">spaghetti</span></code> command run.</p>
-<p>You can have the bot delete the invoking message for a command by calling the <a class="reference internal" href="apireference.html#royalnet.commands.CommandData.delete_invoking" title="royalnet.commands.CommandData.delete_invoking"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData.delete_invoking</span></code></a>
+<p>You can have the bot delete the invoking message for a command by calling the <code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData.delete_invoking</span></code>
 method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_invoking</span><span class="p">()</span>
@@ -427,13 +427,13 @@ to True:</p>
 <div class="section" id="using-the-database">
 <h2>Using the database<a class="headerlink" href="#using-the-database" title="Permalink to this headline">¶</a></h2>
 <p>Bots can be connected to a PostgreSQL database through a special SQLAlchemy interface called
-<a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a>.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code>.</p>
 <p>If the connection is established, the <code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code> and <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code> fields will be
 available for use in commands.</p>
-<p><code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code> is an instance of <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a>, which contains the
+<p><code class="docutils literal notranslate"><span class="pre">self.interface.alchemy</span></code> is an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code>, which contains the
 <a class="reference external" href="https://docs.sqlalchemy.org/en/13/core/connections.html#sqlalchemy.engine.Engine" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.engine.Engine</span></code></a>, metadata and tables, while <code class="docutils literal notranslate"><span class="pre">self.interface.session</span></code> is a
 <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/session_api.html#sqlalchemy.orm.session.Session" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.session.Session</span></code></a>, and can be interacted in the same way as one.</p>
-<p>If you want to use <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> in your command, you should override the
+<p>If you want to use <code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code> in your command, you should override the
 <code class="docutils literal notranslate"><span class="pre">require_alchemy_tables</span></code> field with the <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#set" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a> of Alchemy tables you need.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">royalnet.commands</span> <span class="k">import</span> <span class="n">Command</span>
 <span class="kn">from</span> <span class="nn">royalnet.database.tables</span> <span class="k">import</span> <span class="n">Royal</span>
@@ -453,7 +453,7 @@ available for use in commands.</p>
 <div class="section" id="querying-the-database">
 <h3>Querying the database<a class="headerlink" href="#querying-the-database" title="Permalink to this headline">¶</a></h3>
 <p>You can <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query" title="(in SQLAlchemy v1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query</span></code></a> the database using the SQLAlchemy ORM.</p>
-<p>The SQLAlchemy tables can be found inside <a class="reference internal" href="apireference.html#royalnet.database.Alchemy" title="royalnet.database.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code></a> with the same name they were created
+<p>The SQLAlchemy tables can be found inside <code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.database.Alchemy</span></code> with the same name they were created
 from, if they were specified in <code class="docutils literal notranslate"><span class="pre">require_alchemy_tables</span></code>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RoyalTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">alchemy</span><span class="o">.</span><span class="n">Royal</span>
 <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">RoyalTable</span><span class="p">)</span>
@@ -487,7 +487,7 @@ from, if they were specified in <code class="docutils literal notranslate"><span
 <p>You can fetch the query results with the <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.all" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.all()</span></code></a>,
 <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.first" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.first()</span></code></a>, <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one()</span></code></a> and
 <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.one_or_none" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.one_or_none()</span></code></a> methods.</p>
-<p>Remember to use <a class="reference internal" href="apireference.html#royalnet.utils.asyncify" title="royalnet.utils.asyncify"><code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code></a> when fetching results, as it may take a while!</p>
+<p>Remember to use <code class="xref py py-func docutils literal notranslate"><span class="pre">royalnet.utils.asyncify()</span></code> when fetching results, as it may take a while!</p>
 <p>Use <a class="reference external" href="https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.all" title="(in SQLAlchemy v1.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sqlalchemy.orm.query.Query.all()</span></code></a> if you want a <a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of <strong>all results</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncify</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">)</span>
 </pre></div>

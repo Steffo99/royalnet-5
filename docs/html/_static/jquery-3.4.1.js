@@ -5170,7 +5170,7 @@ jQuery.event = {
 				}
 			}
 
-			// Remove common event handler if we removed something and no more handlers exist
+			// Remove generic event handler if we removed something and no more handlers exist
 			// (avoids potential for endless recursion during removal of special event handlers)
 			if ( origCount && !handlers.length ) {
 				if ( !special.teardown ||
