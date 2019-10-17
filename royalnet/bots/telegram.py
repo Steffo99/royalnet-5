@@ -5,10 +5,11 @@ import urllib3
 import asyncio
 import sentry_sdk
 import logging as _logging
+import warnings
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
-from ..commands import *
+from ..packs import *
 
 
 log = _logging.getLogger(__name__)
@@ -84,6 +85,7 @@ class TelegramBot(GenericBot):
                 return result
 
             async def keyboard(data, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
+                warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
                 tg_keyboard = []
                 for key in keyboard:
                     press_id = uuid.uuid4()

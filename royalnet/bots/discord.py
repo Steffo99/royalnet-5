@@ -5,7 +5,7 @@ from .generic import GenericBot
 from ..utils import *
 from ..error import *
 from ..audio import *
-from ..commands import *
+from ..packs import *
 
 log = _logging.getLogger(__name__)
 

@@ -52,7 +52,7 @@ class PlayMode:
     def queue_preview(self) -> typing.List[YtdlDiscord]:
         """Display all the videos in the PlayMode as a list, if possible.
 
-        To be used with ``queue`` commands, for example.
+        To be used with ``queue`` packs, for example.
 
         Raises:
             NotImplementedError: If a preview can't be generated.

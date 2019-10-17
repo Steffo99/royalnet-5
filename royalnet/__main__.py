@@ -2,6 +2,7 @@ import click
 import typing
 import importlib
 import royalnet as r
+import royalherald as rh
 import multiprocessing
 import keyring
 
@@ -13,8 +14,8 @@ import keyring
               help="Enable/disable the Discord module.")
 @click.option("-d", "--database", type=str, default=None,
               help="The PostgreSQL database path.")
-@click.option("-c", "--command-packs", type=str, multiple=True, default=[],
-              help="The names of the command pack modules that should be imported.")
+@click.option("-p", "--packs", type=str, multiple=True, default=[],
+              help="The names of the Packs that should be used.")
 @click.option("-n", "--network-address", type=str, default=None,
               help="The Network server URL to connect to.")
 @click.option("-l", "--local-network-server", is_flag=True, default=False,
@@ -26,7 +27,7 @@ import keyring
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
         database: typing.Optional[str],
-        command_packs: typing.List[str],
+        packs: typing.List[str],
         network_address: typing.Optional[str],
         local_network_server: bool,
         secrets_name: str,
@@ -63,41 +64,38 @@ def run(telegram: typing.Optional[bool],
     # Start the network server
     if local_network_server:
         server_process = multiprocessing.Process(name="Network Server",
-                                                 target=r.network.NetworkServer("0.0.0.0",
-                                                                                44444,
-                                                                                network_password).run_blocking,
+                                                 target=rh.Server("0.0.0.0", 44444, network_password).run_blocking,
                                                  daemon=True)
         server_process.start()
         network_address = "ws://127.0.0.1:44444/"
 
     # Create a Royalnet configuration
-    network_config: typing.Optional[r.network.NetworkConfig] = None
+    network_config: typing.Optional[rh.Config] = None
     if network_address is not None:
-        network_config = r.network.NetworkConfig(network_address, network_password)
+        network_config = rh.Config(network_address, network_password)
 
     # Create a Alchemy configuration
     telegram_db_config: typing.Optional[r.database.DatabaseConfig] = None
     discord_db_config: typing.Optional[r.database.DatabaseConfig] = None
     if database is not None:
         telegram_db_config = r.database.DatabaseConfig(database,
-                                                       r.database.tables.User,
-                                                       r.database.tables.Telegram,
+                                                       r.packs.common.tables.User,
+                                                       r.packs.common.tables.Telegram,
                                                        "tg_id")
         discord_db_config = r.database.DatabaseConfig(database,
-                                                      r.database.tables.User,
-                                                      r.database.tables.Discord,
+                                                      r.packs.common.tables.User,
+                                                      r.packs.common.tables.Discord,
                                                       "discord_id")
 
     # Import command packs
-    if not command_packs:
-        raise click.ClickException("No command packs were specified.")
+    packs.append("royalnet.packs.common")  # common pack is always imported
     enabled_commands = []
-    for pack in command_packs:
+    for pack in packs:
         imported = importlib.import_module(pack)
         try:
             imported_commands = imported.commands
         except AttributeError:
-            raise click.ClickException(f"{pack} isn't a Royalnet command pack.")
+            raise click.ClickException(f"{pack} isn't a Royalnet Pack.")
         enabled_commands = [*enabled_commands, *imported_commands]
 
     telegram_process: typing.Optional[multiprocessing.Process] = None

@@ -9,7 +9,7 @@ from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from ..utils import *
 from ..database import *
-from ..commands import *
+from ..packs import *
 from ..error import *
 
 
@@ -17,14 +17,14 @@ log = logging.getLogger(__name__)
 
 
 class GenericBot:
-    """A generic bot class, to be used as base for the other more specific classes, such as
+    """A common bot class, to be used as base for the other more specific classes, such as
     :py:class:`royalnet.bots.TelegramBot` and :py:class:`royalnet.bots.DiscordBot`. """
     interface_name = NotImplemented
 
     def _init_commands(self) -> None:
-        """Generate the ``commands`` dictionary required to handle incoming messages, and the ``network_handlers``
+        """Generate the ``packs`` dictionary required to handle incoming messages, and the ``network_handlers``
         dictionary required to handle incoming requests. """
-        log.info(f"Registering commands...")
+        log.info(f"Registering packs...")
         self._Interface = self._interface_factory()
         self._Data = self._data_factory()
         self.commands = {}
@@ -126,7 +126,7 @@ class GenericBot:
                                       }).to_dict()
 
     def _init_database(self):
-        """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the commands. Then,
+        """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the packs. Then,
         find the chain that links the ``master_table`` to the ``identity_table``. """
         if self.uninitialized_database_config:
             log.info(f"Database: enabled")
@@ -198,7 +198,7 @@ class GenericBot:
             self.initialized = True
 
     def run(self):
-        """A blocking coroutine that should make the bot start listening to commands and requests."""
+        """A blocking coroutine that should make the bot start listening to packs and requests."""
         raise NotImplementedError()
 
     def run_blocking(self, verbose=False):

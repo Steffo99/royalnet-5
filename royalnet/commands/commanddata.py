@@ -1,4 +1,5 @@
 import typing
+import warnings
 from .commanderrors import UnsupportedError
 
 
@@ -22,6 +23,7 @@ class CommandData:
         """Send a keyboard having the keys of the dict as keys and calling the correspondent values on a press.
 
         The function should be passed the :py:class:`CommandData` instance as a argument."""
+        warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
         raise UnsupportedError("'keyboard' is not supported on this platform")
 
     async def delete_invoking(self, error_if_unavailable=False) -> None:
