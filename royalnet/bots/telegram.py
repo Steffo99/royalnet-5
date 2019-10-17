@@ -69,10 +69,10 @@ class TelegramBot(GenericBot):
                 elif data.update.callback_query is not None:
                     user: telegram.user = data.update.callback_query.from_user
                 else:
-                    raise UnregisteredError("Author can not be determined")
+                    raise CommandError("Command caller can not be determined")
                 if user is None:
                     if error_if_none:
-                        raise UnregisteredError("No author for this message")
+                        raise CommandError("No command caller for this message")
                     return None
                 query = data.interface.session.query(self.master_table)
                 for link in self.identity_chain:
@@ -80,7 +80,7 @@ class TelegramBot(GenericBot):
                 query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
-                    raise UnregisteredError("Author is not registered")
+                    raise CommandError("Command caller is not registered")
                 return result
 
             async def keyboard(data, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
