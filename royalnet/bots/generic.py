@@ -9,7 +9,7 @@ from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from ..utils import *
 from ..database import *
-from ..packs import *
+from ..commands import *
 from ..error import *
 
 
@@ -132,7 +132,7 @@ class GenericBot:
             log.info(f"Database: enabled")
             required_tables = {self.uninitialized_database_config.master_table, self.uninitialized_database_config.identity_table}
             for command in self.uninitialized_commands:
-                required_tables = required_tables.union(command.require_alchemy_tables)
+                required_tables = required_tables.union(command.tables)
             log.debug(f"Required tables: {', '.join([item.__qualname__ for item in required_tables])}")
             self.alchemy = Alchemy(self.uninitialized_database_config.database_uri, required_tables)
             self.master_table = self.alchemy.__getattribute__(self.uninitialized_database_config.master_table.__name__)

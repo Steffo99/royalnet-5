@@ -6,9 +6,9 @@ import telegram
 import discord
 from sqlalchemy import and_
 from royalnet.commands import *
-from ...utils import sleep_until, asyncify, telegram_escape, discord_escape
-from ...database.tables import Reminder
-from ..commanderrors import InvalidInputError, UnsupportedError
+from royalnet.utils import sleep_until, asyncify, telegram_escape, discord_escape
+from ..tables import Reminder
+
 
 class ReminderCommand(Command):
     name: str = "reminder"

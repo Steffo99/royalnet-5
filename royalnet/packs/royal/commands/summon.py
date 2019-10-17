@@ -1,11 +1,9 @@
 import typing
 import discord
 from royalnet.commands import *
-from ...utils import NetworkHandler
-from ...network import Request, ResponseSuccess
-from ..commanderrors import CommandError
-if typing.TYPE_CHECKING:
-    from ...bots import DiscordBot
+from royalnet.utils import NetworkHandler
+from royalnet.bots import DiscordBot
+from royalherald import Request, ResponseSuccess
 
 
 class SummonNH(NetworkHandler):

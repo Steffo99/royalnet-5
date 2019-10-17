@@ -1,7 +1,7 @@
 import typing
 import random
 from royalnet.commands import *
-from ...utils import safeformat
+from royalnet.utils import safeformat
 
 
 class SmecdsCommand(Command):

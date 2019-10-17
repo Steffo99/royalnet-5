@@ -1,13 +1,9 @@
 import typing
-import pickle
 import discord
 from royalnet.commands import *
-from ...utils import NetworkHandler, asyncify
-from ...network import Request, ResponseSuccess
-from ..commanderrors import CommandError
-from ...audio import YtdlDiscord
-if typing.TYPE_CHECKING:
-    from ...bots import DiscordBot
+from royalnet.utils import NetworkHandler
+from royalnet.bots import DiscordBot
+from royalherald import Request, ResponseSuccess
 
 
 class SkipNH(NetworkHandler):

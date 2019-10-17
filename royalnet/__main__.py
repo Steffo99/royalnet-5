@@ -27,7 +27,7 @@ import keyring
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
         database: typing.Optional[str],
-        packs: typing.List[str],
+        packs: typing.Tuple[str],
         network_address: typing.Optional[str],
         local_network_server: bool,
         secrets_name: str,
@@ -88,12 +88,13 @@ def run(telegram: typing.Optional[bool],
                                                       "discord_id")
 
     # Import command packs
+    packs: typing.List[str] = list(packs)
     packs.append("royalnet.packs.common")  # common pack is always imported
     enabled_commands = []
     for pack in packs:
         imported = importlib.import_module(pack)
         try:
-            imported_commands = imported.commands
+            imported_commands = imported.available_commands
         except AttributeError:
             raise click.ClickException(f"{pack} isn't a Royalnet Pack.")
         enabled_commands = [*enabled_commands, *imported_commands]

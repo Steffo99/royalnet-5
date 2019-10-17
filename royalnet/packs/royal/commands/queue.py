@@ -2,11 +2,9 @@ import typing
 import pickle
 import discord
 from royalnet.commands import *
-from ...utils import NetworkHandler, numberemojiformat
-from ...network import Request, ResponseSuccess
-from ..commanderrors import CommandError
-if typing.TYPE_CHECKING:
-    from ...bots import DiscordBot
+from royalnet.utils import NetworkHandler, numberemojiformat
+from royalnet.bots import DiscordBot
+from royalherald import Request, ResponseSuccess
 
 
 class QueueNH(NetworkHandler):

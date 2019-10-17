@@ -1,7 +1,7 @@
 import typing
 import re
 from royalnet.commands import *
-from ...utils import safeformat
+from royalnet.utils import safeformat
 
 
 class ShipCommand(Command):

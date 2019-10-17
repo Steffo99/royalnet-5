@@ -3,11 +3,10 @@ import pickle
 import datetime
 import discord
 from royalnet.commands import *
-from ...utils import NetworkHandler, asyncify
-from ...network import Request, ResponseSuccess
-from ...audio import YtdlDiscord
-if typing.TYPE_CHECKING:
-    from ...bots import DiscordBot
+from royalnet.utils import NetworkHandler, asyncify
+from royalnet.audio import YtdlDiscord
+from royalnet.bots import DiscordBot
+from royalherald import Request, ResponseSuccess
 
 
 class YoutubeNH(NetworkHandler):

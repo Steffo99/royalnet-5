@@ -5,9 +5,8 @@ import random
 import uuid
 import html
 from royalnet.commands import *
-from ...utils import asyncify
-from ..commanderrors import CommandError, KeyboardExpiredError
-from ...database.tables import TriviaScore
+from royalnet.utils import asyncify
+from ..tables import TriviaScore
 
 
 class TriviaCommand(Command):

@@ -18,7 +18,7 @@ from .mmevents import MMEvent
 from .mmresponse import MMResponse
 
 # Enter the tables of your Pack here!
-tables = [
+available_tables = [
     User,
     Telegram,
     Discord,
@@ -38,4 +38,4 @@ tables = [
 ]
 
 # Don't change this, it should automatically generate __all__
-__all__ = [table.__class__.__qualname__ for table in tables]
+__all__ = [table.__class__.__qualname__ for table in available_tables]

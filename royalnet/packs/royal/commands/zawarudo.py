@@ -3,12 +3,11 @@ import discord
 import asyncio
 import datetime
 from royalnet.commands import *
-from ...utils import NetworkHandler, asyncify
-from ...network import Request, ResponseSuccess
-from ...audio import YtdlDiscord
-from ...audio.playmodes import Playlist
-if typing.TYPE_CHECKING:
-    from ...bots import DiscordBot
+from royalnet.utils import NetworkHandler, asyncify
+from royalnet.audio import YtdlDiscord
+from royalnet.audio.playmodes import Playlist
+from royalnet.bots import DiscordBot
+from royalherald import Request, ResponseSuccess
 
 
 class ZawarudoNH(NetworkHandler):
