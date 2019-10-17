@@ -1,6 +1,7 @@
 import discord
 import sentry_sdk
 import logging as _logging
+import asyncio
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
@@ -14,6 +15,12 @@ if not discord.opus.is_loaded():
     log.error("Opus is not loaded. Weird behaviour might emerge.")
 
 
+class MusicData:
+    def __init__(self):
+        self.playmode: playmodes.PlayMode = playmodes.Playlist()
+        self.voice_client: typing.Optional[discord.VoiceClient] = None
+
+
 class DiscordBot(GenericBot):
     """A bot that connects to `Discord <https://discordapp.com/>`_."""
     interface_name = "discord"
@@ -21,7 +28,7 @@ class DiscordBot(GenericBot):
     def _init_voice(self):
         """Initialize the variables needed for the connection to voice chat."""
         log.debug(f"Creating music_data dict")
-        self.music_data: typing.Dict[discord.Guild, playmodes.PlayMode] = {}
+        self.music_data: typing.Dict[discord.Guild, MusicData] = {}
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:
         # noinspection PyPep8Naming
@@ -67,24 +74,30 @@ class DiscordBot(GenericBot):
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
             async def vc_connect_or_move(cli, channel: discord.VoiceChannel):
-                # Connect to voice chat
-                try:
+                music_data = self.music_data.get(channel.guild)
+                if music_data is None:
+                    # Create a MusicData object
+                    music_data = MusicData()
+                    self.music_data[channel.guild] = music_data
+                    # Connect to voice
                     log.debug(f"Connecting to Voice in {channel}")
-                    await channel.connect()
-                    log.debug(f"Connected to Voice in {channel}")
-                except discord.errors.ClientException:
-                    # Move to the selected channel, instead of connecting
-                    # noinspection PyUnusedLocal
-                    for voice_client in cli.voice_clients:
-                        voice_client: discord.VoiceClient
-                        if voice_client.guild != channel.guild:
-                            continue
-                        await voice_client.move_to(channel)
-                        log.debug(f"Moved {voice_client} to {channel}")
-                # Create a music_data entry, if it doesn't exist; default is a Playlist
-                if not self.music_data.get(channel.guild):
-                    log.debug(f"Creating music_data for {channel.guild}")
-                    self.music_data[channel.guild] = playmodes.Playlist()
+                    try:
+                        music_data.voice_client = await channel.connect(reconnect=False, timeout=10)
+                    except Exception:
+                        log.warning(f"Failed to connect to Voice in {channel}")
+                        del self.music_data[channel.guild]
+                        raise
+                    else:
+                        log.debug(f"Connected to Voice in {channel}")
+                else:
+                    if music_data.voice_client is None:
+                        # TODO: change exception type
+                        raise Exception("Another connection attempt is already in progress.")
+                    # Try to move to a different channel
+                    voice_client = music_data.voice_client
+                    log.debug(f"Moving {voice_client} to {channel}")
+                    await voice_client.move_to(channel)
+                    log.debug(f"Moved {voice_client} to {channel}")
 
             async def on_message(cli, message: discord.Message):
                 self.loop.create_task(cli._handle_message(message))
@@ -204,15 +217,15 @@ class DiscordBot(GenericBot):
         for dfile in dfiles:
             log.debug(f"Adding {dfile} to music_data")
             await asyncify(dfile.ready_up)
-            guild_music_data.add(dfile)
-        if guild_music_data.now_playing is None:
+            guild_music_data.playmode.add(dfile)
+        if guild_music_data.playmode.now_playing is None:
             await self.advance_music_data(guild)
 
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
         guild_music_data = self.music_data[guild]
         voice_client: discord.VoiceClient = self.client.find_voice_client_by_guild(guild)
-        next_source: discord.AudioSource = await guild_music_data.next()
+        next_source: discord.AudioSource = await guild_music_data.playmode.next()
         await self.update_activity_with_source_title()
         if next_source is None:
             log.debug(f"Ending playback chain")
@@ -237,7 +250,7 @@ class DiscordBot(GenericBot):
             log.debug(f"Updating current Activity: setting to None, as multiple guilds are using the bot")
             await self.client.change_presence(status=discord.Status.online)
             return
-        play_mode: playmodes.PlayMode = self.music_data[list(self.music_data)[0]]
+        play_mode: playmodes.PlayMode = self.music_data[list(self.music_data)[0]].playmode
         now_playing = play_mode.now_playing
         if now_playing is None:
             # No songs are playing now

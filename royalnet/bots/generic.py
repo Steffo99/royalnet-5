@@ -203,7 +203,7 @@ class GenericBot:
 
     def run_blocking(self, verbose=False):
         if verbose:
-            core_logger = logging.getLogger("royalnet")
+            core_logger = logging.root
             core_logger.setLevel(logging.DEBUG)
             stream_handler = logging.StreamHandler()
             stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
