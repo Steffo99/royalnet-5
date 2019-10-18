@@ -2,46 +2,8 @@ import typing
 import pickle
 import discord
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler, numberemojiformat
+from royalnet.utils import numberemojiformat
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
-
-
-class QueueNH(NetworkHandler):
-    message_type = "music_queue"
-
-    @classmethod
-    async def discord(cls, bot: "DiscordBot", data: dict):
-        # Find the matching guild
-        if data["guild_name"]:
-            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
-        else:
-            guilds = bot.client.guilds
-        if len(guilds) == 0:
-            raise CommandError("No guilds with the specified name found.")
-        if len(guilds) > 1:
-            raise CommandError("Multiple guilds with the specified name found.")
-        guild = list(bot.client.guilds)[0]
-        # Check if the guild has a PlayMode
-        playmode = bot.music_data.get(guild)
-        if not playmode:
-            return ResponseSuccess({
-                "type": None
-            })
-        try:
-            queue = playmode.queue_preview()
-        except NotImplementedError:
-            return ResponseSuccess({
-                "type": playmode.__class__.__name__
-            })
-        return ResponseSuccess({
-            "type": playmode.__class__.__name__,
-            "queue":
-            {
-                "strings": [str(dfile.info) for dfile in queue],
-                "pickled_embeds": str(pickle.dumps([dfile.info.to_discord_embed() for dfile in queue]))
-            }
-        })
 
 
 class QueueCommand(Command):
@@ -53,13 +15,49 @@ class QueueCommand(Command):
 
     syntax = "[ [guild] ]"
 
+    @staticmethod
+    async def _legacy_queue_handler(bot: "DiscordBot", guild_name: typing.Optional[str]):
+        # Find the matching guild
+        if guild_name:
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(guild_name)
+        else:
+            guilds = bot.client.guilds
+        if len(guilds) == 0:
+            raise CommandError("No guilds with the specified name found.")
+        if len(guilds) > 1:
+            raise CommandError("Multiple guilds with the specified name found.")
+        guild = list(bot.client.guilds)[0]
+        # Check if the guild has a PlayMode
+        playmode = bot.music_data.get(guild)
+        if not playmode:
+            return {
+                "type": None
+            }
+        try:
+            queue = playmode.queue_preview()
+        except NotImplementedError:
+            return {
+                "type": playmode.__class__.__name__
+            }
+        return {
+            "type": playmode.__class__.__name__,
+            "queue":
+                {
+                    "strings": [str(dfile.info) for dfile in queue],
+                    "pickled_embeds": str(pickle.dumps([dfile.info.to_discord_embed() for dfile in queue]))
+                }
+        }
+
+    _event_name = "_legacy_queue"
+
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(QueueNH.message_type, QueueNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_queue_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        guild, = args.match(r"(?:\[(.+)])?")
-        response = await self.interface.net_request(Request(QueueNH.message_type, {"guild_name": guild}), "discord")
+        guild_name, = args.match(r"(?:\[(.+)])?")
+        response = await self.interface.call_herald_action("discord", self._event_name, {"guild_name": guild_name})
         if response["type"] is None:
             await data.reply("ℹ️ Non c'è nessuna coda di riproduzione attiva al momento.")
             return

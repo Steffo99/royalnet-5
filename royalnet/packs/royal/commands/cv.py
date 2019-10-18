@@ -1,19 +1,22 @@
 import discord
 import typing
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler, andformat
+from royalnet.utils import andformat
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
 
 
-class CvNH(NetworkHandler):
-    message_type = "discord_cv"
+class CvCommand(Command):
+    name: str = "cv"
 
-    @classmethod
-    async def discord(cls, bot: DiscordBot, data: dict):
+    description: str = "Elenca le persone attualmente connesse alla chat vocale."
+
+    syntax: str = "[guildname] ['all']"
+
+    @staticmethod
+    async def _legacy_cv_handler(bot: DiscordBot, guild_name: typing.Optional[str], everyone: bool):
         # Find the matching guild
-        if data["guild_name"]:
-            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
+        if guild_name:
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(guild_name)
         else:
             guilds = bot.client.guilds
         if len(guilds) == 0:
@@ -47,7 +50,7 @@ class CvNH(NetworkHandler):
             for member in members_in_channels[channel]:
                 member: typing.Union[discord.User, discord.Member]
                 # Ignore not-connected non-notable members
-                if not data["everyone"] and channel == 0 and len(member.roles) < 2:
+                if not everyone and channel == 0 and len(member.roles) < 2:
                     continue
                 # Ignore offline members
                 if member.status == discord.Status.offline and member.voice is None:
@@ -108,24 +111,20 @@ class CvNH(NetworkHandler):
                         message += f" | ❓ Unknown activity"
                 message += "\n"
             message += "\n"
-        return ResponseSuccess({"response": message})
+        return {"response": message}
 
-
-class CvCommand(Command):
-    name: str = "cv"
-
-    description: str = "Elenca le persone attualmente connesse alla chat vocale."
-
-    syntax: str = "[guildname] ['all']"
+    _event_name = "_legacy_cv"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler("discord_cv", CvNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_cv_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         # noinspection PyTypeChecker
         guild_name, everyone = args.match(r"(?:\[(.+)])?\s*(\S+)?\s*")
-        response = await self.interface.net_request(Request("discord_cv", {"guild_name": guild_name,
-                                                                           "everyone": bool(everyone)}),
-                                                    destination="discord")
+        response = await self.interface.call_herald_action("discord", self._event_name, {
+                                                               "guild_name": guild_name,
+                                                               "everyone": everyone
+                                                           })
         await data.reply(response["response"])

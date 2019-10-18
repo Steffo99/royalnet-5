@@ -1,24 +1,7 @@
 import typing
 import discord
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
-
-
-class SummonNH(NetworkHandler):
-    message_type = "music_summon"
-
-    @classmethod
-    async def discord(cls, bot: "DiscordBot", data: dict):
-        """Handle a summon Royalnet request.
-         That is, join a voice channel, or move to a different one if that is not possible."""
-        channels = bot.client.find_channel_by_name(data["channel_name"])
-        channel = channels[0]
-        if not isinstance(channel, discord.VoiceChannel):
-            raise CommandError("Channel is not a voice channel")
-        bot.loop.create_task(bot.client.vc_connect_or_move(channel))
-        return ResponseSuccess()
 
 
 class SummonCommand(Command):
@@ -30,9 +13,23 @@ class SummonCommand(Command):
 
     syntax: str = "[nomecanale]"
 
+    @staticmethod
+    async def _legacy_summon_handler(bot: "DiscordBot", channel_name: str):
+        """Handle a summon Royalnet request.
+         That is, join a voice channel, or move to a different one if that is not possible."""
+        channels = bot.client.find_channel_by_name(channel_name)
+        channel = channels[0]
+        if not isinstance(channel, discord.VoiceChannel):
+            raise CommandError("Channel is not a voice channel")
+        bot.loop.create_task(bot.client.vc_connect_or_move(channel))
+        return {}
+
+    _event_name = "_legacy_summon"
+
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(SummonNH.message_type, SummonNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_summon_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self.interface.name == "discord":
@@ -72,5 +69,7 @@ class SummonCommand(Command):
             await data.reply(f"✅ Mi sono connesso in [c]#{channel.name}[/c].")
         else:
             channel_name: str = args[0].lstrip("#")
-            await self.interface.net_request(Request(SummonNH.message_type, {"channel_name": channel_name}), "discord")
+            response = await self.interface.call_herald_action("discord", self._event_name, {
+                                                                   "channel_name": channel_name
+                                                               })
             await data.reply(f"✅ Mi sono connesso in [c]#{channel_name}[/c].")

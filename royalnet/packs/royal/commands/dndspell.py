@@ -41,7 +41,8 @@ class DndspellCommand(Command):
                     for spell in j["spell"]:
                         self._dnddata.add(spell)
 
-    def _parse_spell(self, spell: dict) -> str:
+    @staticmethod
+    def _parse_spell(spell: dict) -> str:
         string = f'✨ [b]{spell["name"]}[/b]\n'
         if "source" in spell:
             string += f'[i]{spell["source"]}, page {spell["page"]}[/i]\n'

@@ -28,7 +28,8 @@ class GenericBot:
         self._Interface = self._interface_factory()
         self._Data = self._data_factory()
         self.commands = {}
-        self.network_handlers: typing.Dict[str, typing.Callable[[typing.Any], typing.Awaitable[typing.Dict]]] = {}
+        self.network_handlers: typing.Dict[str, typing.Callable[["GenericBot", typing.Any],
+                                                                typing.Awaitable[typing.Dict]]] = {}
         for SelectedCommand in self.uninitialized_commands:
             interface = self._Interface()
             try:
@@ -69,15 +70,17 @@ class GenericBot:
 
             async def call_herald_action(ci, destination: str, event_name: str, args: typing.Dict) -> typing.Dict:
                 if self.network is None:
-                    raise UnsupportedError("royalherald is not enabled on this bot")
+                    raise UnsupportedError("Herald is not enabled on this bot")
                 request: rh.Request = rh.Request(handler=event_name, data=args)
                 response: rh.Response = await self.network.request(destination=destination, request=request)
                 if isinstance(response, rh.ResponseFailure):
-                    raise CommandError(f"royalherald action code failed: {response}")
+                    raise CommandError(f"Herald action call failed:\n"
+                                       f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
-                    raise TypeError(f"royalherald returned unknown response: {response}")
+                    raise TypeError(f"Other Herald Link returned unknown response:\n"
+                                    f"[p]{response}[/p]")
 
         return GenericInterface
 
@@ -103,7 +106,7 @@ class GenericBot:
         else:
             log.debug(f"Using {network_handler} as handler for {request.handler}")
         try:
-            response_data = await network_handler(**request.data)
+            response_data = await network_handler(self, **request.data)
             return rh.ResponseSuccess(data=response_data)
         except Exception as e:
             sentry_sdk.capture_exception(e)

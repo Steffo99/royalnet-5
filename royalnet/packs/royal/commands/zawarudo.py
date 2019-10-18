@@ -3,26 +3,26 @@ import discord
 import asyncio
 import datetime
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler, asyncify
+from royalnet.utils import asyncify
 from royalnet.audio import YtdlDiscord
 from royalnet.audio.playmodes import Playlist
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
 
 
-class ZawarudoNH(NetworkHandler):
-    message_type = "music_zawarudo"
+class ZawarudoCommand(Command):
+    name: str = "zawarudo"
 
-    ytdl_args = {
-        "format": "bestaudio/best",
-        "outtmpl": f"./downloads/%(title)s.%(ext)s"
-    }
+    aliases = ["theworld", "world"]
 
-    @classmethod
-    async def discord(cls, bot: "DiscordBot", data: dict):
+    description: str = "Ferma il tempo!"
+
+    syntax = "[ [guild] ] [1-9]"
+
+    @staticmethod
+    async def _legacy_zawarudo_handler(bot: "DiscordBot", guild_name: typing.Optional[str], time: int):
         # Find the matching guild
-        if data["guild_name"]:
-            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
+        if guild_name:
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(guild_name)
         else:
             guilds = bot.client.guilds
         if len(guilds) == 0:
@@ -57,7 +57,7 @@ class ZawarudoNH(NetworkHandler):
             if member.bot:
                 continue
             await member.edit(mute=True)
-        await asyncio.sleep(data["time"])
+        await asyncio.sleep(time)
         await bot.add_to_music_data(zw_end, guild)
         for member in affected:
             member: typing.Union[discord.User, discord.Member]
@@ -66,21 +66,14 @@ class ZawarudoNH(NetworkHandler):
             await member.edit(mute=False)
         bot.music_data[guild] = old_playlist
         await bot.advance_music_data(guild)
-        return ResponseSuccess()
+        return {}
 
-
-class ZawarudoCommand(Command):
-    name: str = "zawarudo"
-
-    aliases = ["theworld", "world"]
-
-    description: str = "Ferma il tempo!"
-
-    syntax = "[ [guild] ] [1-9]"
+    _event_name = "_legacy_zawarudo"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(ZawarudoNH.message_type, ZawarudoNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_zawarudo_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, time = args.match(r"(?:\[(.+)])?\s*(.+)?")
@@ -93,4 +86,7 @@ class ZawarudoCommand(Command):
         if time > 10:
             raise InvalidInputError("The World can stop time only for 10 seconds.")
         await data.reply(f"🕒 ZA WARUDO! TOKI WO TOMARE!")
-        await self.interface.net_request(Request(ZawarudoNH.message_type, {"time": time, "guild_name": guild_name}), "discord")
+        await self.interface.call_herald_action("discord", self._event_name, {
+                                                    "guild_name": guild_name,
+                                                    "time": time
+                                                })

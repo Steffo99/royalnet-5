@@ -1,20 +1,21 @@
 import typing
 import discord
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
 
 
-class PauseNH(NetworkHandler):
-    message_type = "music_pause"
+class PauseCommand(Command):
+    name: str = "pause"
 
-    # noinspection PyProtectedMember
-    @classmethod
-    async def discord(cls, bot: DiscordBot, data: dict):
+    description: str = "Mette in pausa o riprende la riproduzione della canzone attuale."
+
+    syntax = "[ [guild] ]"
+
+    @staticmethod
+    async def _legacy_pause_handler(bot: DiscordBot, guild_name: typing.Optional[str]):
         # Find the matching guild
-        if data["guild_name"]:
-            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
+        if guild_name:
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(guild_name)
         else:
             guilds = bot.client.guilds
         if len(guilds) == 0:
@@ -32,23 +33,20 @@ class PauseNH(NetworkHandler):
             voice_client._player.resume()
         else:
             voice_client._player.pause()
-        return ResponseSuccess({"resumed": resume})
+        return {"resumed": resume}
 
-
-class PauseCommand(Command):
-    name: str = "pause"
-
-    description: str = "Mette in pausa o riprende la riproduzione della canzone attuale."
-
-    syntax = "[ [guild] ]"
+    _event_name = "_legacy_pause"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(PauseNH.message_type, PauseNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_pause_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        guild, = args.match(r"(?:\[(.+)])?")
-        response = await self.interface.net_request(Request("music_pause", {"guild_name": guild}), "discord")
+        guild_name, = args.match(r"(?:\[(.+)])?")
+        response = await self.interface.call_herald_action("discord", self._event_name, {
+                                                               "guild_name": guild_name
+                                                           })
         if response["resumed"]:
             await data.reply(f"▶️ Riproduzione ripresa.")
         else:

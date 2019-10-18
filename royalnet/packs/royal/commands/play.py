@@ -3,21 +3,26 @@ import pickle
 import datetime
 import discord
 from royalnet.commands import *
-from royalnet.utils import NetworkHandler, asyncify
+from royalnet.utils import asyncify
 from royalnet.audio import YtdlDiscord
 from royalnet.bots import DiscordBot
-from royalherald import Request, ResponseSuccess
 
 
-class PlayNH(NetworkHandler):
-    message_type = "music_play"
+class PlayCommand(Command):
+    name: str = "play"
 
-    @classmethod
-    async def discord(cls, bot: "DiscordBot", data: dict):
+    aliases = ["p"]
+
+    description: str = "Aggiunge un url alla coda della chat vocale."
+
+    syntax = "[ [guild] ] (url)"
+
+    @staticmethod
+    async def _legacy_play_handler(bot: "DiscordBot", guild_name: typing.Optional[str], url: str):
         """Handle a play Royalnet request. That is, add audio to a PlayMode."""
         # Find the matching guild
-        if data["guild_name"]:
-            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(data["guild_name"])
+        if guild_name:
+            guilds: typing.List[discord.Guild] = bot.client.find_guild_by_name(guild_name)
         else:
             guilds = bot.client.guilds
         if len(guilds) == 0:
@@ -35,7 +40,7 @@ class PlayNH(NetworkHandler):
             "outtmpl": f"./downloads/{datetime.datetime.now().timestamp()}_%(title)s.%(ext)s"
         }
         # Start downloading
-        dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, data["url"], **ytdl_args)
+        dfiles: typing.List[YtdlDiscord] = await asyncify(YtdlDiscord.create_from_url, url, **ytdl_args)
         await bot.add_to_music_data(dfiles, guild)
         # Create response dictionary
         response = {
@@ -44,21 +49,14 @@ class PlayNH(NetworkHandler):
                 "discord_embed_pickle": str(pickle.dumps(dfile.info.to_discord_embed()))
             } for dfile in dfiles]
         }
-        return ResponseSuccess(response)
+        return response
 
-
-class PlayCommand(Command):
-    name: str = "play"
-
-    aliases = ["p"]
-
-    description: str = "Aggiunge un url alla coda della chat vocale."
-
-    syntax = "[ [guild] ] (url)"
+    _event_name = "_legacy_play"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        interface.register_net_handler(PlayNH.message_type, PlayNH)
+        if interface.name == "discord":
+            interface.register_herald_action(self._event_name, self._legacy_play_handler)
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, url = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
@@ -66,8 +64,10 @@ class PlayCommand(Command):
             raise CommandError("PlayCommand only accepts URLs.\n"
                                "If you want to search a song on YouTube or Soundcloud, please use YoutubeCommand"
                                " or SoundcloudCommand!")
-        response = await self.interface.net_request(Request("music_play", {"url": url, "guild_name": guild_name}),
-                                                    "discord")
+        response: dict = await self.interface.call_herald_action("discord", self._event_name, {
+                                                                     "guild_name": guild_name,
+                                                                     "url": url
+                                                                 })
         if len(response["videos"]) == 0:
             raise CommandError(f"Nessun file trovato.")
         for video in response["videos"]:

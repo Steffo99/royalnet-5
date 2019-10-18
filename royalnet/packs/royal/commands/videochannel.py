@@ -40,8 +40,11 @@ class VideochannelCommand(Command):
                     raise CommandError("Non sei connesso a nessun canale vocale.")
                 channel = voice.channel
                 if author.is_on_mobile():
-                    await data.reply(f"📹 Per entrare in modalità video, clicca qui: <https://discordapp.com/channels/{channel.guild.id}/{channel.id}>\n[b]Attenzione: la modalità video non funziona su Discord per Android e iOS![/b]")
+                    await data.reply(f"📹 Per entrare in modalità video, clicca qui:\n"
+                                     f"<https://discordapp.com/channels/{channel.guild.id}/{channel.id}>\n"
+                                     f"[b]Attenzione: la modalità video non funziona su Android e iOS![/b]")
                     return
-            await data.reply(f"📹 Per entrare in modalità video, clicca qui: <https://discordapp.com/channels/{channel.guild.id}/{channel.id}>")
+            await data.reply(f"📹 Per entrare in modalità video, clicca qui:\n"
+                             f"<https://discordapp.com/channels/{channel.guild.id}/{channel.id}>")
         else:
             raise UnsupportedError(f"This command is not supported on {self.interface.name.capitalize()}.")

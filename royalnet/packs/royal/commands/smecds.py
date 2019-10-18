@@ -60,7 +60,9 @@ class SmecdsCommand(Command):
                "dei Sims", "di Sid", "delle Skullgirls", "di Sonic", "di Spiral (Knights)", "di Spore", "di Starbound",
                "di SimCity", "di Sensei", "di Ssssssssssssss... Boom! E' esploso il dizionario", "della scala",
                "di Sakura", "di Suzie", "di Shinji", "del senpai", "del support", "di Superman", "di Sekiro",
-               "dello Slime God", "del salassato", "della salsa"]
+               "dello Slime God", "del salassato", "della salsa", "di Senjougahara", "di Sugar", "della Stampa",
+               "della Stampante"]
+
     SMECDS = "🤔 Secondo me, è colpa {ds}."
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
