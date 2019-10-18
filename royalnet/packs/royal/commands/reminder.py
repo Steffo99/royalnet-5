@@ -23,13 +23,13 @@ class ReminderCommand(Command):
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
+        session = interface.alchemy.Session()
         reminders = (
-            interface.session
-                     .query(interface.alchemy.Reminder)
-                     .filter(and_(
-                         interface.alchemy.Reminder.datetime >= datetime.datetime.now(),
-                         interface.alchemy.Reminder.interface_name == interface.name))
-                     .all()
+            session.query(interface.alchemy.Reminder)
+                   .filter(and_(
+                       interface.alchemy.Reminder.datetime >= datetime.datetime.now(),
+                       interface.alchemy.Reminder.interface_name == interface.name))
+                   .all()
         )
         for reminder in reminders:
             interface.loop.create_task(self._remind(reminder))
@@ -82,5 +82,5 @@ class ReminderCommand(Command):
                                                    datetime=date,
                                                    message=reminder_text)
         self.interface.loop.create_task(self._remind(reminder))
-        self.interface.session.add(reminder)
-        await asyncify(self.interface.session.commit)
+        data.session.add(reminder)
+        await asyncify(data.session.commit)

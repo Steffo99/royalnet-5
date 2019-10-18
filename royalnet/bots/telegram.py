@@ -55,7 +55,7 @@ class TelegramBot(GenericBot):
         # noinspection PyMethodParameters,PyAbstractClass
         class TelegramData(CommandData):
             def __init__(data, interface: CommandInterface, update: telegram.Update):
-                data.interface = interface
+                super().__init__(interface)
                 data.update = update
 
             async def reply(data, text: str):

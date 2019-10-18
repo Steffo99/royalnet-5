@@ -1,9 +1,17 @@
 import typing
 import warnings
 from .commanderrors import UnsupportedError
+from .commandinterface import CommandInterface
 
 
 class CommandData:
+    def __init__(self, interface: CommandInterface):
+        self._interface: CommandInterface = interface
+        if len(self._interface.command.tables) > 0:
+            self.session = self._interface.alchemy.Session()
+        else:
+            self.session = None
+
     async def reply(self, text: str) -> None:
         """Send a text message to the channel where the call was made.
 

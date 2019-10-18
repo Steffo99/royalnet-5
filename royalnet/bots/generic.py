@@ -35,6 +35,9 @@ class GenericBot:
                 command = SelectedCommand(interface)
             except Exception as e:
                 log.error(f"{e.__class__.__qualname__} during the registration of {SelectedCommand.__qualname__}")
+                continue
+            # Linking the command to the interface
+            interface.command = command
             # Override the main command name, but warn if it's overriding something
             if f"{interface.prefix}{SelectedCommand.name}" in self.commands:
                 log.warning(f"Overriding (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{SelectedCommand.name}")

@@ -74,7 +74,7 @@ class DiarioCommand(Command):
                 if not (text or media_url):
                     raise InvalidInputError("Missing text.")
                 # Find the Royalnet account associated with the sender
-                quoted_tg = await asyncify(self.interface.session.query(self.interface.alchemy.Telegram)
+                quoted_tg = await asyncify(data.session.query(self.interface.alchemy.Telegram)
                                            .filter_by(tg_id=reply.from_user.id)
                                            .one_or_none)
                 quoted_account = quoted_tg.royal if quoted_tg is not None else None
@@ -124,8 +124,8 @@ class DiarioCommand(Command):
                     # Find if there's a Royalnet account associated with the quoted name
                     if quoted is not None:
                         quoted_alias = await asyncify(
-                            self.interface.session.query(self.interface.alchemy.Alias)
-                                                  .filter_by(alias=quoted.lower()).one_or_none)
+                            data.session.query(self.interface.alchemy.Alias)
+                                               .filter_by(alias=quoted.lower()).one_or_none)
                     else:
                         quoted_alias = None
                     quoted_account = quoted_alias.royal if quoted_alias is not None else None
@@ -147,8 +147,8 @@ class DiarioCommand(Command):
                                                    timestamp=timestamp,
                                                    media_url=media_url,
                                                    spoiler=spoiler)
-            self.interface.session.add(diario)
-            await asyncify(self.interface.session.commit)
+            data.session.add(diario)
+            await asyncify(data.session.commit)
             await data.reply(f"✅ {str(diario)}")
         else:
             # Find the creator of the quotes
@@ -182,9 +182,9 @@ class DiarioCommand(Command):
             # Find if there's a Royalnet account associated with the quoted name
             if quoted is not None:
                 quoted_alias = await asyncify(
-                    self.interface.session.query(self.interface.alchemy.Alias)
-                                          .filter_by(alias=quoted.lower())
-                                          .one_or_none)
+                    data.session.query(self.interface.alchemy.Alias)
+                                           .filter_by(alias=quoted.lower())
+                                           .one_or_none)
             else:
                 quoted_alias = None
             quoted_account = quoted_alias.royal if quoted_alias is not None else None
@@ -201,6 +201,6 @@ class DiarioCommand(Command):
                                                    timestamp=timestamp,
                                                    media_url=None,
                                                    spoiler=spoiler)
-            self.interface.session.add(diario)
-            await asyncify(self.interface.session.commit)
+            data.session.add(diario)
+            await asyncify(data.session.commit)
             await data.reply(f"✅ {str(diario)}")

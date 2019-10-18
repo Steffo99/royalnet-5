@@ -38,7 +38,7 @@ class DiscordBot(GenericBot):
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordData(CommandData):
             def __init__(data, interface: CommandInterface, message: discord.Message):
-                data._interface = interface
+                super().__init__(interface)
                 data.message = message
 
             async def reply(data, text: str):

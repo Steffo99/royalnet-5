@@ -97,8 +97,8 @@ class TriviaCommand(Command):
         for answerer in self._answerers[question_id]:
             if answerer.trivia_score is None:
                 ts = self.interface.alchemy.TriviaScore(royal=answerer)
-                self.interface.session.add(ts)
-                self.interface.session.commit()
+                data.session.add(ts)
+                data.session.commit()
             if self._answerers[question_id][answerer]:
                 results += self._correct_emoji
                 answerer.trivia_score.correct_answers += 1
@@ -108,4 +108,4 @@ class TriviaCommand(Command):
             results += f" {answerer} ({answerer.trivia_score.correct_answers}/{answerer.trivia_score.total_answers})\n"
         await data.reply(results)
         del self._answerers[question_id]
-        await asyncify(self.interface.session.commit)
+        await asyncify(data.session.commit)

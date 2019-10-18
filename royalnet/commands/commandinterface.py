@@ -2,6 +2,7 @@ import typing
 import asyncio
 from .commanderrors import UnsupportedError
 if typing.TYPE_CHECKING:
+    from .command import Command
     from ..database import Alchemy
     from ..bots import GenericBot
 
@@ -14,10 +15,7 @@ class CommandInterface:
     loop: asyncio.AbstractEventLoop = NotImplemented
 
     def __init__(self):
-        if self.alchemy:
-            self.session = self.alchemy.Session()
-        else:
-            self.session = None
+        self.command: typing.Optional[Command] = None  # Will be bound after the command has been created
 
     def register_net_handler(self, message_type: str, network_handler: typing.Callable):
         """Register a new handler for messages received through Royalnet."""

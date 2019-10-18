@@ -9,7 +9,6 @@ from royalnet.commands import *
 from royalnet.utils import asyncify, telegram_escape, sleep_until
 from ..tables import MMEvent, MMDecision, MMResponse
 
-
 log = logging.getLogger(__name__)
 
 
@@ -91,7 +90,7 @@ class MmCommand(Command):
                     text += f"❌ {mmresponse.royal}\n"
         return text
 
-    async def _run_mm(self, mmevent: MMEvent) -> None:
+    async def _run_mm(self, mmevent: MMEvent, session) -> None:
         client: telegram.Bot = self.interface.bot.client
 
         async def update_message() -> None:
@@ -107,61 +106,62 @@ class MmCommand(Command):
                 pass
 
         decision_string = f"⚫️ Hai detto che forse parteciperai a [b]{mmevent.title}[/b]" \
-                          f" alle [b]{mmevent.datetime.strftime('%H:%M')}[/b].\n" \
-                          f"Confermi di volerci essere? (Metti sì anche se arrivi un po' in ritardo!)"
+            f" alle [b]{mmevent.datetime.strftime('%H:%M')}[/b].\n" \
+            f"Confermi di volerci essere? (Metti sì anche se arrivi un po' in ritardo!)"
 
         decision_keyboard = telegram.InlineKeyboardMarkup([
-                [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES"),
-                 telegram.InlineKeyboardButton("🔴 Non mi interessa più.", callback_data=f"mm_{mmevent.mmid}_d_NO")]
-            ])
+            [telegram.InlineKeyboardButton("🔵 Ci sarò!", callback_data=f"mm_{mmevent.mmid}_d_YES"),
+             telegram.InlineKeyboardButton("🔴 Non mi interessa più.", callback_data=f"mm_{mmevent.mmid}_d_NO")]
+        ])
 
         async def decision_yes(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="YES")
-                self.interface.session.add(mmdecision)
+                data.session.add(mmdecision)
             else:
                 mmdecision.decision = "YES"
-            await asyncify(self.interface.session.commit)
+            await asyncify(data.session.commit)
             await update_message()
             return "🔵 Hai detto che ci sarai!"
 
         async def decision_maybe(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="MAYBE")
-                self.interface.session.add(mmdecision)
+                data.session.add(mmdecision)
             else:
                 mmdecision.decision = "MAYBE"
             # Can't asyncify this
-            self.interface.session.commit()
+            data.session.commit()
             await update_message()
-            return f"⚫️ Hai detto che forse ci sarai. Rispondi al messaggio di conferma {self._cycle_duration} minuti prima dell'inizio!"
+            return f"⚫️ Hai detto che forse ci sarai." \
+                   f"Rispondi al messaggio di conferma {self._cycle_duration} minuti prima dell'inizio!"
 
         async def decision_no(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="NO")
-                self.interface.session.add(mmdecision)
+                data.session.add(mmdecision)
             else:
                 mmdecision.decision = "NO"
             # Can't asyncify this
-            self.interface.session.commit()
+            data.session.commit()
             await update_message()
             return "🔴 Hai detto che non ti interessa."
 
@@ -169,43 +169,43 @@ class MmCommand(Command):
             delay = (datetime.datetime.now() - mmevent.datetime).total_seconds()
             if delay < 60:
                 return f"🚩 E' ora di [b]{mmevent.title}[/b]!\n" \
-                       f"Sei pronto?"
+                    f"Sei pronto?"
             return f"🕒 Sei in ritardo di [b]{int(delay / 60)} minuti[/b] per [b]{mmevent.title}[/b]...\n" \
-                   f"Sei pronto?"
+                f"Sei pronto?"
 
         response_keyboard = telegram.InlineKeyboardMarkup([
-                [telegram.InlineKeyboardButton("✅ Ci sono!",
-                                               callback_data=f"mm_{mmevent.mmid}_r_YES")],
-                [telegram.InlineKeyboardButton("🕒 Aspettatemi ancora un po'!",
-                                               callback_data=f"mm_{mmevent.mmid}_r_LATER")],
-                [telegram.InlineKeyboardButton("❌ Non vengo più, mi spiace.",
-                                               callback_data=f"mm_{mmevent.mmid}_r_NO")]
-            ])
+            [telegram.InlineKeyboardButton("✅ Ci sono!",
+                                           callback_data=f"mm_{mmevent.mmid}_r_YES")],
+            [telegram.InlineKeyboardButton("🕒 Aspettatemi ancora un po'!",
+                                           callback_data=f"mm_{mmevent.mmid}_r_LATER")],
+            [telegram.InlineKeyboardButton("❌ Non vengo più, mi spiace.",
+                                           callback_data=f"mm_{mmevent.mmid}_r_NO")]
+        ])
 
         async def response_yes(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             mmresponse.response = "YES"
             # Can't asyncify this
-            self.interface.session.commit()
+            data.session.commit()
             await update_message()
             return "✅ Sei pronto!"
 
         def later_string(royal) -> str:
             return f"🕒 {royal.username} ha chiesto di aspettare {self._cycle_duration} prima di iniziare la" \
-                   f" partita.\n\n" \
-                   f"Se vuoi iniziare la partita senza aspettarlo, premi Avvia partita su Royal Matchmaking!"
+                f" partita.\n\n" \
+                f"Se vuoi iniziare la partita senza aspettarlo, premi Avvia partita su Royal Matchmaking!"
 
         async def response_later(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             mmresponse.response = "LATER"
             # Can't asyncify this
-            self.interface.session.commit()
+            data.session.commit()
             await self.interface.bot.safe_api_call(client.send_message,
                                                    chat_id=mmevent.creator.telegram[0].tg_id,
                                                    text=telegram_escape(later_string(royal)),
@@ -217,17 +217,17 @@ class MmCommand(Command):
         async def response_no(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                self.interface.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
-                                                                                          royal=royal).one_or_none)
+                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                                                                                royal=royal).one_or_none)
             mmresponse.response = "NO"
             # Can't asyncify this
-            self.interface.session.commit()
+            data.session.commit()
             await update_message()
             return "❌ Hai detto che non ci sarai."
 
         def started_string():
             text = f"🚩 L'evento [b]{mmevent.title}[/b] è iniziato!\n\n" \
-                   f"Partecipano:\n"
+                f"Partecipano:\n"
             for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.response, reverse=True):
                 if mmresponse.response == "YES":
                     text += f"✅ {mmresponse.royal}\n"
@@ -236,8 +236,8 @@ class MmCommand(Command):
             return text
 
         started_without_you_string = f"🚩 Non hai confermato la tua presenza in tempo e [b]{mmevent.title}[/b] è" \
-                                     f" iniziato senza di te.\n" \
-                                     f"Mi dispiace!"
+            f" iniziato senza di te.\n" \
+            f"Mi dispiace!"
 
         async def start_event():
             mmevent.state = "STARTED"
@@ -259,7 +259,7 @@ class MmCommand(Command):
                                                            text=telegram_escape(started_without_you_string),
                                                            parse_mode="HTML",
                                                            disable_webpage_preview=True)
-            await asyncify(self.interface.session.commit)
+            await asyncify(session.commit)
             await update_message()
 
         async def start_key(data: CommandData):
@@ -285,7 +285,7 @@ class MmCommand(Command):
                                                            parse_mode="HTML",
                                                            disable_webpage_preview=True,
                                                            reply_markup=decision_keyboard)
-            await asyncify(self.interface.session.commit)
+            await asyncify(session.commit)
             await update_message()
 
         if mmevent.state == "DECISION":
@@ -300,8 +300,8 @@ class MmCommand(Command):
                     mmdecision.decision = "NO"
                 elif mmdecision.decision == "YES":
                     mmresponse: MMResponse = self.interface.alchemy.MMResponse(royal=mmdecision.royal, mmevent=mmevent)
-                    self.interface.session.add(mmresponse)
-            await asyncify(self.interface.session.commit)
+                    session.add(mmresponse)
+            await asyncify(session.commit)
             await update_message()
 
         if mmevent.state == "READY_CHECK":
@@ -347,12 +347,14 @@ class MmCommand(Command):
         if self.interface.name != "telegram":
             return
         log.debug("Loading pending MMEvents from the database")
-        mmevents = self.interface.session.query(self.interface.alchemy.MMEvent) \
-                                         .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \
-                                         .all()
+        session = interface.alchemy.Session()
+        mmevents = session.query(self.interface.alchemy.MMEvent) \
+            .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \
+            .all()
         log.info(f"Found {len(mmevents)} pending MMEvents")
         for mmevent in mmevents:
-            interface.loop.create_task(self._run_mm(mmevent))
+            session = self.interface.alchemy.Session()
+            interface.loop.create_task(self._run_mm(mmevent, session))
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         if self.interface.name != "telegram":
@@ -380,18 +382,19 @@ class MmCommand(Command):
                                                           title=title,
                                                           description=description,
                                                           state="WAITING")
-        self.interface.session.add(mmevent)
-        await asyncify(self.interface.session.commit)
+        data.session.add(mmevent)
+        await asyncify(data.session.commit)
 
         message: telegram.Message = await self.interface.bot.safe_api_call(client.send_message,
                                                                            chat_id=-1001224004974,
-                                                                           text=telegram_escape(self._main_text(mmevent)),
+                                                                           text=telegram_escape(
+                                                                               self._main_text(mmevent)),
                                                                            parse_mode="HTML",
                                                                            disable_webpage_preview=True,
                                                                            reply_markup=self._main_keyboard(mmevent))
 
         mmevent.message_id = message.message_id
         # Can't asyncify this
-        await asyncify(self.interface.session.commit)
+        await asyncify(data.session.commit)
 
-        await self._run_mm(mmevent)
+        await self._run_mm(mmevent, data.session)
