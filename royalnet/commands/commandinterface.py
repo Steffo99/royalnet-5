@@ -1,5 +1,6 @@
 import typing
 import asyncio
+import royalherald as rh
 from .commanderrors import UnsupportedError
 if typing.TYPE_CHECKING:
     from .command import Command
@@ -17,25 +18,19 @@ class CommandInterface:
     def __init__(self):
         self.command: typing.Optional[Command] = None  # Will be bound after the command has been created
 
-    def register_net_handler(self, message_type: str, network_handler: typing.Callable):
-        """Register a new handler for messages received through Royalnet."""
-        raise UnsupportedError("'register_net_handler' is not supported on this platform")
+    def register_herald_action(self,
+                               event_name: str,
+                               coroutine: typing.Callable[[typing.Any], typing.Awaitable[typing.Dict]]):
+        raise UnsupportedError(f"{self.register_herald_action.__name__} is not supported on this platform")
 
-    def unregister_net_handler(self, message_type: str):
-        """Remove a Royalnet handler."""
-        raise UnsupportedError("'unregister_net_handler' is not supported on this platform")
+    def unregister_herald_action(self, event_name: str):
+        raise UnsupportedError(f"{self.unregister_herald_action.__name__} is not supported on this platform")
 
-    async def net_request(self, message, destination: str) -> dict:
-        """Send data through a :py:class:`royalnet.network.NetworkLink` and wait for a
-        :py:class:`royalnet.network.Reply`.
-
-        Parameters:
-            message: The data to be sent. Must be :py:mod:`pickle`-able.
-            destination: The destination of the request, either in UUID format or node name."""
-        raise UnsupportedError("'net_request' is not supported on this platform")
+    async def call_herald_action(self, destination: str, event_name: str, args: typing.Dict) -> typing.Dict:
+        raise UnsupportedError(f"{self.call_herald_action.__name__} is not supported on this platform")
 
     def register_keyboard_key(self, key_name: str, callback: typing.Callable):
-        raise UnsupportedError("'register_keyboard_key' is not supported on this platform")
+        raise UnsupportedError(f"{self.register_keyboard_key.__name__} is not supported on this platform")
 
     def unregister_keyboard_key(self, key_name: str):
-        raise UnsupportedError("'unregister_keyboard_key' is not supported on this platform")
+        raise UnsupportedError(f"{self.unregister_keyboard_key.__name__} is not supported on this platform")

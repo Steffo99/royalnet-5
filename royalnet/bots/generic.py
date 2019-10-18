@@ -28,7 +28,7 @@ class GenericBot:
         self._Interface = self._interface_factory()
         self._Data = self._data_factory()
         self.commands = {}
-        self.network_handlers: typing.Dict[str, typing.Type[NetworkHandler]] = {}
+        self.network_handlers: typing.Dict[str, typing.Callable[[typing.Any], typing.Awaitable[typing.Dict]]] = {}
         for SelectedCommand in self.uninitialized_commands:
             interface = self._Interface()
             try:
@@ -59,26 +59,25 @@ class GenericBot:
             bot = self
             loop = self.loop
 
-            def register_net_handler(ci, message_type: str, network_handler: typing.Callable):
-                self.network_handlers[message_type] = network_handler
+            def register_herald_action(ci,
+                                       event_name: str,
+                                       coroutine: typing.Callable[[typing.Any], typing.Awaitable[typing.Dict]]) -> None:
+                self.network_handlers[event_name] = coroutine
 
-            def unregister_net_handler(ci, message_type: str):
-                del self.network_handlers[message_type]
+            def unregister_herald_action(ci, event_name: str):
+                del self.network_handlers[event_name]
 
-            async def net_request(ci, request: rh.Request, destination: str) -> dict:
+            async def call_herald_action(ci, destination: str, event_name: str, args: typing.Dict) -> typing.Dict:
                 if self.network is None:
-                    raise Exception("Royalnet is not enabled on this bot")
-                response_dict: dict = await self.network.request(request.to_dict(), destination)
-                if "type" not in response_dict:
-                    raise RoyalnetResponseError("Response is missing a type")
-                elif response_dict["type"] == "ResponseSuccess":
-                    response: typing.Union[rh.ResponseSuccess, rh.ResponseFailure] = rh.ResponseSuccess.from_dict(response_dict)
-                elif response_dict["type"] == "ResponseError":
-                    response = rh.ResponseFailure.from_dict(response_dict)
+                    raise UnsupportedError("royalherald is not enabled on this bot")
+                request: rh.Request = rh.Request(handler=event_name, data=args)
+                response: rh.Response = await self.network.request(destination=destination, request=request)
+                if isinstance(response, rh.ResponseFailure):
+                    raise CommandError(f"royalherald action code failed: {response}")
+                elif isinstance(response, rh.ResponseSuccess):
+                    return response.data
                 else:
-                    raise RoyalnetResponseError("Response type is unknown")
-                response.raise_on_error()
-                return response.data
+                    raise TypeError(f"royalherald returned unknown response: {response}")
 
         return GenericInterface
 
@@ -90,43 +89,31 @@ class GenericBot:
         if self.uninitialized_network_config is not None:
             self.network: rh.Link = rh.Link(self.uninitialized_network_config.master_uri,
                                             self.uninitialized_network_config.master_secret,
-                                            self.interface_name, self._network_handler)
+                                            self.interface_name,
+                                            self._network_handler)
             log.debug(f"Running NetworkLink {self.network}")
             self.loop.create_task(self.network.run())
 
-    async def _network_handler(self, request_dict: dict) -> dict:
-        """Handle a single :py:class:`dict` received from the :py:class:`royalherald.Link`.
-
-        Returns:
-            Another :py:class:`dict`, formatted as a :py:class:`royalherald.Response`."""
-        # Convert the dict to a Request
-        try:
-            request: rh.Request = rh.Request.from_dict(request_dict)
-        except TypeError:
-            log.warning(f"Invalid request received: {request_dict}")
-            return rh.ResponseFailure("invalid_request",
-                                      f"The Request that you sent was invalid. Check extra_info to see what you sent.",
-                                      extra_info={"you_sent": request_dict}).to_dict()
-        log.debug(f"Received {request} from the NetworkLink")
+    async def _network_handler(self, request: rh.Request) -> rh.Response:
         try:
             network_handler = self.network_handlers[request.handler]
         except KeyError:
             log.warning(f"Missing network_handler for {request.handler}")
-            return rh.ResponseFailure("no_handler", f"This Link is missing a network handler for {request.handler}.").to_dict()
-        try:
+            return rh.ResponseFailure("no_handler", f"This bot is missing a network handler for {request.handler}.")
+        else:
             log.debug(f"Using {network_handler} as handler for {request.handler}")
-            response: typing.Union[rh.ResponseSuccess, rh.ResponseFailure] = await getattr(network_handler, self.interface_name)(self, request.data)
-            return response.to_dict()
+        try:
+            response_data = await network_handler(**request.data)
+            return rh.ResponseSuccess(data=response_data)
         except Exception as e:
             sentry_sdk.capture_exception(e)
-            log.debug(f"Exception {e} in {network_handler}")
+            log.error(f"Exception {e} in {network_handler}")
             return rh.ResponseFailure("exception_in_handler",
-                                      f"An exception was raised in {network_handler} for {request.handler}. Check "
-                                      f"extra_info for details.",
+                                      f"An exception was raised in {network_handler} for {request.handler}.",
                                       extra_info={
                                           "type": e.__class__.__name__,
-                                          "str": str(e)
-                                      }).to_dict()
+                                          "message": str(e)
+                                      })
 
     def _init_database(self):
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the packs. Then,
