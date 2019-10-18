@@ -18,7 +18,7 @@ class MmCommand(Command):
     Requires the MM_CHANNEL_ID envvar to be set."""
     name: str = "mm"
 
-    aliases = ["matchmaking", "matchmake"]
+    aliases = ["matchmaking", "matchmake", "lfg", "lookingforgroup"]
 
     description: str = "Trova giocatori per una partita a qualcosa."
 
@@ -117,33 +117,33 @@ class MmCommand(Command):
         async def decision_yes(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="YES")
-                data.session.add(mmdecision)
+                session.add(mmdecision)
             else:
                 mmdecision.decision = "YES"
-            await asyncify(data.session.commit)
+            await asyncify(session.commit)
             await update_message()
             return "🔵 Hai detto che ci sarai!"
 
         async def decision_maybe(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="MAYBE")
-                data.session.add(mmdecision)
+                session.add(mmdecision)
             else:
                 mmdecision.decision = "MAYBE"
             # Can't asyncify this
-            data.session.commit()
+            session.commit()
             await update_message()
             return f"⚫️ Hai detto che forse ci sarai." \
                    f"Rispondi al messaggio di conferma {self._cycle_duration} minuti prima dell'inizio!"
@@ -151,17 +151,17 @@ class MmCommand(Command):
         async def decision_no(data: CommandData):
             royal = await data.get_author()
             mmdecision: MMDecision = await asyncify(
-                data.session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMDecision).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             if mmdecision is None:
                 mmdecision: MMDecision = self.interface.alchemy.MMDecision(royal=royal,
                                                                            mmevent=mmevent,
                                                                            decision="NO")
-                data.session.add(mmdecision)
+                session.add(mmdecision)
             else:
                 mmdecision.decision = "NO"
             # Can't asyncify this
-            data.session.commit()
+            session.commit()
             await update_message()
             return "🔴 Hai detto che non ti interessa."
 
@@ -185,11 +185,11 @@ class MmCommand(Command):
         async def response_yes(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             mmresponse.response = "YES"
             # Can't asyncify this
-            data.session.commit()
+            session.commit()
             await update_message()
             return "✅ Sei pronto!"
 
@@ -201,11 +201,11 @@ class MmCommand(Command):
         async def response_later(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             mmresponse.response = "LATER"
             # Can't asyncify this
-            data.session.commit()
+            session.commit()
             await self.interface.bot.safe_api_call(client.send_message,
                                                    chat_id=mmevent.creator.telegram[0].tg_id,
                                                    text=telegram_escape(later_string(royal)),
@@ -217,11 +217,11 @@ class MmCommand(Command):
         async def response_no(data: CommandData):
             royal = await data.get_author()
             mmresponse: MMResponse = await asyncify(
-                data.session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
+                session.query(self.interface.alchemy.MMResponse).filter_by(mmevent=mmevent,
                                                                                 royal=royal).one_or_none)
             mmresponse.response = "NO"
             # Can't asyncify this
-            data.session.commit()
+            session.commit()
             await update_message()
             return "❌ Hai detto che non ci sarai."
 
@@ -344,57 +344,61 @@ class MmCommand(Command):
 
     def __init__(self, interface):
         super().__init__(interface)
-        if self.interface.name != "telegram":
-            return
-        log.debug("Loading pending MMEvents from the database")
-        session = interface.alchemy.Session()
-        mmevents = session.query(self.interface.alchemy.MMEvent) \
-            .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \
-            .all()
-        log.info(f"Found {len(mmevents)} pending MMEvents")
-        for mmevent in mmevents:
-            session = self.interface.alchemy.Session()
-            interface.loop.create_task(self._run_mm(mmevent, session))
+        # if self.interface.name != "telegram":
+        #     return
+        # log.debug("Loading pending MMEvents from the database")
+        # session = interface.alchemy.Session()
+        # mmevents = session.query(self.interface.alchemy.MMEvent) \
+        #     .filter(self.interface.alchemy.MMEvent.datetime > datetime.datetime.now()) \
+        #     .all()
+        # log.info(f"Found {len(mmevents)} pending MMEvents")
+        # for mmevent in mmevents:
+        #     session = interface.alchemy.Session()
+        #     new_mmevent = session.query(MMEvent).get(mmevent.mmid)
+        #     interface.loop.create_task(self._run_mm(new_mmevent, session, close_at_end=True))
+        # session.close()
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        if self.interface.name != "telegram":
-            raise UnsupportedError("mm is supported only on Telegram")
-        client: telegram.Bot = self.interface.bot.client
-        creator = await data.get_author(error_if_none=True)
-        try:
-            timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
-        except InvalidInputError:
-            timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
-        try:
-            dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring, settings={
-                "PREFER_DATES_FROM": "future"
-            })
-        except OverflowError:
-            dt = None
-        if dt is None:
-            await data.reply("⚠️ La data che hai specificato non è valida.")
-            return
-        if dt <= datetime.datetime.now():
-            await data.reply("⚠️ La data che hai specificato è nel passato.")
-            return
-        mmevent: MMEvent = self.interface.alchemy.MMEvent(creator=creator,
-                                                          datetime=dt,
-                                                          title=title,
-                                                          description=description,
-                                                          state="WAITING")
-        data.session.add(mmevent)
-        await asyncify(data.session.commit)
-
-        message: telegram.Message = await self.interface.bot.safe_api_call(client.send_message,
-                                                                           chat_id=-1001224004974,
-                                                                           text=telegram_escape(
-                                                                               self._main_text(mmevent)),
-                                                                           parse_mode="HTML",
-                                                                           disable_webpage_preview=True,
-                                                                           reply_markup=self._main_keyboard(mmevent))
-
-        mmevent.message_id = message.message_id
-        # Can't asyncify this
-        await asyncify(data.session.commit)
-
-        await self._run_mm(mmevent, data.session)
+        raise UnsupportedError("MmCommand è attualmente disabilitato per via di bug introdotti da cambiamenti nella"
+                               " gestione del database del bot.")
+        # if self.interface.name != "telegram":
+        #     raise UnsupportedError("mm is supported only on Telegram")
+        # client: telegram.Bot = self.interface.bot.client
+        # creator = await data.get_author(error_if_none=True)
+        # try:
+        #     timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
+        # except InvalidInputError:
+        #     timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
+        # try:
+        #     dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring, settings={
+        #         "PREFER_DATES_FROM": "future"
+        #     })
+        # except OverflowError:
+        #     dt = None
+        # if dt is None:
+        #     await data.reply("⚠️ La data che hai specificato non è valida.")
+        #     return
+        # if dt <= datetime.datetime.now():
+        #     await data.reply("⚠️ La data che hai specificato è nel passato.")
+        #     return
+        # mmevent: MMEvent = self.interface.alchemy.MMEvent(creator=creator,
+        #                                                   datetime=dt,
+        #                                                   title=title,
+        #                                                   description=description,
+        #                                                   state="WAITING")
+        # data.session.add(mmevent)
+        # await asyncify(data.session.commit)
+        #
+        # message: telegram.Message = await self.interface.bot.safe_api_call(client.send_message,
+        #                                                                    chat_id=-1001287169422,
+        #                                                                    text=telegram_escape(
+        #                                                                        self._main_text(mmevent)),
+        #                                                                    parse_mode="HTML",
+        #                                                                    disable_webpage_preview=True,
+        #                                                                    reply_markup=self._main_keyboard(mmevent))
+        #
+        # mmevent.message_id = message.message_id
+        # # Can't asyncify this
+        # await asyncify(data.session.commit)
+        #
+        # await self._run_mm(mmevent, data.session)

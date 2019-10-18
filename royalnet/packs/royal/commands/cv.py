@@ -61,11 +61,11 @@ class CvCommand(Command):
                 elif member.status == discord.Status.online:
                     message += "🔵 "
                 elif member.status == discord.Status.idle:
-                    message += "⚫️ "
+                    message += "⚫ "
                 elif member.status == discord.Status.dnd:
                     message += "🔴 "
                 elif member.status == discord.Status.offline:
-                    message += "⚪️ "
+                    message += "⚪ "
                 # Voice
                 if channel != 0:
                     # Voice status
@@ -75,15 +75,15 @@ class CvCommand(Command):
                         message += "🔇 "
                     elif member.voice.self_mute or member.voice.mute:
                         message += "🔈 "
-                    elif member.voice.self_video:
-                        message += "📺 "
+                    elif member.voice.self_video or member.voice.self_stream:
+                        message += "🖥 "
                     else:
                         message += "🔊 "
                 # Nickname
-                if member.nick is not None:
-                    message += f"[i]{member.nick}[/i]"
-                else:
-                    message += member.name
+                # if member.nick is not None:
+                #     message += f"[i]{member.nick}[/i]"
+                # else:
+                message += member.name
                 # Game or stream
                 if member.activity is not None:
                     if member.activity.type == discord.ActivityType.playing:
