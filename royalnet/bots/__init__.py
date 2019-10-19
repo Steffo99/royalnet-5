@@ -1,4 +1,4 @@
-"""Various bot interfaces, and a generic class to create new ones."""
+"""Various bot interfaces, and a common class to create new ones."""
 
 from .generic import GenericBot
 from .telegram import TelegramBot

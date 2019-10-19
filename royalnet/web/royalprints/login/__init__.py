@@ -5,7 +5,7 @@ import datetime
 import bcrypt
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import User
+from royalnet.packs.common.tables import User
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')

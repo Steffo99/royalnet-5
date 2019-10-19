@@ -4,7 +4,8 @@ import flask as f
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import User, Diario
+from royalnet.packs.common.tables import User
+from royalnet.packs.royal.tables import Diario
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')

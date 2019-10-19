@@ -5,6 +5,7 @@ import urllib3
 import asyncio
 import sentry_sdk
 import logging as _logging
+import warnings
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
@@ -54,7 +55,7 @@ class TelegramBot(GenericBot):
         # noinspection PyMethodParameters,PyAbstractClass
         class TelegramData(CommandData):
             def __init__(data, interface: CommandInterface, update: telegram.Update):
-                data.interface = interface
+                super().__init__(interface)
                 data.update = update
 
             async def reply(data, text: str):
@@ -74,7 +75,7 @@ class TelegramBot(GenericBot):
                     if error_if_none:
                         raise CommandError("No command caller for this message")
                     return None
-                query = data.interface.session.query(self.master_table)
+                query = data.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -84,11 +85,12 @@ class TelegramBot(GenericBot):
                 return result
 
             async def keyboard(data, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
+                warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
                 tg_keyboard = []
                 for key in keyboard:
                     press_id = uuid.uuid4()
                     tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
-                    data.interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
+                    data._interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
                 await TelegramBot.safe_api_call(data.update.effective_chat.send_message,
                                                 telegram_escape(text),
                                                 reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
@@ -107,8 +109,7 @@ class TelegramBot(GenericBot):
             try:
                 return await asyncify(f, *args, **kwargs)
             except telegram.error.TimedOut as error:
-                log.debug(f"Timed out during {f.__qualname__} (retrying in 15s): {error}")
-                await asyncio.sleep(15)
+                log.debug(f"Timed out during {f.__qualname__} (retrying immediatly): {error}")
                 continue
             except telegram.error.NetworkError as error:
                 log.debug(f"Network error during {f.__qualname__} (skipping): {error}")
@@ -177,6 +178,8 @@ class TelegramBot(GenericBot):
             error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
+            if __debug__:
+                raise
 
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query
@@ -202,7 +205,10 @@ class TelegramBot(GenericBot):
             error_text = f"⛔️ {e.__class__.__name__}\n"
             error_text += '\n'.join(e.args)
             await self.safe_api_call(query.answer, text=error_text)
-            return
+            if __debug__:
+                raise
+            else:
+                return
         else:
             await self.safe_api_call(query.answer, text=response)
 

@@ -45,7 +45,7 @@ class DiscordBot(GenericBot):
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordData(CommandData):
             def __init__(data, interface: CommandInterface, message: discord.Message):
-                data._interface = interface
+                super().__init__(interface)
                 data.message = message
 
             async def reply(data, text: str):
@@ -145,6 +145,12 @@ class DiscordBot(GenericBot):
                         error_message += '\n'.join(e.args)
                         await data.reply(error_message)
 
+            async def on_connect(cli):
+                log.debug("Connected to Discord")
+
+            async def on_disconnect(cli):
+                log.error("Disconnected from Discord!")
+
             async def on_ready(cli) -> None:
                 log.debug("Connection successful, client is ready")
                 await cli.change_presence(status=discord.Status.online)
@@ -209,7 +215,6 @@ class DiscordBot(GenericBot):
         await self.client.login(token)
         log.info(f"Connecting to Discord")
         await self.client.connect()
-        # TODO: how to stop?
 
     async def add_to_music_data(self, dfiles: typing.List[YtdlDiscord], guild: discord.Guild):
         """Add a list of :py:class:`royalnet.audio.YtdlDiscord` to the corresponding music_data object."""

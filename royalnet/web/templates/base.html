@@ -41,14 +41,14 @@
                         {% if session["royal"]["avatar"] %}
                             <img class="nav-image" alt="" src="{{ session["royal"]["avatar"] }}">
                         {% else %}
-                            <img class="nav-image" alt="" src="{{ url_for("static", filename="generic.png") }}">
+                            <img class="nav-image" alt="" src="{{ url_for("static", filename="common.png") }}">
                         {% endif %}
                     </a>
                 {% else %}
                     <span class="nav-login">
                         <a class="no-icon" href="{{ url_for("tglogin.tglogin_index") }}">
                             Login
-                            <img class="nav-image disabled" alt="" src="{{ url_for("static", filename="generic.png") }}">
+                            <img class="nav-image disabled" alt="" src="{{ url_for("static", filename="common.png") }}">
                         </a>
                     </span>
                 {% endif %}
