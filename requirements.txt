@@ -23,6 +23,7 @@ markdown2==2.3.8
 MarkupSafe==1.1.1
 mcstatus==2.2.1
 multidict==4.5.2
+psycopg2-binary==2.8.3
 pycparser==2.19
 python-dateutil==2.8.0
 python-telegram-bot==12.2.0
