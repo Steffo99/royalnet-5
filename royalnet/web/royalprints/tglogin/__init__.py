@@ -6,7 +6,7 @@ import datetime
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import User, Telegram
+from royalnet.packs.common.tables import User, Telegram
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')

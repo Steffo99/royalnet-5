@@ -4,8 +4,8 @@ import flask as f
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error
-from ....database.tables import *
 from ....utils.wikirender import prepare_page_markdown, RenderError
+from royalnet.packs.royal.tables import *
 
 
 # Maybe some of these tables are optional...

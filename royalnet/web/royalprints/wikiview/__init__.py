@@ -4,7 +4,8 @@ import flask as f
 import os
 from ...royalprint import Royalprint
 from ...shortcuts import error, from_urluuid
-from ....database.tables import User, WikiPage, WikiRevision
+from royalnet.packs.common.tables import User
+from royalnet.packs.royal.tables import WikiPage, WikiRevision
 from ....utils.wikirender import prepare_page_markdown, RenderError
 
 

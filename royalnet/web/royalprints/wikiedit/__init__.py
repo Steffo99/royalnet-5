@@ -6,7 +6,8 @@ import datetime
 import difflib
 from ...royalprint import Royalprint
 from ...shortcuts import error, from_urluuid
-from ....database.tables import User, WikiPage, WikiRevision
+from royalnet.packs.common.tables import User
+from royalnet.packs.royal.tables import WikiPage, WikiRevision
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')

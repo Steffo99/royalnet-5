@@ -4,7 +4,8 @@ import datetime
 import difflib
 import uuid
 from royalnet.database import Alchemy
-from royalnet.database.tables import User, WikiPage, WikiRevision
+from royalnet.packs.common.tables import User
+from royalnet.packs.royal.tables import WikiPage, WikiRevision
 
 
 if __name__ == "__main__":

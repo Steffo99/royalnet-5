@@ -4,6 +4,9 @@ import setuptools
 with open("README.md", "r") as f:
     long_description = f.read()
 
+with open("requirements.txt", "r") as f:
+    install_requires = f.readlines()
+
 setuptools.setup(
     name="royalnet",
     version=royalnet.version.semantic,
@@ -14,25 +17,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/royal-games/royalnet",
     packages=setuptools.find_packages(),
-    install_requires=["python-telegram-bot>=11.1.0",
-                      "discord.py>=1.0.1",
-                      "royalherald>=5.0b7",
-                      "psycopg2-binary>=2.8",
-                      "aiohttp>=3.5.4",
-                      "sqlalchemy>=1.3.2",
-                      "Markdown>=3.1",
-                      "dateparser>=0.7.1",
-                      "youtube_dl>=2019.4.24",
-                      "ffmpeg-python>=0.1.17",
-                      "PyNaCl>=1.3.0",
-                      "werkzeug>=0.15.4",
-                      "flask>=1.0.3",
-                      "markdown2>=2.3.8",
-                      "mcstatus>=2.2.1",
-                      "sortedcontainers>=2.1.0",
-                      "sentry-sdk>=0.11.1",
-                      "click>=7.0",
-                      "keyring>=19.2.0"],
+    install_requires=install_requires,
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",
