@@ -29,7 +29,7 @@ class GenericBot:
         self._Data = self._data_factory()
         self.commands = {}
         self.network_handlers: typing.Dict[str, typing.Callable[["GenericBot", typing.Any],
-                                                                typing.Awaitable[typing.Dict]]] = {}
+                                                                typing.Awaitable[typing.Optional[typing.Dict]]]] = {}
         for SelectedCommand in self.uninitialized_commands:
             interface = self._Interface()
             try:
@@ -97,26 +97,29 @@ class GenericBot:
             log.debug(f"Running NetworkLink {self.network}")
             self.loop.create_task(self.network.run())
 
-    async def _network_handler(self, request: rh.Request) -> rh.Response:
+    async def _network_handler(self, message: typing.Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
-            network_handler = self.network_handlers[request.handler]
+            network_handler = self.network_handlers[message.handler]
         except KeyError:
-            log.warning(f"Missing network_handler for {request.handler}")
-            return rh.ResponseFailure("no_handler", f"This bot is missing a network handler for {request.handler}.")
+            log.warning(f"Missing network_handler for {message.handler}")
+            return rh.ResponseFailure("no_handler", f"This bot is missing a network handler for {message.handler}.")
         else:
-            log.debug(f"Using {network_handler} as handler for {request.handler}")
-        try:
-            response_data = await network_handler(self, **request.data)
-            return rh.ResponseSuccess(data=response_data)
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            log.error(f"Exception {e} in {network_handler}")
-            return rh.ResponseFailure("exception_in_handler",
-                                      f"An exception was raised in {network_handler} for {request.handler}.",
-                                      extra_info={
-                                          "type": e.__class__.__name__,
-                                          "message": str(e)
-                                      })
+            log.debug(f"Using {network_handler} as handler for {message.handler}")
+        if isinstance(message, rh.Request):
+            try:
+                response_data = await network_handler(self, **message.data)
+                return rh.ResponseSuccess(data=response_data)
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                log.error(f"Exception {e} in {network_handler}")
+                return rh.ResponseFailure("exception_in_handler",
+                                          f"An exception was raised in {network_handler} for {message.handler}.",
+                                          extra_info={
+                                              "type": e.__class__.__name__,
+                                              "message": str(e)
+                                          })
+        elif isinstance(message, rh.Broadcast):
+            await network_handler(self, **message.data)
 
     def _init_database(self):
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the packs. Then,

@@ -30,7 +30,7 @@ python-telegram-bot==12.2.0
 pytz==2019.3
 pywin32-ctypes==0.2.0
 regex==2019.8.19
-royalherald==5.0b8
+royalherald==5.1b2
 sentry-sdk==0.13.0
 six==1.12.0
 sortedcontainers==2.1.0
