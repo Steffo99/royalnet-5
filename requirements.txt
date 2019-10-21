@@ -12,7 +12,7 @@ discord.py==1.2.4
 dnspython==1.15.0
 dnspython3==1.15.0
 entrypoints==0.3
-ffmpeg==1.4
+ffmpeg-python==0.2.0
 Flask==1.1.1
 future==0.18.1
 idna==2.8
