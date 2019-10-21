@@ -74,6 +74,8 @@ class GenericBot:
                 request: rh.Request = rh.Request(handler=event_name, data=args)
                 response: rh.Response = await self.network.request(destination=destination, request=request)
                 if isinstance(response, rh.ResponseFailure):
+                    if response.extra_info["type"] == "CommandError":
+                        raise CommandError(response.extra_info["message"])
                     raise CommandError(f"Herald action call failed:\n"
                                        f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):

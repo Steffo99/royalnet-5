@@ -5,9 +5,6 @@ from royalnet.packs.common.tables import Discord
 
 from .diario import Diario
 from .aliases import Alias
-from .activekvgroups import ActiveKvGroup
-from .keyvalues import Keyvalue
-from .keygroups import Keygroup
 from .wikipages import WikiPage
 from .wikirevisions import WikiRevision
 from .bios import Bio
@@ -24,9 +21,6 @@ available_tables = [
     Discord,
     Diario,
     Alias,
-    ActiveKvGroup,
-    Keyvalue,
-    Keygroup,
     WikiPage,
     WikiRevision,
     Bio,
