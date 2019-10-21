@@ -8,6 +8,8 @@ class RollCommand(Command):
 
     description: str = "Roll a dice, from N to M (defaults to 1-100)."
 
+    syntax = "[min] [max]"
+
     aliases = ["r", "random"]
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
@@ -23,4 +25,4 @@ class RollCommand(Command):
             minimum = 1
             maximum = 100
         result = random.randrange(minimum, maximum+1)
-        await data.reply(f"🎲 Dice roll [{minimum}-{maximum}]: {result}")
+        await data.reply(f"🎲 Dice roll [{minimum}-{maximum}]: [b]{result}[/b]")

@@ -1,9 +1,11 @@
 # Imports go here!
-
+from .roll import RollCommand
+from .dice import DiceCommand
 
 # Enter the commands of your Pack here!
 available_commands = [
-
+    RollCommand,
+    DiceCommand,
 ]
 
 # Don't change this, it should automatically generate __all__
