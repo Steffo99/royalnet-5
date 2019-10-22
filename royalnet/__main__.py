@@ -101,6 +101,10 @@ def run(telegram: typing.Optional[bool],
 
     telegram_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["telegram"]:
+        click.echo("\n@BotFather Commands String")
+        for command in enabled_commands:
+            click.echo(f"{command.name} - {command.description}")
+        click.echo("")
         telegram_bot = r.bots.TelegramBot(network_config=network_config,
                                           database_config=telegram_db_config,
                                           sentry_dsn=sentry_dsn,
