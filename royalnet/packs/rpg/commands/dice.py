@@ -7,6 +7,8 @@ class DiceCommand(Command):
 
     description: str = "Roll a dice, using 'dice'."
 
+    syntax = "{dice}"
+
     aliases = ["d"]
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
