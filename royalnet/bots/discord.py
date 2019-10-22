@@ -144,6 +144,8 @@ class DiscordBot(GenericBot):
                         error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
                         error_message += '\n'.join(e.args)
                         await data.reply(error_message)
+                # Close the data session
+                await data.session_close()
 
             async def on_connect(cli):
                 log.debug("Connected to Discord")

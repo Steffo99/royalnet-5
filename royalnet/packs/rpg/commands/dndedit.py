@@ -1,13 +1,13 @@
 from royalnet.commands import *
-from ..tables import DndCharacter
+from ..tables import DndCharacter, DndActiveCharacter
 
 
-class DndnewCommand(Command):
-    name: str = "dndnew"
+class DndeditCommand(Command):
+    name: str = "dndedit"
 
-    description: str = "Create a new DnD character."
+    description: str = "Edit the active DnD character."
 
-    aliases = ["dn", "dndn", "new", "dnew"]
+    aliases = ["de", "dnde", "edit", "dedit"]
 
     syntax = "{name}\n" \
              "LV {level}\n" \
@@ -22,7 +22,7 @@ class DndnewCommand(Command):
              "MAXHP {max_hp}\n" \
              "AC {armor_class}"
 
-    tables = {DndCharacter}
+    tables = {DndCharacter, DndActiveCharacter}
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         name, level, strength, dexterity, constitution, intelligence, wisdom, charisma, max_hp, armor_class = \
@@ -30,7 +30,7 @@ class DndnewCommand(Command):
                        r"LV\s+(\d+)\s+"
                        r"STR\s+(\d+)\s+"
                        r"DEX\s+(\d+)\s+"
-                       r"COS\s+(\d+)\s+"
+                       r"CON\s+(\d+)\s+"
                        r"INT\s+(\d+)\s+"
                        r"WIS\s+(\d+)\s+"
                        r"CHA\s+(\d+)\s+"
@@ -43,17 +43,17 @@ class DndnewCommand(Command):
         else:
             raise CommandError("Character names cannot be composed of only a number.")
         author = await data.get_author(error_if_none=True)
-        char = self.alchemy.DndCharacter(name=name,
-                                         level=level,
-                                         strength=strength,
-                                         dexterity=dexterity,
-                                         constitution=constitution,
-                                         intelligence=intelligence,
-                                         wisdom=wisdom,
-                                         charisma=charisma,
-                                         max_hp=max_hp,
-                                         armor_class=armor_class,
-                                         creator=author)
+        char = author.dnd_active_character.character
+        char.name = name
+        char.level = level
+        char.strength = strength
+        char.dexterity = dexterity
+        char.constitution = constitution
+        char.intelligence = intelligence
+        char.wisdom = wisdom
+        char.charisma = charisma
+        char.max_hp = max_hp
+        char.armor_class = armor_class
         data.session.add(char)
         await data.session_commit()
-        await data.reply(f"✅ Character [b]{char.name}[/b] ([c]{char.character_id}[/c]) was created!")
+        await data.reply(f"✅ Edit successful!")

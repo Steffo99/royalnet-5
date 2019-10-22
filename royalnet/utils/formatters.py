@@ -22,15 +22,18 @@ def andformat(l: typing.List[str], middle=", ", final=" and ") -> str:
     return result
 
 
-def plusformat(i: int) -> str:
+def plusformat(i: int, empty_if_zero: bool = False) -> str:
     """Convert an :py:class:`int` to a :py:class:`str`, prepending a ``+`` if it's greater than 0.
 
     Parameters:
         i: the :py:class:`int` to convert.
+        empty_if_zero: Return an empty string if ``i`` is zero.
 
     Returns:
         The resulting :py:class:`str`."""
-    if i >= 0:
+    if i == 0 and empty_if_zero:
+        return ""
+    if i > 0:
         return f"+{i}"
     return str(i)
 

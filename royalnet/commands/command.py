@@ -26,5 +26,10 @@ class Command:
     def __init__(self, interface: CommandInterface):
         self.interface = interface
 
+    @property
+    def alchemy(self):
+        """A shortcut to ``self.interface.alchemy``"""
+        return self.interface.alchemy
+
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         raise NotImplementedError()

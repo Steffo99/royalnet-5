@@ -90,6 +90,9 @@ class DndCharacter:
         return f"<{self.__class__.__qualname__} {self.name}>"
 
     def __str__(self):
+        return f"{self.name}"
+
+    def character_sheet(self):
         return f"{self.name}\n" \
                f"LV {self.level}\n\n" \
                f"STR {self.strength}\n" \

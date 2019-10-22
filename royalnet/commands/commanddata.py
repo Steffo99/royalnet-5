@@ -2,6 +2,7 @@ import typing
 import warnings
 from .commanderrors import UnsupportedError
 from .commandinterface import CommandInterface
+from ..utils import asyncify
 
 
 class CommandData:
@@ -10,6 +11,18 @@ class CommandData:
         if len(self._interface.command.tables) > 0:
             self.session = self._interface.alchemy.Session()
         else:
+            self.session = None
+
+    async def session_commit(self):
+        """Commit the changes to the session."""
+        await asyncify(self.session.commit)
+
+    async def session_close(self):
+        """Close the opened session.
+
+        Remember to call this when the data is disposed of!"""
+        if self.session:
+            await asyncify(self.session.close)
             self.session = None
 
     async def reply(self, text: str) -> None:

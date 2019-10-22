@@ -178,8 +178,8 @@ class TelegramBot(GenericBot):
             error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
-            if __debug__:
-                raise
+        # Close the data session
+        await data.session_close()
 
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query
