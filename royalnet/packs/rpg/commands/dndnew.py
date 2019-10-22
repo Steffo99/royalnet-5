@@ -1,3 +1,4 @@
+import re
 from royalnet.commands import *
 from ..tables import DndCharacter
 
@@ -35,7 +36,7 @@ class DndnewCommand(Command):
                        r"WIS\s+(\d+)\s+"
                        r"CHA\s+(\d+)\s+"
                        r"MAXHP\s+(\d+)\s+"
-                       r"AC\s+(\d+)")
+                       r"AC\s+(\d+)", re.IGNORECASE)
         try:
             int(name)
         except ValueError:
