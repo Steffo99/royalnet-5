@@ -205,10 +205,6 @@ class TelegramBot(GenericBot):
             error_text = f"⛔️ {e.__class__.__name__}\n"
             error_text += '\n'.join(e.args)
             await self.safe_api_call(query.answer, text=error_text)
-            if __debug__:
-                raise
-            else:
-                return
         else:
             await self.safe_api_call(query.answer, text=response)
 
