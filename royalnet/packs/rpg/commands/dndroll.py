@@ -16,6 +16,12 @@ class DndrollCommand(Command):
 
     tables = {DndCharacter, DndActiveCharacter}
 
+    @staticmethod
+    def _roll():
+        return random.randrange(1, 21)
+
+    _roll_string = "1d20"
+
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         author = await data.get_author(error_if_none=True)
         if author.dnd_active_character is None:
@@ -73,12 +79,12 @@ class DndrollCommand(Command):
 
         total_mod = stat_mod + proficiency_mod + extra_mod
 
-        roll = random.randrange(1, 21)
+        roll = self._roll()
 
         result = roll + total_mod
 
         await data.reply(f"🎲 Rolling {stat_name}{proficiency_name}{plusformat(extra_mod, empty_if_zero=True)}:\n"
-                         f"1d20"
+                         f"{self._roll_string}"
                          f"{plusformat(stat_mod, empty_if_zero=True)}"
                          f"{plusformat(proficiency_mod, empty_if_zero=True)}"
                          f"{plusformat(extra_mod, empty_if_zero=True)}"
