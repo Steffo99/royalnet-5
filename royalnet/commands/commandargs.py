@@ -15,12 +15,12 @@ class CommandArgs(list):
             try:
                 return super().__getitem__(item)
             except IndexError:
-                raise InvalidInputError(f'Tried to get missing [{item}] arg from CommandArgs')
+                raise InvalidInputError(f'Missing argument #{item+1}.')
         if isinstance(item, slice):
             try:
                 return super().__getitem__(item)
             except IndexError:
-                raise InvalidInputError(f'Tried to get invalid [{item}] slice from CommandArgs')
+                raise InvalidInputError(f'Cannot get arguments from #{item.start+1} to #{item.stop+1}.')
         raise ValueError(f"Invalid type passed to CommandArgs.__getattr__: {type(item)}")
 
     def joined(self, *, require_at_least=0) -> str:
@@ -35,7 +35,7 @@ class CommandArgs(list):
         Returns:
             The space-joined string."""
         if len(self) < require_at_least:
-            raise InvalidInputError("Not enough arguments")
+            raise InvalidInputError(f"Not enough arguments specified (minimum is {require_at_least}).")
         return " ".join(self)
 
     def match(self, pattern: typing.Union[str, typing.Pattern], *flags) -> typing.Sequence[typing.AnyStr]:
@@ -52,7 +52,7 @@ class CommandArgs(list):
         text = self.joined()
         match = re.match(pattern, text, *flags)
         if match is None:
-            raise InvalidInputError("Pattern didn't match")
+            raise InvalidInputError("Invalid syntax.")
         return match.groups()
 
     def optional(self, index: int, default=None):
