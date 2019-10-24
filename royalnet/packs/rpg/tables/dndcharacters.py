@@ -92,27 +92,27 @@ class DndCharacter:
         return Column(Integer, nullable=False)
 
     @declared_attr
-    def strength_proficiency(self):
+    def strength_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
-    def dexterity_proficiency(self):
+    def dexterity_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
-    def constitution_proficiency(self):
+    def constitution_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
-    def intelligence_proficiency(self):
+    def intelligence_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
-    def wisdom_proficiency(self):
+    def wisdom_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
-    def charisma_proficiency(self):
+    def charisma_save_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
     @declared_attr
@@ -187,29 +187,33 @@ class DndCharacter:
     def survival_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
+    @declared_attr
+    def sanity_proficiency(self):
+        return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
+
     @property
     def strength_save(self):
-        return self.strength + self.proficiency_bonus * self.strength_proficiency.value
+        return self.strength + self.proficiency_bonus * self.strength_save_proficiency.value
 
     @property
     def dexterity_save(self):
-        return self.dexterity + self.proficiency_bonus * self.dexterity_proficiency.value
+        return self.dexterity + self.proficiency_bonus * self.dexterity_save_proficiency.value
 
     @property
     def constitution_save(self):
-        return self.constitution + self.proficiency_bonus * self.constitution_proficiency.value
+        return self.constitution + self.proficiency_bonus * self.constitution_save_proficiency.value
 
     @property
     def intelligence_save(self):
-        return self.intelligence + self.proficiency_bonus * self.intelligence_proficiency.value
+        return self.intelligence + self.proficiency_bonus * self.intelligence_save_proficiency.value
 
     @property
     def wisdom_save(self):
-        return self.wisdom + self.proficiency_bonus * self.wisdom_proficiency.value
+        return self.wisdom + self.proficiency_bonus * self.wisdom_save_proficiency.value
 
     @property
     def charisma_save(self):
-        return self.charisma + self.proficiency_bonus * self.charisma_proficiency.value
+        return self.charisma + self.proficiency_bonus * self.charisma_save_proficiency.value
 
     @property
     def acrobatics(self):
