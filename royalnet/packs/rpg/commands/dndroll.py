@@ -1,94 +1,146 @@
-import typing
+import re
 import random
 from royalnet.commands import *
-from royalnet.utils import plusformat
 from ..tables import DndCharacter, DndActiveCharacter
+from royalnet.utils import plusformat
 
 
 class DndrollCommand(Command):
     name: str = "dndroll"
 
-    description: str = "Roll as the active DnD character."
+    description: str = "Roll dice as the active DnD character."
 
-    aliases = ["dr", "dndr", "droll"]
-
-    syntax = "{stat} [proficiency] [modifier]"
+    aliases = ["dr", "dndr", "roll", "droll"]
 
     tables = {DndCharacter, DndActiveCharacter}
 
-    @staticmethod
-    def _roll():
-        return random.randrange(1, 21)
+    _skill_names = {
+        "str": "strength",
+        "for": "strength",
+        "dex": "dexterity",
+        "des": "dexterity",
+        "con": "constitution",
+        "cos": "constitution",
+        "inte": "intelligence",
+        "wis": "wisdom",
+        "sag": "wisdom",
+        "cha": "charisma",
+        "car": "charisma",
 
-    _roll_string = "1d20"
+        "ststr": "strength_save",
+        "stfor": "strength_save",
+        "stdex": "dexterity_save",
+        "stdes": "dexterity_save",
+        "stcon": "constitution_save",
+        "stcos": "constitution_save",
+        "stint": "intelligence_save",
+        "stwis": "wisdom_save",
+        "stsag": "wisdom_save",
+        "stcha": "charisma_save",
+        "stcar": "charisma_save",
+
+        "tsstr": "strength_save",
+        "tsfor": "strength_save",
+        "tsdex": "dexterity_save",
+        "tsdes": "dexterity_save",
+        "tscon": "constitution_save",
+        "tscos": "constitution_save",
+        "tsint": "intelligence_save",
+        "tswis": "wisdom_save",
+        "tssag": "wisdom_save",
+        "tscha": "charisma_save",
+        "tscar": "charisma_save",
+
+        "acr": "acrobatics",
+        "add": "animal_handling",
+        "ani": "animal_handling",
+        "arc": "arcana",
+        "ath": "athletics",
+        "dec": "deception",
+        "ing": "deception",
+        "his": "history",
+        "sto": "history",
+        "ins": "insight",
+        "intu": "insight",
+        "inti": "intimidation",
+        "inv": "investigation",
+        "med": "medicine",
+        "nat": "nature",
+        "perc": "perception",
+        "perf": "performance",
+        "pers": "persuasion",
+        "rel": "religion",
+        "sle": "sleight_of_hand",
+        "soh": "sleight_of_hand",
+        "rap": "sleight_of_hand",
+        "ste": "stealth",
+        "nas": "stealth",
+        "sur": "survival",
+        "sop": "sopravvivenza",
+    }
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         author = await data.get_author(error_if_none=True)
         if author.dnd_active_character is None:
             raise CommandError("You don't have an active character.")
         char: DndCharacter = author.dnd_active_character.character
-        stat: str = args[0]
-        second: typing.Optional[str] = args.optional(1)
-        third: typing.Optional[str] = args.optional(2)
+
+        first = args[0]
+        second = args.optional(1)
+        third = args.optional(2)
+
+        advantage = False
+        disadvantage = False
+        extra_modifier = 0
 
         if third:
-            extra_mod: int = int(third)
-        else:
-            extra_mod: int = 0
-
-        if second:
-            if second.startswith("e") or second.startswith("x"):
-                proficiency_mul: float = 2.0
-                proficiency_name: str = " with Expertise"
-            elif second.startswith("f") or second.startswith("n") or second.startswith("c"):
-                proficiency_mul: float = 1.0
-                proficiency_name: str = " with Proficiency"
-            elif second.startswith("h") or second == "/" or second.startswith("m"):
-                proficiency_mul: float = 0.5
-                proficiency_name: str = " with Half Proficiency"
-            elif second.startswith("h") or second == "/" or second.startswith("m"):
-                proficiency_mul: float = 0.0
-                proficiency_name: str = " [i]without Proficiency[/i]"
+            try:
+                extra_modifier = int(third)
+            except ValueError:
+                raise InvalidInputError("Invalid modifier value (third parameter).")
+            if second.startswith("a") or second.startswith("v"):
+                advantage = True
+            elif second.startswith("d") or second.startswith("d"):
+                disadvantage = True
             else:
-                raise CommandError(f"Unknown proficiency type '{second}'")
-            proficiency_mod: int = int(char.proficiency_bonus * proficiency_mul)
+                raise InvalidInputError("Invalid advantage string (second parameter).")
+
+        elif second:
+            try:
+                extra_modifier = int(second)
+            except ValueError:
+                if second.startswith("a") or second.startswith("v"):
+                    advantage = True
+                elif second.startswith("d") or second.startswith("d"):
+                    disadvantage = True
+                else:
+                    raise InvalidInputError("Invalid modifier value or advantage string (second parameter).")
+
+        skill_short_name = first
+        for root in self._skill_names:
+            if skill_short_name.startswith(root):
+                skill_name = self._skill_names[root]
+                break
         else:
-            proficiency_name: str = ""
-            proficiency_mod: int = 0
+            raise CommandError("Invalid skill name (first parameter).")
 
-        if stat.startswith("st") or stat.startswith("fo"):
-            stat_mod: int = char.strength_mod
-            stat_name: str = "[i]STR[/i]"
-        elif stat.startswith("de"):
-            stat_mod: int = char.dexterity_mod
-            stat_name: str = "[i]DEX[/i]"
-        elif stat.startswith("co"):
-            stat_mod: int = char.constitution_mod
-            stat_name: str = "[i]CON[/i]"
-        elif stat.startswith("in"):
-            stat_mod: int = char.intelligence_mod
-            stat_name: str = "[i]INT[/i]"
-        elif stat.startswith("wi") or stat.startswith("sa"):
-            stat_mod: int = char.wisdom_mod
-            stat_name: str = "[i]WIS[/i]"
-        elif stat.startswith("ch") or stat.startswith("ca"):
-            stat_mod: int = char.charisma_mod
-            stat_name: str = "[i]CHA[/i]"
+        skill_modifier = char.__getattribute__(skill_name)
+        modifier = skill_modifier + extra_modifier
+        modifier_str = plusformat(modifier, empty_if_zero=True)
+
+        if advantage:
+            roll_a = random.randrange(1, 21)
+            roll_b = random.randrange(1, 21)
+            roll = max([roll_a, roll_b])
+            total = roll + modifier
+            await data.reply(f"🎲 2d20h1{modifier_str} = ({roll_a}|{roll_b}){modifier_str} = [b]{total}[/b]")
+        elif disadvantage:
+            roll_a = random.randrange(1, 21)
+            roll_b = random.randrange(1, 21)
+            roll = min([roll_a, roll_b])
+            total = roll + modifier
+            await data.reply(f"🎲 2d20l1{modifier_str} = ({roll_a}|{roll_b}){modifier_str} = [b]{total}[/b]")
         else:
-            raise CommandError(f"Unknown stat '{stat}'")
-
-        total_mod = stat_mod + proficiency_mod + extra_mod
-
-        roll = self._roll()
-
-        result = roll + total_mod
-
-        await data.reply(f"🎲 Rolling {stat_name}{proficiency_name}{plusformat(extra_mod, empty_if_zero=True)}:\n"
-                         f"{self._roll_string}"
-                         f"{plusformat(stat_mod, empty_if_zero=True)}"
-                         f"{plusformat(proficiency_mod, empty_if_zero=True)}"
-                         f"{plusformat(extra_mod, empty_if_zero=True)}"
-                         f" = "
-                         f"{roll}{plusformat(total_mod, empty_if_zero=True)}"
-                         f" = "
-                         f"[b]{result}[/b]")
+            roll = random.randrange(1, 21)
+            total = roll + modifier
+            await data.reply(f"🎲 1d20{modifier_str} = {roll}{modifier_str} = [b]{total}[/b]")
