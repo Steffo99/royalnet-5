@@ -39,9 +39,10 @@ class DndnewCommand(Command):
         column_names = [column.name for column in columns if (not column.primary_key and
                                                               not column.foreign_keys and
                                                               column.name != "name")]
-        message = "ℹ️ [b]Character sheet format:[/b]"
+        message = "ℹ️ Character Sheet syntax:\n[p]\nName\n"
         for column_name in column_names:
             message += f"{column_name} _\n"
+        message += "[/p]"
         return message
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:

@@ -187,10 +187,6 @@ class DndCharacter:
     def survival_proficiency(self):
         return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
 
-    @declared_attr
-    def sanity_proficiency(self):
-        return Column(Enum(DndProficiencyType), nullable=False, default=DndProficiencyType.NONE)
-
     @property
     def strength_save(self):
         return self.strength + self.proficiency_bonus * self.strength_save_proficiency.value

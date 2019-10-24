@@ -91,11 +91,11 @@ class DndrollCommand(Command):
 
         advantage = False
         disadvantage = False
-        modifier = 0
+        extra_modifier = 0
 
         if third:
             try:
-                modifier = int(second)
+                extra_modifier = int(third)
             except ValueError:
                 raise InvalidInputError("Invalid modifier value (third parameter).")
             if second.startswith("a") or second.startswith("v"):
@@ -107,7 +107,7 @@ class DndrollCommand(Command):
 
         elif second:
             try:
-                modifier = int(second)
+                extra_modifier = int(second)
             except ValueError:
                 if second.startswith("a") or second.startswith("v"):
                     advantage = True
@@ -124,7 +124,8 @@ class DndrollCommand(Command):
         else:
             raise CommandError("Invalid skill name (first parameter).")
 
-        modifier = char.__getattribute__(skill_name)
+        skill_modifier = char.__getattribute__(skill_name)
+        modifier = skill_modifier + extra_modifier
         modifier_str = plusformat(modifier, empty_if_zero=True)
 
         if advantage:
