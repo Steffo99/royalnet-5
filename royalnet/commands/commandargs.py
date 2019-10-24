@@ -55,7 +55,7 @@ class CommandArgs(list):
             raise InvalidInputError("Invalid syntax.")
         return match.groups()
 
-    def optional(self, index: int, default=None):
+    def optional(self, index: int, default=None) -> typing.Optional[str]:
         """Get the argument at a specific index, but don't raise an error if nothing is found, instead returning the ``default`` value.
 
         Parameters:
