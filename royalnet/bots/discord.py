@@ -20,6 +20,9 @@ class MusicData:
         self.playmode: playmodes.PlayMode = playmodes.Playlist()
         self.voice_client: typing.Optional[discord.VoiceClient] = None
 
+    def queue_preview(self):
+        return self.playmode.queue_preview()
+
 
 class DiscordBot(GenericBot):
     """A bot that connects to `Discord <https://discordapp.com/>`_."""
