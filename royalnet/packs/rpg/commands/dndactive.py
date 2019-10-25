@@ -22,7 +22,7 @@ class DndactiveCommand(Command):
             if author.dnd_active_character is None:
                 await data.reply("ℹ️ You have no active characters.")
             else:
-                await data.reply(f"ℹ️ You currently have [b]{author.dnd_active_character}[/b] as active character.")
+                await data.reply(f"ℹ️ You currently active character is [b]{author.dnd_active_character}[/b].")
             return
         try:
             identifier = int(identifier)

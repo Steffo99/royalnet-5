@@ -116,7 +116,7 @@ class DndrollCommand(Command):
                 else:
                     raise InvalidInputError("Invalid modifier value or advantage string (second parameter).")
 
-        skill_short_name = first
+        skill_short_name = first.lower()
         for root in self._skill_names:
             if skill_short_name.startswith(root):
                 skill_name = self._skill_names[root]
