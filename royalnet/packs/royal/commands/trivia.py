@@ -36,7 +36,6 @@ class TriviaCommand(Command):
         if self._question_lock:
             raise CommandError("C'è già un'altra domanda attiva!")
         self._question_lock = True
-        await data.delete_invoking()
         # Fetch the question
         async with aiohttp.ClientSession() as session:
             async with session.get("https://opentdb.com/api.php?amount=1") as response:
