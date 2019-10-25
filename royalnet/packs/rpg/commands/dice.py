@@ -13,7 +13,14 @@ class DiceCommand(Command):
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         dice_str = args.joined(require_at_least=1)
-        roll = dice.roll(dice_str)
+        try:
+            roll = dice.roll(dice_str)
+        except dice.DiceFatalException as e:
+            raise CommandError(e.msg)
+        except dice.DiceException as e:
+            raise CommandError(e.msg)
+        except dice.DiceBaseException as e:
+            raise CommandError(str(e))
         try:
             result = list(roll)
         except TypeError:
