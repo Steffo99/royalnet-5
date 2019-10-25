@@ -16,9 +16,14 @@ class DndactiveCommand(Command):
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         identifier = args.optional(0)
+        author = await data.get_author(error_if_none=True)
         if identifier is None:
-            # Display the active character identifiers
-            ...
+            # Display the active character
+            if author.dnd_active_character is None:
+                await data.reply("ℹ️ You have no active characters.")
+            else:
+                await data.reply(f"ℹ️ You currently have [b]{author.dnd_active_character}[/b] as active character.")
+            return
         try:
             identifier = int(identifier)
         except ValueError:
@@ -40,7 +45,6 @@ class DndactiveCommand(Command):
         if char is None:
             raise CommandError("No character found.")
         # Check if the player already has an active character
-        author = await data.get_author(error_if_none=True)
         if author.dnd_active_character is None:
             # Create a new active character
             achar = self.alchemy.DndActiveCharacter(character=char, user=author)
