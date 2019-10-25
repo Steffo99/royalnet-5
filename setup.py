@@ -29,6 +29,7 @@ setuptools.setup(
         "Topic :: Multimedia :: Video",
         "License :: OSI Approved :: MIT License"
     ],
+    dependency_links=["https://github.com/Rapptz/discord.py/tarball/master"],
     include_package_data=True,
     zip_safe=False
 )

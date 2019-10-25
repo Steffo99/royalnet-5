@@ -9,7 +9,6 @@ Click==7.0
 cryptography==2.8
 dateparser==0.7.2
 dice==2.4.2
-discord.py==1.2.4
 dnspython==1.15.0
 dnspython3==1.15.0
 entrypoints==0.3
