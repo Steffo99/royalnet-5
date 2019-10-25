@@ -26,14 +26,13 @@ class PlayCommand(Command):
         else:
             guilds = bot.client.guilds
         if len(guilds) == 0:
-            raise CommandError("No guilds with the specified name found.")
+            raise CommandError("Server non trovato.")
         if len(guilds) > 1:
-            raise CommandError("Multiple guilds with the specified name found.")
+            raise CommandError("Il nome del server è ambiguo.")
         guild = list(bot.client.guilds)[0]
         # Ensure the guild has a PlayMode before adding the file to it
         if not bot.music_data.get(guild):
-            # TODO: change Exception
-            raise Exception("No music_data for this guild")
+            raise CommandError("Il bot non è in nessun canale vocale.")
         # Create url
         ytdl_args = {
             "format": "bestaudio/best",
