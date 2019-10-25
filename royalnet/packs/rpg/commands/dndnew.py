@@ -39,7 +39,7 @@ class DndnewCommand(Command):
         column_names = [column.name for column in columns if (not column.primary_key and
                                                               not column.foreign_keys and
                                                               column.name != "name")]
-        message = "ℹ️ Character Sheet syntax:\n[p]\nName\n"
+        message = "ℹ️ How to create a new character:\n[p]/dndnew YOUR_CHARACTER_NAME\n"
         for column_name in column_names:
             message += f"{column_name} _\n"
         message += "[/p]"
