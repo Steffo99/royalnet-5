@@ -18,9 +18,11 @@ class SummonCommand(Command):
         """Handle a summon Royalnet request.
          That is, join a voice channel, or move to a different one if that is not possible."""
         channels = bot.client.find_channel_by_name(channel_name)
+        if len(channels) < 1:
+            raise CommandError(f"Nessun canale vocale con il nome [c]{channel_name}[/c] trovato.")
         channel = channels[0]
         if not isinstance(channel, discord.VoiceChannel):
-            raise CommandError("Channel is not a voice channel")
+            raise CommandError(f"Il canale [c]{channel}[/c] non è un canale vocale.")
         bot.loop.create_task(bot.client.vc_connect_or_move(channel))
         return {}
 
