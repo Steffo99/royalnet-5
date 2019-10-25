@@ -56,7 +56,7 @@ class DiscordBot(GenericBot):
 
             async def get_author(data, error_if_none=False):
                 user: discord.Member = data.message.author
-                query = data._interface.session.query(self.master_table)
+                query = data.session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
