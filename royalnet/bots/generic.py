@@ -3,6 +3,7 @@ import asyncio
 import logging
 import sentry_sdk
 import keyring
+import royalnet.version
 import royalherald as rh
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
@@ -151,11 +152,17 @@ class GenericBot:
 
     def _init_sentry(self):
         if self.uninitialized_sentry_dsn:
-            log.info("Sentry: enabled")
+            # noinspection PyUnreachableCode
+            if __debug__:
+                release = "DEV"
+            else:
+                release = royalnet.version.semantic
+            log.info(f"Sentry: enabled (Royalnet {release})")
             self.sentry = sentry_sdk.init(self.uninitialized_sentry_dsn,
                                           integrations=[AioHttpIntegration(),
                                                         SqlalchemyIntegration(),
-                                                        LoggingIntegration(event_level=None)])
+                                                        LoggingIntegration(event_level=None)],
+                                          release=release)
         else:
             log.info("Sentry: disabled")
 
