@@ -61,9 +61,10 @@ class PlayCommand(Command):
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, url = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
         if not (url.startswith("http://") or url.startswith("https://")):
-            raise CommandError("PlayCommand only accepts URLs.\n"
-                               "If you want to search a song on YouTube or Soundcloud, please use YoutubeCommand"
-                               " or SoundcloudCommand!")
+            raise CommandError(f"Il comando [c]{self.interface.prefix}play[/c] funziona solo per riprodurre file da"
+                               f" un URL.\n"
+                               f"Se vuoi cercare un video, usa [c]{self.interface.prefix}youtube[/c] o"
+                               f" [c]{self.interface.prefix}soundcloud[/c]!")
         response: dict = await self.interface.call_herald_action("discord", self._event_name, {
                                                                      "guild_name": guild_name,
                                                                      "url": url

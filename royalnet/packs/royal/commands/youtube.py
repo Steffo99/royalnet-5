@@ -58,8 +58,9 @@ class YoutubeCommand(Command):
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         guild_name, search = args.match(r"(?:\[(.+)])?\s*<?(.+)>?")
         if search.startswith("http://") or search.startswith("https://"):
-            raise CommandError("YoutubeCommand only accepts search queries, and you've sent an URL.\n"
-                               "If you want to add a song from an url, please use PlayCommand!")
+            raise CommandError(f"Il comando [c]{self.interface.prefix}youtube[/c] funziona solo per cercare video su"
+                               f" YouTube con un dato nome.\n"
+                               f"Se vuoi riprodurre una canzone da un URL, usa [c]{self.interface.prefix}play[/c]!")
         response = await self.interface.call_herald_action("discord", self._event_name, {
                                                                "guild_name": guild_name,
                                                                "search": search

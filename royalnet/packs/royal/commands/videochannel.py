@@ -47,4 +47,4 @@ class VideochannelCommand(Command):
             await data.reply(f"📹 Per entrare in modalità video, clicca qui:\n"
                              f"<https://discordapp.com/channels/{channel.guild.id}/{channel.id}>")
         else:
-            raise UnsupportedError(f"This command is not supported on {self.interface.name.capitalize()}.")
+            raise UnsupportedError()
