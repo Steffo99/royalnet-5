@@ -21,6 +21,7 @@ from .summon import SummonCommand
 from .youtube import YoutubeCommand
 from .soundcloud import SoundcloudCommand
 from .zawarudo import ZawarudoCommand
+from .emojify import EmojifyCommand
 
 # Enter the commands of your Pack here!
 available_commands = [
@@ -45,7 +46,8 @@ available_commands = [
     SummonCommand,
     YoutubeCommand,
     SoundcloudCommand,
-    ZawarudoCommand
+    ZawarudoCommand,
+    EmojifyCommand,
 ]
 
 # Don't change this, it should automatically generate __all__
