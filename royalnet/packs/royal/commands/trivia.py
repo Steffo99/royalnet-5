@@ -24,13 +24,19 @@ class TriviaCommand(Command):
 
     _wrong_emoji = "❌"
 
-    _answer_time = 18
+    _answer_time = 14
+
+    _question_lock: bool = False
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
-        self._answerers: typing.Dict[uuid.UUID, typing.Dict[..., bool]] = {}
+        self._answerers: typing.Dict[uuid.UUID, typing.Dict[str, bool]] = {}
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
+        if self._question_lock:
+            raise CommandError("C'è già un'altra domanda attiva!")
+        self._question_lock = True
+        await data.delete_invoking()
         # Fetch the question
         async with aiohttp.ClientSession() as session:
             async with session.get("https://opentdb.com/api.php?amount=1") as response:
@@ -70,17 +76,17 @@ class TriviaCommand(Command):
         async def correct(data: CommandData):
             answerer_ = await data.get_author(error_if_none=True)
             try:
-                self._answerers[question_id][answerer_] = True
+                self._answerers[question_id][answerer_.uid] = True
             except KeyError:
-                raise KeyboardExpiredError("Question time ran out.")
+                raise KeyboardExpiredError("Tempo scaduto!")
             return "🆗 Hai risposto alla domanda. Ora aspetta un attimo per i risultati!"
 
         async def wrong(data: CommandData):
             answerer_ = await data.get_author(error_if_none=True)
             try:
-                self._answerers[question_id][answerer_] = False
+                self._answerers[question_id][answerer_.uid] = False
             except KeyError:
-                raise KeyboardExpiredError("Question time ran out.")
+                raise KeyboardExpiredError("Tempo scaduto!")
             return "🆗 Hai risposto alla domanda. Ora aspetta un attimo per i risultati!"
 
         # Add question
@@ -94,12 +100,13 @@ class TriviaCommand(Command):
         await asyncio.sleep(self._answer_time)
         results = f"❗️ Tempo scaduto!\n" \
                   f"La risposta corretta era [b]{answers[correct_index]}[/b]!\n\n"
-        for answerer in self._answerers[question_id]:
+        for answerer_id in self._answerers[question_id]:
+            answerer = data.session.query(self.alchemy.User).get(answerer_id)
             if answerer.trivia_score is None:
                 ts = self.interface.alchemy.TriviaScore(royal=answerer)
                 data.session.add(ts)
                 data.session.commit()
-            if self._answerers[question_id][answerer]:
+            if self._answerers[question_id][answerer_id]:
                 results += self._correct_emoji
                 answerer.trivia_score.correct_answers += 1
             else:
@@ -109,3 +116,4 @@ class TriviaCommand(Command):
         await data.reply(results)
         del self._answerers[question_id]
         await asyncify(data.session.commit)
+        self._question_lock = False

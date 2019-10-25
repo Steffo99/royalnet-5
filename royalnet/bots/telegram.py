@@ -163,8 +163,8 @@ class TelegramBot(GenericBot):
             return
         # Prepare data
         data = self._Data(interface=command.interface, update=update)
-        # Run the command
         try:
+            # Run the command
             await command.run(CommandArgs(parameters), data)
         except InvalidInputError as e:
             await data.reply(f"⚠️ {e.message}\n"
@@ -178,8 +178,9 @@ class TelegramBot(GenericBot):
             error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
             error_message += '\n'.join(e.args)
             await data.reply(error_message)
-        # Close the data session
-        await data.session_close()
+        finally:
+            # Close the data session
+            await data.session_close()
 
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query
@@ -196,10 +197,13 @@ class TelegramBot(GenericBot):
             return
         try:
             response = await callback(data=self._Data(interface=command.interface, update=update))
-        except KeyboardExpiredError:
+        except KeyboardExpiredError as e:
             # FIXME: May cause a memory leak, as keys are not deleted after use
             await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
-            await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
+            if len(e.args) > 0:
+                await self.safe_api_call(query.answer, text=f"⛔️ {e.args[0]}")
+            else:
+                await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
             return
         except Exception as e:
             error_text = f"⛔️ {e.__class__.__name__}\n"
