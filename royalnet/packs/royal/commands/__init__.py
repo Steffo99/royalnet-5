@@ -11,7 +11,7 @@ from .videochannel import VideochannelCommand
 from .dnditem import DnditemCommand
 from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
-from .matchmaking import MmCommand
+from .matchmaking import MatchmakingCommand
 from .pause import PauseCommand
 from .play import PlayCommand
 from .playmode import PlaymodeCommand
@@ -37,7 +37,7 @@ available_commands = [
     DnditemCommand,
     DndspellCommand,
     TriviaCommand,
-    MmCommand,
+    MatchmakingCommand,
     PauseCommand,
     PlayCommand,
     PlaymodeCommand,

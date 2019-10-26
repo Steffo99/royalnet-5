@@ -8,11 +8,11 @@ class MMResponse:
     __tablename__ = "mmresponse"
 
     @declared_attr
-    def royal_id(self):
+    def user_id(self):
         return Column(Integer, ForeignKey("users.uid"), primary_key=True)
 
     @declared_attr
-    def royal(self):
+    def user(self):
         return relationship("User", backref="mmresponses_given")
 
     @declared_attr
@@ -28,4 +28,4 @@ class MMResponse:
         return Column(Enum(MMChoice), nullable=False)
 
     def __repr__(self):
-        return f"<MMResponse of {self.royal}: {self.choice}>"
+        return f"<MMResponse of {self.user}: {self.choice}>"
