@@ -1,9 +1,7 @@
-from sqlalchemy import Column, \
-                       Integer, \
-                       String, \
-                       ForeignKey
+from sqlalchemy import *
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
+from ..utils import MMChoice
 
 
 class MMResponse:
@@ -26,9 +24,8 @@ class MMResponse:
         return relationship("MMEvent", backref="responses")
 
     @declared_attr
-    def response(self):
-        # Valid decisions are YES, LATER or NO
-        return Column(String)
+    def choice(self):
+        return Column(Enum(MMChoice), nullable=False)
 
     def __repr__(self):
-        return f"<MMResponse of {self.royal}: {self.response}>"
+        return f"<MMResponse of {self.royal}: {self.choice}>"

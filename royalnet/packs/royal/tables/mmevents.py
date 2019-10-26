@@ -1,10 +1,5 @@
-from sqlalchemy import Column, \
-                       Integer, \
-                       DateTime, \
-                       String, \
-                       Text, \
-                       ForeignKey, \
-                       BigInteger
+import pickle
+from sqlalchemy import *
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -37,14 +32,21 @@ class MMEvent:
         return Column(Text, nullable=False, default="")
 
     @declared_attr
-    def state(self):
-        # Valid states are WAITING, DECISION, READY_CHECK, STARTED
-        return Column(String, nullable=False, default="WAITING")
+    def interface(self):
+        return Column(String, nullable=False)
 
     @declared_attr
-    def message_id(self):
-        return Column(BigInteger)
+    def raw_interface_data(self):
+        # The default is a pickled None
+        return Column(Binary, nullable=False, default=b'\x80\x03N.')
+
+    @property
+    def interface_data(self):
+        return pickle.loads(self.raw_interface_data)
+
+    @interface_data.setter
+    def interface_data(self, value):
+        self.raw_interface_data = pickle.dumps(value)
 
     def __repr__(self):
         return f"<MMEvent {self.mmid}: {self.title}>"
-

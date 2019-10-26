@@ -15,7 +15,7 @@ class YoutubeCommand(Command):
 
     description: str = "Cerca un video su YouTube e lo aggiunge alla coda della chat vocale."
 
-    syntax = "[ [guild] ] (url)"
+    syntax = "[ [guild] ] {url}"
 
     @classmethod
     async def _legacy_youtube_handler(cls, bot: "DiscordBot", guild_name: typing.Optional[str], search: str):

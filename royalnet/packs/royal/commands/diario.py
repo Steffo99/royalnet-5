@@ -33,7 +33,7 @@ class DiarioCommand(Command):
 
     description: str = "Aggiungi una citazione al Diario."
 
-    syntax = "[!] \"(testo)\" --[autore], [contesto]"
+    syntax = "[!] \"{testo}\" --[autore], [contesto]"
 
     tables = {User, Diario, Alias}
 

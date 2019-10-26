@@ -13,7 +13,7 @@ class Mp3Command(Command):
 
     description: str = "Scarica un video con youtube-dl e invialo in chat."
 
-    syntax = "(ytdlstring)"
+    syntax = "{ytdlstring}"
 
     ytdl_args = {
         "format": "bestaudio",

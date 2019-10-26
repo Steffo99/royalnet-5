@@ -10,7 +10,7 @@ class CvCommand(Command):
 
     description: str = "Elenca le persone attualmente connesse alla chat vocale."
 
-    syntax: str = "[guildname] ['all']"
+    syntax: str = "[guildname] [all]"
 
     @staticmethod
     async def _legacy_cv_handler(bot: DiscordBot, guild_name: typing.Optional[str], everyone: bool):

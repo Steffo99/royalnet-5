@@ -12,7 +12,7 @@ class PlaymodeCommand(Command):
 
     description: str = "Cambia modalità di riproduzione per la chat vocale."
 
-    syntax = "[ [guild] ] (mode)"
+    syntax = "[ [guild] ] {mode}"
 
     @staticmethod
     async def _legacy_playmode_handler(bot: "DiscordBot", guild_name: typing.Optional[str], mode_name: str):

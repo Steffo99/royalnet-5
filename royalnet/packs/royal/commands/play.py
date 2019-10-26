@@ -15,7 +15,7 @@ class PlayCommand(Command):
 
     description: str = "Aggiunge un url alla coda della chat vocale."
 
-    syntax = "[ [guild] ] (url)"
+    syntax = "[ [guild] ] {url}"
 
     @staticmethod
     async def _legacy_play_handler(bot: "DiscordBot", guild_name: typing.Optional[str], url: str):

@@ -11,7 +11,7 @@ from .videochannel import VideochannelCommand
 from .dnditem import DnditemCommand
 from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
-from .mm import MmCommand
+from .matchmaking import MmCommand
 from .pause import PauseCommand
 from .play import PlayCommand
 from .playmode import PlaymodeCommand

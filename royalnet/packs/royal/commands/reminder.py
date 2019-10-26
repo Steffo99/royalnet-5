@@ -17,7 +17,7 @@ class ReminderCommand(Command):
 
     description: str = "Ti ricorda di fare qualcosa dopo un po' di tempo."
 
-    syntax: str = "[ (data) ] (messaggio)"
+    syntax: str = "[ {data} ] {messaggio}"
 
     tables = {Reminder}
 
@@ -37,7 +37,7 @@ class ReminderCommand(Command):
     async def _remind(self, reminder):
         await sleep_until(reminder.datetime)
         if self.interface.name == "telegram":
-            chat_id: int = pickle.loads(reminder.interface_data)
+            chat_id: int = pickle.loads(reminder.raw_interface_data)
             bot: telegram.Bot = self.interface.bot.client
             await asyncify(bot.send_message,
                            chat_id=chat_id,
@@ -45,7 +45,7 @@ class ReminderCommand(Command):
                            parse_mode="HTML",
                            disable_web_page_preview=True)
         elif self.interface.name == "discord":
-            channel_id: int = pickle.loads(reminder.interface_data)
+            channel_id: int = pickle.loads(reminder.raw_interface_data)
             bot: discord.Client = self.interface.bot.client
             channel = bot.get_channel(channel_id)
             await channel.send(discord_escape(f"❗️ {reminder.message}"))

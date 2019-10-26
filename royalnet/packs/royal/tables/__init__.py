@@ -10,7 +10,6 @@ from .wikirevisions import WikiRevision
 from .bios import Bio
 from .reminders import Reminder
 from .triviascores import TriviaScore
-from .mmdecisions import MMDecision
 from .mmevents import MMEvent
 from .mmresponse import MMResponse
 
@@ -26,7 +25,6 @@ available_tables = [
     Bio,
     Reminder,
     TriviaScore,
-    MMDecision,
     MMEvent,
     MMResponse,
 ]

@@ -12,7 +12,7 @@ class DndspellCommand(Command):
 
     description: str = "Ottieni informazioni su una magia di D&D5e."
 
-    syntax = "(nomemagia)"
+    syntax = "{nomemagia}"
 
     _dnddata: sortedcontainers.SortedKeyList = None
 

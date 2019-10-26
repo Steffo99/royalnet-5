@@ -15,7 +15,7 @@ class SoundcloudCommand(Command):
 
     description: str = "Cerca una canzone su Soundcloud e la aggiunge alla coda della chat vocale."
 
-    syntax = "[ [guild] ] (url)"
+    syntax = "[ [guild] ] {url}"
 
     @staticmethod
     async def _legacy_soundcloud_handler(bot: "DiscordBot", guild_name: typing.Optional[str], search: str):

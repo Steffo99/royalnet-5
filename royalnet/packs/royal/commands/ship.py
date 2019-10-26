@@ -11,7 +11,7 @@ class ShipCommand(Command):
 
     description: str = "Crea una ship tra due nomi."
 
-    syntax = "(nomeuno) (nomedue)"
+    syntax = "{nomeuno} {nomedue}"
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         name_one = args[0]

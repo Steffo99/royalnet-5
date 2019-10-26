@@ -12,7 +12,7 @@ class DnditemCommand(Command):
 
     description: str = "Ottieni informazioni su un oggetto di D&D5e."
 
-    syntax = "(nomeoggetto)"
+    syntax = "{nomeoggetto}"
 
     _dnddata: sortedcontainers.SortedKeyList = None
 
