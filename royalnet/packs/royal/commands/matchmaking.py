@@ -1,4 +1,7 @@
 import datetime
+import re
+import dateparser
+import typing
 from telegram import Bot as PTBBot
 from telegram import Message as PTBMessage
 from telegram.error import BadRequest, Unauthorized
@@ -25,24 +28,49 @@ class MatchmakingCommand(Command):
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
         # Find all relevant MMEvents and run them
-        session = self.interface.Session()
-        mmevents = await asyncify(
+        session = self.alchemy.Session()
+        mmevents = (
             session.query(self.alchemy.MMEvent)
                    .filter(self.alchemy.MMEvent.interface == self.interface.name,
                            self.alchemy.MMEvent.datetime > datetime.datetime.now())
-                   .all
+                   .all()
         )
         for mmevent in mmevents:
-            self._run_mmevent(mmevent.mmid)
+            self.interface.loop.create_task(self._run_mmevent(mmevent.mmid))
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         # Create a new MMEvent and run it
         if self.interface.name != "telegram":
             raise UnsupportedError(f"{self.interface.prefix}matchmaking funziona solo su Telegram. Per ora.")
         author = await data.get_author(error_if_none=True)
-        ...
 
-    _mm_chat_id = -1001224004974
+        try:
+            timestring, title, description = args.match(r"\[\s*([^]]+)\s*]\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
+        except InvalidInputError:
+            timestring, title, description = args.match(r"\s*(.+?)\s*\n\s*([^\n]+)\s*\n?\s*(.+)?\s*", re.DOTALL)
+        try:
+            dt: typing.Optional[datetime.datetime] = dateparser.parse(timestring, settings={
+                "PREFER_DATES_FROM": "future"
+            })
+        except OverflowError:
+            dt = None
+        if dt is None:
+            await data.reply("⚠️ La data che hai specificato non è valida.")
+            return
+        if dt <= datetime.datetime.now():
+            await data.reply("⚠️ La data che hai specificato è nel passato.")
+            return
+        mmevent: MMEvent = self.interface.alchemy.MMEvent(creator=author,
+                                                          datetime=dt,
+                                                          title=title,
+                                                          description=description,
+                                                          interface=self.interface.name)
+        data.session.add(mmevent)
+        await data.session_commit()
+        await self._run_mmevent(mmevent.mmid)
+        await data.reply(f"✅ Evento [b]{mmevent.title}[/b] creato!")
+
+    _mm_chat_id = -1001287169422
 
     _mm_error_chat_id = -1001153723135
 
@@ -64,9 +92,9 @@ class MatchmakingCommand(Command):
             [IKB(f"{MMChoice.LATE_MEDIUM.value} Arrivo dopo 15-35 min.",
                  callback_data=f"mm{mmevent.mmid}_LATE_MEDIUM")],
             [IKB(f"{MMChoice.LATE_LONG.value} Arrivo dopo 40+ min.", callback_data=f"mm{mmevent.mmid}_LATE_LONG")],
-            [IKB(f"{MMChoice.NO_TIME} Non posso a quell'ora...", callback_data=f"mm{mmevent.mmid}_NO_TIME")],
-            [IKB(f"{MMChoice.NO_INTEREST} Non mi interessa.", callback_data=f"mm{mmevent.mmid}_NO_INTEREST")],
-            [IKB(f"{MMChoice.NO_TECH} Ho un problema!", callback_data=f"mm{mmevent.mmid}_NO_TECH")],
+            [IKB(f"{MMChoice.NO_TIME.value} Non posso a quell'ora...", callback_data=f"mm{mmevent.mmid}_NO_TIME")],
+            [IKB(f"{MMChoice.NO_INTEREST.value} Non mi interessa.", callback_data=f"mm{mmevent.mmid}_NO_INTEREST")],
+            [IKB(f"{MMChoice.NO_TECH.value} Ho un problema!", callback_data=f"mm{mmevent.mmid}_NO_TECH")],
         ])
 
     async def _update_telegram_mm_message(self, client: PTBBot, mmevent: MMEvent):
@@ -74,7 +102,7 @@ class MatchmakingCommand(Command):
             await self.interface.bot.safe_api_call(client.edit_message_text,
                                                    chat_id=self._mm_chat_id,
                                                    text=telegram_escape(self._gen_mm_message(mmevent)),
-                                                   message_id=mmevent.interface_data,
+                                                   message_id=mmevent.interface_data.message_id,
                                                    parse_mode="HTML",
                                                    disable_web_page_preview=True,
                                                    reply_markup=self._gen_telegram_keyboard(mmevent))
@@ -100,13 +128,10 @@ class MatchmakingCommand(Command):
         return callback
 
     def _gen_event_start_message(self, mmevent: MMEvent):
-        text = f"🚩 L'evento [b]{mmevent.title}[/b] è iniziato!\n\n" \
-               f"Partecipano:\n"
-        for mmresponse in sorted(mmevent.responses, key=lambda mmr: mmr.user.username):
-            if mmresponse.response == "YES":
-                text += f"✅ {mmresponse.user}\n"
-            elif mmresponse.response == "NO":
-                text += f"❌ {mmresponse.user}\n"
+        text = f"🚩 L'evento [b]{mmevent.title}[/b] è iniziato!\n\n"
+        for response in mmevent.responses:
+            response: MMResponse
+            text += f"{response.choice.value} {response.user}\n"
         return text
 
     def _gen_unauth_message(self, user: User):
@@ -140,8 +165,7 @@ class MatchmakingCommand(Command):
                                                                                  self._gen_mm_message(mmevent)),
                                                                              parse_mode="HTML",
                                                                              disable_webpage_preview=True,
-                                                                             reply_markup=self._gen_telegram_keyboard(
-                                                                                 mmevent.mmid))
+                                                                             reply_markup=self._gen_telegram_keyboard(mmevent))
                 # Store message data in the interface data object
                 mmevent.interface_data = MMInterfaceDataTelegram(chat_id=self._mm_chat_id,
                                                                  message_id=message.message_id)
@@ -182,12 +206,20 @@ class MatchmakingCommand(Command):
         if self.interface.name == "telegram":
             bot: TelegramBot = self.interface.bot
             client: PTBBot = bot.client
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_YES")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_MAYBE")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_LATE_SHORT")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_LATE_MEDIUM")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_LATE_LONG")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_NO_TIME")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_NO_INTEREST")
+            self.interface.unregister_keyboard_key(f"mm{mmevent.mmid}_NO_TECH")
             for response in mmevent.responses:
                 if response.choice == MMChoice.NO_INTEREST or response.choice == MMChoice.NO_TIME:
                     return
                 try:
                     await self.interface.bot.safe_api_call(client.send_message,
-                                                           chat_id=response.user.telegram.tg_id,
+                                                           chat_id=response.user.telegram[0].tg_id,
                                                            text=telegram_escape(self._gen_event_start_message(mmevent)),
                                                            parse_mode="HTML",
                                                            disable_webpage_preview=True)
