@@ -6,7 +6,6 @@ from .safeformat import safeformat
 from .classdictjanitor import cdj
 from .sleepuntil import sleep_until
 from .formatters import andformat, plusformat, fileformat, ytdldateformat, numberemojiformat, splitstring, ordinalformat
-from .parse5etoolsentry import parse_5etools_entry
 
 __all__ = [
     "asyncify",
@@ -22,6 +21,5 @@ __all__ = [
     "telegram_escape",
     "discord_escape",
     "splitstring",
-    "parse_5etools_entry",
     "ordinalformat",
 ]
