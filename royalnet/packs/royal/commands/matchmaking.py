@@ -5,13 +5,13 @@ import typing
 from telegram import Bot as PTBBot
 from telegram import Message as PTBMessage
 from telegram.error import BadRequest, Unauthorized
-from telegram import InlineKeyboardMarkup as IKM
-from telegram import InlineKeyboardButton as IKB
+from telegram import InlineKeyboardMarkup as InKeMa
+from telegram import InlineKeyboardButton as InKeBu
 from royalnet.commands import *
 from royalnet.bots import TelegramBot
 from royalnet.utils import telegram_escape, asyncify, sleep_until
-from ..tables import MMEvent, MMResponse, User, Telegram
-from ..utils import MMChoice, MMInterfaceData, MMInterfaceDataTelegram
+from ..tables import MMEvent, MMResponse, User
+from ..utils import MMChoice, MMInterfaceDataTelegram
 
 
 class MatchmakingCommand(Command):
@@ -30,10 +30,11 @@ class MatchmakingCommand(Command):
         # Find all relevant MMEvents and run them
         session = self.alchemy.Session()
         mmevents = (
-            session.query(self.alchemy.MMEvent)
-                   .filter(self.alchemy.MMEvent.interface == self.interface.name,
-                           self.alchemy.MMEvent.datetime > datetime.datetime.now())
-                   .all()
+            session
+                .query(self.alchemy.MMEvent)
+                .filter(self.alchemy.MMEvent.interface == self.interface.name,
+                        self.alchemy.MMEvent.datetime > datetime.datetime.now())
+                .all()
         )
         for mmevent in mmevents:
             self.interface.loop.create_task(self._run_mmevent(mmevent.mmid))
@@ -55,11 +56,11 @@ class MatchmakingCommand(Command):
         except OverflowError:
             dt = None
         if dt is None:
-            await data.reply("⚠️ La data che hai specificato non è valida.")
-            return
+            raise CommandError("La data che hai specificato non è valida.")
         if dt <= datetime.datetime.now():
-            await data.reply("⚠️ La data che hai specificato è nel passato.")
-            return
+            raise CommandError("La data che hai specificato è nel passato.")
+        if dt >= datetime.datetime.now() + datetime.timedelta(days=90):
+            raise CommandError("La data che hai specificato è a più di 90 giorni di distanza da oggi.")
         mmevent: MMEvent = self.interface.alchemy.MMEvent(creator=author,
                                                           datetime=dt,
                                                           title=title,
@@ -67,7 +68,7 @@ class MatchmakingCommand(Command):
                                                           interface=self.interface.name)
         data.session.add(mmevent)
         await data.session_commit()
-        await self._run_mmevent(mmevent.mmid)
+        self.interface.loop(self._run_mmevent(mmevent.mmid))
         await data.reply(f"✅ Evento [b]{mmevent.title}[/b] creato!")
 
     _mm_chat_id = -1001287169422
@@ -85,16 +86,17 @@ class MatchmakingCommand(Command):
         return text
 
     def _gen_telegram_keyboard(self, mmevent: MMEvent):
-        return IKM([
-            [IKB(f"{MMChoice.YES.value} Ci sarò!", callback_data=f"mm{mmevent.mmid}_YES")],
-            [IKB(f"{MMChoice.MAYBE.value} (Forse.)", callback_data=f"mm{mmevent.mmid}_MAYBE")],
-            [IKB(f"{MMChoice.LATE_SHORT.value} Arrivo dopo 5-10 min.", callback_data=f"mm{mmevent.mmid}_LATE_SHORT")],
-            [IKB(f"{MMChoice.LATE_MEDIUM.value} Arrivo dopo 15-35 min.",
-                 callback_data=f"mm{mmevent.mmid}_LATE_MEDIUM")],
-            [IKB(f"{MMChoice.LATE_LONG.value} Arrivo dopo 40+ min.", callback_data=f"mm{mmevent.mmid}_LATE_LONG")],
-            [IKB(f"{MMChoice.NO_TIME.value} Non posso a quell'ora...", callback_data=f"mm{mmevent.mmid}_NO_TIME")],
-            [IKB(f"{MMChoice.NO_INTEREST.value} Non mi interessa.", callback_data=f"mm{mmevent.mmid}_NO_INTEREST")],
-            [IKB(f"{MMChoice.NO_TECH.value} Ho un problema!", callback_data=f"mm{mmevent.mmid}_NO_TECH")],
+        return InKeMa([
+            [InKeBu(f"{MMChoice.YES.value} Ci sarò!", callback_data=f"mm{mmevent.mmid}_YES")],
+            [InKeBu(f"{MMChoice.MAYBE.value} (Forse.)", callback_data=f"mm{mmevent.mmid}_MAYBE")],
+            [InKeBu(f"{MMChoice.LATE_SHORT.value} Arrivo dopo 5-10 min.",
+                    callback_data=f"mm{mmevent.mmid}_LATE_SHORT")],
+            [InKeBu(f"{MMChoice.LATE_MEDIUM.value} Arrivo dopo 15-35 min.",
+                    callback_data=f"mm{mmevent.mmid}_LATE_MEDIUM")],
+            [InKeBu(f"{MMChoice.LATE_LONG.value} Arrivo dopo 40+ min.", callback_data=f"mm{mmevent.mmid}_LATE_LONG")],
+            [InKeBu(f"{MMChoice.NO_TIME.value} Non posso a quell'ora...", callback_data=f"mm{mmevent.mmid}_NO_TIME")],
+            [InKeBu(f"{MMChoice.NO_INTEREST.value} Non mi interessa.", callback_data=f"mm{mmevent.mmid}_NO_INTEREST")],
+            [InKeBu(f"{MMChoice.NO_TECH.value} Ho un problema!", callback_data=f"mm{mmevent.mmid}_NO_TECH")],
         ])
 
     async def _update_telegram_mm_message(self, client: PTBBot, mmevent: MMEvent):
@@ -165,7 +167,8 @@ class MatchmakingCommand(Command):
                                                                                  self._gen_mm_message(mmevent)),
                                                                              parse_mode="HTML",
                                                                              disable_webpage_preview=True,
-                                                                             reply_markup=self._gen_telegram_keyboard(mmevent))
+                                                                             reply_markup=self._gen_telegram_keyboard(
+                                                                                 mmevent))
                 # Store message data in the interface data object
                 mmevent.interface_data = MMInterfaceDataTelegram(chat_id=self._mm_chat_id,
                                                                  message_id=message.message_id)
@@ -236,8 +239,6 @@ class MatchmakingCommand(Command):
         if self.interface.name == "telegram":
             await self.interface.bot.safe_api_call(client.delete_message,
                                                    chat_id=mmevent.interface_data.chat_id,
-                                                   message_id=mmevent.interface_data.message_id,
-                                                   parse_mode="HTML",
-                                                   disable_webpage_preview=True)
+                                                   message_id=mmevent.interface_data.message_id)
         # The end!
         await asyncify(session.close)

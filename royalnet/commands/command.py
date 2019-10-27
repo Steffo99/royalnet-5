@@ -28,8 +28,13 @@ class Command:
 
     @property
     def alchemy(self):
-        """A shortcut to ``self.interface.alchemy``"""
+        """A shortcut to ``self.interface.alchemy``."""
         return self.interface.alchemy
+
+    @property
+    def loop(self):
+        """A shortcut to ``self.interface.loop``."""
+        return self.interface.loop
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         raise NotImplementedError()
