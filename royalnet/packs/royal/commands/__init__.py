@@ -8,8 +8,6 @@ from .reminder import ReminderCommand
 from .ship import ShipCommand
 from .smecds import SmecdsCommand
 from .videochannel import VideochannelCommand
-from .dnditem import DnditemCommand
-from .dndspell import DndspellCommand
 from .trivia import TriviaCommand
 from .matchmaking import MatchmakingCommand
 from .pause import PauseCommand
@@ -34,8 +32,6 @@ available_commands = [
     ShipCommand,
     SmecdsCommand,
     VideochannelCommand,
-    DnditemCommand,
-    DndspellCommand,
     TriviaCommand,
     MatchmakingCommand,
     PauseCommand,
