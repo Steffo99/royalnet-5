@@ -1,8 +1,7 @@
-import typing
 import aiohttp
 import sortedcontainers
 from royalnet.commands import *
-from royalnet.utils import parse_5etools_entry
+from ..utils import parse_5etools_entry
 
 
 class DnditemCommand(Command):

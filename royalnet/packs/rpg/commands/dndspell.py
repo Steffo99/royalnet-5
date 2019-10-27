@@ -1,8 +1,8 @@
-import typing
 import aiohttp
 import sortedcontainers
 from royalnet.commands import *
-from royalnet.utils import parse_5etools_entry, ordinalformat, andformat
+from royalnet.utils import ordinalformat, andformat
+from ..utils import parse_5etools_entry
 
 
 class DndspellCommand(Command):
