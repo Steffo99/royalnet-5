@@ -12,6 +12,7 @@ from .reminders import Reminder
 from .triviascores import TriviaScore
 from .mmevents import MMEvent
 from .mmresponse import MMResponse
+from .leagueoflegends import LeagueOfLegends
 
 # Enter the tables of your Pack here!
 available_tables = [
@@ -27,6 +28,7 @@ available_tables = [
     TriviaScore,
     MMEvent,
     MMResponse,
+    LeagueOfLegends
 ]
 
 # Don't change this, it should automatically generate __all__
