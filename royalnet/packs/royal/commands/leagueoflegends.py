@@ -82,8 +82,6 @@ class LeagueoflegendsCommand(Command):
         name = args.joined()
 
         if name:
-            # Create new LeagueOfLegends
-            name = args.joined(require_at_least=2).split(" ", 1)[1]
             # Connect a new League of Legends account to Royalnet
             log.debug(f"Searching for: {name}")
             summoner = self._riotwatcher.summoner.by_name(region=self._region, summoner_name=name)
