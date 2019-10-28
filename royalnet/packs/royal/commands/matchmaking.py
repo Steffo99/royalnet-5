@@ -68,7 +68,7 @@ class MatchmakingCommand(Command):
                                                           interface=self.interface.name)
         data.session.add(mmevent)
         await data.session_commit()
-        self.interface.loop(self._run_mmevent(mmevent.mmid))
+        self.interface.loop.create_task(self._run_mmevent(mmevent.mmid))
         await data.reply(f"✅ Evento [b]{mmevent.title}[/b] creato!")
 
     _mm_chat_id = -1001287169422
