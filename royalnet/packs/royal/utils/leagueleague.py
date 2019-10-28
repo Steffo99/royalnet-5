@@ -24,7 +24,14 @@ class LeagueLeague:
         self.veteran: bool = veteran
 
     def __str__(self):
-        return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP)"
+        emojis = ""
+        if self.veteran:
+            emojis += "🏆"
+        if self.hot_streak:
+            emojis += "🔥"
+        if self.fresh_blood:
+            emojis += "⭐️"
+        return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP) {emojis}"
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__} {self}>"
