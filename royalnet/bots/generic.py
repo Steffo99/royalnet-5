@@ -128,7 +128,7 @@ class GenericBot:
         """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the packs. Then,
         find the chain that links the ``master_table`` to the ``identity_table``. """
         if self.uninitialized_database_config:
-            log.info(f"Database: enabled")
+            log.info(f"Alchemy: enabled")
             required_tables = {self.uninitialized_database_config.master_table, self.uninitialized_database_config.identity_table}
             for command in self.uninitialized_commands:
                 required_tables = required_tables.union(command.tables)
@@ -144,7 +144,7 @@ class GenericBot:
             self.identity_chain = relationshiplinkchain(self.master_table, self.identity_table)
             log.debug(f"Identity chain: {' -> '.join([str(item) for item in self.identity_chain])}")
         else:
-            log.debug(f"Database: disabled")
+            log.info(f"Alchemy: disabled")
             self.alchemy = None
             self.master_table = None
             self.identity_table = None
