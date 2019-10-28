@@ -20,6 +20,7 @@ from .youtube import YoutubeCommand
 from .soundcloud import SoundcloudCommand
 from .zawarudo import ZawarudoCommand
 from .emojify import EmojifyCommand
+from .leagueoflegends import LeagueoflegendsCommand
 
 # Enter the commands of your Pack here!
 available_commands = [
@@ -44,6 +45,7 @@ available_commands = [
     SoundcloudCommand,
     ZawarudoCommand,
     EmojifyCommand,
+    LeagueoflegendsCommand,
 ]
 
 # Don't change this, it should automatically generate __all__

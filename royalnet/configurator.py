@@ -21,6 +21,9 @@ def run():
     sentry = click.prompt("Sentry DSN", default="")
     if sentry:
         keyring.set_password(f"Royalnet/{secrets_name}", "sentry", sentry)
+    leagueoflegends = click.prompt("League of Legends API Token", default="")
+    if leagueoflegends:
+        keyring.set_password(f"Royalnet/{secrets_name}", "leagueoflegends", leagueoflegends)
 
 
 if __name__ == "__main__":

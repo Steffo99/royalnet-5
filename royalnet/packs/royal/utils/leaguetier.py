@@ -13,7 +13,7 @@ class LeagueTier(enum.Enum):
     CHALLENGER = 8
 
     def __str__(self):
-        return self.name
+        return self.name.capitalize()
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}.{self.name}"

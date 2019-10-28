@@ -24,7 +24,7 @@ class LeagueLeague:
         self.veteran: bool = veteran
 
     def __str__(self):
-        return f"{self.tier} {self.rank} ({self.points} LP)"
+        return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP)"
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__} {self}>"
@@ -56,6 +56,19 @@ class LeagueLeague:
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def __bool__(self):
+        result = True
+        result &= self.veteran is not None
+        result &= self.fresh_blood is not None
+        result &= self.hot_streak is not None
+        result &= self.inactive is not None
+        result &= self.losses is not None
+        result &= self.wins is not None
+        result &= self.points is not None
+        result &= self.rank is not None
+        result &= self.tier is not None
+        return result
 
     def __composite_values__(self):
         return self.tier, \

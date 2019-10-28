@@ -1,8 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, composite
 from sqlalchemy.ext.declarative import declared_attr
-# noinspection PyUnresolvedReferences
-from .users import User
 from ..utils import LeagueRank, LeagueTier, LeagueLeague
 
 
@@ -44,7 +42,7 @@ class LeagueOfLegends:
     @declared_attr
     def summoner_id(self):
         # aEsHyfXA2q8bK-g7GlT4kFK_0uLL3w-jBPyfMAy8kOXTJXo
-        return Column(String, nullable=False)
+        return Column(String, nullable=False, primary_key=True)
 
     @declared_attr
     def account_id(self):
