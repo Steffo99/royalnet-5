@@ -17,9 +17,11 @@ class LeagueoflegendsCommand(Command):
 
     description: str = "Connetti un account di League of Legends a un account Royalnet, e visualizzane le statistiche."
 
-    syntax = "[regione] [nomeevocatore] OPPURE [nomeevocatore]"
-
+    syntax = "[nomeevocatore]"
+    
     tables = {LeagueOfLegends}
+    
+    _region = "euw1"
 
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
@@ -29,7 +31,7 @@ class LeagueoflegendsCommand(Command):
     async def _update(self, lol: LeagueOfLegends):
         log.info(f"Updating: {lol}")
         log.debug(f"Getting summoner data: {lol}")
-        summoner = self._riotwatcher.summoner.by_id(region=lol.region, encrypted_summoner_id=lol.summoner_id)
+        summoner = self._riotwatcher.summoner.by_id(region=self._region, encrypted_summoner_id=lol.summoner_id)
         lol.profile_icon_id = summoner["profileIconId"]
         lol.summoner_name = summoner["name"]
         lol.puuid = summoner["puuid"]
@@ -37,7 +39,7 @@ class LeagueoflegendsCommand(Command):
         lol.summoner_id = summoner["id"]
         lol.account_id = summoner["accountId"]
         log.debug(f"Getting leagues data: {lol}")
-        leagues = self._riotwatcher.league.by_summoner(region=lol.region, encrypted_summoner_id=lol.summoner_id)
+        leagues = self._riotwatcher.league.by_summoner(region=self._region, encrypted_summoner_id=lol.summoner_id)
         soloq = None
         flexq = None
         twtrq = None
@@ -56,7 +58,7 @@ class LeagueoflegendsCommand(Command):
         lol.rank_twtrq = twtrq
         lol.rank_tftq = tftq
         log.debug(f"Getting mastery data: {lol}")
-        mastery = self._riotwatcher.champion_mastery.scores_by_summoner(region=lol.region, encrypted_summoner_id=lol.summoner_id)
+        mastery = self._riotwatcher.champion_mastery.scores_by_summoner(region=self._region, encrypted_summoner_id=lol.summoner_id)
         lol.mastery_score = mastery
 
     def _display(self, lol: LeagueOfLegends):
@@ -76,41 +78,23 @@ class LeagueoflegendsCommand(Command):
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         author = await data.get_author(error_if_none=True)
-        name = args.optional(1)
 
-        if not name:
-            # Update and display the League of Legends stats for the current account
-            if len(author.leagueoflegends) == 0:
-                raise CommandError("Nessun account di League of Legends trovato.")
-            elif len(author.leagueoflegends) > 1:
-                name = args.optional(0)
-                if name is None:
-                    raise CommandError("Più account di League of Legends sono registrati a questo account.\n"
-                                       "Specifica di quale account vuoi vedere le statistiche.\n"
-                                       f"Sintassi: [c]{self.interface.prefix}{self.name} [nomeevocatore][/c]")
-                for account in author.leagueoflegends:
-                    if account.summoner_name == name:
-                        leagueoflegends = account
-                        break
-                else:
-                    raise CommandError("Nessun account con il nome specificato trovato.")
-            else:
-                leagueoflegends = author.leagueoflegends[0]
-            await self._update(leagueoflegends)
-            await data.session_commit()
-            await data.reply(self._display(leagueoflegends))
-        else:
-            region = args[0]
+        name = args.joined()
+
+        if name:
+            # Create new LeagueOfLegends
+            name = args.joined(require_at_least=2).split(" ", 1)[1]
             # Connect a new League of Legends account to Royalnet
             log.debug(f"Searching for: {name}")
-            summoner = self._riotwatcher.summoner.by_name(region=region, summoner_name=name)
+            summoner = self._riotwatcher.summoner.by_name(region=self._region, summoner_name=name)
             # Ensure the account isn't already connected to something else
-            leagueoflegends = await asyncify(data.session.query(self.alchemy.LeagueOfLegends).filter_by(summoner_id=summoner["id"]).one_or_none)
+            leagueoflegends = await asyncify(
+                data.session.query(self.alchemy.LeagueOfLegends).filter_by(summoner_id=summoner["id"]).one_or_none)
             if leagueoflegends:
                 raise CommandError(f"L'account {leagueoflegends} è già registrato su Royalnet.")
             # Get rank information
             log.debug(f"Getting leagues data: {name}")
-            leagues = self._riotwatcher.league.by_summoner(region=region, encrypted_summoner_id=summoner["id"])
+            leagues = self._riotwatcher.league.by_summoner(region=self._region, encrypted_summoner_id=summoner["id"])
             soloq = None
             flexq = None
             twtrq = None
@@ -126,10 +110,11 @@ class LeagueoflegendsCommand(Command):
                     tftq = LeagueLeague.from_dict(league)
             # Get mastery score
             log.debug(f"Getting mastery data: {name}")
-            mastery = self._riotwatcher.champion_mastery.scores_by_summoner(region=region, encrypted_summoner_id=summoner["id"])
+            mastery = self._riotwatcher.champion_mastery.scores_by_summoner(region=self._region,
+                                                                            encrypted_summoner_id=summoner["id"])
             # Create database row
             leagueoflegends = self.alchemy.LeagueOfLegends(
-                region=region,
+                region=self._region,
                 user=author,
                 profile_icon_id=summoner["profileIconId"],
                 summoner_name=summoner["name"],
@@ -147,3 +132,14 @@ class LeagueoflegendsCommand(Command):
             data.session.add(leagueoflegends)
             await data.session_commit()
             await data.reply(f"↔️ Account {leagueoflegends} connesso a {author}!")
+        else:
+            # Update and display the League of Legends stats for the current account
+            if len(author.leagueoflegends) == 0:
+                raise CommandError("Nessun account di League of Legends trovato.")
+            for account in author.leagueoflegends:
+                await self._update(account)
+            await data.session_commit()
+            message = ""
+            for account in author.leagueoflegends:
+                message += self._display(account)
+            await data.reply(message)
