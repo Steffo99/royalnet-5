@@ -12,3 +12,10 @@ class LeagueRank(enum.Enum):
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}.{self.name}"
+
+    def __gt__(self, other):
+        return self.value < other.value
+
+    @classmethod
+    def from_string(cls, string: str):
+        return cls.__members__.get(string)

@@ -31,12 +31,14 @@ class LeagueLeague:
             emojis += "🔥"
         if self.fresh_blood:
             emojis += "⭐️"
-        return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP) {emojis}"
+        return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP){' ' if emojis else ''}{emojis}"
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} {self}>"
 
     def __eq__(self, other) -> bool:
+        if other is None:
+            return False
         if not isinstance(other, LeagueLeague):
             raise TypeError(f"Can't compare {self.__class__.__qualname__} with {other.__class__.__qualname__}")
         equal = True
@@ -64,6 +66,8 @@ class LeagueLeague:
         return not self.__eq__(other)
 
     def __gt__(self, other) -> bool:
+        if other is None:
+            return True
         if not isinstance(other, LeagueLeague):
             raise TypeError(f"Can't compare {self.__class__.__qualname__} with {other.__class__.__qualname__}")
         if not (bool(self) and bool(other)):
@@ -73,7 +77,7 @@ class LeagueLeague:
             return self.tier > other.tier
         elif self.rank != other.rank:
             # Silver I is better than Silver IV
-            return self.rank < other.rank
+            return self.rank > other.rank
         elif self.points != other.points:
             # Silver I (100 LP) is better than Silver I (0 LP)
             return self.points > other.points
@@ -118,8 +122,8 @@ class LeagueLeague:
     @classmethod
     def from_dict(cls, d: dict):
         return cls(
-            tier=d["tier"],
-            rank=d["rank"],
+            tier=LeagueTier.from_string(d["tier"]),
+            rank=LeagueRank.from_string(d["rank"]),
             points=d["leaguePoints"],
             wins=d["wins"],
             losses=d["losses"],
