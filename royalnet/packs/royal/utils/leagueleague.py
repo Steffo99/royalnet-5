@@ -23,7 +23,7 @@ class LeagueLeague:
         self.fresh_blood: bool = fresh_blood
         self.veteran: bool = veteran
 
-    def __str__(self):
+    def __str__(self) -> str:
         emojis = ""
         if self.veteran:
             emojis += "🏆"
@@ -33,36 +33,55 @@ class LeagueLeague:
             emojis += "⭐️"
         return f"[b]{self.tier} {self.rank}[/b] ({self.points} LP) {emojis}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} {self}>"
 
-    def __eq__(self, other):
-        if isinstance(other, LeagueLeague):
-            equal = True
-            if other.veteran:
-                equal &= self.veteran == other.veteran
-            if other.fresh_blood:
-                equal &= self.fresh_blood == other.fresh_blood
-            if other.hot_streak:
-                equal &= self.hot_streak == other.hot_streak
-            if other.inactive:
-                equal &= self.inactive == other.inactive
-            if other.losses:
-                equal &= self.losses == other.losses
-            if other.wins:
-                equal &= self.wins == other.wins
-            if other.points:
-                equal &= self.points == other.points
-            if other.rank:
-                equal &= self.rank == other.rank
-            if other.tier:
-                equal &= self.tier == other.tier
-            return equal
-        else:
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, LeagueLeague):
             raise TypeError(f"Can't compare {self.__class__.__qualname__} with {other.__class__.__qualname__}")
+        equal = True
+        if other.veteran:
+            equal &= self.veteran == other.veteran
+        if other.fresh_blood:
+            equal &= self.fresh_blood == other.fresh_blood
+        if other.hot_streak:
+            equal &= self.hot_streak == other.hot_streak
+        if other.inactive:
+            equal &= self.inactive == other.inactive
+        if other.losses:
+            equal &= self.losses == other.losses
+        if other.wins:
+            equal &= self.wins == other.wins
+        if other.points:
+            equal &= self.points == other.points
+        if other.rank:
+            equal &= self.rank == other.rank
+        if other.tier:
+            equal &= self.tier == other.tier
+        return equal
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
+
+    def __gt__(self, other) -> bool:
+        if not isinstance(other, LeagueLeague):
+            raise TypeError(f"Can't compare {self.__class__.__qualname__} with {other.__class__.__qualname__}")
+        if not (bool(self) and bool(other)):
+            raise ValueError("Can't compare partial LeagueLeagues.")
+        if self.tier != other.tier:
+            # Silver is better than Bronze
+            return self.tier > other.tier
+        elif self.rank != other.rank:
+            # Silver I is better than Silver IV
+            return self.rank < other.rank
+        elif self.points != other.points:
+            # Silver I (100 LP) is better than Silver I (0 LP)
+            return self.points > other.points
+        elif self.winrate != other.winrate:
+            # Silver I (100 LP with 60% winrate) is better than Silver I (100 LP with 40% winrate)
+            return self.winrate > other.winrate
+        else:
+            return False
 
     def __bool__(self):
         result = True

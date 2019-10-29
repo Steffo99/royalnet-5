@@ -1,6 +1,7 @@
 import typing
 import riotwatcher
 import logging
+import asyncio
 from royalnet.commands import *
 from royalnet.utils import *
 from ..tables import LeagueOfLegends
@@ -23,21 +24,51 @@ class LeagueoflegendsCommand(Command):
     
     _region = "euw1"
 
+    _telegram_group_id = -1001153723135
+
     def __init__(self, interface: CommandInterface):
         super().__init__(interface)
         self._riotwatcher = riotwatcher.RiotWatcher(api_key=self.interface.bot.get_secret("leagueoflegends"))
         ...
 
+    def _notify(self,
+                obj: LeagueOfLegends,
+                attribute_name: str,
+                old_value: typing.Any,
+                new_value: typing.Any):
+        if self.interface.name == "telegram":
+            if isinstance(old_value, LeagueLeague):
+                # This is a rank change!
+                # Don't send messages for every rank change, send messages just if the TIER or RANK changes!
+                if old_value.tier == new_value.tier and old_value.rank == new_value.rank:
+                    return
+                # Prepare the message
+                if new_value > old_value:
+                    message = f"📈 [b]{obj.user}[/b] è salito a {new_value} su League of Legends!"
+                else:
+                    message = "📉 [b]{obj.user}[/b] è sceso a {new_value} su League of Legends."
+                # Send the message
+
+    @staticmethod
+    def _change(obj: LeagueOfLegends,
+                attribute_name: str,
+                new_value: typing.Any,
+                callback: typing.Callable[[LeagueOfLegends, str, typing.Any, typing.Any], None]):
+        old_value = obj.__getattribute__(attribute_name)
+        if old_value != new_value:
+            callback(obj, attribute_name, old_value, new_value)
+        obj.__setattr__(attribute_name, new_value)
+
     async def _update(self, lol: LeagueOfLegends):
         log.info(f"Updating: {lol}")
         log.debug(f"Getting summoner data: {lol}")
         summoner = self._riotwatcher.summoner.by_id(region=self._region, encrypted_summoner_id=lol.summoner_id)
-        lol.profile_icon_id = summoner["profileIconId"]
-        lol.summoner_name = summoner["name"]
-        lol.puuid = summoner["puuid"]
-        lol.summoner_level = summoner["summonerLevel"]
-        lol.summoner_id = summoner["id"]
-        lol.account_id = summoner["accountId"]
+        self._change(lol, "profile_icon_id", summoner["profileIconId"], self._notify)
+        self._change(lol, "summoner_name", summoner["name"], self._notify)
+        self._change(lol, "puuid", summoner["puuid"], self._notify)
+        self._change(lol, "summoner_level", summoner["summonerLevel"], self._notify)
+        self._change(lol, "summoner_id", summoner["id"], self._notify)
+        self._change(lol, "account_id", summoner["accountId"], self._notify)
         log.debug(f"Getting leagues data: {lol}")
         leagues = self._riotwatcher.league.by_summoner(region=self._region, encrypted_summoner_id=lol.summoner_id)
         soloq = None
@@ -53,13 +84,21 @@ class LeagueoflegendsCommand(Command):
                 twtrq = LeagueLeague.from_dict(league)
             if league["queueType"] == "RANKED_TFT":
                 tftq = LeagueLeague.from_dict(league)
-        lol.rank_soloq = soloq
-        lol.rank_flexq = flexq
-        lol.rank_twtrq = twtrq
-        lol.rank_tftq = tftq
+        self._change(lol, "rank_soloq", soloq, self._notify)
+        self._change(lol, "rank_flexq", flexq, self._notify)
+        self._change(lol, "rank_twtrq", twtrq, self._notify)
+        self._change(lol, "rank_tftq", tftq, self._notify)
         log.debug(f"Getting mastery data: {lol}")
         mastery = self._riotwatcher.champion_mastery.scores_by_summoner(region=self._region, encrypted_summoner_id=lol.summoner_id)
-        lol.mastery_score = mastery
+        self._change(lol, "mastery_score", mastery, self._notify)
+
+    async def _updater(self, period: int):
+        while True:
+            session = self.alchemy.Session()
+            lols = session.query(self.alchemy.LeagueOfLegends).all()
+            for lol in lols:
+                await self._update(lol)
+            await asyncio.sleep(period)
 
     def _display(self, lol: LeagueOfLegends):
         string = f"ℹ️ [b]{lol.summoner_name}[/b]\n" \
