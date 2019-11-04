@@ -1,4 +1,4 @@
-semantic = "5.0a79"
+semantic = "5.0a80"
 
 if __name__ == "__main__":
     print(semantic)
