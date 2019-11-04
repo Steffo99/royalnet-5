@@ -69,11 +69,6 @@
                             <li><span class="stats-info">Righe del diario create</span>: <span class="stats-value">{{ royal.diario_created|length }}</span></li>
                             <li><span class="stats-info">Righe del diario in cui è menzionato</span>: <span class="stats-value">{{ royal.diario_quoted|length }}</span></li>
                             <li><span class="stats-info">Modifiche alla wiki</span>: <span class="stats-value">{{ royal.wiki_contributions|length }}</span>
-                            {% if royal.active_kv_group %}
-                                <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value">{{ royal.active_kv_group[0].group_name }}</span></li>
-                            {% else %}
-                                <li><span class="stats-info">Kvgroup attivo</span>: <span class="stats-value disabled">Nessuno</span></li>
-                            {% endif %}
                             {% if royal.trivia_score %}
                                 <li><span class="stats-info">Punteggio trivia</span>: <span class="stats-value">{{ royal.trivia_score.correct_answers }}/{{ royal.trivia_score.total_answers }}</span></li>
                             {% else %}
