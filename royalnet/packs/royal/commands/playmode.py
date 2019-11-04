@@ -29,14 +29,14 @@ class PlaymodeCommand(Command):
         guild = list(bot.client.guilds)[0]
         # Delete the previous PlayMode, if it exists
         if bot.music_data[guild] is not None:
-            bot.music_data[guild].delete()
+            bot.music_data[guild].playmode.delete()
         # Create the new PlayMode
         if mode_name == "playlist":
-            bot.music_data[guild] = Playlist()
+            bot.music_data[guild].playmode = Playlist()
         elif mode_name == "pool":
-            bot.music_data[guild] = Pool()
+            bot.music_data[guild].playmode = Pool()
         elif mode_name == "layers":
-            bot.music_data[guild] = Layers()
+            bot.music_data[guild].playmode = Layers()
         else:
             raise CommandError("Unknown PlayMode specified.")
         return {}
