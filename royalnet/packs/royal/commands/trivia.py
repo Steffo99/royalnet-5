@@ -47,7 +47,7 @@ class TriviaCommand(Command):
         elif arg == "scores":
             trivia_scores = await asyncify(data.session.query(self.alchemy.TriviaScore).all)
             strings = ["🏆 [b]Trivia Leaderboards[/b]\n"]
-            for index, ts in sorted(trivia_scores, key=lambda ts: -ts.correct_rate):
+            for index, ts in enumerate(sorted(trivia_scores, key=lambda ts: -ts.correct_rate)):
                 if index > 3:
                     index = 3
                 strings.append(f"{self._medal_emojis[index]} {ts.royal.username}"
