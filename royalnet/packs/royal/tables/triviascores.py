@@ -32,5 +32,9 @@ class TriviaScore:
     def offset(self):
         return self.correct_answers - self.wrong_answers
 
+    @property
+    def correct_rate(self):
+        return self.correct_answers / self.total_answers
+
     def __repr__(self):
         return f"<TriviaScore of {self.royal}: ({self.correct_answers}|{self.wrong_answers})>"

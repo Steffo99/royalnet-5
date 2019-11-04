@@ -18,7 +18,11 @@ class TriviaCommand(Command):
 
     tables = {TriviaScore}
 
+    syntax = "[credits|scores]"
+
     _letter_emojis = ["🇦", "🇧", "🇨", "🇩"]
+
+    _medal_emojis = ["🥇", "🥈", "🥉", "🔹"]
 
     _correct_emoji = "✅"
 
@@ -33,6 +37,23 @@ class TriviaCommand(Command):
         self._answerers: typing.Dict[uuid.UUID, typing.Dict[str, bool]] = {}
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
+        arg = args.optional(0)
+        if arg == "credits":
+            await data.reply(f"ℹ️ [c]{self.interface.prefix}{self.name}[/c] di [i]Steffo[/i]\n"
+                             f"\n"
+                             f"Tutte le domande vengono dall'[b]Open Trivia Database[/b] di [i]Pixeltail Games[/i],"
+                             f" creatori di Tower Unite, e sono rilasciate sotto la licenza [b]CC BY-SA 4.0[/b].")
+            return
+        elif arg == "scores":
+            trivia_scores = await asyncify(data.session.query(self.alchemy.TriviaScore).all())
+            strings = ["🏆 [b]Trivia Leaderboards[/b]\n"]
+            for index, ts in sorted(trivia_scores, key=lambda ts: -ts.correct_rate):
+                if index > 3:
+                    index = 3
+                strings.append(f"{self._medal_emojis[index]} {ts.royal.username}"
+                               f" ({ts.correct_answers}/{ts.total_answers})")
+            await data.reply("\n".join(strings))
+            return
         if self._question_lock:
             raise CommandError("C'è già un'altra domanda attiva!")
         self._question_lock = True
@@ -104,7 +125,7 @@ class TriviaCommand(Command):
             if answerer.trivia_score is None:
                 ts = self.interface.alchemy.TriviaScore(royal=answerer)
                 data.session.add(ts)
-                data.session.commit()
+                await asyncify(data.session.commit)
             if self._answerers[question_id][answerer_id]:
                 results += self._correct_emoji
                 answerer.trivia_score.correct_answers += 1
