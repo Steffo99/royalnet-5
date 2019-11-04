@@ -45,7 +45,7 @@ class TriviaCommand(Command):
                              f" creatori di Tower Unite, e sono rilasciate sotto la licenza [b]CC BY-SA 4.0[/b].")
             return
         elif arg == "scores":
-            trivia_scores = await asyncify(data.session.query(self.alchemy.TriviaScore).all())
+            trivia_scores = await asyncify(data.session.query(self.alchemy.TriviaScore).all)
             strings = ["🏆 [b]Trivia Leaderboards[/b]\n"]
             for index, ts in sorted(trivia_scores, key=lambda ts: -ts.correct_rate):
                 if index > 3:
