@@ -224,6 +224,8 @@ class DiscordBot(GenericBot):
     async def add_to_music_data(self, dfiles: typing.List[YtdlDiscord], guild: discord.Guild):
         """Add a list of :py:class:`royalnet.audio.YtdlDiscord` to the corresponding music_data object."""
         guild_music_data = self.music_data[guild]
+        if guild_music_data is None:
+            raise CommandError(f"No music_data has been created for guild {guild}")
         for dfile in dfiles:
             log.debug(f"Adding {dfile} to music_data")
             await asyncify(dfile.ready_up)
@@ -233,8 +235,8 @@ class DiscordBot(GenericBot):
 
     async def advance_music_data(self, guild: discord.Guild):
         """Try to play the next song, while it exists. Otherwise, just return."""
-        guild_music_data = self.music_data[guild]
-        voice_client: discord.VoiceClient = self.client.find_voice_client_by_guild(guild)
+        guild_music_data: MusicData = self.music_data[guild]
+        voice_client: discord.VoiceClient = guild_music_data.voice_client
         next_source: discord.AudioSource = await guild_music_data.playmode.next()
         await self.update_activity_with_source_title()
         if next_source is None:
