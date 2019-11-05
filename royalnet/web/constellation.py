@@ -2,6 +2,9 @@ import typing
 import uvicorn
 import logging
 import sentry_sdk
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 import royalnet
 import keyring
 from starlette.applications import Starlette
