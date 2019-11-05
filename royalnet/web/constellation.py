@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 class Constellation:
     def __init__(self,
                  secrets_name: str,
+                 database_uri: str,
+                 tables: set,
                  page_stars: typing.List[typing.Type[PageStar]] = None,
                  exc_stars: typing.List[typing.Type[ExceptionStar]] = None,
                  *,
@@ -28,6 +30,9 @@ class Constellation:
 
         log.info("Creating starlette app...")
         self.starlette = Starlette(debug=debug)
+
+        log.info(f"Creating alchemy with tables: {' '.join([table.__name__ for table in tables])}")
+        self.alchemy: royalnet.database.Alchemy = royalnet.database.Alchemy(database_uri=database_uri, tables=tables)
 
         log.info("Registering page_stars...")
         for SelectedPageStar in page_stars:

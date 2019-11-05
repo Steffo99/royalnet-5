@@ -14,6 +14,18 @@ class Star:
     async def page(self, request: Request, **kwargs) -> Response:
         raise NotImplementedError()
 
+    @property
+    def alchemy(self):
+        return self.constellation.alchemy
+
+    @property
+    def Session(self):
+        return self.constellation.alchemy.Session
+
+    @property
+    def session_acm(self):
+        return self.constellation.alchemy.session_acm
+
 
 class PageStar(Star):
     path: str = NotImplemented

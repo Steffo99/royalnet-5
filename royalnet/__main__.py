@@ -156,9 +156,17 @@ def run(telegram: typing.Optional[bool],
 
     webserver_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["webserver"]:
+        # Common tables are always included
+        constellation_tables = set(r.packs.common.available_tables)
+        # Find the required tables
+        for star in [*enabled_page_stars, *enabled_exception_stars]:
+            constellation_tables = constellation_tables.union(star.tables)
+        # Create the Constellation
         constellation = r.web.Constellation(page_stars=enabled_page_stars,
                                             exc_stars=enabled_exception_stars,
-                                            secrets_name=secrets_name)
+                                            secrets_name=secrets_name,
+                                            database_uri=database,
+                                            tables=constellation_tables)
         webserver_process = multiprocessing.Process(name="Constellation Webserver",
                                                     target=constellation.run_blocking,
                                                     args=(verbose,),
