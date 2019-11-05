@@ -21,6 +21,7 @@ from .soundcloud import SoundcloudCommand
 from .zawarudo import ZawarudoCommand
 from .emojify import EmojifyCommand
 from .leagueoflegends import LeagueoflegendsCommand
+from .diarioquote import DiarioquoteCommand
 
 # Enter the commands of your Pack here!
 available_commands = [
@@ -46,6 +47,7 @@ available_commands = [
     ZawarudoCommand,
     EmojifyCommand,
     LeagueoflegendsCommand,
+    DiarioquoteCommand,
 ]
 
 # Don't change this, it should automatically generate __all__
