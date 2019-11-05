@@ -79,7 +79,7 @@ class Constellation:
     def set_secret(self, username: str, password: str):
         return keyring.set_password(f"Royalnet/{self.secrets_name}", username, password)
 
-    def run_blocking(self, verbose):
+    def run_blocking(self, address: str, port: int, verbose: bool):
         if verbose:
             core_logger = logging.root
             core_logger.setLevel(logging.DEBUG)
@@ -88,5 +88,5 @@ class Constellation:
             core_logger.addHandler(stream_handler)
             core_logger.debug("Logging setup complete.")
         self._init_sentry()
-        log.info("Running constellation server...")
-        uvicorn.run(self.starlette)
+        log.info(f"Running constellation server on {address}:{port}...")
+        uvicorn.run(self.starlette, host=address, port=port)

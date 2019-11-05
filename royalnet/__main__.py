@@ -15,6 +15,8 @@ import logging
               help="Enable/disable the Discord bot.")
 @click.option("--webserver/--no-webserver", default=None,
               help="Enable/disable the Web server.")
+@click.option("--webserver-port", default=8001,
+              help="The port on which the web server will listen on.")
 @click.option("-d", "--database", type=str, default=None,
               help="The PostgreSQL database path.")
 @click.option("-p", "--packs", type=str, multiple=True, default=[],
@@ -30,6 +32,7 @@ import logging
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
         webserver: typing.Optional[bool],
+        webserver_port: typing.Optional[int],
         database: typing.Optional[str],
         packs: typing.Tuple[str],
         network_address: typing.Optional[str],
@@ -169,7 +172,7 @@ def run(telegram: typing.Optional[bool],
                                             tables=constellation_tables)
         webserver_process = multiprocessing.Process(name="Constellation Webserver",
                                                     target=constellation.run_blocking,
-                                                    args=(verbose,),
+                                                    args=("0.0.0.0", webserver_port, verbose,),
                                                     daemon=True)
         webserver_process.start()
 
