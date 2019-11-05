@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 with open("requirements.txt", "r") as f:
-    install_requires = f.readlines()
+    install_requires = [line for line in f.readlines() if not line.startswith("#")]
 
 setuptools.setup(
     name="royalnet",
