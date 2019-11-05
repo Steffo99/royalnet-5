@@ -19,7 +19,7 @@ class DiarioquoteCommand(Command):
             entry_id = int(args[0].lstrip("#"))
         except ValueError:
             raise CommandError("L'id che hai specificato non è valido.")
-        entry: Diario = await data.session.query(self.alchemy.Diario).get(entry_id)
+        entry: Diario = await asyncify(data.session.query(self.alchemy.Diario).get, entry_id)
         if entry is None:
             raise CommandError("Nessuna riga con quell'id trovata.")
         await data.reply(str(entry))
