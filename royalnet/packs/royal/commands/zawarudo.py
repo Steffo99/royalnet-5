@@ -47,7 +47,7 @@ class ZawarudoCommand(Command):
                                                           "https://scaleway.steffo.eu/jojo/zawarudo_outro.mp3",
                                                           **ytdl_args)
         old_playlist = bot.music_data[guild]
-        bot.music_data[guild] = Playlist()
+        bot.music_data[guild].playmode = Playlist()
         # Get voice client
         vc: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
         channel: discord.VoiceChannel = vc.channel
