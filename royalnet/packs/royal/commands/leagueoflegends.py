@@ -43,11 +43,20 @@ class LeagueoflegendsCommand(Command):
                 # Don't send messages for every rank change, send messages just if the TIER or RANK changes!
                 if old_value.tier == new_value.tier and old_value.rank == new_value.rank:
                     return
+                # Find the queue
+                queue_names = {
+                    "rank_soloq": "Solo/Duo",
+                    "rank_flexq": "Flex",
+                    "rank_twtrq": "3v3",
+                    "rank_tftq": "TFT"
+                }
                 # Prepare the message
                 if new_value > old_value:
-                    message = f"📈 [b]{obj.user}[/b] è salito a {new_value} su League of Legends! Congratulazioni!"
+                    message = f"📈 [b]{obj.user}[/b] è salito a {new_value} su League of Legends " \
+                              f"({queue_names[attribute_name]})! Congratulazioni!"
                 else:
-                    message = f"📉 [b]{obj.user}[/b] è sceso a {new_value} su League of Legends."
+                    message = f"📉 [b]{obj.user}[/b] è sceso a {new_value} su League of Legends " \
+                              f"({queue_names[attribute_name]})."
                 # Send the message
                 client = self.interface.bot.client
                 await self.interface.bot.safe_api_call(client.send_message,
