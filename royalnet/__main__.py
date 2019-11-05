@@ -5,13 +5,16 @@ import royalnet as r
 import royalherald as rh
 import multiprocessing
 import keyring
+import starlette
 
 
 @click.command()
 @click.option("--telegram/--no-telegram", default=None,
-              help="Enable/disable the Telegram module.")
+              help="Enable/disable the Telegram bot.")
 @click.option("--discord/--no-discord", default=None,
-              help="Enable/disable the Discord module.")
+              help="Enable/disable the Discord bot.")
+@click.option("--webserver/--no-webserver", default=None,
+              help="Enable/disable the Web server.")
 @click.option("-d", "--database", type=str, default=None,
               help="The PostgreSQL database path.")
 @click.option("-p", "--packs", type=str, multiple=True, default=[],
@@ -26,6 +29,7 @@ import keyring
               help="Print all possible debug information.")
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
+        webserver: typing.Optional[bool],
         database: typing.Optional[str],
         packs: typing.Tuple[str],
         network_address: typing.Optional[str],
@@ -42,7 +46,8 @@ def run(telegram: typing.Optional[bool],
     # Enable / Disable interfaces
     interfaces = {
         "telegram": telegram,
-        "discord": discord
+        "discord": discord,
+        "webserver": webserver
     }
     # If any interface is True, then the undefined ones should be False
     if any(interfaces[name] is True for name in interfaces):
@@ -128,6 +133,9 @@ def run(telegram: typing.Optional[bool],
                                                   args=(verbose,),
                                                   daemon=True)
         discord_process.start()
+
+    if interfaces["webserver"]:
+        ...
 
     click.echo("Royalnet processes have been started. You can force-quit by pressing Ctrl+C.")
     if server_process is not None:
