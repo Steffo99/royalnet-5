@@ -32,6 +32,14 @@ class LeagueoflegendsCommand(Command):
         if self.interface.name == "telegram":
             self.loop.create_task(self._updater(900))
 
+    async def _send(self, message):
+        client = self.interface.bot.client
+        await self.interface.bot.safe_api_call(client.send_message,
+                                               chat_id=self._telegram_group_id,
+                                               text=telegram_escape(message),
+                                               parse_mode="HTML",
+                                               disable_webpage_preview=True)
+
     async def _notify(self,
                       obj: LeagueOfLegends,
                       attribute_name: str,
@@ -58,12 +66,11 @@ class LeagueoflegendsCommand(Command):
                     message = f"📉 [b]{obj.user}[/b] è sceso a {new_value} su League of Legends " \
                               f"({queue_names[attribute_name]})."
                 # Send the message
-                client = self.interface.bot.client
-                await self.interface.bot.safe_api_call(client.send_message,
-                                                       chat_id=self._telegram_group_id,
-                                                       text=telegram_escape(message),
-                                                       parse_mode="HTML",
-                                                       disable_webpage_preview=True)
+                await self._send(message)
+            # Level up!
+            elif attribute_name == "summoner_level":
+                if new_value == 30 or (new_value >= 50 and (new_value % 25 == 0)):
+                    await self._send(f"🆙 [b]{obj.user}[/b] è salito al livello [b]{new_value}[/b] su League of Legends!")
 
     @staticmethod
     async def _change(obj: LeagueOfLegends,
