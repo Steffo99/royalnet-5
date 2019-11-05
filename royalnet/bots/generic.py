@@ -37,6 +37,7 @@ class GenericBot:
                 command = SelectedCommand(interface)
             except Exception as e:
                 log.error(f"{e.__class__.__qualname__} during the registration of {SelectedCommand.__qualname__}")
+                sentry_sdk.capture_exception(e)
                 continue
             # Linking the command to the interface
             interface.command = command

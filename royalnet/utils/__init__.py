@@ -6,6 +6,7 @@ from .safeformat import safeformat
 from .classdictjanitor import cdj
 from .sleepuntil import sleep_until
 from .formatters import andformat, plusformat, fileformat, ytdldateformat, numberemojiformat, splitstring, ordinalformat
+from .urluuid import to_urluuid, from_urluuid
 
 __all__ = [
     "asyncify",
@@ -22,4 +23,6 @@ __all__ = [
     "discord_escape",
     "splitstring",
     "ordinalformat",
+    "to_urluuid",
+    "from_urluuid",
 ]

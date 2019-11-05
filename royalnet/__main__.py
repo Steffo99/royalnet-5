@@ -5,7 +5,7 @@ import royalnet as r
 import royalherald as rh
 import multiprocessing
 import keyring
-import starlette
+import logging
 
 
 @click.command()
@@ -36,6 +36,14 @@ def run(telegram: typing.Optional[bool],
         local_network_server: bool,
         secrets_name: str,
         verbose: bool):
+    # Setup logging
+    if verbose:
+        core_logger = logging.root
+        core_logger.setLevel(logging.DEBUG)
+        stream_handler = logging.StreamHandler()
+        stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
+        core_logger.addHandler(stream_handler)
+        core_logger.debug("Logging setup complete.")
 
     # Get the network password
     network_password = keyring.get_password(f"Royalnet/{secrets_name}", "network")
@@ -92,17 +100,29 @@ def run(telegram: typing.Optional[bool],
                                                       r.packs.common.tables.Discord,
                                                       "discord_id")
 
-    # Import command packs
+    # Import command and star packs
     packs: typing.List[str] = list(packs)
     packs.append("royalnet.packs.common")  # common pack is always imported
     enabled_commands = []
+    enabled_page_stars = []
+    enabled_exception_stars = []
     for pack in packs:
         imported = importlib.import_module(pack)
         try:
             imported_commands = imported.available_commands
         except AttributeError:
-            raise click.ClickException(f"{pack} isn't a Royalnet Pack.")
+            raise click.ClickException(f"{pack} isn't a Royalnet Pack as it is missing available_commands.")
+        try:
+            imported_page_stars = imported.available_page_stars
+        except AttributeError:
+            raise click.ClickException(f"{pack} isn't a Royalnet Pack as it is missing available_page_stars.")
+        try:
+            imported_exception_stars = imported.available_exception_stars
+        except AttributeError:
+            raise click.ClickException(f"{pack} isn't a Royalnet Pack as it is missing available_exception_stars.")
         enabled_commands = [*enabled_commands, *imported_commands]
+        enabled_page_stars = [*enabled_page_stars, *imported_page_stars]
+        enabled_exception_stars = [*enabled_exception_stars, *imported_exception_stars]
 
     telegram_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["telegram"]:
@@ -134,8 +154,16 @@ def run(telegram: typing.Optional[bool],
                                                   daemon=True)
         discord_process.start()
 
+    webserver_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["webserver"]:
-        ...
+        constellation = r.web.Constellation(page_stars=enabled_page_stars,
+                                            exc_stars=enabled_exception_stars,
+                                            secrets_name=secrets_name)
+        webserver_process = multiprocessing.Process(name="Constellation Webserver",
+                                                    target=constellation.run_blocking,
+                                                    args=(verbose,),
+                                                    daemon=True)
+        webserver_process.start()
 
     click.echo("Royalnet processes have been started. You can force-quit by pressing Ctrl+C.")
     if server_process is not None:
@@ -144,6 +172,8 @@ def run(telegram: typing.Optional[bool],
         telegram_process.join()
     if discord_process is not None:
         discord_process.join()
+    if webserver_process is not None:
+        webserver_process.join()
 
 
 if __name__ == "__main__":

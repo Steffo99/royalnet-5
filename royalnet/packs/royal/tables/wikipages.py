@@ -3,7 +3,7 @@ from sqlalchemy import Column, \
                        String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declared_attr
-from royalnet.web.shortcuts import to_urluuid
+from royalnet.utils import to_urluuid
 
 
 class WikiPage:
