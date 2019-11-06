@@ -11,7 +11,7 @@ class Star:
     def __init__(self, constellation: "Constellation"):
         self.constellation: "Constellation" = constellation
 
-    async def page(self, request: Request, **kwargs) -> Response:
+    async def page(self, request: Request) -> Response:
         raise NotImplementedError()
 
     @property

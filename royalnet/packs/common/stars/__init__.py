@@ -1,10 +1,10 @@
 # Imports go here!
-from .version import VersionStar
+from .api_royalnet_version import ApiRoyalnetVersionStar
 
 
 # Enter the PageStars of your Pack here!
 available_page_stars = [
-    VersionStar,
+    ApiRoyalnetVersionStar,
 ]
 
 # Enter the ExceptionStars of your Pack here!

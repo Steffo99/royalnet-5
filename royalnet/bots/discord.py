@@ -1,18 +1,14 @@
 import discord
 import sentry_sdk
 import logging as _logging
-import asyncio
 from .generic import GenericBot
 from ..utils import *
 from ..error import *
 from ..audio import *
 from ..commands import *
 
-log = _logging.getLogger(__name__)
 
-# TODO: Load the opus library
-if not discord.opus.is_loaded():
-    log.error("Opus is not loaded. Weird behaviour might emerge.")
+log = _logging.getLogger(__name__)
 
 
 class MusicData:

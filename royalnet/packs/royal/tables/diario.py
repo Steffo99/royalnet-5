@@ -1,4 +1,5 @@
 import re
+import datetime
 from sqlalchemy import Column, \
                        Integer, \
                        Text, \
@@ -38,7 +39,7 @@ class Diario:
         return Column(Text)
 
     @declared_attr
-    def timestamp(self):
+    def timestamp(self) -> datetime.datetime:
         return Column(DateTime, nullable=False)
 
     @declared_attr
@@ -56,6 +57,19 @@ class Diario:
     @declared_attr
     def quoted_account(self):
         return relationship("User", foreign_keys=self.quoted_account_id, backref="diario_quoted")
+
+    def json(self) -> dict:
+        return {
+            "diario_id": self.diario_id,
+            "creator": self.creator.json() if self.creator else None,
+            "quoted_account": self.quoted_account.json() if self.quoted_account else None,
+            "quoted": self.quoted,
+            "text": self.text,
+            "context": self.context,
+            "timestamp": self.timestamp.isoformat(),
+            "media_url": self.media_url,
+            "spoiler": self.spoiler
+        }
 
     def __repr__(self):
         return f"<Diario diario_id={self.diario_id}" \

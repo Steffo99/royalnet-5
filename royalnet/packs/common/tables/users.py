@@ -28,6 +28,14 @@ class User:
     def avatar(self):
         return Column(LargeBinary)
 
+    def json(self):
+        return {
+            "uid": self.uid,
+            "username": self.username,
+            "role": self.role,
+            "avatar": self.avatar
+        }
+
     def __repr__(self):
         return f"<{self.__class__.__qualname__} {self.username}>"
 

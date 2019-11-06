@@ -4,10 +4,10 @@ from starlette.responses import *
 from royalnet.web import PageStar
 
 
-class VersionStar(PageStar):
+class ApiRoyalnetVersionStar(PageStar):
     path = "/api/royalnet/version"
 
-    async def page(self, request: Request, **kwargs) -> JSONResponse:
+    async def page(self, request: Request) -> JSONResponse:
         return JSONResponse({
             "version": {
                 "semantic": royalnet.version.semantic
