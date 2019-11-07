@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Running Royalnet &mdash; Royalnet  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/rygdocs.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Royalnet Commands" href="creatingacommand.html" />
+    <link rel="prev" title="royalnet" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Royalnet
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running Royalnet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-keyring">The Keyring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-bots">Running the bots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="creatingacommand.html">Royalnet Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Royalnet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Running Royalnet</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/runningroyalnet.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="running-royalnet">
+<h1>Running Royalnet<a class="headerlink" href="#running-royalnet" title="Permalink to this headline">¶</a></h1>
+<p>To run a <code class="docutils literal notranslate"><span class="pre">royalnet</span></code> instance, you have first to download the package from <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="section" id="the-keyring">
+<h2>The Keyring<a class="headerlink" href="#the-keyring" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">royalnet</span>
+</pre></div>
+</div>
+<p>To run <code class="docutils literal notranslate"><span class="pre">royalnet</span></code>, you’ll have to setup the system keyring.</p>
+<p>On Windows and desktop Linux, this is already configured;
+on a headless Linux instance, you’ll need to <a class="reference external" href="https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems">manually start and unlock the keyring daemon</a>.</p>
+<p>Now you have to create a new <code class="docutils literal notranslate"><span class="pre">royalnet</span></code> configuration. Start the configuration wizard:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">royalnet</span><span class="o">.</span><span class="n">configurator</span>
+</pre></div>
+</div>
+<p>You’ll be prompted to enter a “secrets name”: this is the name of the group of API keys that will be associated with
+your bot. Enter a name that you’ll be able to remember.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Desired</span> <span class="n">secrets</span> <span class="n">name</span> <span class="p">[</span><span class="n">__default__</span><span class="p">]:</span> <span class="n">royalgames</span>
+</pre></div>
+</div>
+<p>You’ll then be asked for a network password.</p>
+<p>This password is used to connect to the rest of the <code class="xref py py-mod docutils literal notranslate"><span class="pre">royalnet.network</span></code>, or, if you’re hosting a local Network,
+it will be the necessary password to connect to it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Network</span> <span class="n">password</span> <span class="p">[]:</span> <span class="n">cosafaunapesuunafoglia</span>
+</pre></div>
+</div>
+<p>Then you’ll be asked for a Telegram Bot API token.
+You can get one from <a class="reference external" href="https://t.me/BotFather">&#64;BotFather</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Telegram</span> <span class="n">Bot</span> <span class="n">API</span> <span class="n">token</span> <span class="p">[]:</span> <span class="mi">000000000</span><span class="p">:</span><span class="n">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
+</pre></div>
+</div>
+<p>The next prompt will ask for a Discord Bot API token.
+You can get one at the <a class="reference external" href="https://discordapp.com/developers/applications/">Discord Developers Portal</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Discord</span> <span class="n">Bot</span> <span class="n">API</span> <span class="n">token</span> <span class="p">[]:</span> <span class="n">AAAAAAAAAAAAAAAAAAAAAAAA</span><span class="o">.</span><span class="n">AAAAAA</span><span class="o">.</span><span class="n">AAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
+</pre></div>
+</div>
+<p>Now the configurator will ask you for a Imgur API token.
+<a class="reference external" href="https://api.imgur.com/oauth2/addclient">Register an application</a> on Imgur to be supplied one.
+The token should be of type “anonymous usage without user authorization”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Imgur</span> <span class="n">API</span> <span class="n">token</span> <span class="p">[]:</span> <span class="n">aaaaaaaaaaaaaaa</span>
+</pre></div>
+</div>
+<p>Next, you’ll be asked for a Sentry DSN. You probably won’t have one, so just ignore it and press enter.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sentry</span> <span class="n">DSN</span> <span class="p">[]:</span>
+</pre></div>
+</div>
+<p>Now that all tokens are configured, you’re ready to launch the bot!</p>
+</div>
+<div class="section" id="running-the-bots">
+<h2>Running the bots<a class="headerlink" href="#running-the-bots" title="Permalink to this headline">¶</a></h2>
+<p>You can run the main <code class="docutils literal notranslate"><span class="pre">royalnet</span></code> process by running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span> <span class="o">-</span><span class="n">m</span> <span class="n">royalnet</span>
+</pre></div>
+</div>
+<p>To see all available options, you can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span> <span class="o">-</span><span class="n">m</span> <span class="n">royalnet</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All royalnet options should be specified <strong>after</strong> the word <code class="docutils literal notranslate"><span class="pre">royalnet</span></code>, or else they will be passed to
+the Python interpreter.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="creatingacommand.html" class="btn btn-neutral float-right" title="Royalnet Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="royalnet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Stefano Pigozzi
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
