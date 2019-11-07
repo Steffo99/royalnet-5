@@ -32,8 +32,7 @@ class ZawarudoCommand(Command):
         guild = list(bot.client.guilds)[0]
         # Ensure the guild has a PlayMode before adding the file to it
         if not bot.music_data.get(guild):
-            # TODO: change Exception
-            raise Exception("No music_data for this guild")
+            raise CommandError("No music_data for this guild")
         # Create url
         ytdl_args = {
             "format": "bestaudio",
