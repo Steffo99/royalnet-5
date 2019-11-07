@@ -25,6 +25,8 @@ import logging
               help="The Network server URL to connect to.")
 @click.option("-l", "--local-network-server", is_flag=True, default=False,
               help="Locally run a Network server and bind it to port 44444. Overrides -n.")
+@click.option("--local-network-server-port", type=int, default=44444,
+              help="The port on which the local network will be ran.")
 @click.option("-s", "--secrets-name", type=str, default="__default__",
               help="The name in the keyring that the secrets are stored with.")
 @click.option("-v", "--verbose", is_flag=True, default=False,
@@ -37,6 +39,7 @@ def run(telegram: typing.Optional[bool],
         packs: typing.Tuple[str],
         network_address: typing.Optional[str],
         local_network_server: bool,
+        local_network_server_port: int,
         secrets_name: str,
         verbose: bool):
     # Setup logging
@@ -80,10 +83,10 @@ def run(telegram: typing.Optional[bool],
     # Start the network server
     if local_network_server:
         server_process = multiprocessing.Process(name="Network Server",
-                                                 target=rh.Server("0.0.0.0", 44444, network_password).run_blocking,
+                                                 target=rh.Server("0.0.0.0", local_network_server_port, network_password).run_blocking,
                                                  daemon=True)
         server_process.start()
-        network_address = "ws://127.0.0.1:44444/"
+        network_address = f"ws://127.0.0.1:{local_network_server_port}/"
 
     # Create a Royalnet configuration
     network_config: typing.Optional[rh.Config] = None
