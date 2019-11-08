@@ -108,7 +108,7 @@ class CvCommand(Command):
                     elif member.activity.type == discord.ActivityType.watching:
                         message += f" | 📺 {member.activity.name}"
                     else:
-                        message += f" | ❓ Unknown activity"
+                        message += f" | ❓ {member.activity.state}"
                 message += "\n"
             message += "\n"
         return {"response": message}
