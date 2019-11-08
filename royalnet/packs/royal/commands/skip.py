@@ -27,7 +27,7 @@ class SkipCommand(Command):
         guild = list(bot.client.guilds)[0]
         # Set the currently playing source as ended
         voice_client: discord.VoiceClient = bot.client.find_voice_client_by_guild(guild)
-        if not (voice_client.is_playing() or voice_client.is_paused()):
+        if voice_client and not (voice_client.is_playing() or voice_client.is_paused()):
             raise CommandError("Nothing to skip")
         # noinspection PyProtectedMember
         voice_client._player.stop()

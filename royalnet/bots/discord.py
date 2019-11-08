@@ -242,6 +242,7 @@ class DiscordBot(GenericBot):
         def advance(error=None):
             if error:
                 voice_client.disconnect(force=True)
+                guild_music_data.voice_client = None
                 log.error(f"Error while advancing music_data: {error}")
                 return
             self.loop.create_task(self.advance_music_data(guild))
