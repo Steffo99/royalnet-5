@@ -22,6 +22,7 @@ from .zawarudo import ZawarudoCommand
 from .emojify import EmojifyCommand
 from .leagueoflegends import LeagueoflegendsCommand
 from .diarioquote import DiarioquoteCommand
+from .mp3 import Mp3Command
 
 # Enter the commands of your Pack here!
 available_commands = [
@@ -48,6 +49,7 @@ available_commands = [
     EmojifyCommand,
     LeagueoflegendsCommand,
     DiarioquoteCommand,
+    Mp3Command,
 ]
 
 # Don't change this, it should automatically generate __all__
