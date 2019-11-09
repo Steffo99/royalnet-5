@@ -23,3 +23,7 @@ class UnsupportedError(CommandError):
 
 class KeyboardExpiredError(CommandError):
     """A special type of exception that can be raised in keyboard handlers to mark a specific keyboard as expired."""
+
+
+class ConfigurationError(CommandError):
+    """The command is misconfigured and cannot work."""
