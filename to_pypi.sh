@@ -5,7 +5,7 @@ VERSION=$(python3.7 -m royalnet.version)
 
 rm -rf dist
 python setup.py sdist bdist_wheel
-twine upload "dist/royalnet-$VERSpiION"*
+twine upload "dist/royalnet-$VERSION"*
 git add *
 git commit -m "$VERSION"
 git push
