@@ -1,6 +1,5 @@
 import typing
 import asyncio
-import royalherald as rh
 from .commanderrors import UnsupportedError
 if typing.TYPE_CHECKING:
     from .command import Command
