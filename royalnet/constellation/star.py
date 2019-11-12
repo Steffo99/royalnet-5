@@ -36,6 +36,9 @@ class Star:
         """A shortcut for the session :func:`asynccontextmanager` of the :class:`Constellation`."""
         return self.constellation.alchemy.session_acm
 
+    def __repr__(self):
+        return f"<{self.__class__.__qualname__}>"
+
 
 class PageStar(Star):
     """A PageStar is a class representing a single route of the website (for example, ``/api/user/get``).
@@ -64,6 +67,9 @@ class PageStar(Star):
             
     """
 
+    def __repr__(self):
+        return f"<{self.__class__.__qualname__}: {self.path}>"
+
 
 class ExceptionStar(Star):
     """An ExceptionStar is a class that handles an :class:`Exception` raised by another star by returning a different
@@ -79,3 +85,6 @@ class ExceptionStar(Star):
     error: Union[Type[Exception], int]
     """The error that should be handled by this star. It should be either a subclass of :exc:`Exception`, 
     or the :class:`int` of an HTTP error code."""
+
+    def __repr__(self):
+        return f"<{self.__class__.__qualname__}: handles {self.error}>"

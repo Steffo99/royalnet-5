@@ -2,16 +2,29 @@ import typing
 import re
 
 
-def andformat(l: typing.List[str], middle=", ", final=" and ") -> str:
-    """Convert a :py:class:`list` to a :py:class:`str` by adding ``final`` between the last two elements and ``middle`` between the others.
+def andformat(l: typing.Collection[str], middle=", ", final=" and ") -> str:
+    """Convert a iterable (such as a :class:`list`) to a :class:`str` by adding ``final`` between the last two elements and ``middle`` between the others.
 
-    Parameters:
-        l: the input :py:class:`list`.
-        middle: the :py:class:`str` to be added between the middle elements.
-        final: the :py:class:`str` to be added between the last two elements.
+    Args:
+        l: the input iterable.
+        middle: the :class:`str` to be added between the middle elements.
+        final: the :class:`str` to be added between the last two elements.
 
     Returns:
-        The resulting :py:class:`str`."""
+        The resulting :py:class:`str`.
+
+    Examples:
+        ::
+
+            >>> andformat(["Steffo", "Kappa", "Proto"])
+            "Steffo, Kappa and Proto"
+
+            >>> andformat(["Viktya", "Sensei", "Cate"], final=" e ")
+            "Viktya, Sensei e Cate"
+
+            >>> andformat(["Paltri", "Spaggia", "Gesù", "Mallllco"], middle="+", final="+")
+            "Paltri+Spaggia+Gesù+Mallllco"
+    """
     result = ""
     for index, item in enumerate(l):
         result += item
@@ -22,42 +35,45 @@ def andformat(l: typing.List[str], middle=", ", final=" and ") -> str:
     return result
 
 
-def plusformat(i: int, empty_if_zero: bool = False) -> str:
-    """Convert an :py:class:`int` to a :py:class:`str`, prepending a ``+`` if it's greater than 0.
+def underscorize(string: str) -> str:
+    """Replace all non-word characters in a :class:`str` with underscores.
 
-    Parameters:
-        i: the :py:class:`int` to convert.
-        empty_if_zero: Return an empty string if ``i`` is zero.
-
-    Returns:
-        The resulting :py:class:`str`."""
-    if i == 0 and empty_if_zero:
-        return ""
-    if i > 0:
-        return f"+{i}"
-    return str(i)
-
-
-def fileformat(string: str) -> str:
-    """Ensure a string can be used as a filename by replacing all non-word characters with underscores.
+    It is particularly useful when you want to use random strings from the Internet as filenames.
     
     Parameters:
         string: the input string.
     
     Returns:
-        A valid filename string."""
+        The resulting string.
+
+    Example:
+        ::
+            >>> underscorize("LE EPIC PRANK [GONE WRONG!?!?]")
+            "LE EPIC PRANK _GONE WRONG_____"
+
+    """
     return re.sub(r"\W", "_", string)
 
 
 def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
-    """Convert the weird date string returned by ``youtube-dl`` into the ``YYYY-MM-DD`` format.
+    """Convert the date :class:`str` returned by :mod:`youtube-dl` into the ``YYYY-MM-DD`` format.
     
     Parameters:
-        string: the input string, in the ``YYYYMMDD`` format.
+        string: the input string, in the ``YYYYMMDD`` format used by :mod:`youtube_dl`.
         separator: the string to add between the years, the months and the days. Defaults to ``-``.
         
     Returns:
-        The resulting string, in the format ``YYYY-MM-DD`` format."""
+        The resulting string in the new format.
+
+    Example:
+        ::
+            >>> ytdldateformat("20111111")
+            "2011-11-11"
+
+            >>> ytdldateformat("20200202", separator=".")
+            "2020.02.02"
+
+    """
     if string is None:
         return ""
     return f"{string[0:4]}{separator}{string[4:6]}{separator}{string[6:8]}"

@@ -5,7 +5,7 @@ from .escaping import telegram_escape, discord_escape
 from .safeformat import safeformat
 from .classdictjanitor import cdj
 from .sleepuntil import sleep_until
-from .formatters import andformat, plusformat, fileformat, ytdldateformat, numberemojiformat, splitstring, ordinalformat
+from .formatters import andformat, plusformat, underscorize, ytdldateformat, numberemojiformat, splitstring, ordinalformat
 from .urluuid import to_urluuid, from_urluuid
 
 __all__ = [
@@ -16,7 +16,7 @@ __all__ = [
     "plusformat",
     "andformat",
     "plusformat",
-    "fileformat",
+    "underscorize",
     "ytdldateformat",
     "numberemojiformat",
     "telegram_escape",
