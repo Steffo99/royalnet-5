@@ -13,7 +13,7 @@ A multipurpose bot framework and webserver
 
 ## Installing
 
-
+Installing `royalnet` is a bit messy right now; please wait for the release of `5.1`!
 
 ## Documentation
 
