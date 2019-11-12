@@ -1,6 +1,6 @@
 from typing import Dict, Callable
 import warnings
-from .commanderrors import UnsupportedError
+from .errors import UnsupportedError
 from .commandinterface import CommandInterface
 from ..utils import asyncify
 

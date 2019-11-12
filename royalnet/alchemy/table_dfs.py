@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Type
 from sqlalchemy.inspection import inspect
 from sqlalchemy.schema import Table
 
 
-def table_dfs(starting_table: Table, ending_table: Table) -> tuple:
+def table_dfs(starting_table: Type[Table], ending_table: Type[Table]) -> tuple:
     """Depth-first-search for the path from the starting table to the ending table.
 
     Returns:

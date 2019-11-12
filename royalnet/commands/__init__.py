@@ -2,7 +2,7 @@ from .commandinterface import CommandInterface
 from .command import Command
 from .commanddata import CommandData
 from .commandargs import CommandArgs
-from .commanderrors import CommandError, InvalidInputError, UnsupportedError, KeyboardExpiredError, ConfigurationError
+from .errors import CommandError, InvalidInputError, UnsupportedError, KeyboardExpiredError, ConfigurationError
 
 __all__ = [
     "CommandInterface",

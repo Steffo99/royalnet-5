@@ -31,7 +31,7 @@ class DiscordBot(GenericBot):
 
     def _interface_factory(self) -> typing.Type[CommandInterface]:
         # noinspection PyPep8Naming
-        GenericInterface = super()._interface_factory()
+        GenericInterface = super().interface_factory()
 
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordInterface(GenericInterface):

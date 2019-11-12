@@ -1,10 +1,10 @@
 import typing
 import asyncio
-from .commanderrors import UnsupportedError
+from .errors import UnsupportedError
 if typing.TYPE_CHECKING:
     from .command import Command
     from ..alchemy import Alchemy
-    from ..interfaces import GenericBot
+    from ..serf import GenericBot
 
 
 class CommandInterface:

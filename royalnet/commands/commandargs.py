@@ -1,16 +1,33 @@
 import re
 from typing import Pattern, AnyStr, Optional, Sequence, Union
-from .commanderrors import InvalidInputError
+from .errors import InvalidInputError
 
 
 class CommandArgs(list):
-    """An interface to access the arguments of a command with ease."""
+    """An interface to easily access the arguments of a command.
+
+    Inherits from :class:`list`."""
 
     def __getitem__(self, item):
-        """Arguments can be accessed with an array notation, such as ``args[0]``.
+        """Access arguments as if they were a :class:`list`.
 
         Raises:
-            royalnet.error.InvalidInputError: if the requested argument does not exist."""
+            royalnet.error.InvalidInputError: if the requested argument does not exist.
+
+        Examples:
+            ::
+
+                # /pasta spaghetti aldente
+                >>> self[0]
+                "spaghetti"
+                >>> self[1]
+                "aldente"
+                >>> self[2]
+                # InvalidInputError: Missing argument #3.
+                >>> self[0:2]
+                ["spaghetti", "aldente"]
+
+        """
         if isinstance(item, int):
             try:
                 return super().__getitem__(item)
@@ -33,7 +50,18 @@ class CommandArgs(list):
             royalnet.error.InvalidInputError: if there are less than ``require_at_least`` arguments.
 
         Returns:
-            The space-joined string."""
+            The space-joined string.
+
+        Examples:
+            ::
+
+                # /pasta spaghetti aldente
+                >>> self.joined()
+                "spaghetti aldente"
+                >>> self.joined(require_at_least=3)
+                # InvalidInputError: Not enough arguments specified (minimum is 3).
+
+            """
         if len(self) < require_at_least:
             raise InvalidInputError(f"Not enough arguments specified (minimum is {require_at_least}).")
         return " ".join(self)
@@ -63,7 +91,20 @@ class CommandArgs(list):
             default: The value returned if the argument is missing.
 
         Returns:
-            Either the argument or the ``default`` value, defaulting to ``None``."""
+            Either the argument or the ``default`` value, defaulting to ``None``.
+
+        Examples:
+            ::
+
+                # /pasta spaghetti aldente
+                >>> self.optional(0)
+                "spaghetti"
+                >>> self.optional(2)
+                None
+                >>> self.optional(2, default="carbonara")
+                "carbonara"
+
+        """
         try:
             return self[index]
         except InvalidInputError:

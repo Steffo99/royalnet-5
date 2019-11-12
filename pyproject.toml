@@ -1,3 +1,5 @@
+# Remember to run `poetry update` after you edit this file!
+
 [tool.poetry]
     name = "royalnet"
     version = "5.1a1"
@@ -18,30 +20,41 @@
 [tool.poetry.dependencies]
     python = "^3.8"
     dateparser = "^0.7.2"
+    # telegram
     python_telegram_bot = {version="^12.2.0", optional=true}
-    discord_py = {git = "https://github.com/Rapptz/discord.py", optional=true}  # discord.py 1.2.4 is missing Go Live related methods
+    # discord
+    "discord.py" = {git = "https://github.com/Steffo99/discord.py", optional=true}  # discord.py 1.2.4 is missing Go Live related methods
     pynacl = {version="^1.3.0", optional=true}  # This requires libffi-dev and python3.*-dev to be installed on Linux systems
+    # bard
     ffmpeg_python = {version="~0.2.0", optional=true}
     youtube_dl = {version="*", optional=true}
+    # alchemy
     sqlalchemy = {version="^1.3.10", optional=true}
     psycopg2 = {version="^2.8.4", optional=true}  # Requires quite a bit of stuff http://initd.org/psycopg/docs/install.html#install-from-source
     psycopg2_binary = {version="^2.8.4", optional=true}  # Prebuilt alternative to psycopg2, not recommended
+    # constellation
     starlette = {version="^0.12.13", optional=true}
+    uvicorn = {version="^0.10.7", optional=true}
+    # sentry
     sentry_sdk = {version="~0.13.2", optional=true}
+    # herald
+    websockets = {version="^8.1", optional=true}
+
+# Development dependencies
+[tool.poetry.dev-dependencies]
+    pytest = "^5.2.1"
 
 # Optional dependencies
 [tool.poetry.extras]
     telegram = ["python_telegram_bot"]
-    discord = ["discord_py", "pynacl"]
+    discord = ["discord.py", "pynacl"]
     alchemy_easy = ["sqlalchemy", "psycopg2_binary"]
     alchemy_hard = ["sqlalchemy", "psycopg2"]
     bard = ["ffmpeg_python", "youtube_dl"]
-    constellation = ["starlette"]
+    constellation = ["starlette", "uvicorn"]
     sentry = ["sentry_sdk"]
+    herald = ["websockets"]
 
-# Development dependencies
-[tool.poetry.dev-dependencies]
-    # There are none
 
 [build-system]
     requires = ["poetry>=0.12"]

@@ -1,4 +1,3 @@
-
 class AlchemyException(Exception):
     """Base class for Alchemy exceptions."""
 

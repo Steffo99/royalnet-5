@@ -1,4 +1,4 @@
-from typing import Set, Dict, Union, Optional
+from typing import Set, Dict, Union, Type
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import Table
@@ -28,15 +28,17 @@ class Alchemy:
         self._engine: Engine = create_engine(database_uri)
         self._Base: DeclarativeMeta = declarative_base(bind=self._engine)
         self._Session: sessionmaker = sessionmaker(bind=self._engine)
-        self._tables: Dict[str, Table] = {}
+        self._tables: Dict[str, Type[Table]] = {}
         for table in tables:
             name = table.__name__
             assert self._tables.get(name) is None
             assert isinstance(name, str)
-            self._tables[name] = type(name, (self._Base, table), {})
+            # noinspection PyTypeChecker
+            bound_table: Type[Table] = type(name, (self._Base, table), {})
+            self._tables[name] = bound_table
         self._Base.metadata.create_all()
 
-    def get(self, table: Union[str, type]) -> Optional[Table]:
+    def get(self, table: Union[str, type]) -> Type[Table]:
         """Get the table with a specified name or class.
 
         Args:
