@@ -33,6 +33,8 @@ sqlalchemy = {version="^1.3.10", optional=true}
 psycopg2 = {version="^2.8.4", optional=true}  # Requires quite a bit of stuff http://initd.org/psycopg/docs/install.html#install-from-source
 psycopg2_binary = {version="^2.8.4", optional=true}  # Prebuilt alternative to psycopg2, not recommended
 
+starlette = {version="0.12.13", optional=true}
+
 # Optional dependencies
 [tool.poetry.extras]
 telegram = ["python_telegram_bot"]
@@ -40,6 +42,7 @@ discord = ["discord_py", "pynacl"]
 alchemy_easy = ["sqlalchemy", "psycopg2_binary"]
 alchemy_hard = ["sqlalchemy", "psycopg2"]
 bard = ["ffmpeg_python", "youtube_dl"]
+constellation = ["starlette"]
 
 # Development dependencies
 [tool.poetry.dev-dependencies]
