@@ -1,7 +1,15 @@
 # `royalnet` [![PyPI](https://img.shields.io/pypi/v/royalnet.svg)](https://pypi.org/project/royalnet/)
 
-The fifth rewrite of the Royal Network!
+A multipurpose bot and web framework
 
-It has a lot of submodules, many of which may be used in other bots.
+## About
 
-[Documentation available here](https://royal-games.github.io/royalnet/html/index.html).
+
+
+## Installing
+
+
+
+## Documentation
+
+`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet).
