@@ -23,14 +23,17 @@ class Star:
 
     @property
     def alchemy(self):
+        """A shortcut for the :class:`Alchemy` of the :class:`Constellation`."""
         return self.constellation.alchemy
 
     @property
     def Session(self):
+        """A shortcut for the alchemy :class:`Session` of the :class:`Constellation`."""
         return self.constellation.alchemy.Session
 
     @property
     def session_acm(self):
+        """A shortcut for the session :func:`asynccontextmanager` of the :class:`Constellation`."""
         return self.constellation.alchemy.session_acm
 
 
