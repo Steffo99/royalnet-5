@@ -3,8 +3,8 @@ import asyncio
 from .commanderrors import UnsupportedError
 if typing.TYPE_CHECKING:
     from .command import Command
-    from ..database import Alchemy
-    from ..bots import GenericBot
+    from ..alchemy import Alchemy
+    from ..interfaces import GenericBot
 
 
 class CommandInterface:

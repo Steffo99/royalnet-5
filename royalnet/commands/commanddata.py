@@ -1,4 +1,4 @@
-import typing
+from typing import Dict, Callable
 import warnings
 from .commanderrors import UnsupportedError
 from .commandinterface import CommandInterface
@@ -9,7 +9,7 @@ class CommandData:
     def __init__(self, interface: CommandInterface):
         self._interface: CommandInterface = interface
         if len(self._interface.command.tables) > 0:
-            self.session = self._interface.alchemy.Session()
+            self.session = self._interface.alchemy._Session()
         else:
             self.session = None
 
@@ -40,7 +40,7 @@ class CommandData:
             error_if_none: Raise an exception if this is True and the call has no author."""
         raise UnsupportedError("'get_author' is not supported on this platform")
 
-    async def keyboard(self, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
+    async def keyboard(self, text: str, keyboard: Dict[str, Callable]) -> None:
         """Send a keyboard having the keys of the dict as keys and calling the correspondent values on a press.
 
         The function should be passed the :py:class:`CommandData` instance as a argument."""

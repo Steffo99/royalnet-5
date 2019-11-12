@@ -94,16 +94,16 @@ def run(telegram: typing.Optional[bool],
         network_config = rh.Config(network_address, network_password)
 
     # Create a Alchemy configuration
-    telegram_db_config: typing.Optional[r.database.DatabaseConfig] = None
-    discord_db_config: typing.Optional[r.database.DatabaseConfig] = None
+    telegram_db_config: typing.Optional[r.alchemy.DatabaseConfig] = None
+    discord_db_config: typing.Optional[r.alchemy.DatabaseConfig] = None
     if database is not None:
-        telegram_db_config = r.database.DatabaseConfig(database,
-                                                       r.packs.common.tables.User,
-                                                       r.packs.common.tables.Telegram,
-                                                       "tg_id")
-        discord_db_config = r.database.DatabaseConfig(database,
+        telegram_db_config = r.alchemy.DatabaseConfig(database,
                                                       r.packs.common.tables.User,
-                                                      r.packs.common.tables.Discord,
+                                                      r.packs.common.tables.Telegram,
+                                                       "tg_id")
+        discord_db_config = r.alchemy.DatabaseConfig(database,
+                                                     r.packs.common.tables.User,
+                                                     r.packs.common.tables.Discord,
                                                       "discord_id")
 
     # Import command and star packs
@@ -136,11 +136,11 @@ def run(telegram: typing.Optional[bool],
         for command in enabled_commands:
             click.echo(f"{command.name} - {command.description}")
         click.echo("")
-        telegram_bot = r.bots.TelegramBot(network_config=network_config,
-                                          database_config=telegram_db_config,
-                                          sentry_dsn=sentry_dsn,
-                                          commands=enabled_commands,
-                                          secrets_name=secrets_name)
+        telegram_bot = r.interfaces.TelegramBot(network_config=network_config,
+                                                database_config=telegram_db_config,
+                                                sentry_dsn=sentry_dsn,
+                                                commands=enabled_commands,
+                                                secrets_name=secrets_name)
         telegram_process = multiprocessing.Process(name="Telegram Interface",
                                                    target=telegram_bot.run_blocking,
                                                    args=(verbose,),
@@ -149,11 +149,11 @@ def run(telegram: typing.Optional[bool],
 
     discord_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["discord"]:
-        discord_bot = r.bots.DiscordBot(network_config=network_config,
-                                        database_config=discord_db_config,
-                                        sentry_dsn=sentry_dsn,
-                                        commands=enabled_commands,
-                                        secrets_name=secrets_name)
+        discord_bot = r.interfaces.DiscordBot(network_config=network_config,
+                                              database_config=discord_db_config,
+                                              sentry_dsn=sentry_dsn,
+                                              commands=enabled_commands,
+                                              secrets_name=secrets_name)
         discord_process = multiprocessing.Process(name="Discord Interface",
                                                   target=discord_bot.run_blocking,
                                                   args=(verbose,),

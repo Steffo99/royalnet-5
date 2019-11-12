@@ -1,5 +1,5 @@
 import re
-import typing
+from typing import Pattern, AnyStr, Optional, Sequence, Union
 from .commanderrors import InvalidInputError
 
 
@@ -38,7 +38,7 @@ class CommandArgs(list):
             raise InvalidInputError(f"Not enough arguments specified (minimum is {require_at_least}).")
         return " ".join(self)
 
-    def match(self, pattern: typing.Union[str, typing.Pattern], *flags) -> typing.Sequence[typing.AnyStr]:
+    def match(self, pattern: Union[str, Pattern], *flags) -> Sequence[AnyStr]:
         """Match the :py:func:`royalnet.utils.commandargs.joined` to a regex pattern.
 
         Parameters:
@@ -55,7 +55,7 @@ class CommandArgs(list):
             raise InvalidInputError("Invalid syntax.")
         return match.groups()
 
-    def optional(self, index: int, default=None) -> typing.Optional[str]:
+    def optional(self, index: int, default=None) -> Optional[str]:
         """Get the argument at a specific index, but don't raise an error if nothing is found, instead returning the ``default`` value.
 
         Parameters:
