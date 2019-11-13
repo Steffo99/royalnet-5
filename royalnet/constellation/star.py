@@ -1,8 +1,9 @@
 from typing import Type, TYPE_CHECKING, List, Union
-from starlette.requests import Request
-from starlette.responses import Response
+
 if TYPE_CHECKING:
     from .constellation import Constellation
+    from starlette.requests import Request
+    from starlette.responses import Response
 
 
 class Star:
@@ -15,7 +16,7 @@ class Star:
     def __init__(self, constellation: "Constellation"):
         self.constellation: "Constellation" = constellation
 
-    async def page(self, request: Request) -> Response:
+    async def page(self, request: "Request") -> "Response":
         """The function generating the :class:`Response` to a web :class:`Request`.
 
         If it raises an error, the corresponding :class:`ExceptionStar` will be used to handle the request instead."""

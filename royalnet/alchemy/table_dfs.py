@@ -1,6 +1,9 @@
-from typing import Type
-from sqlalchemy.inspection import inspect
-from sqlalchemy.schema import Table
+try:
+    from sqlalchemy.inspection import inspect
+    from sqlalchemy.schema import Table
+except ImportError:
+    inspect = None
+    Table = None
 
 
 def table_dfs(starting_table: Table, ending_table: Table) -> tuple:
@@ -8,6 +11,9 @@ def table_dfs(starting_table: Table, ending_table: Table) -> tuple:
 
     Returns:
         A :class:`tuple` containing the path, starting from the starting table and ending at the ending table."""
+    if inspect is None:
+        raise ImportError("'alchemy' extra is not installed")
+
     inspected = set()
 
     def search(_mapper, chain):

@@ -2,8 +2,12 @@ from asyncio import AbstractEventLoop, get_event_loop
 from typing import Optional, Dict, List, Any
 from datetime import datetime, timedelta
 import dateparser
-from youtube_dl import YoutubeDL
 from royalnet.utils import ytdldateformat, asyncify
+
+try:
+    from youtube_dl import YoutubeDL
+except ImportError:
+    YoutubeDL = None
 
 
 class YtdlInfo:
@@ -85,6 +89,9 @@ class YtdlInfo:
 
         Returns:
             A :py:class:`list` containing the infos for the requested videos."""
+        if YoutubeDL is None:
+            raise ImportError("'bard' extra is not installed")
+
         if loop is None:
             loop: AbstractEventLoop = get_event_loop()
         # So many redundant options!

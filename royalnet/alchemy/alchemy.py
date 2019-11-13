@@ -1,13 +1,22 @@
-from typing import Set, Dict, Union, Type
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.schema import Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import DeclarativeMeta
-from sqlalchemy.orm import sessionmaker
+from typing import Set, Dict, Union
 from contextlib import contextmanager, asynccontextmanager
 from royalnet.utils import asyncify
 from royalnet.alchemy.errors import TableNotFoundException
+
+try:
+    from sqlalchemy import create_engine
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.schema import Table
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.ext.declarative.api import DeclarativeMeta
+    from sqlalchemy.orm import sessionmaker
+except ImportError:
+    create_engine = None
+    Engine = None
+    Table = None
+    declarative_base = None
+    DeclarativeMeta = None
+    sessionmaker = None
 
 
 class Alchemy:
@@ -22,12 +31,15 @@ class Alchemy:
             tables: The :class:`set` of tables to be created and used in the selected database.
                     Check the tables submodule for more details.
         """
+        if create_engine is None:
+            raise ImportError("'alchemy' extra is not installed")
+
         if database_uri.startswith("sqlite"):
             raise NotImplementedError("sqlite databases aren't supported, as they can't be used in multithreaded"
                                       " applications")
         self._engine: Engine = create_engine(database_uri)
         self._Base: DeclarativeMeta = declarative_base(bind=self._engine)
-        self._Session: sessionmaker = sessionmaker(bind=self._engine)
+        self.Session: sessionmaker = sessionmaker(bind=self._engine)
         self._tables: Dict[str, Table] = {}
         for table in tables:
             name = table.__name__
@@ -76,7 +88,7 @@ class Alchemy:
                     session.commit()
 
         """
-        session = self._Session()
+        session = self.Session()
         try:
             yield session
         except Exception:
@@ -99,7 +111,7 @@ class Alchemy:
                     ...
                     # Commit the session
                     await asyncify(session.commit)"""
-        session = await asyncify(self._Session)
+        session = await asyncify(self.Session)
         try:
             yield session
         except Exception:

@@ -1,19 +1,32 @@
 import logging
 import asyncio
-import warnings
-import uuid
-from typing import Type, Optional, Dict, List, Tuple, Callable
-import telegram
-import urllib3
-import sentry_sdk
-from telegram.utils.request import Request as TRequest
+from typing import Type, Optional, List, Callable
 from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
-                              UnsupportedError, KeyboardExpiredError
-from royalnet.herald import Config as HeraldConfig
+                              UnsupportedError
 from royalnet.utils import asyncify
 from .escape import escape
-from ..alchemyconfig import AlchemyConfig
 from ..serf import Serf
+
+try:
+    import telegram
+    import urllib3
+    from telegram.utils.request import Request as TRequest
+except ImportError:
+    telegram = None
+    urllib3 = None
+    TRequest = None
+
+try:
+    from sqlalchemy.orm.session import Session
+    from ..alchemyconfig import AlchemyConfig
+except ImportError:
+    Session = None
+    AlchemyConfig = None
+
+try:
+    from royalnet.herald import Config as HeraldConfig
+except ImportError:
+    HeraldConfig = None
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +40,9 @@ class TelegramSerf(Serf):
                  commands: List[Type[Command]] = None,
                  network_config: Optional[HeraldConfig] = None,
                  secrets_name: str = "__default__"):
+        if telegram is None:
+            raise ImportError("'telegram' extra is not installed")
+
         super().__init__(alchemy_config=alchemy_config,
                          commands=commands,
                          network_config=network_config,
@@ -65,7 +81,7 @@ class TelegramSerf(Serf):
                 continue
             except Exception as error:
                 log.error(f"{error.__class__.__qualname__} during {f} (skipping): {error}")
-                sentry_sdk.capture_exception(error)
+                TelegramSerf.sentry_exc(error)
                 break
         return None
 
@@ -80,26 +96,14 @@ class TelegramSerf(Serf):
 
             def __init__(self):
                 super().__init__()
-                self.keys_callbacks: Dict[..., Callable] = {}
-
-            def register_keyboard_key(interface, key_name: ..., callback: Callable):
-                warnings.warn("register_keyboard_key is deprecated", category=DeprecationWarning)
-                interface.keys_callbacks[key_name] = callback
-
-            def unregister_keyboard_key(interface, key_name: ...):
-                warnings.warn("unregister_keyboard_key is deprecated", category=DeprecationWarning)
-                try:
-                    del interface.keys_callbacks[key_name]
-                except KeyError:
-                    raise KeyError(f"Key '{key_name}' is not registered")
 
         return TelegramInterface
 
     def data_factory(self) -> Type[CommandData]:
         # noinspection PyMethodParameters
         class TelegramData(CommandData):
-            def __init__(data, interface: CommandInterface, update: telegram.Update):
-                super().__init__(interface)
+            def __init__(data, interface: CommandInterface, session, update: telegram.Update):
+                super().__init__(interface=interface, session=session)
                 data.update = update
 
             async def reply(data, text: str):
@@ -128,34 +132,39 @@ class TelegramSerf(Serf):
                     raise CommandError("Command caller is not registered")
                 return result
 
-            async def keyboard(data, text: str, keyboard: Dict[str, Callable]) -> None:
-                warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
-                tg_keyboard = []
-                for key in keyboard:
-                    press_id = uuid.uuid4()
-                    tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
-                    data._interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
-                await self.api_call(data.update.effective_chat.send_message,
-                                    escape(text),
-                                    reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
-                                    parse_mode="HTML",
-                                    disable_web_page_preview=True)
-
             async def delete_invoking(data, error_if_unavailable=False) -> None:
                 message: telegram.Message = data.update.message
                 await self.api_call(message.delete)
 
         return TelegramData
 
-    async def _handle_update(self, update: telegram.Update):
-        """What should be done when a :class:`telegram.Update` is received?"""
-        # Skip non-message updates
-        if update.message is not None:
-            await self._handle_message(update)
-        elif update.callback_query is not None:
-            await self._handle_callback_query(update)
+    async def handle_update(self, update: telegram.Update):
+        """Delegate :class:`telegram.Update` handling to the correct message type submethod."""
 
-    async def _handle_message(self, update: telegram.Update):
+        if update.message is not None:
+            await self.handle_message(update)
+        elif update.edited_message is not None:
+            pass
+        elif update.channel_post is not None:
+            pass
+        elif update.edited_channel_post is not None:
+            pass
+        elif update.inline_query is not None:
+            pass
+        elif update.chosen_inline_result is not None:
+            pass
+        elif update.callback_query is not None:
+            pass
+        elif update.shipping_query is not None:
+            pass
+        elif update.pre_checkout_query is not None:
+            pass
+        elif update.poll is not None:
+            pass
+        else:
+            log.warning(f"Unknown update type: {update}")
+
+    async def handle_message(self, update: telegram.Update):
         """What should be done when a :class:`telegram.Message` is received?"""
         message: telegram.Message = update.message
         text: str = message.text
@@ -171,84 +180,82 @@ class TelegramSerf(Serf):
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()
-        # Send a typing notification
-        await self.api_call(update.message.chat.send_action, telegram.ChatAction.TYPING)
         # Find the command
         try:
             command = self.commands[command_name]
         except KeyError:
             # Skip the message
             return
+        # Send a typing notification
+        await self.api_call(update.message.chat.send_action, telegram.ChatAction.TYPING)
         # Prepare data
-        data = self.Data(interface=command.interface, update=update)
-        try:
-            # Run the command
-            await command.run(CommandArgs(parameters), data)
-        except InvalidInputError as e:
-            await data.reply(f"⚠️ {e.message}\n"
-                             f"Syntax: [c]/{command.name} {command.syntax}[/c]")
-        except UnsupportedError as e:
-            await data.reply(f"⚠️ {e.message}")
-        except CommandError as e:
-            await data.reply(f"⚠️ {e.message}")
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n"
-            error_message += '\n'.join(e.args)
-            await data.reply(error_message)
-        finally:
-            # Close the data session
-            await data.session_close()
-
-    async def _handle_callback_query(self, update: telegram.Update):
-        query: telegram.CallbackQuery = update.callback_query
-        source: telegram.Message = query.message
-        callback: Optional[Callable] = None
-        command: Optional[Command] = None
-        for command in self.commands.values():
-            if query.data in command.interface.keys_callbacks:
-                callback = command.interface.keys_callbacks[query.data]
-                break
-        if callback is None:
-            await self.api_call(source.edit_reply_markup, reply_markup=None)
-            await self.api_call(query.answer, text="⛔️ This keyboard has expired.")
-            return
-        try:
-            response = await callback(data=self.Data(interface=command.interface, update=update))
-        except KeyboardExpiredError as e:
-            # FIXME: May cause a memory leak, as keys are not deleted after use
-            await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
-            if len(e.args) > 0:
-                await self.safe_api_call(query.answer, text=f"⛔️ {e.args[0]}")
-            else:
-                await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
-            return
-        except Exception as e:
-            error_text = f"⛔️ {e.__class__.__name__}\n"
-            error_text += '\n'.join(e.args)
-            await self.safe_api_call(query.answer, text=error_text)
+        if self.alchemy is not None:
+            session = await asyncify(self.alchemy.Session)
         else:
-            await self.safe_api_call(query.answer, text=response)
+            session = None
+        try:
+            # Create the command data
+            data = self.Data(interface=command.interface, session=session, update=update)
+            try:
+                # Run the command
+                await command.run(CommandArgs(parameters), data)
+            except InvalidInputError as e:
+                await data.reply(f"⚠️ {e.message}\n"
+                                 f"Syntax: [c]/{command.name} {command.syntax}[/c]")
+            except UnsupportedError as e:
+                await data.reply(f"⚠️ {e.message}")
+            except CommandError as e:
+                await data.reply(f"⚠️ {e.message}")
+            except Exception as e:
+                self.sentry_exc(e)
+                error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
+                                '\n'.join(e.args)
+                await data.reply(error_message)
+        finally:
+            if session is not None:
+                await asyncify(session.close)
 
-    def _initialize(self):
-        super()._initialize()
-        self._init_client()
+    async def handle_edited_message(self, update: telegram.Update):
+        pass
+
+    async def handle_channel_post(self, update: telegram.Update):
+        pass
+
+    async def handle_edited_channel_post(self, update: telegram.Update):
+        pass
+
+    async def handle_inline_query(self, update: telegram.Update):
+        pass
+
+    async def handle_chosen_inline_result(self, update: telegram.Update):
+        pass
+
+    async def handle_callback_query(self, update: telegram.Update):
+        pass
+
+    async def handle_shipping_query(self, update: telegram.Update):
+        pass
+
+    async def handle_pre_checkout_query(self, update: telegram.Update):
+        pass
+
+    async def handle_poll(self, update: telegram.Update):
+        pass
 
     async def run(self):
-        if not self.initialized:
-            self._initialize()
         while True:
             # Get the latest 100 updates
-            last_updates: List[telegram.Update] = await self.safe_api_call(self.client.get_updates,
-                                                                           offset=self._offset,
-                                                                           timeout=30,
-                                                                           read_latency=5.0)
+            last_updates: List[telegram.Update] = await self.api_call(self.client.get_updates,
+                                                                      offset=self.update_offset,
+                                                                      timeout=60,
+                                                                      read_latency=5.0)
             # Handle updates
             for update in last_updates:
+                # TODO: don't lose the reference to the task
                 # noinspection PyAsyncCall
-                self.loop.create_task(self._handle_update(update))
+                self.loop.create_task(self.handle_update(update))
             # Recalculate offset
             try:
-                self._offset = last_updates[-1].update_id + 1
+                self.update_offset = last_updates[-1].update_id + 1
             except IndexError:
                 pass

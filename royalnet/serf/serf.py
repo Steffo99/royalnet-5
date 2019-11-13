@@ -2,17 +2,39 @@ import logging
 from asyncio import Task, AbstractEventLoop
 from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
 from keyring import get_password
-import sentry_sdk
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.integrations.aiohttp import AioHttpIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
 from sqlalchemy.schema import Table
 from royalnet import __version__ as version
 from royalnet.commands import Command, CommandInterface, CommandData, CommandError, UnsupportedError
-from royalnet.alchemy import Alchemy, table_dfs
-from royalnet.herald import Response, ResponseSuccess, Broadcast, ResponseFailure, Request, Link
-from royalnet.herald import Config as HeraldConfig
 from .alchemyconfig import AlchemyConfig
+
+try:
+    from royalnet.alchemy import Alchemy, table_dfs
+except ImportError:
+    Alchemy = None
+    table_dfs = None
+
+try:
+    from royalnet.herald import Response, ResponseSuccess, Broadcast, ResponseFailure, Request, Link
+    from royalnet.herald import Config as HeraldConfig
+except ImportError:
+    Response = None
+    ResponseSuccess = None
+    Broadcast = None
+    ResponseFailure = None
+    Request = None
+    Link = None
+    HeraldConfig = None
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+except ImportError:
+    sentry_sdk = None
+    SqlalchemyIntegration = None
+    AioHttpIntegration = None
+    LoggingIntegration = None
 
 log = logging.getLogger(__name__)
 
@@ -42,9 +64,14 @@ class Serf:
         # TODO: I'm not sure what this is either
         self._identity_column: Optional[str] = None
 
-        if alchemy_config is not None:
+        if Alchemy is None:
+            log.info("Alchemy: not installed")
+        elif alchemy_config is None:
+            log.info("Alchemy: disabled")
+        else:
             tables = self.find_tables(alchemy_config, commands)
             self.init_alchemy(alchemy_config, tables)
+            log.info(f"Alchemy: {self.alchemy}")
 
         self.Interface: Type[CommandInterface] = self.interface_factory()
         """The :class:`CommandInterface` class of this Serf."""
@@ -58,6 +85,7 @@ class Serf:
         if commands is None:
             commands = []
         self.register_commands(commands)
+        log.info(f"Commands: total {len(self.commands)}")
 
         self.herald_handlers: Dict[str, Callable[["Serf", Any], Awaitable[Optional[dict]]]] = {}
         """A :class:`dict` linking :class:`Request` event names to coroutines returning a :class:`dict` that will be
@@ -69,8 +97,13 @@ class Serf:
         self.herald_task: Optional[Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
 
-        if network_config is not None:
+        if Link is None:
+            log.info("Herald: not installed")
+        elif network_config is None:
+            log.info("Herald: disabled")
+        else:
             self.init_network(network_config)
+            log.info(f"Herald: {self.herald}")
 
         self.loop: Optional[AbstractEventLoop] = None
         """The event loop this Serf is running on."""
@@ -194,7 +227,7 @@ class Serf:
                     self.commands[f"{interface.prefix}{alias}"] = \
                         self.commands[f"{interface.prefix}{SelectedCommand.name}"]
                 else:
-                    log.info(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
+                    log.warning(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
 
     def init_network(self, config: HeraldConfig):
         """Create a :py:class:`Link`, and run it as a :py:class:`asyncio.Task`."""
@@ -226,23 +259,25 @@ class Serf:
         elif isinstance(message, Broadcast):
             await network_handler(self, **message.data)
 
-    def init_sentry(self):
-        sentry_dsn = self.get_secret("sentry")
-        if sentry_dsn:
-            # noinspection PyUnreachableCode
-            if __debug__:
-                release = f"Dev"
-            else:
-                release = f"{version}"
-            log.debug("Initializing Sentry...")
-            sentry_sdk.init(sentry_dsn,
-                            integrations=[AioHttpIntegration(),
-                                          SqlalchemyIntegration(),
-                                          LoggingIntegration(event_level=None)],
-                            release=release)
-            log.info(f"Sentry: enabled (Royalnet {release})")
+    @staticmethod
+    def init_sentry(dsn):
+        # noinspection PyUnreachableCode
+        if __debug__:
+            release = f"Dev"
         else:
-            log.info("Sentry: disabled")
+            release = f"{version}"
+        log.debug("Initializing Sentry...")
+        sentry_sdk.init(dsn,
+                        integrations=[AioHttpIntegration(),
+                                      SqlalchemyIntegration(),
+                                      LoggingIntegration(event_level=None)],
+                        release=release)
+        log.info(f"Sentry: enabled (Royalnet {release})")
+
+    @staticmethod
+    def sentry_exc(exc: Exception):
+        if sentry_sdk is not None:
+            sentry_sdk.capture_exception(exc)
 
     def get_secret(self, username: str):
         """Get a Royalnet secret from the keyring.
@@ -259,5 +294,13 @@ class Serf:
         """Blockingly run the Serf.
 
         This should be used as the target of a :class:`multiprocessing.Process`."""
-        self.init_sentry()
+        if sentry_sdk is None:
+            log.info("Sentry: not installed")
+        else:
+            sentry_dsn = self.get_secret("sentry")
+            if sentry_dsn is None:
+                log.info("Sentry: disabled")
+            else:
+                self.init_sentry(sentry_dsn)
+
         self.loop.run_until_complete(self.run())

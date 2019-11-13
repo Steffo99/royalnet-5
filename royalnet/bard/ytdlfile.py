@@ -1,11 +1,15 @@
 import os
-import youtube_dl
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
 from royalnet.utils import asyncify, MultiLock
 from asyncio import AbstractEventLoop, get_event_loop
 from .ytdlinfo import YtdlInfo
 from .errors import NotFoundError, MultipleFilesError
+
+try:
+    from youtube_dl import YoutubeDL
+except ImportError:
+    youtube_dl = None
 
 
 class YtdlFile:
@@ -60,9 +64,12 @@ class YtdlFile:
 
     async def download_file(self) -> None:
         """Download the file."""
+        if YoutubeDL is None:
+            raise ImportError("'bard' extra is not installed")
+
         def download():
             """Download function block to be asyncified."""
-            with youtube_dl.YoutubeDL(self.ytdl_args) as ytdl:
+            with YoutubeDL(self.ytdl_args) as ytdl:
                 filename = ytdl.prepare_filename(self.info.__dict__)
                 ytdl.download([self.info.webpage_url])
                 self.filename = filename

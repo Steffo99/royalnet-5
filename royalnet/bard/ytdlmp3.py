@@ -2,9 +2,9 @@ import typing
 import re
 import ffmpeg
 import os
+from royalnet.utils import asyncify, MultiLock
 from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
-from royalnet.utils import asyncify, MultiLock
 
 
 class YtdlMp3:

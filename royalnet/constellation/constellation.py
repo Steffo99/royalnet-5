@@ -1,16 +1,27 @@
 import typing
-import uvicorn
 import logging
-import sentry_sdk
-from sentry_sdk.integrations.aiohttp import AioHttpIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
 import royalnet
 import keyring
-from starlette.applications import Starlette
-from .star import PageStar, ExceptionStar
 from royalnet.alchemy import Alchemy
-from royalnet import __version__ as version
+from .star import PageStar, ExceptionStar
+
+try:
+    import uvicorn
+    from starlette.applications import Starlette
+except ImportError:
+    uvicorn = None
+    Starlette = None
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+except ImportError:
+    sentry_sdk = None
+    AioHttpIntegration = None
+    SqlalchemyIntegration = None
+    LoggingIntegration = None
 
 
 log = logging.getLogger(__name__)
@@ -29,6 +40,9 @@ class Constellation:
                  exc_stars: typing.List[typing.Type[ExceptionStar]] = None,
                  *,
                  debug: bool = __debug__,):
+        if Starlette is None:
+            raise ImportError("'constellation' extra is not installed")
+
         if page_stars is None:
             page_stars = []
 
@@ -93,22 +107,25 @@ class Constellation:
             address: The IP address this Constellation should bind to.
             port: The port this Constellation should listen for requests on."""
         # Initialize Sentry on the process
-        sentry_dsn = self.get_secret("sentry")
-        if sentry_dsn:
-            # noinspection PyUnreachableCode
-            if __debug__:
-                release = f"Dev"
-            else:
-                release = f"{version}"
-            log.debug("Initializing Sentry...")
-            sentry_sdk.init(sentry_dsn,
-                            integrations=[AioHttpIntegration(),
-                                          SqlalchemyIntegration(),
-                                          LoggingIntegration(event_level=None)],
-                            release=release)
-            log.info(f"Sentry: enabled (Royalnet {release})")
+        if sentry_sdk is None:
+            log.info("Sentry: not installed")
         else:
-            log.info("Sentry: disabled")
+            sentry_dsn = self.get_secret("sentry")
+            if not sentry_dsn:
+                log.info("Sentry: disabled")
+            else:
+                # noinspection PyUnreachableCode
+                if __debug__:
+                    release = f"Dev"
+                else:
+                    release = f"{royalnet.__version__}"
+                log.debug("Initializing Sentry...")
+                sentry_sdk.init(sentry_dsn,
+                                integrations=[AioHttpIntegration(),
+                                              SqlalchemyIntegration(),
+                                              LoggingIntegration(event_level=None)],
+                                release=release)
+                log.info(f"Sentry: enabled (Royalnet {release})")
         # Run the server
         log.info(f"Running Constellation on {address}:{port}...")
         self.running = True

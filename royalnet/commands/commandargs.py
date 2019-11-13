@@ -44,7 +44,8 @@ class CommandArgs(list):
         """Get the arguments as a space-joined string.
 
         Parameters:
-            require_at_least: the minimum amount of arguments required, will raise :py:exc:`royalnet.error.InvalidInputError` if the requirement is not fullfilled.
+            require_at_least: the minimum amount of arguments required, will raise :exc:`InvalidInputError` if the
+            requirement is not fullfilled.
 
         Raises:
             royalnet.error.InvalidInputError: if there are less than ``require_at_least`` arguments.
@@ -84,7 +85,8 @@ class CommandArgs(list):
         return match.groups()
 
     def optional(self, index: int, default=None) -> Optional[str]:
-        """Get the argument at a specific index, but don't raise an error if nothing is found, instead returning the ``default`` value.
+        """Get the argument at a specific index, but don't raise an error if nothing is found, instead returning the
+        ``default`` value.
 
         Parameters:
             index: The index of the argument you want to retrieve.

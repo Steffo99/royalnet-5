@@ -1,5 +1,6 @@
-from typing import Type
-from sqlalchemy.schema import Table
+from typing import Type, TYPE_CHECKING
+if TYPE_CHECKING:
+    from sqlalchemy.schema import Table
 
 
 class AlchemyConfig:
@@ -15,4 +16,4 @@ class AlchemyConfig:
         self.identity_column: str = identity_column
 
     def __repr__(self):
-        return f"<{self.__class__.__qualname__} for {self.server_url}>"
+        return f"<{self.__class__.__qualname__} for {self.database_url}>"
