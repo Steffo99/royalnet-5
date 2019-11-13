@@ -9,6 +9,8 @@ import royalnet
 import keyring
 from starlette.applications import Starlette
 from .star import PageStar, ExceptionStar
+from royalnet.alchemy import Alchemy
+from royalnet import __version__ as version
 
 
 log = logging.getLogger(__name__)
@@ -23,7 +25,6 @@ class Constellation:
     def __init__(self,
                  secrets_name: str,
                  database_uri: str,
-                 tables: set,
                  page_stars: typing.List[typing.Type[PageStar]] = None,
                  exc_stars: typing.List[typing.Type[ExceptionStar]] = None,
                  *,
@@ -53,12 +54,12 @@ class Constellation:
         log.debug(f"Found Tables: {' '.join([table.__name__ for table in tables])}")
 
         log.info(f"Creating Alchemy...")
-        self.alchemy: royalnet.database.Alchemy = royalnet.database.Alchemy(database_uri=database_uri, tables=tables)
+        self.alchemy: Alchemy = Alchemy(database_uri=database_uri, tables=tables)
         """The :class:`Alchemy: of this Constellation."""
 
         log.info("Registering PageStars...")
         for SelectedPageStar in page_stars:
-            log.info(f"Registering: {page_star_instance.path} -> {page_star_instance.__class__.__name__}")
+            log.info(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__class__.__name__}")
             try:
                 page_star_instance = SelectedPageStar(constellation=self)
             except Exception as e:
@@ -68,7 +69,7 @@ class Constellation:
 
         log.info("Registering ExceptionStars...")
         for SelectedExcStar in exc_stars:
-            log.info(f"Registering: {exc_star_instance.error} -> {exc_star_instance.__class__.__name__}")
+            log.info(f"Registering: {SelectedExcStar.error} -> {SelectedExcStar.__class__.__name__}")
             try:
                 exc_star_instance = SelectedExcStar(constellation=self)
             except Exception as e:
@@ -98,7 +99,7 @@ class Constellation:
             if __debug__:
                 release = f"Dev"
             else:
-                release = f"{royalnet.version.semantic}"
+                release = f"{version}"
             log.debug("Initializing Sentry...")
             sentry_sdk.init(sentry_dsn,
                             integrations=[AioHttpIntegration(),

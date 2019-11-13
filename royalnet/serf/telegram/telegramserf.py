@@ -1,110 +1,48 @@
-import telegram
-import telegram.utils.request
-import uuid
-import urllib3
+import logging
 import asyncio
-import sentry_sdk
-import logging as _logging
 import warnings
-from .interface import GenericBot
-from ..utils import *
-from ..error import *
-from ..commands import *
+import uuid
+from typing import Type, Optional, Dict, List, Tuple, Callable
+import telegram
+import urllib3
+import sentry_sdk
+from telegram.utils.request import Request as TRequest
+from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
+                              UnsupportedError, KeyboardExpiredError
+from royalnet.herald import Config as HeraldConfig
+from royalnet.utils import asyncify
+from .escape import escape
+from ..alchemyconfig import AlchemyConfig
+from ..serf import Serf
+
+log = logging.getLogger(__name__)
 
 
-log = _logging.getLogger(__name__)
-
-
-class TelegramBot(GenericBot):
-    """A bot that connects to `Telegram <https://telegram.org/>`_."""
+class TelegramSerf(Serf):
+    """A Serf that connects to `Telegram <https://telegram.org/>`_."""
     interface_name = "telegram"
 
-    def _init_client(self):
-        """Create the :py:class:`telegram.Bot`, and set the starting offset."""
-        # https://github.com/python-telegram-bot/python-telegram-bot/issues/341
-        request = telegram.utils.request.Request(5, read_timeout=30)
-        token = self.get_secret("telegram")
-        self.client = telegram.Bot(token, request=request)
-        self._offset: int = -100
+    def __init__(self, *,
+                 alchemy_config: Optional[AlchemyConfig] = None,
+                 commands: List[Type[Command]] = None,
+                 network_config: Optional[HeraldConfig] = None,
+                 secrets_name: str = "__default__"):
+        super().__init__(alchemy_config=alchemy_config,
+                         commands=commands,
+                         network_config=network_config,
+                         secrets_name=secrets_name)
 
-    def _interface_factory(self) -> typing.Type[CommandInterface]:
-        # noinspection PyPep8Naming
-        GenericInterface = super().interface_factory()
+        self.client = telegram.Bot(self.get_secret("telegram"), request=TRequest(5, read_timeout=30))
+        """The :class:`telegram.Bot` instance that will be used from the Serf."""
 
-        # noinspection PyMethodParameters,PyAbstractClass
-        class TelegramInterface(GenericInterface):
-            name = self.interface_name
-            prefix = "/"
-
-            def __init__(self):
-                super().__init__()
-                self.keys_callbacks: typing.Dict[typing.Tuple[int, str], typing.Callable] = {}
-
-            def register_keyboard_key(interface, key_name: str, callback: typing.Callable):
-                interface.keys_callbacks[key_name] = callback
-
-            def unregister_keyboard_key(interface, key_name: str):
-                try:
-                    del interface.keys_callbacks[key_name]
-                except KeyError:
-                    raise KeyError(f"Key '{key_name}' is not registered")
-
-        return TelegramInterface
-
-    def _data_factory(self) -> typing.Type[CommandData]:
-        # noinspection PyMethodParameters,PyAbstractClass
-        class TelegramData(CommandData):
-            def __init__(data, interface: CommandInterface, update: telegram.Update):
-                super().__init__(interface)
-                data.update = update
-
-            async def reply(data, text: str):
-                await TelegramBot.safe_api_call(data.update.effective_chat.send_message,
-                                                telegram_escape(text),
-                                                parse_mode="HTML",
-                                                disable_web_page_preview=True)
-
-            async def get_author(data, error_if_none=False):
-                if data.update.message is not None:
-                    user: telegram.User = data.update.message.from_user
-                elif data.update.callback_query is not None:
-                    user: telegram.user = data.update.callback_query.from_user
-                else:
-                    raise CommandError("Command caller can not be determined")
-                if user is None:
-                    if error_if_none:
-                        raise CommandError("No command caller for this message")
-                    return None
-                query = data.session.query(self.master_table)
-                for link in self.identity_chain:
-                    query = query.join(link.mapper.class_)
-                query = query.filter(self.identity_column == user.id)
-                result = await asyncify(query.one_or_none)
-                if result is None and error_if_none:
-                    raise CommandError("Command caller is not registered")
-                return result
-
-            async def keyboard(data, text: str, keyboard: typing.Dict[str, typing.Callable]) -> None:
-                warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
-                tg_keyboard = []
-                for key in keyboard:
-                    press_id = uuid.uuid4()
-                    tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
-                    data._interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
-                await TelegramBot.safe_api_call(data.update.effective_chat.send_message,
-                                                telegram_escape(text),
-                                                reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
-                                                parse_mode="HTML",
-                                                disable_web_page_preview=True)
-
-            async def delete_invoking(data, error_if_unavailable=False) -> None:
-                message: telegram.Message = data.update.message
-                await TelegramBot.safe_api_call(message.delete)
-
-        return TelegramData
+        self.update_offset: int = -100
+        """The current `update offset <https://core.telegram.org/bots/api#getupdates>`_."""
 
     @staticmethod
-    async def safe_api_call(f: typing.Callable, *args, **kwargs) -> typing.Optional:
+    async def api_call(f: Callable, *args, **kwargs) -> Optional:
+        """Call a :class:`telegram.Bot` method safely, without getting a mess of errors raised.
+
+        The method may return None if it was decided that the call should be skipped."""
         while True:
             try:
                 return await asyncify(f, *args, **kwargs)
@@ -131,7 +69,86 @@ class TelegramBot(GenericBot):
                 break
         return None
 
+    def interface_factory(self) -> Type[CommandInterface]:
+        # noinspection PyPep8Naming
+        GenericInterface = super().interface_factory()
+
+        # noinspection PyMethodParameters
+        class TelegramInterface(GenericInterface):
+            name = self.interface_name
+            prefix = "/"
+
+            def __init__(self):
+                super().__init__()
+                self.keys_callbacks: Dict[..., Callable] = {}
+
+            def register_keyboard_key(interface, key_name: ..., callback: Callable):
+                warnings.warn("register_keyboard_key is deprecated", category=DeprecationWarning)
+                interface.keys_callbacks[key_name] = callback
+
+            def unregister_keyboard_key(interface, key_name: ...):
+                warnings.warn("unregister_keyboard_key is deprecated", category=DeprecationWarning)
+                try:
+                    del interface.keys_callbacks[key_name]
+                except KeyError:
+                    raise KeyError(f"Key '{key_name}' is not registered")
+
+        return TelegramInterface
+
+    def data_factory(self) -> Type[CommandData]:
+        # noinspection PyMethodParameters
+        class TelegramData(CommandData):
+            def __init__(data, interface: CommandInterface, update: telegram.Update):
+                super().__init__(interface)
+                data.update = update
+
+            async def reply(data, text: str):
+                await self.api_call(data.update.effective_chat.send_message,
+                                    escape(text),
+                                    parse_mode="HTML",
+                                    disable_web_page_preview=True)
+
+            async def get_author(data, error_if_none=False):
+                if data.update.message is not None:
+                    user: telegram.User = data.update.message.from_user
+                elif data.update.callback_query is not None:
+                    user: telegram.User = data.update.callback_query.from_user
+                else:
+                    raise CommandError("Command caller can not be determined")
+                if user is None:
+                    if error_if_none:
+                        raise CommandError("No command caller for this message")
+                    return None
+                query = data.session.query(self._master_table)
+                for link in self._identity_chain:
+                    query = query.join(link.mapper.class_)
+                query = query.filter(self._identity_column == user.id)
+                result = await asyncify(query.one_or_none)
+                if result is None and error_if_none:
+                    raise CommandError("Command caller is not registered")
+                return result
+
+            async def keyboard(data, text: str, keyboard: Dict[str, Callable]) -> None:
+                warnings.warn("keyboard is deprecated, please avoid using it", category=DeprecationWarning)
+                tg_keyboard = []
+                for key in keyboard:
+                    press_id = uuid.uuid4()
+                    tg_keyboard.append([telegram.InlineKeyboardButton(key, callback_data=str(press_id))])
+                    data._interface.register_keyboard_key(key_name=str(press_id), callback=keyboard[key])
+                await self.api_call(data.update.effective_chat.send_message,
+                                    escape(text),
+                                    reply_markup=telegram.InlineKeyboardMarkup(tg_keyboard),
+                                    parse_mode="HTML",
+                                    disable_web_page_preview=True)
+
+            async def delete_invoking(data, error_if_unavailable=False) -> None:
+                message: telegram.Message = data.update.message
+                await self.api_call(message.delete)
+
+        return TelegramData
+
     async def _handle_update(self, update: telegram.Update):
+        """What should be done when a :class:`telegram.Update` is received?"""
         # Skip non-message updates
         if update.message is not None:
             await self._handle_message(update)
@@ -139,6 +156,7 @@ class TelegramBot(GenericBot):
             await self._handle_callback_query(update)
 
     async def _handle_message(self, update: telegram.Update):
+        """What should be done when a :class:`telegram.Message` is received?"""
         message: telegram.Message = update.message
         text: str = message.text
         # Try getting the caption instead
@@ -154,7 +172,7 @@ class TelegramBot(GenericBot):
         command_text, *parameters = text.split(" ")
         command_name = command_text.replace(f"@{self.client.username}", "").lower()
         # Send a typing notification
-        await self.safe_api_call(update.message.chat.send_action, telegram.ChatAction.TYPING)
+        await self.api_call(update.message.chat.send_action, telegram.ChatAction.TYPING)
         # Find the command
         try:
             command = self.commands[command_name]
@@ -162,7 +180,7 @@ class TelegramBot(GenericBot):
             # Skip the message
             return
         # Prepare data
-        data = self._Data(interface=command.interface, update=update)
+        data = self.Data(interface=command.interface, update=update)
         try:
             # Run the command
             await command.run(CommandArgs(parameters), data)
@@ -185,18 +203,18 @@ class TelegramBot(GenericBot):
     async def _handle_callback_query(self, update: telegram.Update):
         query: telegram.CallbackQuery = update.callback_query
         source: telegram.Message = query.message
-        callback: typing.Optional[typing.Callable] = None
-        command: typing.Optional[Command] = None
+        callback: Optional[Callable] = None
+        command: Optional[Command] = None
         for command in self.commands.values():
             if query.data in command.interface.keys_callbacks:
                 callback = command.interface.keys_callbacks[query.data]
                 break
         if callback is None:
-            await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
-            await self.safe_api_call(query.answer, text="⛔️ This keyboard has expired.")
+            await self.api_call(source.edit_reply_markup, reply_markup=None)
+            await self.api_call(query.answer, text="⛔️ This keyboard has expired.")
             return
         try:
-            response = await callback(data=self._Data(interface=command.interface, update=update))
+            response = await callback(data=self.Data(interface=command.interface, update=update))
         except KeyboardExpiredError as e:
             # FIXME: May cause a memory leak, as keys are not deleted after use
             await self.safe_api_call(source.edit_reply_markup, reply_markup=None)
@@ -221,10 +239,10 @@ class TelegramBot(GenericBot):
             self._initialize()
         while True:
             # Get the latest 100 updates
-            last_updates: typing.List[telegram.Update] = await self.safe_api_call(self.client.get_updates,
-                                                                                  offset=self._offset,
-                                                                                  timeout=30,
-                                                                                  read_latency=5.0)
+            last_updates: List[telegram.Update] = await self.safe_api_call(self.client.get_updates,
+                                                                           offset=self._offset,
+                                                                           timeout=30,
+                                                                           read_latency=5.0)
             # Handle updates
             for update in last_updates:
                 # noinspection PyAsyncCall

@@ -1,17 +1,18 @@
-import asyncio
 import logging
-from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union
+from asyncio import Task, AbstractEventLoop
+from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
+from keyring import get_password
 import sentry_sdk
-import keyring
-from royalnet.herald import Response, ResponseSuccess, Broadcast, ResponseFailure, Request, Link
-from royalnet.herald import Config as HeraldConfig
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from sqlalchemy.schema import Table
+from royalnet import __version__ as version
 from royalnet.commands import Command, CommandInterface, CommandData, CommandError, UnsupportedError
-from royalnet.alchemy import Alchemy
+from royalnet.alchemy import Alchemy, table_dfs
+from royalnet.herald import Response, ResponseSuccess, Broadcast, ResponseFailure, Request, Link
+from royalnet.herald import Config as HeraldConfig
 from .alchemyconfig import AlchemyConfig
-
 
 log = logging.getLogger(__name__)
 
@@ -25,13 +26,25 @@ class Serf:
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
                  network_config: Optional[HeraldConfig] = None,
-                 sentry_dsn: Optional[str] = None,
-                 loop: asyncio.AbstractEventLoop = None,
                  secrets_name: str = "__default__"):
         self.secrets_name = secrets_name
 
+        self.alchemy: Optional[Alchemy] = None
+        """The :class:`Alchemy` object connecting this Serf to the database."""
+
+        self._master_table: Optional[Table] = None
+        """The central table listing all users. It usually is :class:`User`."""
+
+        self._identity_table: Optional[Table] = None
+        """The identity table containing the interface data (such as the Telegram user data) and that is in a 
+        many-to-one relationship with the master table."""
+
+        # TODO: I'm not sure what this is either
+        self._identity_column: Optional[str] = None
+
         if alchemy_config is not None:
-            self.init_alchemy(alchemy_config)
+            tables = self.find_tables(alchemy_config, commands)
+            self.init_alchemy(alchemy_config, tables)
 
         self.Interface: Type[CommandInterface] = self.interface_factory()
         """The :class:`CommandInterface` class of this Serf."""
@@ -53,19 +66,55 @@ class Serf:
         self.herald: Optional[Link] = None
         """The :class:`Link` object connecting the Serf to the rest of the herald network."""
 
-        self.herald_task: Optional[asyncio.Task] = None
+        self.herald_task: Optional[Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
 
         if network_config is not None:
             self.init_network(network_config)
 
+        self.loop: Optional[AbstractEventLoop] = None
+        """The event loop this Serf is running on."""
+
+    @staticmethod
+    def find_tables(alchemy_config: AlchemyConfig, commands: List[Type[Command]]) -> Set[type]:
+        """Find the :class:`Table`s required by the Serf.
+
+        Warning:
+            This function will return a wrong result if there are tables between the master table and the identity table
+            that aren't included by a command.
+
+        Returns:
+            A :class:`list` of :class:`Table`s."""
+        # FIXME: breaks if there are nonincluded tables between master and identity.
+        tables = {alchemy_config.master_table, alchemy_config.identity_table}
+        for command in commands:
+            tables = tables.union(command.tables)
+        return tables
+
+    def init_alchemy(self, alchemy_config: AlchemyConfig, tables: Set[type]) -> None:
+        """Create and initialize the :class:`Alchemy` with the required tables, and find the link between the master
+        table and the identity table."""
+        self.alchemy = Alchemy(alchemy_config.database_url, tables)
+        self._master_table = self.alchemy.get(alchemy_config.master_table)
+        self._identity_table = self.alchemy.get(alchemy_config.identity_table)
+        # FIXME: this MAY break
+        self._identity_column = self._identity_table.__getattribute__(alchemy_config.identity_column)
+        # self._identity_column = self._identity_table.__getattribute__(self._identity_table,
+        #                                                               alchemy_config.identity_column)
+
+    @property
+    def _identity_chain(self) -> tuple:
+        """Find a relationship path starting from the master table and ending at the identity table, and return it."""
+        return table_dfs(self._master_table, self._identity_table)
+
     def interface_factory(self) -> Type[CommandInterface]:
         """Create the :class:`CommandInterface` class for the Serf."""
+
         # noinspection PyMethodParameters
         class GenericInterface(CommandInterface):
             alchemy: Alchemy = self.alchemy
             bot: "Serf" = self
-            loop: asyncio.AbstractEventLoop = self.loop
+            loop: AbstractEventLoop = self.loop
 
             def register_herald_action(ci,
                                        event_name: str,
@@ -171,86 +220,44 @@ class Serf:
                 return ResponseFailure("exception_in_handler",
                                        f"An exception was raised in {network_handler} for {message.handler}.",
                                        extra_info={
-                                          "type": e.__class__.__name__,
-                                          "message": str(e)
+                                           "type": e.__class__.__name__,
+                                           "message": str(e)
                                        })
         elif isinstance(message, Broadcast):
             await network_handler(self, **message.data)
 
-    def _init_database(self):
-        """Create an :py:class:`royalnet.database.Alchemy` with the tables required by the packs. Then,
-        find the chain that links the ``master_table`` to the ``identity_table``. """
-        if self.uninitialized_database_config:
-            log.info(f"Alchemy: enabled")
-            required_tables = {self.uninitialized_database_config.master_table, self.uninitialized_database_config.identity_table}
-            for command in self.uninitialized_commands:
-                required_tables = required_tables.union(command.tables)
-            log.debug(f"Required tables: {', '.join([item.__qualname__ for item in required_tables])}")
-            self.alchemy = Alchemy(self.uninitialized_database_config.database_uri, required_tables)
-            self.master_table = self.alchemy.__getattribute__(self.uninitialized_database_config.master_table.__name__)
-            log.debug(f"Master table: {self.master_table.__qualname__}")
-            self.identity_table = self.alchemy.__getattribute__(self.uninitialized_database_config.identity_table.__name__)
-            log.debug(f"Identity table: {self.identity_table.__qualname__}")
-            self.identity_column = self.identity_table.__getattribute__(self.identity_table,
-                                                                        self.uninitialized_database_config.identity_column_name)
-            log.debug(f"Identity column: {self.identity_column.__class__.__qualname__}")
-            self.identity_chain = table_dfs(self.master_table, self.identity_table)
-            log.debug(f"Identity chain: {' -> '.join([str(item) for item in self.identity_chain])}")
-        else:
-            log.info(f"Alchemy: disabled")
-            self.alchemy = None
-            self.master_table = None
-            self.identity_table = None
-            self.identity_column = None
-
-    def _init_sentry(self):
-        if self.uninitialized_sentry_dsn:
+    def init_sentry(self):
+        sentry_dsn = self.get_secret("sentry")
+        if sentry_dsn:
             # noinspection PyUnreachableCode
             if __debug__:
-                release = "DEV"
+                release = f"Dev"
             else:
-                release = royalnet.version.semantic
+                release = f"{version}"
+            log.debug("Initializing Sentry...")
+            sentry_sdk.init(sentry_dsn,
+                            integrations=[AioHttpIntegration(),
+                                          SqlalchemyIntegration(),
+                                          LoggingIntegration(event_level=None)],
+                            release=release)
             log.info(f"Sentry: enabled (Royalnet {release})")
-            self.sentry = sentry_sdk.init(self.uninitialized_sentry_dsn,
-                                          integrations=[AioHttpIntegration(),
-                                                        SqlalchemyIntegration(),
-                                                        LoggingIntegration(event_level=None)],
-                                          release=release)
         else:
             log.info("Sentry: disabled")
 
-    def _init_loop(self):
-        if self.uninitialized_loop is None:
-            self.loop = asyncio.get_event_loop()
-        else:
-            self.loop = self.uninitialized_loop
-
     def get_secret(self, username: str):
-        return keyring.get_password(f"Royalnet/{self.secrets_name}", username)
+        """Get a Royalnet secret from the keyring.
 
-    def set_secret(self, username: str, password: str):
-        return keyring.set_password(f"Royalnet/{self.secrets_name}", username, password)
+        Args:
+            username: the name of the secret that should be retrieved."""
+        return get_password(f"Royalnet/{self.secrets_name}", username)
 
-    def _initialize(self):
-        if not self.initialized:
-            self._init_sentry()
-            self._init_loop()
-            self._init_database()
-            self._init_commands()
-            self.init_network()
-            self.initialized = True
-
-    def run(self):
-        """A blocking coroutine that should make the bot start listening to packs and requests."""
+    async def run(self):
+        """A coroutine that starts the event loop and handles command calls."""
         raise NotImplementedError()
 
-    def run_blocking(self, verbose=False):
-        if verbose:
-            core_logger = logging.root
-            core_logger.setLevel(logging.DEBUG)
-            stream_handler = logging.StreamHandler()
-            stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
-            core_logger.addHandler(stream_handler)
-            core_logger.debug("Logging setup complete.")
-        self._initialize()
+    def run_blocking(self):
+        """Blockingly run the Serf.
+
+        This should be used as the target of a :class:`multiprocessing.Process`."""
+        self.init_sentry()
         self.loop.run_until_complete(self.run())
