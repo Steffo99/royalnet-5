@@ -1,6 +1,5 @@
 import logging
-import asyncio
-from typing import Type, Optional, List, Callable, Union
+from typing import Type, Optional, List, Union
 from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
                               UnsupportedError
 from royalnet.utils import asyncify
@@ -44,7 +43,13 @@ class DiscordSerf(Serf):
                          network_config=network_config,
                          secrets_name=secrets_name)
 
-    def _interface_factory(self) -> Type[CommandInterface]:
+        self.Client = self.bot_factory()
+        """The custom :class:`discord.Client` class that will be instantiated later."""
+
+        self.client = self.Client()
+        """The custo :class:`discord.Client` instance."""
+
+    def interface_factory(self) -> Type[CommandInterface]:
         # noinspection PyPep8Naming
         GenericInterface = super().interface_factory()
 
@@ -55,7 +60,7 @@ class DiscordSerf(Serf):
 
         return DiscordInterface
 
-    def _data_factory(self) -> Type[CommandData]:
+    def data_factory(self) -> Type[CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordData(CommandData):
             def __init__(data, interface: CommandInterface, session, message: discord.Message):
@@ -134,7 +139,7 @@ class DiscordSerf(Serf):
                 if session is not None:
                     await asyncify(session.close)
 
-    def _bot_factory(self) -> Type[discord.Client]:
+    def bot_factory(self) -> Type[discord.Client]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
@@ -181,7 +186,7 @@ class DiscordSerf(Serf):
                 return matching_channels
 
             def find_voice_client(cli, guild: discord.Guild) -> Optional[discord.VoiceClient]:
-                """Find the :py:class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`."""
+                """Find the :class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`."""
                 # TODO: the bug I was looking for might be here
                 for voice_client in cli.voice_clients:
                     if voice_client.guild == guild:
@@ -190,80 +195,7 @@ class DiscordSerf(Serf):
 
         return DiscordClient
 
-    # TODO: restart from here
-
-    def _init_client(self):
-        """Create an instance of the DiscordClient class created in :py:func:`royalnet.bots.DiscordBot._bot_factory`."""
-        log.debug(f"Creating DiscordClient instance")
-        self._Client = self._bot_factory()
-        self.client = self._Client()
-
-    def _initialize(self):
-        super()._initialize()
-        self._init_client()
-        self._init_voice()
-
     async def run(self):
-        """Login to Discord, then run the bot."""
-        if not self.initialized:
-            self._initialize()
-        log.debug("Getting Discord secret")
         token = self.get_secret("discord")
-        log.info(f"Logging in to Discord")
         await self.client.login(token)
-        log.info(f"Connecting to Discord")
         await self.client.connect()
-
-    async def add_to_music_data(self, dfiles: typing.List[YtdlDiscord], guild: discord.Guild):
-        """Add a list of :py:class:`royalnet.audio.YtdlDiscord` to the corresponding music_data object."""
-        guild_music_data = self.music_data[guild]
-        if guild_music_data is None:
-            raise CommandError(f"No music_data has been created for guild {guild}")
-        for dfile in dfiles:
-            log.debug(f"Adding {dfile} to music_data")
-            await asyncify(dfile.ready_up)
-            guild_music_data.playmode.add(dfile)
-        if guild_music_data.playmode.now_playing is None:
-            await self.advance_music_data(guild)
-
-    async def advance_music_data(self, guild: discord.Guild):
-        """Try to play the next song, while it exists. Otherwise, just return."""
-        guild_music_data: MusicData = self.music_data[guild]
-        voice_client: discord.VoiceClient = guild_music_data.voice_client
-        next_source: discord.AudioSource = await guild_music_data.playmode.next()
-        await self.update_activity_with_source_title()
-        if next_source is None:
-            log.debug(f"Ending playback chain")
-            return
-
-        def advance(error=None):
-            if error:
-                voice_client.disconnect(force=True)
-                guild_music_data.voice_client = None
-                log.error(f"Error while advancing music_data: {error}")
-                return
-            self.loop.create_task(self.advance_music_data(guild))
-
-        log.debug(f"Starting playback of {next_source}")
-        voice_client.play(next_source, after=advance)
-
-    async def update_activity_with_source_title(self):
-        """Change the bot's presence (using :py:func:`discord.Client.change_presence`) to match the current listening status.
-
-        If multiple guilds are using the bot, the bot will always have an empty presence."""
-        if len(self.music_data) != 1:
-            # Multiple guilds are using the bot, do not display anything
-            log.debug(f"Updating current Activity: setting to None, as multiple guilds are using the bot")
-            await self.client.change_presence(status=discord.Status.online)
-            return
-        play_mode: playmodes.PlayMode = self.music_data[list(self.music_data)[0]].playmode
-        now_playing = play_mode.now_playing
-        if now_playing is None:
-            # No songs are playing now
-            log.debug(f"Updating current Activity: setting to None, as nothing is currently being played")
-            await self.client.change_presence(status=discord.Status.online)
-            return
-        log.debug(f"Updating current Activity: listening to {now_playing.info.title}")
-        await self.client.change_presence(activity=discord.Activity(name=now_playing.info.title,
-                                                                    type=discord.ActivityType.listening),
-                                          status=discord.Status.online)
