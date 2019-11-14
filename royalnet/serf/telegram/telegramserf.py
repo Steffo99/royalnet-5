@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 class TelegramSerf(Serf):
-    """A Serf that connects to `Telegram <https://telegram.org/>`_."""
+    """A Serf that connects to `Telegram <https://telegram.org/>`_ as a bot."""
     interface_name = "telegram"
 
     def __init__(self, *,
@@ -93,9 +93,6 @@ class TelegramSerf(Serf):
         class TelegramInterface(GenericInterface):
             name = self.interface_name
             prefix = "/"
-
-            def __init__(self):
-                super().__init__()
 
         return TelegramInterface
 
