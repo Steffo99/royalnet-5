@@ -1,5 +1,4 @@
 import asyncio
-import websockets
 import uuid
 import functools
 import logging as _logging
@@ -10,6 +9,11 @@ from .response import Response, ResponseSuccess, ResponseFailure
 from .broadcast import Broadcast
 from .errors import ConnectionClosedError, InvalidServerResponseError
 from .config import Config
+
+try:
+    import websockets
+except ImportError:
+    websockets = None
 
 
 log = _logging.getLogger(__name__)
@@ -53,9 +57,11 @@ def requires_identification(func):
 class Link:
     def __init__(self, config: Config, request_handler, *,
                  loop: asyncio.AbstractEventLoop = None):
+        if websockets is None:
+            raise ImportError("'websockets' extra is not installed")
         self.config: Config = config
         self.nid: str = str(uuid.uuid4())
-        self.websocket: typing.Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: typing.Optional["websockets.WebSocketClientProtocol"] = None
         self.request_handler: typing.Callable[[typing.Union[Request, Broadcast]],
                                               typing.Awaitable[Response]] = request_handler
         self._pending_requests: typing.Dict[str, PendingRequest] = {}
