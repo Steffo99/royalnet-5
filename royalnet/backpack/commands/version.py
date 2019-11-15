@@ -1,5 +1,5 @@
+import royalnet
 from royalnet.commands import *
-from royalnet.version import semantic
 
 
 class VersionCommand(Command):
@@ -8,7 +8,7 @@ class VersionCommand(Command):
     description: str = "Get the current Royalnet version."
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
-        message = f"ℹ️ Royalnet {semantic}\n"
+        message = f"ℹ️ Royalnet {royalnet.__version__}\n"
         if "69" in message:
             message += "(Nice.)"
         await data.reply(message)

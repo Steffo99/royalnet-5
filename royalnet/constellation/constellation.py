@@ -2,7 +2,6 @@ import typing
 import logging
 import royalnet
 import keyring
-from royalnet.alchemy import Alchemy
 from .star import PageStar, ExceptionStar
 
 try:
@@ -60,7 +59,7 @@ class Constellation:
         """The :class:`Starlette` app."""
 
         log.debug("Finding required Tables...")
-        tables = set()
+        tables = set(royalnet.backpack.available_tables)
         for SelectedPageStar in page_stars:
             tables = tables.union(SelectedPageStar.tables)
         for SelectedExcStar in exc_stars:
@@ -68,7 +67,7 @@ class Constellation:
         log.debug(f"Found Tables: {' '.join([table.__name__ for table in tables])}")
 
         log.info(f"Creating Alchemy...")
-        self.alchemy: Alchemy = Alchemy(database_uri=database_uri, tables=tables)
+        self.alchemy: royalnet.alchemy.Alchemy = royalnet.alchemy.Alchemy(database_uri=database_uri, tables=tables)
         """The :class:`Alchemy: of this Constellation."""
 
         log.info("Registering PageStars...")
@@ -98,19 +97,34 @@ class Constellation:
             username: the name of the secret that should be retrieved."""
         return keyring.get_password(f"Royalnet/{self.secrets_name}", username)
 
-    def run_blocking(self, address: str, port: int):
-        """Blockingly run the Constellation.
+    @classmethod
+    def run_process(cls,
+                    address: str,
+                    port: int,
+                    secrets_name: str,
+                    database_uri: str,
+                    page_stars: typing.List[typing.Type[PageStar]] = None,
+                    exc_stars: typing.List[typing.Type[ExceptionStar]] = None,
+                    *,
+                    debug: bool = __debug__,):
+        """Blockingly create and run the Constellation.
 
         This should be used as the target of a :class:`multiprocessing.Process`.
 
         Args:
             address: The IP address this Constellation should bind to.
             port: The port this Constellation should listen for requests on."""
+        constellation = cls(secrets_name=secrets_name,
+                            database_uri=database_uri,
+                            page_stars=page_stars,
+                            exc_stars=exc_stars,
+                            debug=debug)
+
         # Initialize Sentry on the process
         if sentry_sdk is None:
             log.info("Sentry: not installed")
         else:
-            sentry_dsn = self.get_secret("sentry")
+            sentry_dsn = constellation.get_secret("sentry")
             if not sentry_dsn:
                 log.info("Sentry: disabled")
             else:
@@ -128,11 +142,11 @@ class Constellation:
                 log.info(f"Sentry: enabled (Royalnet {release})")
         # Run the server
         log.info(f"Running Constellation on {address}:{port}...")
-        self.running = True
+        constellation.running = True
         try:
-            uvicorn.run(self.starlette, host=address, port=port)
+            uvicorn.run(constellation.starlette, host=address, port=port)
         finally:
-            self.running = False
+            constellation.running = False
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__}: {'running' if self.running else 'inactive'}>"

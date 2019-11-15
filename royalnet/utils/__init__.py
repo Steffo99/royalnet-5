@@ -1,11 +1,7 @@
-"""Miscellaneous useful functions and classes."""
-
 from .asyncify import asyncify
-from .escaping import telegram_escape, discord_escape
 from .safeformat import safeformat
-from .classdictjanitor import cdj
 from .sleep_until import sleep_until
-from .formatters import andformat, plusformat, underscorize, ytdldateformat, numberemojiformat, splitstring, ordinalformat
+from .formatters import andformat, underscorize, ytdldateformat, numberemojiformat, splitstring, ordinalformat
 from .urluuid import to_urluuid, from_urluuid
 from .multilock import MultiLock
 

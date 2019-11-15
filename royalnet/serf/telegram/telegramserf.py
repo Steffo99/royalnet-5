@@ -99,8 +99,12 @@ class TelegramSerf(Serf):
     def data_factory(self) -> Type[CommandData]:
         # noinspection PyMethodParameters
         class TelegramData(CommandData):
-            def __init__(data, interface: CommandInterface, session, update: telegram.Update):
-                super().__init__(interface=interface, session=session)
+            def __init__(data,
+                         interface: CommandInterface,
+                         session,
+                         loop: asyncio.AbstractEventLoop,
+                         update: telegram.Update):
+                super().__init__(interface=interface, session=session, loop=loop)
                 data.update = update
 
             async def reply(data, text: str):
@@ -192,7 +196,7 @@ class TelegramSerf(Serf):
             session = None
         try:
             # Create the command data
-            data = self.Data(interface=command.interface, session=session, update=update)
+            data = self.Data(interface=command.interface, session=session, loop=self.loop, update=update)
             try:
                 # Run the command
                 await command.run(CommandArgs(parameters), data)
@@ -240,6 +244,7 @@ class TelegramSerf(Serf):
         pass
 
     async def run(self):
+        await super().run()
         while True:
             # Get the latest 100 updates
             last_updates: List[telegram.Update] = await self.api_call(self.client.get_updates,

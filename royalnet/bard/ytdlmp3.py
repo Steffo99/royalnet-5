@@ -34,7 +34,7 @@ class YtdlMp3:
                     )
             self.mp3_filename = destination_filename
 
-    def delete_asap(self) -> None:
+    async def delete_asap(self) -> None:
         """Delete the mp3 file."""
         if self.is_converted:
             async with self.lock.exclusive():

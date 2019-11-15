@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Type, Optional, List, Union
 from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
@@ -63,8 +64,12 @@ class DiscordSerf(Serf):
     def data_factory(self) -> Type[CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordData(CommandData):
-            def __init__(data, interface: CommandInterface, session, message: discord.Message):
-                super().__init__(interface=interface, session=session)
+            def __init__(data,
+                         interface: CommandInterface,
+                         session,
+                         loop: asyncio.AbstractEventLoop,
+                         message: discord.Message):
+                super().__init__(interface=interface, session=session, loop=loop)
                 data.message = message
 
             async def reply(data, text: str):
@@ -118,7 +123,7 @@ class DiscordSerf(Serf):
             else:
                 session = None
             # Prepare data
-            data = self.Data(interface=command.interface, session=session, message=message)
+            data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
             try:
                 # Run the command
                 await command.run(CommandArgs(parameters), data)
@@ -196,6 +201,7 @@ class DiscordSerf(Serf):
         return DiscordClient
 
     async def run(self):
+        await super().run()
         token = self.get_secret("discord")
         await self.client.login(token)
         await self.client.connect()

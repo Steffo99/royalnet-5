@@ -1,4 +1,4 @@
-# This is a template Pack __init__. You can use this without changing anything in other packages too!
+"""A Pack that is imported by default by all :mod:`royalnet` instances."""
 
 from . import commands, tables, stars
 from .commands import available_commands

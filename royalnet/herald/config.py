@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class Config:
     def __init__(self,
                  name: str,
@@ -29,6 +32,21 @@ class Config:
     @property
     def url(self):
         return f"ws{'s' if self.secure else ''}://{self.address}:{self.port}{self.path}"
+
+    def copy(self,
+             name: Optional[str] = None,
+             address: Optional[str] = None,
+             port: Optional[int] = None,
+             secret: Optional[str] = None,
+             secure: Optional[bool] = None,
+             path: Optional[str] = None):
+        """Create an exact copy of this configuration, but with different parameters."""
+        return self.__class__(name=name if name else self.name,
+                              address=address if address else self.address,
+                              port=port if port else self.port,
+                              secret=secret if secret else self.secret,
+                              secure=secure if secure else self.secure,
+                              path=path if path else self.path)
 
     def __repr__(self):
         return f"<HeraldConfig for {self.url}>"

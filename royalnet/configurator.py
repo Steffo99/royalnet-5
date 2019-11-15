@@ -6,9 +6,9 @@ import keyring
 def run():
     click.echo("Welcome to the Royalnet configuration creator!")
     secrets_name = click.prompt("Desired secrets name", default="__default__")
-    network = click.prompt("Network password", default="")
+    network = click.prompt("Herald password", default="")
     if network:
-        keyring.set_password(f"Royalnet/{secrets_name}", "network", network)
+        keyring.set_password(f"Royalnet/{secrets_name}", "herald", network)
     telegram = click.prompt("Telegram Bot API token", default="")
     if telegram:
         keyring.set_password(f"Royalnet/{secrets_name}", "telegram", telegram)
@@ -21,9 +21,6 @@ def run():
     sentry = click.prompt("Sentry DSN", default="")
     if sentry:
         keyring.set_password(f"Royalnet/{secrets_name}", "sentry", sentry)
-    leagueoflegends = click.prompt("League of Legends API Token", default="")
-    if leagueoflegends:
-        keyring.set_password(f"Royalnet/{secrets_name}", "leagueoflegends", leagueoflegends)
 
 
 if __name__ == "__main__":

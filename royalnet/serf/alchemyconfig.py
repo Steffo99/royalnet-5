@@ -1,18 +1,16 @@
-from typing import Type, TYPE_CHECKING
-if TYPE_CHECKING:
-    from sqlalchemy.schema import Table
+from typing import TYPE_CHECKING
 
 
 class AlchemyConfig:
     """A helper class to configure :class:`Alchemy` in a :class:`Serf`."""
     def __init__(self,
                  database_url: str,
-                 master_table: Type[Table],
-                 identity_table: Type[Table],
+                 master_table: type,
+                 identity_table: type,
                  identity_column: str):
         self.database_url: str = database_url
-        self.master_table: Type[Table] = master_table
-        self.identity_table: Type[Table] = identity_table
+        self.master_table: type = master_table
+        self.identity_table: type = identity_table
         self.identity_column: str = identity_column
 
     def __repr__(self):
