@@ -4,7 +4,7 @@ from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, 
 from keyring import get_password
 from sqlalchemy.schema import Table
 from royalnet import __version__ as version
-from royalnet.commands import Command, CommandInterface, CommandData, CommandError, UnsupportedError
+from royalnet.commands import *
 from .alchemyconfig import AlchemyConfig
 
 try:
@@ -283,6 +283,29 @@ class Serf:
         Args:
             username: the name of the secret that should be retrieved."""
         return get_password(f"Royalnet/{self.secrets_name}", username)
+
+    def call(self, command: Command, data: CommandData, parameters: List[str]):
+        try:
+            # Run the command
+            await command.run(CommandArgs(parameters), data)
+        except InvalidInputError as e:
+            await data.reply(f"⚠️ {e.message}\n"
+                             f"Syntax: [c]{command.interface.prefix}{command.name} {command.syntax}[/c]")
+        except UserError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except UnsupportedError as e:
+            await data.reply(f"🚫 {e.message}")
+        except ExternalError as e:
+            await data.reply(f"🚫 {e.message}")
+        except ConfigurationError as e:
+            await data.reply(f"⛔️ {e.message}")
+        except CommandError as e:
+            await data.reply(f"⛔️ {e.message}")
+        except Exception as e:
+            self.sentry_exc(e)
+            error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
+                            '\n'.join(e.args)
+            await data.reply(error_message)
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""

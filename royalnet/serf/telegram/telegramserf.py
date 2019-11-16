@@ -194,27 +194,13 @@ class TelegramSerf(Serf):
             session = await asyncify(self.alchemy.Session)
         else:
             session = None
-        try:
-            # Create the command data
-            data = self.Data(interface=command.interface, session=session, loop=self.loop, update=update)
-            try:
-                # Run the command
-                await command.run(CommandArgs(parameters), data)
-            except InvalidInputError as e:
-                await data.reply(f"⚠️ {e.message}\n"
-                                 f"Syntax: [c]/{command.name} {command.syntax}[/c]")
-            except UnsupportedError as e:
-                await data.reply(f"⚠️ {e.message}")
-            except CommandError as e:
-                await data.reply(f"⚠️ {e.message}")
-            except Exception as e:
-                self.sentry_exc(e)
-                error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
-                                '\n'.join(e.args)
-                await data.reply(error_message)
-        finally:
-            if session is not None:
-                await asyncify(session.close)
+        # Prepare data
+        data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
+        # Call the command
+        self.call(command, data, parameters)
+        # Close the alchemy session
+        if session is not None:
+            await asyncify(session.close)
 
     async def handle_edited_message(self, update: telegram.Update):
         pass

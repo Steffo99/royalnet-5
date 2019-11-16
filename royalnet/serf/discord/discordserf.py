@@ -1,8 +1,7 @@
 import asyncio
 import logging
 from typing import Type, Optional, List, Union
-from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
-                              UnsupportedError
+from royalnet.commands import *
 from royalnet.utils import asyncify
 from .escape import escape
 from ..serf import Serf
@@ -124,25 +123,11 @@ class DiscordSerf(Serf):
                 session = None
             # Prepare data
             data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
-            try:
-                # Run the command
-                await command.run(CommandArgs(parameters), data)
-            except InvalidInputError as e:
-                await data.reply(f":warning: {e.message}\n"
-                                 f"Syntax: [c]/{command.name} {command.syntax}[/c]")
-            except UnsupportedError as e:
-                await data.reply(f":warning: {e.message}")
-            except CommandError as e:
-                await data.reply(f":warning: {e.message}")
-            except Exception as e:
-                self.sentry_exc(e)
-                error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
-                                '\n'.join(e.args)
-                await data.reply(error_message)
-            finally:
-                # Close the alchemy session
-                if session is not None:
-                    await asyncify(session.close)
+            # Call the command
+            self.call(command, data, parameters)
+            # Close the alchemy session
+            if session is not None:
+                await asyncify(session.close)
 
     def bot_factory(self) -> Type[discord.Client]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
@@ -172,7 +157,7 @@ class DiscordSerf(Serf):
             def find_channel(cli,
                              name: str,
                              guild: Optional[discord.Guild] = None) -> List[discord.abc.GuildChannel]:
-                """Find the :class:`TextChannel`, :class:`VoiceChannel` or :class:`CategoryChannel` with the
+                """Find the :class:`TextChannel`s, :class:`VoiceChannel`s or :class:`CategoryChannel`s with the
                 specified name (case insensitive).
 
                 You can specify a guild to only search in that specific guild."""
