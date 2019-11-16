@@ -284,7 +284,7 @@ class Serf:
             username: the name of the secret that should be retrieved."""
         return get_password(f"Royalnet/{self.secrets_name}", username)
 
-    def call(self, command: Command, data: CommandData, parameters: List[str]):
+    async def call(self, command: Command, data: CommandData, parameters: List[str]):
         try:
             # Run the command
             await command.run(CommandArgs(parameters), data)

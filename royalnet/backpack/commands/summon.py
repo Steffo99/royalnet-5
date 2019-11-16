@@ -44,7 +44,7 @@ class SummonCommand(Command):
             channel: discord.VoiceChannel = voice.channel
         # Try to connect to the voice channel
         try:
-            await channel.connect()
+            client = await channel.connect()
         except asyncio.TimeoutError:
             raise ExternalError("Timed out while trying to connect to the channel")
         except discord.opus.OpusNotLoaded:
@@ -52,3 +52,5 @@ class SummonCommand(Command):
         except discord.ClientException as e:
             # TODO: handle this someway
             raise
+        await asyncio.sleep(6)
+        breakpoint()
