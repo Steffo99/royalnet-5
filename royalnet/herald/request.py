@@ -2,7 +2,7 @@ import typing
 
 
 class Request:
-    """A request sent from a :py:class:`Link` to another.
+    """A request sent from a :class:`Link` to another.
 
      It contains the name of the requested handler, in addition to the data."""
 

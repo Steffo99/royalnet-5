@@ -27,11 +27,11 @@ log = logging.getLogger(__name__)
 
 
 class Constellation:
-    """A Constellation is the class that represents the webserver.
+    """The class that represents the webserver.
 
-    It runs multiple :class:`Star`s, which represent the routes of the website.
+    It runs multiple :class:`Star` , which represent the routes of the website.
 
-    It also handles the :class:`Alchemy` connection, and it _will_ support Herald connections too."""
+    It also handles the :class:`Alchemy` connection, and it *will eventually* support Herald connections too."""
     def __init__(self,
                  secrets_name: str,
                  database_uri: str,
@@ -56,7 +56,7 @@ class Constellation:
 
         log.info(f"Creating Starlette in {'Debug' if __debug__ else 'Production'} mode...")
         self.starlette = Starlette(debug=debug)
-        """The :class:`Starlette` app."""
+        """The :class:`starlette.Starlette` app."""
 
         log.debug("Finding required Tables...")
         tables = set(royalnet.backpack.available_tables)
@@ -68,7 +68,7 @@ class Constellation:
 
         log.info(f"Creating Alchemy...")
         self.alchemy: royalnet.alchemy.Alchemy = royalnet.alchemy.Alchemy(database_uri=database_uri, tables=tables)
-        """The :class:`Alchemy: of this Constellation."""
+        """The :class:`Alchemy` of this Constellation."""
 
         log.info("Registering PageStars...")
         for SelectedPageStar in page_stars:

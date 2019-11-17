@@ -22,10 +22,10 @@ class YtdlInfo:
     }
 
     def __init__(self, info: Dict[str, Any]):
-        """Create a YtdlInfo from the dict returned by the :py:func:`youtube_dl.YoutubeDL.extract_info` function.
+        """Create a YtdlInfo from the dict returned by the :func:`youtube_dl.YoutubeDL.extract_info` function.
 
         Warning:
-            Does not download the info, for that use :py:func:`royalnet.audio.YtdlInfo.retrieve_for_url`."""
+            Does not download the info, to do that use :func:`.retrieve_for_url`."""
         self.id: Optional[str] = info.get("id")
         self.uploader: Optional[str] = info.get("uploader")
         self.uploader_id: Optional[str] = info.get("uploader_id")
@@ -85,10 +85,10 @@ class YtdlInfo:
 
     @classmethod
     async def from_url(cls, url, loop: Optional[AbstractEventLoop] = None, **ytdl_args) -> List["YtdlInfo"]:
-        """Fetch the info for an url through YoutubeDL.
+        """Fetch the info for an url through :mod:`youtube_dl`.
 
         Returns:
-            A :py:class:`list` containing the infos for the requested videos."""
+            A :class:`list` containing the infos for the requested videos."""
         if YoutubeDL is None:
             raise ImportError("'bard' extra is not installed")
 

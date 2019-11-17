@@ -48,6 +48,7 @@ def underscorize(string: str) -> str:
 
     Example:
         ::
+
             >>> underscorize("LE EPIC PRANK [GONE WRONG!?!?]")
             "LE EPIC PRANK _GONE WRONG_____"
 
@@ -67,6 +68,7 @@ def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
 
     Example:
         ::
+
             >>> ytdldateformat("20111111")
             "2011-11-11"
 
@@ -89,11 +91,7 @@ def numberemojiformat(l: typing.List[str]) -> str:
         The resulting Unicode string.
 
     Examples:
-        ::
-            >>> numberemojiformat(["First", "Second", "Third"])
-            "1️⃣ First\n2️⃣ Second\n3️⃣ Third\n"
-            >>> numberemojiformat(list(range(13)))
-            "1️⃣ 1\n2️⃣ 2\n3️⃣ 3\n4️⃣ 4\n5️⃣ 5\n6️⃣ 6\n7️⃣ 7\n8️⃣ 8\n9️⃣ 9\n🔟 10\n*️⃣ 11\n*️⃣ 12"
+        Cannot be displayed, as Sphinx does not render emojis properly.
     """
     number_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     extra_emoji = "*️⃣"
@@ -113,10 +111,11 @@ def ordinalformat(number: int) -> str:
         number: the number to convert.
 
     Returns:
-        The corresponding English `ordinal numeral <https://en.wikipedia.org/wiki/Ordinal_numeral>`.
+        The corresponding English `ordinal numeral <https://en.wikipedia.org/wiki/Ordinal_numeral>`_.
 
     Examples:
         ::
+
             >>> ordinalformat(1)
             "1st"
             >>> ordinalformat(2)

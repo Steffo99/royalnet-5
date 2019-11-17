@@ -146,7 +146,7 @@ class Serf:
         # noinspection PyMethodParameters
         class GenericInterface(CommandInterface):
             alchemy: Alchemy = self.alchemy
-            bot: "Serf" = self
+            serf: "Serf" = self
 
             def register_herald_action(ci,
                                        event_name: str,

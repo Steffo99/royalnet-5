@@ -20,11 +20,11 @@ except ImportError:
 
 
 class Alchemy:
-    """A wrapper around ``sqlalchemy.orm`` that allows the instantiation of multiple engines at once while maintaining
+    """A wrapper around :mod:`sqlalchemy.orm` that allows the instantiation of multiple engines at once while maintaining
     a single declarative class for all of them."""
 
     def __init__(self, database_uri: str, tables: Set):
-        """Create a new Alchemy object.
+        """Create a new :class:`.Alchemy` object.
 
         Args:
             database_uri: The `database URI <https://docs.sqlalchemy.org/en/13/core/engines.html>`_  .

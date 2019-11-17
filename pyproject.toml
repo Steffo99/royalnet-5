@@ -40,12 +40,13 @@
     sentry_sdk = {version="~0.13.2", optional=true}
     # herald
     websockets = {version="^8.1", optional=true}
-    # colorlog
-    colorlog = {version="^4.0.2", optional=true}
 
 # Development dependencies
 [tool.poetry.dev-dependencies]
     pytest = "^5.2.1"
+    sphinx = "^2.2.1"
+    sphinx_rtd_theme = "^0.4.3"
+
 
 # Optional dependencies
 [tool.poetry.extras]
@@ -57,7 +58,6 @@
     constellation = ["starlette", "uvicorn"]
     sentry = ["sentry_sdk"]
     herald = ["websockets"]
-    colorlog = ["colorlog"]
 
 [build-system]
     requires = ["poetry>=0.12"]

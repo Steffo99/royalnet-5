@@ -84,7 +84,7 @@ class Link:
             return f"<{self.__class__.__qualname__} (disconnected)>"
 
     async def connect(self):
-        """Connect to the :py:class:`royalnet.network.NetworkServer` at ``self.master_uri``."""
+        """Connect to the :class:`Server` at :attr:`.master_uri`."""
         log.info(f"Connecting to {self.config.url}...")
         self.websocket = await websockets.connect(self.config.url, loop=self._loop)
         self.connect_event.set()
@@ -95,7 +95,7 @@ class Link:
         """Recieve a :py:class:`Package` from the :py:class:`Server`.
 
         Raises:
-            :py:exc:`royalnet.network.royalnetlink.ConnectionClosedError` if the connection closes."""
+            :exc:`ConnectionClosedError` if the connection is closed."""
         try:
             jbytes: bytes = await self.websocket.recv()
             package: Package = Package.from_json_bytes(jbytes)
@@ -128,6 +128,7 @@ class Link:
 
     @requires_identification
     async def send(self, package: Package):
+        """Send a package to the :class:`Server`."""
         await self.websocket.send(package.to_json_bytes())
         log.debug(f"Sent package: {package}")
 

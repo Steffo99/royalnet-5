@@ -1,13 +1,13 @@
 class HeraldError(Exception):
-    """A generic :py:mod:`royalherald` error."""
+    """A generic :mod:`royalnet.herald` error."""
 
 
 class LinkError(HeraldError):
-    """An error for something that happened in a :py:class:`Link`."""
+    """An error for something that happened in a :class:`Link`."""
 
 
 class ServerError(HeraldError):
-    """An error for something that happened in a :py:class:`Server`."""
+    """An error for something that happened in a :class:`Server`."""
 
 
 class ConnectionClosedError(LinkError):
@@ -15,4 +15,4 @@ class ConnectionClosedError(LinkError):
 
 
 class InvalidServerResponseError(LinkError):
-    """The :py:class:`Server` sent invalid data to the :py:class:`Link`."""
+    """The :py:class:`Server` sent invalid data to the :class:`Link`."""
