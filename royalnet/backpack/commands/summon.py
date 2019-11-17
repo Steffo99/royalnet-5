@@ -23,6 +23,8 @@ class SummonCommand(Command):
         if self.interface.name != "discord":
             # TODO: use a Herald Event to remotely connect the bot
             raise UnsupportedError()
+        if discord is None:
+            raise ConfigurationError("'discord' extra is not installed.")
         # noinspection PyUnresolvedReferences
         message: discord.Message = data.message
         member: Union[discord.User, discord.Member] = message.author
@@ -92,7 +94,7 @@ class SummonCommand(Command):
 
         # Try to connect to the voice channel
         try:
-            voice: discord.VoiceClient = await channel.connect()
+            await channel.connect()
         except asyncio.TimeoutError:
             raise ExternalError("Timed out while trying to connect to the channel")
         except discord.opus.OpusNotLoaded:

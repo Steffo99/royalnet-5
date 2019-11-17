@@ -67,7 +67,7 @@ class DiscordSerf(Serf):
                          interface: CommandInterface,
                          session,
                          loop: asyncio.AbstractEventLoop,
-                         message: discord.Message):
+                         message: "discord.Message"):
                 super().__init__(interface=interface, session=session, loop=loop)
                 data.message = message
 
@@ -75,7 +75,7 @@ class DiscordSerf(Serf):
                 await data.message.channel.send(escape(text))
 
             async def get_author(data, error_if_none=False):
-                user: discord.Member = data.message.author
+                user: "discord.Member" = data.message.author
                 query = data.session.query(self._master_table)
                 for link in self._identity_chain:
                     query = query.join(link.mapper.class_)
@@ -90,7 +90,7 @@ class DiscordSerf(Serf):
 
         return DiscordData
 
-    async def handle_message(self, message: discord.Message):
+    async def handle_message(self, message: "discord.Message"):
         """Handle a Discord message by calling a command if appropriate."""
         text = message.content
         # Skip non-text messages
@@ -100,7 +100,7 @@ class DiscordSerf(Serf):
         if not text.startswith("!"):
             return
         # Skip bot messages
-        author: Union[discord.User] = message.author
+        author: Union["discord.User"] = message.author
         if author.bot:
             return
         # Find and clean parameters
@@ -129,11 +129,11 @@ class DiscordSerf(Serf):
             if session is not None:
                 await asyncify(session.close)
 
-    def bot_factory(self) -> Type[discord.Client]:
+    def bot_factory(self) -> Type["discord.Client"]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
-            async def on_message(cli, message: discord.Message):
+            async def on_message(cli, message: "discord.Message"):
                 """Handle messages received by passing them to the handle_message method of the bot."""
                 # TODO: keep reference to these tasks somewhere
                 self.loop.create_task(self.handle_message(message))
@@ -143,6 +143,13 @@ class DiscordSerf(Serf):
                 await cli.change_presence(status=discord.Status.online)
 
         return DiscordClient
+
+    def get_voice_client(self, guild: "discord.Guild") -> Optional["discord.VoiceClient"]:
+        voice_clients: List["discord.VoiceClient"] = self.client.voice_clients
+        for voice_client in voice_clients:
+            if voice_client.guild == guild:
+                return voice_client
+        return None
 
     async def run(self):
         await super().run()

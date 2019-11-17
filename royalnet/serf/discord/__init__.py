@@ -1,4 +1,4 @@
-from .create_rich_embed import create_rich_embed
+from .createrichembed import create_rich_embed
 from .escape import escape
 from .discordserf import DiscordSerf
 
