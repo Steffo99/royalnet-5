@@ -1,3 +1,6 @@
+from typing import Optional
+from .ytdlinfo import YtdlInfo
+
 try:
     import discord
 except ImportError:
@@ -13,6 +16,10 @@ class FileAudioSource(discord.AudioSource):
         This AudioSource will consume (and close) the passed stream."""
 
     def __init__(self, file):
+        """Create a FileAudioSource.
+
+        Arguments:
+            file: the file to be played back."""
         self.file = file
 
     def __repr__(self):

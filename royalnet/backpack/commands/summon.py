@@ -28,7 +28,7 @@ class SummonCommand(Command):
         # noinspection PyUnresolvedReferences
         message: discord.Message = data.message
         member: Union[discord.User, discord.Member] = message.author
-        serf: DiscordSerf = self.interface.bot
+        serf: DiscordSerf = self.interface.serf
         client: discord.Client = serf.client
         channel_name: Optional[str] = args.joined()
 
