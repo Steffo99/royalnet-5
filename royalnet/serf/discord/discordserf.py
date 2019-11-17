@@ -142,47 +142,6 @@ class DiscordSerf(Serf):
                 """Change the bot presence to ``online`` when the bot is ready."""
                 await cli.change_presence(status=discord.Status.online)
 
-            def find_guild(cli, name: str) -> List[discord.Guild]:
-                """Find the :class:`discord.Guild`s with the specified name (case insensitive).
-
-                Returns:
-                    A :class:`list` of :class:`discord.Guild` having the specified name."""
-                all_guilds: List[discord.Guild] = cli.guilds
-                matching_channels: List[discord.Guild] = []
-                for guild in all_guilds:
-                    if guild.name.lower() == name.lower():
-                        matching_channels.append(guild)
-                return matching_channels
-
-            def find_channel(cli,
-                             name: str,
-                             guild: Optional[discord.Guild] = None) -> List[discord.abc.GuildChannel]:
-                """Find the :class:`TextChannel`s, :class:`VoiceChannel`s or :class:`CategoryChannel`s with the
-                specified name (case insensitive).
-
-                You can specify a guild to only search in that specific guild."""
-                if guild is not None:
-                    all_channels = guild.channels
-                else:
-                    all_channels: List[discord.abc.GuildChannel] = cli.get_all_channels()
-                matching_channels: List[discord.abc.GuildChannel] = []
-                for channel in all_channels:
-                    if not (isinstance(channel, discord.TextChannel)
-                            or isinstance(channel, discord.VoiceChannel)
-                            or isinstance(channel, discord.CategoryChannel)):
-                        continue
-                    if channel.name.lower() == name.lower():
-                        matching_channels.append(channel)
-                return matching_channels
-
-            def find_voice_client(cli, guild: discord.Guild) -> Optional[discord.VoiceClient]:
-                """Find the :class:`discord.VoiceClient` belonging to a specific :py:class:`discord.Guild`."""
-                # TODO: the bug I was looking for might be here
-                for voice_client in cli.voice_clients:
-                    if voice_client.guild == guild:
-                        return voice_client
-                return None
-
         return DiscordClient
 
     async def run(self):

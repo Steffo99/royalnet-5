@@ -294,16 +294,16 @@ class Serf:
         except UserError as e:
             await data.reply(f"⚠️ {e.message}")
         except UnsupportedError as e:
-            await data.reply(f"🚫 {e.message}")
+            await data.reply(f"⚠️ {e.message}")
         except ExternalError as e:
-            await data.reply(f"🚫 {e.message}")
+            await data.reply(f"⚠️ {e.message}")
         except ConfigurationError as e:
-            await data.reply(f"⛔️ {e.message}")
+            await data.reply(f"⚠️ {e.message}")
         except CommandError as e:
-            await data.reply(f"⛔️ {e.message}")
+            await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             self.sentry_exc(e)
-            error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
+            error_message = f"⛔ [b]{e.__class__.__name__}[/b]\n" \
                             '\n'.join(e.args)
             await data.reply(error_message)
 
