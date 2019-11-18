@@ -18,10 +18,10 @@ class DiscordBard:
         """The :class:`YtdlDiscord` that's currently being played."""
 
         self.generator: \
-            AsyncGenerator[FileAudioSource, Tuple[Tuple[Any, ...], Dict[str, Any]]] = self._generate_generator()
+            AsyncGenerator[FileAudioSource, Tuple[Tuple[Any, ...], Dict[str, Any]]] = self._generator()
         """The AsyncGenerator responsible for deciding the next song that should be played."""
 
-    async def _generate_generator(self) -> AsyncGenerator[FileAudioSource, Tuple[Tuple[Any, ...], Dict[str, Any]]]:
+    async def _generator(self) -> AsyncGenerator[Optional[FileAudioSource], Tuple[Tuple[Any, ...], Dict[str, Any]]]:
         """Create an async generator that returns the next source to be played;
         it can take a args+kwargs tuple in input to optionally select a different source.
 
@@ -46,7 +46,7 @@ class DiscordBard:
         self.now_playing = fas
         return fas
 
-    async def add(self, ytd: YtdlDiscord):
+    async def add(self, ytd: YtdlDiscord) -> None:
         """Add a new :class:`YtdlDiscord` to the :class:`DiscordBard`, if possible.
 
         Raises:
@@ -62,7 +62,7 @@ class DiscordBard:
         """
         raise UnsupportedError()
 
-    async def remove(self, ytd: YtdlDiscord):
+    async def remove(self, ytd: YtdlDiscord) -> None:
         """Remove a :class:`YtdlDiscord` from the :class:`DiscordBard`, if possible.
 
         Raises:
@@ -70,7 +70,14 @@ class DiscordBard:
         """
         raise UnsupportedError()
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         """Enqueue the deletion of all :class:`YtdlDiscord` contained in the :class:`DiscordBard`, and return only once
         all deletions are complete."""
         raise NotImplementedError()
+
+    async def length(self) -> int:
+        """Return the length of the :class:`DiscordBard`.
+
+        Raises:
+            UnsupportedError: If :meth:`.peek` is unsupported."""
+        return len(await self.peek())

@@ -7,10 +7,9 @@ from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
 
 try:
-    import discord
-    from royalnet.serf.discord import FileAudioSource
+    from royalnet.bard.fileaudiosource import FileAudioSource
 except ImportError:
-    discord = None
+    FileAudioSource = None
 
 try:
     import ffmpeg
@@ -71,7 +70,7 @@ class YtdlDiscord:
 
     @asynccontextmanager
     async def spawn_audiosource(self):
-        if discord is None:
+        if FileAudioSource is None:
             raise ImportError("'discord' extra is not installed")
         await self.convert_to_pcm()
         with open(self.pcm_filename, "rb") as stream:
