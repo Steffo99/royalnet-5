@@ -235,27 +235,27 @@ class Serf:
 
     async def network_handler(self, message: Union[Request, Broadcast]) -> Response:
         try:
-            network_handler = self.herald_handlers[message.handler]
+            herald_handler = self.herald_handlers[message.handler]
         except KeyError:
             log.warning(f"Missing network_handler for {message.handler}")
             return ResponseFailure("no_handler", f"This bot is missing a network handler for {message.handler}.")
         else:
-            log.debug(f"Using {network_handler} as handler for {message.handler}")
+            log.debug(f"Using {herald_handler} as handler for {message.handler}")
         if isinstance(message, Request):
             try:
-                response_data = await network_handler(self, **message.data)
+                response_data = await herald_handler(self, **message.data)
                 return ResponseSuccess(data=response_data)
             except Exception as e:
                 sentry_sdk.capture_exception(e)
-                log.error(f"Exception {e} in {network_handler}")
+                log.error(f"Exception {e} in {herald_handler}")
                 return ResponseFailure("exception_in_handler",
-                                       f"An exception was raised in {network_handler} for {message.handler}.",
+                                       f"An exception was raised in {herald_handler} for {message.handler}.",
                                        extra_info={
                                            "type": e.__class__.__name__,
                                            "message": str(e)
                                        })
         elif isinstance(message, Broadcast):
-            await network_handler(self, **message.data)
+            await herald_handler(self, **message.data)
 
     @staticmethod
     def init_sentry(dsn):

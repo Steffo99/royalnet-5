@@ -43,7 +43,7 @@ class DiscordSerf(Serf):
                          network_config=network_config,
                          secrets_name=secrets_name)
 
-        self.Client = self.bot_factory()
+        self.Client = self.client_factory()
         """The custom :class:`discord.Client` class that will be instantiated later."""
 
         self.client = self.Client()
@@ -129,7 +129,7 @@ class DiscordSerf(Serf):
             if session is not None:
                 await asyncify(session.close)
 
-    def bot_factory(self) -> Type["discord.Client"]:
+    def client_factory(self) -> Type["discord.Client"]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
