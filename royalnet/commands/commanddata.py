@@ -1,3 +1,4 @@
+from asyncio import AbstractEventLoop
 from typing import Optional, TYPE_CHECKING
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
@@ -8,9 +9,10 @@ if TYPE_CHECKING:
 
 
 class CommandData:
-    def __init__(self, interface: CommandInterface, session: Optional["Session"]):
+    def __init__(self, interface: CommandInterface, session: Optional["Session"], loop: AbstractEventLoop):
         self._interface: CommandInterface = interface
         self._session: Optional["Session"] = session
+        self.loop: AbstractEventLoop = loop
 
     @property
     def session(self) -> "Session":

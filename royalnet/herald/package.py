@@ -4,7 +4,7 @@ import typing
 
 
 class Package:
-    """A ``royalherald`` package, the data type with which a :py:class:`Link` communicates with a :py:class:`Server` or
+    """A data type with which a :py:class:`Link` communicates with a :py:class:`Server` or
     another Link.
 
     Contains info about the source and the destination."""
@@ -21,8 +21,10 @@ class Package:
         Parameters:
             data: The data that should be sent.
             source: The ``nid`` of the node that created this Package.
-            destination: The ``link_type`` of the destination node, or alternatively, the ``nid`` of the node. Can also be the ``NULL`` value to send the message to nobody.
-            source_conv_id: The conversation id of the node that created this package. Akin to the sequence number on IP packets.
+            destination: The ``link_type`` of the destination node, or alternatively, the ``nid`` of the node.
+                         Can also be the ``NULL`` value to send the message to nobody.
+            source_conv_id: The conversation id of the node that created this package.
+                            Akin to the sequence number on IP packets.
             destination_conv_id: The conversation id of the node that this Package is a reply to."""
         # TODO: something is not right in these type hints. Check them.
         self.data: dict = data
@@ -32,7 +34,8 @@ class Package:
         self.destination_conv_id: typing.Optional[str] = destination_conv_id
 
     def __repr__(self):
-        return f"<{self.__class__.__qualname__} {self.source} ({self.source_conv_id}) to {self.destination} ({self.destination_conv_id}>"
+        return f"<{self.__class__.__qualname__} {self.source} ({self.source_conv_id})" \
+               f" to {self.destination} ({self.destination_conv_id}>"
 
     def __eq__(self, other):
         if isinstance(other, Package):
@@ -44,13 +47,13 @@ class Package:
         return False
 
     def reply(self, data) -> "Package":
-        """Reply to this Package with another Package.
+        """Reply to this :class:`Package` with another :class:`Package`.
 
         Parameters:
-            data: The data that should be sent. Usually a :py:class:`royalnet.network.Message`.
+            data: The data that should be sent. Usually a :class:`Request`.
 
         Returns:
-            The reply Package."""
+            The reply :class:`Package`."""
         return Package(data,
                        source=self.destination,
                        destination=self.source,
@@ -59,7 +62,7 @@ class Package:
 
     @staticmethod
     def from_dict(d) -> "Package":
-        """Create a Package from a dictionary."""
+        """Create a :class:`Package` from a dictionary."""
         if "source" not in d:
             raise ValueError("Missing source field")
         if "nid" not in d["source"]:
@@ -81,7 +84,7 @@ class Package:
                        destination_conv_id=d["destination"]["conv_id"])
 
     def to_dict(self) -> dict:
-        """Convert the Package into a dictionary."""
+        """Convert the :class:`Package` into a dictionary."""
         return {
             "source": {
                 "nid": self.source,
@@ -96,18 +99,18 @@ class Package:
 
     @staticmethod
     def from_json_string(string: str) -> "Package":
-        """Create a Package from a JSON string."""
+        """Create a :class:`Package` from a JSON string."""
         return Package.from_dict(json.loads(string))
 
     def to_json_string(self) -> str:
-        """Convert the Package into a JSON string."""
+        """Convert the :class:`Package` into a JSON string."""
         return json.dumps(self.to_dict())
 
     @staticmethod
     def from_json_bytes(b: bytes) -> "Package":
-        """Create a Package from UTF8-encoded JSON bytes."""
+        """Create a :class:`Package` from UTF-8-encoded JSON bytes."""
         return Package.from_json_string(str(b, encoding="utf8"))
 
     def to_json_bytes(self) -> bytes:
-        """Convert the Package into UTF8-encoded JSON bytes."""
+        """Convert the :class:`Package` into UTF-8-encoded JSON bytes."""
         return bytes(self.to_json_string(), encoding="utf8")

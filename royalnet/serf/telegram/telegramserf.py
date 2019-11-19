@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 class TelegramSerf(Serf):
-    """A Serf that connects to `Telegram <https://telegram.org/>`_."""
+    """A Serf that connects to `Telegram <https://telegram.org/>`_ as a bot."""
     interface_name = "telegram"
 
     def __init__(self, *,
@@ -94,16 +94,17 @@ class TelegramSerf(Serf):
             name = self.interface_name
             prefix = "/"
 
-            def __init__(self):
-                super().__init__()
-
         return TelegramInterface
 
     def data_factory(self) -> Type[CommandData]:
         # noinspection PyMethodParameters
         class TelegramData(CommandData):
-            def __init__(data, interface: CommandInterface, session, update: telegram.Update):
-                super().__init__(interface=interface, session=session)
+            def __init__(data,
+                         interface: CommandInterface,
+                         session,
+                         loop: asyncio.AbstractEventLoop,
+                         update: telegram.Update):
+                super().__init__(interface=interface, session=session, loop=loop)
                 data.update = update
 
             async def reply(data, text: str):
@@ -193,27 +194,13 @@ class TelegramSerf(Serf):
             session = await asyncify(self.alchemy.Session)
         else:
             session = None
-        try:
-            # Create the command data
-            data = self.Data(interface=command.interface, session=session, update=update)
-            try:
-                # Run the command
-                await command.run(CommandArgs(parameters), data)
-            except InvalidInputError as e:
-                await data.reply(f"⚠️ {e.message}\n"
-                                 f"Syntax: [c]/{command.name} {command.syntax}[/c]")
-            except UnsupportedError as e:
-                await data.reply(f"⚠️ {e.message}")
-            except CommandError as e:
-                await data.reply(f"⚠️ {e.message}")
-            except Exception as e:
-                self.sentry_exc(e)
-                error_message = f"🦀 [b]{e.__class__.__name__}[/b] 🦀\n" \
-                                '\n'.join(e.args)
-                await data.reply(error_message)
-        finally:
-            if session is not None:
-                await asyncify(session.close)
+        # Prepare data
+        data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
+        # Call the command
+        await self.call(command, data, parameters)
+        # Close the alchemy session
+        if session is not None:
+            await asyncify(session.close)
 
     async def handle_edited_message(self, update: telegram.Update):
         pass
@@ -243,6 +230,7 @@ class TelegramSerf(Serf):
         pass
 
     async def run(self):
+        await super().run()
         while True:
             # Get the latest 100 updates
             last_updates: List[telegram.Update] = await self.api_call(self.client.get_updates,

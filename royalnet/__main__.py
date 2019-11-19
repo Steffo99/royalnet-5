@@ -2,10 +2,9 @@ import click
 import typing
 import importlib
 import royalnet as r
-import royalherald as rh
 import multiprocessing
 import keyring
-import logging
+from logging import Formatter, StreamHandler, getLogger, Logger
 
 
 @click.command()
@@ -13,55 +12,53 @@ import logging
               help="Enable/disable the Telegram bot.")
 @click.option("--discord/--no-discord", default=None,
               help="Enable/disable the Discord bot.")
-@click.option("--webserver/--no-webserver", default=None,
-              help="Enable/disable the Web server.")
-@click.option("--webserver-port", default=8001,
-              help="The port on which the web server will listen on.")
-@click.option("-d", "--database", type=str, default=None,
-              help="The PostgreSQL database path.")
-@click.option("-p", "--packs", type=str, multiple=True, default=[],
-              help="The names of the Packs that should be used.")
-@click.option("-n", "--network-address", type=str, default=None,
-              help="The Network server URL to connect to.")
-@click.option("-l", "--local-network-server", is_flag=True, default=False,
-              help="Locally run a Network server and bind it to port 44444. Overrides -n.")
-@click.option("--local-network-server-port", type=int, default=44444,
-              help="The port on which the local network will be ran.")
+@click.option("--constellation/--no-constellation", default=None,
+              help="Enable/disable the Constellation web server.")
+@click.option("--herald/--no-herald", default=None,
+              help="Enable/disable the integrated Herald server."
+                   " If turned off, Royalnet will try to connect to another server.")
+@click.option("--remote-herald-address", type=str, default=None,
+              help="If --no-herald is specified, connect to the Herald server at this URL instead.")
+@click.option("-c", "--constellation-port", default=44445,
+              help="The port on which the Constellation will serve webpages on.")
+@click.option("-a", "--alchemy-url", type=str, default=None,
+              help="The Alchemy database path.")
+@click.option("-h", "--herald-port", type=int, default=44444,
+              help="The port on which the Herald should be running.")
+@click.option("-p", "--pack", type=str, multiple=True, default=tuple(),
+              help="Import the pack with the specified name and use it in the Royalnet instance.")
 @click.option("-s", "--secrets-name", type=str, default="__default__",
               help="The name in the keyring that the secrets are stored with.")
-@click.option("-v", "--verbose", is_flag=True, default=False,
-              help="Print all possible debug information.")
+@click.option("-l", "--log-level", type=str, default="INFO",
+              help="Select how much information you want to be printed on the console."
+                   " Valid log levels are: FATAL/ERROR/WARNING/INFO/DEBUG")
 def run(telegram: typing.Optional[bool],
         discord: typing.Optional[bool],
-        webserver: typing.Optional[bool],
-        webserver_port: typing.Optional[int],
-        database: typing.Optional[str],
-        packs: typing.Tuple[str],
-        network_address: typing.Optional[str],
-        local_network_server: bool,
-        local_network_server_port: int,
+        constellation: typing.Optional[bool],
+        herald: typing.Optional[bool],
+        remote_herald_address: typing.Optional[str],
+        constellation_port: int,
+        alchemy_url: typing.Optional[str],
+        herald_port: int,
+        pack: typing.Tuple[str],
         secrets_name: str,
-        verbose: bool):
-    # Setup logging
-    if verbose:
-        core_logger = logging.root
-        core_logger.setLevel(logging.DEBUG)
-        stream_handler = logging.StreamHandler()
-        stream_handler.formatter = logging.Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
-        core_logger.addHandler(stream_handler)
-        core_logger.debug("Logging setup complete.")
+        log_level: str):
+    # Initialize logging
+    royalnet_log: Logger = getLogger("royalnet")
+    royalnet_log.setLevel(log_level)
+    stream_handler = StreamHandler()
+    stream_handler.formatter = Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
+    royalnet_log.addHandler(stream_handler)
 
-    # Get the network password
-    network_password = keyring.get_password(f"Royalnet/{secrets_name}", "network")
-
-    # Get the sentry dsn
-    sentry_dsn = keyring.get_password(f"Royalnet/{secrets_name}", "sentry")
+    def get_secret(username: str):
+        return keyring.get_password(f"Royalnet/{secrets_name}", username)
 
     # Enable / Disable interfaces
     interfaces = {
         "telegram": telegram,
         "discord": discord,
-        "webserver": webserver
+        "herald": herald,
+        "constellation": constellation,
     }
     # If any interface is True, then the undefined ones should be False
     if any(interfaces[name] is True for name in interfaces):
@@ -79,36 +76,30 @@ def run(telegram: typing.Optional[bool],
         for name in interfaces:
             interfaces[name] = True
 
-    server_process: typing.Optional[multiprocessing.Process] = None
-    # Start the network server
-    if local_network_server:
-        server_process = multiprocessing.Process(name="Network Server",
-                                                 target=rh.Server("0.0.0.0", local_network_server_port, network_password).run_blocking,
+    herald_process: typing.Optional[multiprocessing.Process] = None
+    # Start the Herald server
+    if interfaces["herald"]:
+        herald_config = r.herald.Config(name="<server>",
+                                        address="127.0.0.1",
+                                        port=herald_port,
+                                        secret=get_secret("herald"),
+                                        secure=False,
+                                        path="/")
+        herald_process = multiprocessing.Process(name="Herald",
+                                                 target=r.herald.Server(config=herald_config).run_blocking,
                                                  daemon=True)
-        server_process.start()
-        network_address = f"ws://127.0.0.1:{local_network_server_port}/"
-
-    # Create a Royalnet configuration
-    network_config: typing.Optional[rh.Config] = None
-    if network_address is not None:
-        network_config = rh.Config(network_address, network_password)
-
-    # Create a Alchemy configuration
-    telegram_db_config: typing.Optional[r.alchemy.DatabaseConfig] = None
-    discord_db_config: typing.Optional[r.alchemy.DatabaseConfig] = None
-    if database is not None:
-        telegram_db_config = r.alchemy.DatabaseConfig(database,
-                                                      r.packs.common.tables.User,
-                                                      r.packs.common.tables.Telegram,
-                                                       "tg_id")
-        discord_db_config = r.alchemy.DatabaseConfig(database,
-                                                     r.packs.common.tables.User,
-                                                     r.packs.common.tables.Discord,
-                                                      "discord_id")
+        herald_process.start()
+    else:
+        herald_config = r.herald.Config(name=...,
+                                        address=remote_herald_address,
+                                        port=herald_port,
+                                        secret=get_secret("herald"),
+                                        secure=False,
+                                        path="/")
 
     # Import command and star packs
-    packs: typing.List[str] = list(packs)
-    packs.append("royalnet.packs.common")  # common pack is always imported
+    packs: typing.List[str] = list(pack)
+    packs.append("royalnet.backpack")  # backpack is always imported
     enabled_commands = []
     enabled_page_stars = []
     enabled_exception_stars = []
@@ -132,62 +123,66 @@ def run(telegram: typing.Optional[bool],
 
     telegram_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["telegram"]:
-        click.echo("\n@BotFather Commands String")
-        for command in enabled_commands:
-            click.echo(f"{command.name} - {command.description}")
-        click.echo("")
-        telegram_bot = r.interfaces.TelegramBot(network_config=network_config,
-                                                database_config=telegram_db_config,
-                                                sentry_dsn=sentry_dsn,
-                                                commands=enabled_commands,
-                                                secrets_name=secrets_name)
-        telegram_process = multiprocessing.Process(name="Telegram Interface",
-                                                   target=telegram_bot.run_blocking,
-                                                   args=(verbose,),
+        telegram_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
+                                                  master_table=r.backpack.tables.User,
+                                                  identity_table=r.backpack.tables.Telegram,
+                                                  identity_column="tg_id")
+        telegram_serf_kwargs = {
+            'alchemy_config': telegram_db_config,
+            'commands': enabled_commands,
+            'network_config': herald_config.copy(name="telegram"),
+            'secrets_name': secrets_name
+        }
+        telegram_process = multiprocessing.Process(name="Telegram Serf",
+                                                   target=r.serf.telegram.TelegramSerf.run_process,
+                                                   kwargs=telegram_serf_kwargs,
                                                    daemon=True)
         telegram_process.start()
 
     discord_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["discord"]:
-        discord_bot = r.interfaces.DiscordBot(network_config=network_config,
-                                              database_config=discord_db_config,
-                                              sentry_dsn=sentry_dsn,
-                                              commands=enabled_commands,
-                                              secrets_name=secrets_name)
-        discord_process = multiprocessing.Process(name="Discord Interface",
-                                                  target=discord_bot.run_blocking,
-                                                  args=(verbose,),
+        discord_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
+                                                 master_table=r.backpack.tables.User,
+                                                 identity_table=r.backpack.tables.Discord,
+                                                 identity_column="discord_id")
+        discord_serf_kwargs = {
+            'alchemy_config': discord_db_config,
+            'commands': enabled_commands,
+            'network_config': herald_config.copy(name="discord"),
+            'secrets_name': secrets_name
+        }
+        discord_process = multiprocessing.Process(name="Discord Serf",
+                                                  target=r.serf.discord.DiscordSerf.run_process,
+                                                  kwargs=discord_serf_kwargs,
                                                   daemon=True)
         discord_process.start()
 
-    webserver_process: typing.Optional[multiprocessing.Process] = None
-    if interfaces["webserver"]:
-        # Common tables are always included
-        constellation_tables = set(r.packs.common.available_tables)
-        # Find the required tables
-        for star in [*enabled_page_stars, *enabled_exception_stars]:
-            constellation_tables = constellation_tables.union(star.tables)
+    constellation_process: typing.Optional[multiprocessing.Process] = None
+    if interfaces["constellation"]:
         # Create the Constellation
-        constellation = r.web.Constellation(page_stars=enabled_page_stars,
-                                            exc_stars=enabled_exception_stars,
-                                            secrets_name=secrets_name,
-                                            database_uri=database,
-                                            tables=constellation_tables)
-        webserver_process = multiprocessing.Process(name="Constellation Webserver",
-                                                    target=constellation.run_blocking,
-                                                    args=("0.0.0.0", webserver_port, verbose,),
-                                                    daemon=True)
-        webserver_process.start()
+        constellation_kwargs = {
+            'address': "127.0.0.1",
+            'port': constellation_port,
+            'secrets_name': secrets_name,
+            'database_uri': alchemy_url,
+            'page_stars': enabled_page_stars,
+            'exc_stars': enabled_exception_stars,
+        }
+        constellation_process = multiprocessing.Process(name="Constellation",
+                                                        target=r.constellation.Constellation.run_process,
+                                                        kwargs=constellation_kwargs,
+                                                        daemon=True)
+        constellation_process.start()
 
-    click.echo("Royalnet processes have been started. You can force-quit by pressing Ctrl+C.")
-    if server_process is not None:
-        server_process.join()
+    click.echo("Royalnet is now running! You can stop its execution by pressing Ctrl+C at any time.")
+    if herald_process is not None:
+        herald_process.join()
     if telegram_process is not None:
         telegram_process.join()
     if discord_process is not None:
         discord_process.join()
-    if webserver_process is not None:
-        webserver_process.join()
+    if constellation_process is not None:
+        constellation_process.join()
 
 
 if __name__ == "__main__":

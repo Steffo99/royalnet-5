@@ -68,16 +68,16 @@ class CommandArgs(list):
         return " ".join(self)
 
     def match(self, pattern: Union[str, Pattern], *flags) -> Sequence[AnyStr]:
-        """Match the :py:func:`royalnet.utils.commandargs.joined` to a regex pattern.
+        """Match the :meth:`.joined` string to a :class:`re.Pattern`-like object.
 
         Parameters:
-            pattern: The regex pattern to be passed to :py:func:`re.match`.
+            pattern: The regex pattern to be passed to :func:`re.match`.
 
         Raises:
-            royalnet.error.InvalidInputError: if the pattern doesn't match.
+            InvalidInputError: if the pattern doesn't match.
 
         Returns:
-            The matched groups, as returned by :py:func:`re.Match.groups`."""
+            The matched groups, as returned by :func:`re.Match.groups`."""
         text = self.joined()
         match = re.match(pattern, text, *flags)
         if match is None:

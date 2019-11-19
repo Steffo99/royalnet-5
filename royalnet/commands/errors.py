@@ -9,21 +9,22 @@ class CommandError(Exception):
         return f"{self.__class__.__qualname__}({repr(self.message)})"
 
 
-class InvalidInputError(CommandError):
-    """The command has received invalid input and cannot complete.
+class UserError(CommandError):
+    """The command failed to execute, and the error is because of something that the user did."""
 
-    Display an error message to the user, along with the correct syntax for the command."""
+
+class InvalidInputError(UserError):
+    """The command has received invalid input and cannot complete."""
 
 
 class UnsupportedError(CommandError):
-    """A requested feature is not available on this interface.
-
-    Display an error message to the user, telling them to use another interface."""
-
-
-class KeyboardExpiredError(CommandError):
-    """A special type of exception that can be raised in keyboard handlers to mark a specific keyboard as expired."""
+    """A requested feature is not available on this interface."""
 
 
 class ConfigurationError(CommandError):
-    """The command is misconfigured and cannot work."""
+    """The command cannot work because of a wrong configuration by part of the Royalnet admin."""
+
+
+class ExternalError(CommandError):
+    """The command failed to execute, but the problem was because of an external factor (such as an external API going
+    down)."""

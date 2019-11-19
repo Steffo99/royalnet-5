@@ -1,10 +1,10 @@
 import logging
-from asyncio import Task, AbstractEventLoop
+from asyncio import Task, AbstractEventLoop, get_event_loop
 from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
 from keyring import get_password
 from sqlalchemy.schema import Table
 from royalnet import __version__ as version
-from royalnet.commands import Command, CommandInterface, CommandData, CommandError, UnsupportedError
+from royalnet.commands import *
 from .alchemyconfig import AlchemyConfig
 
 try:
@@ -130,10 +130,10 @@ class Serf:
         self.alchemy = Alchemy(alchemy_config.database_url, tables)
         self._master_table = self.alchemy.get(alchemy_config.master_table)
         self._identity_table = self.alchemy.get(alchemy_config.identity_table)
-        # FIXME: this MAY break
-        self._identity_column = self._identity_table.__getattribute__(alchemy_config.identity_column)
-        # self._identity_column = self._identity_table.__getattribute__(self._identity_table,
-        #                                                               alchemy_config.identity_column)
+        # This is fine, as Pycharm doesn't know that identity_table is a class and not an object
+        # noinspection PyArgumentList
+        self._identity_column = self._identity_table.__getattribute__(self._identity_table,
+                                                                      alchemy_config.identity_column)
 
     @property
     def _identity_chain(self) -> tuple:
@@ -146,8 +146,7 @@ class Serf:
         # noinspection PyMethodParameters
         class GenericInterface(CommandInterface):
             alchemy: Alchemy = self.alchemy
-            bot: "Serf" = self
-            loop: AbstractEventLoop = self.loop
+            serf: "Serf" = self
 
             def register_herald_action(ci,
                                        event_name: str,
@@ -232,10 +231,9 @@ class Serf:
     def init_network(self, config: HeraldConfig):
         """Create a :py:class:`Link`, and run it as a :py:class:`asyncio.Task`."""
         log.debug(f"Initializing herald...")
-        self.herald: Link = Link(config, self._network_handler)
-        self.herald_task = self.loop.create_task(self.herald.run())
+        self.herald: Link = Link(config, self.network_handler)
 
-    async def _network_handler(self, message: Union[Request, Broadcast]) -> Response:
+    async def network_handler(self, message: Union[Request, Broadcast]) -> Response:
         try:
             network_handler = self.herald_handlers[message.handler]
         except KeyError:
@@ -286,21 +284,49 @@ class Serf:
             username: the name of the secret that should be retrieved."""
         return get_password(f"Royalnet/{self.secrets_name}", username)
 
+    async def call(self, command: Command, data: CommandData, parameters: List[str]):
+        try:
+            # Run the command
+            await command.run(CommandArgs(parameters), data)
+        except InvalidInputError as e:
+            await data.reply(f"⚠️ {e.message}\n"
+                             f"Syntax: [c]{command.interface.prefix}{command.name} {command.syntax}[/c]")
+        except UserError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except UnsupportedError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except ExternalError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except ConfigurationError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except CommandError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except Exception as e:
+            self.sentry_exc(e)
+            error_message = f"⛔ [b]{e.__class__.__name__}[/b]\n" \
+                            '\n'.join(e.args)
+            await data.reply(error_message)
+
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""
-        raise NotImplementedError()
+        self.herald_task = self.loop.create_task(self.herald.run())
+        # OVERRIDE THIS METHOD!
 
-    def run_blocking(self):
-        """Blockingly run the Serf.
+    @classmethod
+    def run_process(cls, *args, **kwargs):
+        """Blockingly create and run the Serf.
 
         This should be used as the target of a :class:`multiprocessing.Process`."""
+        serf = cls(*args, **kwargs)
+
         if sentry_sdk is None:
             log.info("Sentry: not installed")
         else:
-            sentry_dsn = self.get_secret("sentry")
+            sentry_dsn = serf.get_secret("sentry")
             if sentry_dsn is None:
                 log.info("Sentry: disabled")
             else:
-                self.init_sentry(sentry_dsn)
+                serf.init_sentry(sentry_dsn)
 
-        self.loop.run_until_complete(self.run())
+        serf.loop = get_event_loop()
+        serf.loop.run_until_complete(serf.run())

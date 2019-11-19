@@ -11,13 +11,13 @@ class Star:
 
     It shouldn't be used directly: please use :class:`PageStar` and :class:`ExceptionStar` instead!"""
     tables: set = {}
-    """The set of :class`Alchemy` :class:`Table` classes required by this Star to function."""
+    """The set of :mod:`~royalnet.alchemy` table classes required by this :class:`Star` to function."""
 
     def __init__(self, constellation: "Constellation"):
         self.constellation: "Constellation" = constellation
 
     async def page(self, request: "Request") -> "Response":
-        """The function generating the :class:`Response` to a web :class:`Request`.
+        """The function generating the :class:`~starlette.Response` to a web :class:`~starlette.Request`.
 
         If it raises an error, the corresponding :class:`ExceptionStar` will be used to handle the request instead."""
         raise NotImplementedError()
@@ -34,7 +34,7 @@ class Star:
 
     @property
     def session_acm(self):
-        """A shortcut for the session :func:`asynccontextmanager` of the :class:`Constellation`."""
+        """A shortcut for the :func:`Alchemy.session_acm` of the :class:`Constellation`."""
         return self.constellation.alchemy.session_acm
 
     def __repr__(self):
@@ -85,7 +85,17 @@ class ExceptionStar(Star):
     overriding :meth:`page` and changing the values of :attr:`error` and optionally :attr:`tables`."""
     error: Union[Type[Exception], int]
     """The error that should be handled by this star. It should be either a subclass of :exc:`Exception`, 
-    or the :class:`int` of an HTTP error code."""
+    or the :class:`int` of an HTTP error code.
+    
+    Examples:
+        ::
+        
+            error: int = 404
+            
+        ::
+        
+            error: Type[Exception] = ValueError
+    """
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__}: handles {self.error}>"

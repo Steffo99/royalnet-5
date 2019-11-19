@@ -13,7 +13,7 @@ except ImportError:
 
 
 class YtdlFile:
-    """A representation of a file download with ``youtube_dl``."""
+    """A representation of a file download with :mod:`youtube_dl`."""
 
     default_ytdl_args = {
         "quiet": not __debug__,  # Do not print messages to stdout.
@@ -32,7 +32,7 @@ class YtdlFile:
         """Create a YtdlFile instance.
 
         Warning:
-            Please avoid using directly ``__init__()``, use :meth:`.from_url` instead!"""
+            Please avoid using directly :meth:`.__init__`, use :meth:`.from_url` instead!"""
         self.url: str = url
         self.info: Optional[YtdlInfo] = info
         self.filename: Optional[str] = filename
@@ -48,7 +48,7 @@ class YtdlFile:
         return self.info is not None
 
     async def retrieve_info(self) -> None:
-        """Retrieve info about the YtdlFile through ``youtube_dl``."""
+        """Retrieve info about the YtdlFile through :mod:`youtube_dl`."""
         if not self.has_info:
             infos = await asyncify(YtdlInfo.from_url, self.url, loop=self._loop, **self.ytdl_args)
             if len(infos) == 0:

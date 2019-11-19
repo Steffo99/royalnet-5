@@ -1,5 +1,4 @@
 import typing
-import websockets
 import re
 import datetime
 import uuid
@@ -8,14 +7,19 @@ import logging as _logging
 from .package import Package
 from .config import Config
 
+try:
+    import websockets
+except ImportError:
+    websockets = None
+
 
 log = _logging.getLogger(__name__)
 
 
 class ConnectedClient:
     """The :py:class:`Server`-side representation of a connected :py:class:`Link`."""
-    def __init__(self, socket: websockets.WebSocketServerProtocol):
-        self.socket: websockets.WebSocketServerProtocol = socket
+    def __init__(self, socket: "websockets.WebSocketServerProtocol"):
+        self.socket: "websockets.WebSocketServerProtocol" = socket
         self.nid: typing.Optional[str] = None
         self.link_type: typing.Optional[str] = None
         self.connection_datetime: datetime.datetime = datetime.datetime.now()
@@ -57,7 +61,7 @@ class Server:
             matching = [client for client in self.identified_clients if client.link_type == link_type]
             return matching or []
 
-    async def listener(self, websocket: websockets.server.WebSocketServerProtocol, path):
+    async def listener(self, websocket: "websockets.server.WebSocketServerProtocol", path):
         log.info(f"{websocket.remote_address} connected to the server.")
         connected_client = ConnectedClient(websocket)
         # Wait for identification

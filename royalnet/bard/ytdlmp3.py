@@ -1,14 +1,18 @@
 import typing
 import re
-import ffmpeg
 import os
 from royalnet.utils import asyncify, MultiLock
 from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
 
+try:
+    import ffmpeg
+except ImportError:
+    ffmpeg = None
+
 
 class YtdlMp3:
-    """A representation of a YtdlFile conversion to mp3."""
+    """A representation of a :class:`YtdlFile` conversion to mp3."""
     def __init__(self, ytdl_file: YtdlFile):
         self.ytdl_file: YtdlFile = ytdl_file
         self.mp3_filename: typing.Optional[str] = None
@@ -20,7 +24,9 @@ class YtdlMp3:
         return self.mp3_filename is not None
 
     async def convert_to_mp3(self) -> None:
-        """Convert the file to mp3 with ``ffmpeg``."""
+        """Convert the file to mp3 with :mod:`ffmpeg`."""
+        if ffmpeg is None:
+            raise ImportError("'bard' extra is not installed")
         await self.ytdl_file.download_file()
         if self.mp3_filename is None:
             async with self.ytdl_file.lock.normal():
@@ -34,7 +40,7 @@ class YtdlMp3:
                     )
             self.mp3_filename = destination_filename
 
-    def delete_asap(self) -> None:
+    async def delete_asap(self) -> None:
         """Delete the mp3 file."""
         if self.is_converted:
             async with self.lock.exclusive():
