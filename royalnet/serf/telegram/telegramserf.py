@@ -1,8 +1,7 @@
 import logging
 import asyncio
 from typing import Type, Optional, List, Callable
-from royalnet.commands import Command, CommandInterface, CommandData, CommandArgs, CommandError, InvalidInputError, \
-                              UnsupportedError
+from royalnet.commands import *
 from royalnet.utils import asyncify
 from .escape import escape
 from ..serf import Serf
@@ -38,14 +37,16 @@ class TelegramSerf(Serf):
     def __init__(self, *,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
-                 network_config: Optional[HeraldConfig] = None,
+                 events: List[Type[Event]] = None,
+                 herald_config: Optional[HeraldConfig] = None,
                  secrets_name: str = "__default__"):
         if telegram is None:
             raise ImportError("'telegram' extra is not installed")
 
         super().__init__(alchemy_config=alchemy_config,
                          commands=commands,
-                         network_config=network_config,
+                         events=events,
+                         herald_config=herald_config,
                          secrets_name=secrets_name)
 
         self.client = telegram.Bot(self.get_secret("telegram"), request=TRequest(5, read_timeout=30))

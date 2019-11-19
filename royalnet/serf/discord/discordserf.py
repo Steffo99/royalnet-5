@@ -3,8 +3,11 @@ import logging
 from typing import Type, Optional, List, Union
 from royalnet.commands import *
 from royalnet.utils import asyncify
+from royalnet.serf import Serf
 from .escape import escape
-from ..serf import Serf
+from .discordbard import *
+from .barddict import BardsDict
+
 
 try:
     import discord
@@ -33,21 +36,26 @@ class DiscordSerf(Serf):
     def __init__(self, *,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
-                 network_config: Optional[HeraldConfig] = None,
+                 events: List[Type[Event]] = None,
+                 herald_config: Optional[HeraldConfig] = None,
                  secrets_name: str = "__default__"):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 
         super().__init__(alchemy_config=alchemy_config,
                          commands=commands,
-                         network_config=network_config,
+                         events=events,
+                         herald_config=herald_config,
                          secrets_name=secrets_name)
 
-        self.Client = self.bot_factory()
+        self.Client = self.client_factory()
         """The custom :class:`discord.Client` class that will be instantiated later."""
 
         self.client = self.Client()
-        """The custo :class:`discord.Client` instance."""
+        """The custom :class:`discord.Client` instance."""
+
+        self.bards: BardsDict = BardsDict(self.client)
+        """A dictionary containing all bards spawned by this :class:`DiscordSerf`."""
 
     def interface_factory(self) -> Type[CommandInterface]:
         # noinspection PyPep8Naming
@@ -129,7 +137,7 @@ class DiscordSerf(Serf):
             if session is not None:
                 await asyncify(session.close)
 
-    def bot_factory(self) -> Type["discord.Client"]:
+    def client_factory(self) -> Type["discord.Client"]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
@@ -144,15 +152,99 @@ class DiscordSerf(Serf):
 
         return DiscordClient
 
-    def get_voice_client(self, guild: "discord.Guild") -> Optional["discord.VoiceClient"]:
-        voice_clients: List["discord.VoiceClient"] = self.client.voice_clients
-        for voice_client in voice_clients:
-            if voice_client.guild == guild:
-                return voice_client
-        return None
-
     async def run(self):
         await super().run()
         token = self.get_secret("discord")
+        if token is None:
+            raise ValueError("Missing discord token")
         await self.client.login(token)
         await self.client.connect()
+
+    async def find_channel(self,
+                           channel_type: Optional[Type["discord.abc.GuildChannel"]] = None,
+                           name: Optional[str] = None,
+                           guild: Optional["discord.Guild"] = None,
+                           accessible_to: List["discord.User"] = None,
+                           required_permissions: List[str] = None) -> Optional["discord.abc.GuildChannel"]:
+        """Find the best channel matching all requests.
+
+        In case multiple channels match all requests, return the one with the most members connected.
+
+        Args:
+            channel_type: Filter channels by type (select only :class:`discord.VoiceChannel`,
+                          :class:`discord.TextChannel`, ...).
+            name: Filter channels by name starting with ``name`` (using :meth:`str.startswith`).
+                  Note that some channel types don't have names; this check will be skipped for them.
+            guild: Filter channels by guild, keep only channels inside this one.
+            accessible_to: Filter channels by permissions, keeping only channels where *all* these users have
+                           the required permissions.
+            required_permissions: Filter channels by permissions, keeping only channels where the users have *all* these
+                                  :class:`discord.Permissions`.
+
+        Returns:
+            Either a :class:`~discord.abc.GuildChannel`, or :const:`None` if no channels were found."""
+        if accessible_to is None:
+            accessible_to = []
+        if required_permissions is None:
+            required_permissions = []
+        channels: List[discord.abc.GuildChannel] = []
+        for ch in self.client.get_all_channels():
+            if channel_type is not None and not isinstance(ch, channel_type):
+                continue
+
+            if name is not None:
+                try:
+                    ch_name: str = ch.name
+                    if not ch_name.startswith(name):
+                        continue
+                except AttributeError:
+                    pass
+
+            ch_guild: "discord.Guild" = ch.guild
+            if ch.guild == ch_guild:
+                continue
+
+            for user in accessible_to:
+                member: "discord.Member" = guild.get_member(user.id)
+                if member is None:
+                    continue
+                permissions: "discord.Permissions" = ch.permissions_for(member)
+                missing_perms = False
+                for permission in required_permissions:
+                    if not permissions.__getattribute__(permission):
+                        missing_perms = True
+                        break
+                if missing_perms:
+                    continue
+
+            channels.append(ch)
+
+        if len(channels) == 0:
+            return None
+        else:
+            # Give priority to channels with the most people
+            def people_count(c: discord.VoiceChannel):
+                return len(c.members)
+
+            channels.sort(key=people_count, reverse=True)
+
+            return channels[0]
+
+    async def voice_connect(self, channel: "discord.VoiceChannel"):
+        """Try to connect to a :class:`discord.VoiceChannel` and to create the corresponing :class:`DiscordBard`.
+
+        Info:
+            Command-compatible! This method will raise :exc:`CommandError`s for all its errors, so it can be called
+            inside a command!"""
+        try:
+            voice_client = await channel.connect()
+        except asyncio.TimeoutError:
+            raise ExternalError("Timed out while trying to connect to the channel")
+        except discord.opus.OpusNotLoaded:
+            raise ConfigurationError("[c]libopus[/c] is not loaded in the serf")
+        except discord.ClientException:
+            # The bot is already connected to a voice channel
+            # TODO: safely move the bot somewhere else
+            raise CommandError("The bot is already connected in another channel.\n"
+                               " Please disconnect it before resummoning!")
+        self.bards[channel.guild] = DBQueue(voice_client=voice_client)

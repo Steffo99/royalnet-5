@@ -2,6 +2,7 @@ from .commandinterface import CommandInterface
 from .command import Command
 from .commanddata import CommandData
 from .commandargs import CommandArgs
+from .event import Event
 from .errors import CommandError, \
                     InvalidInputError, \
                     UnsupportedError, \
@@ -20,4 +21,5 @@ __all__ = [
     "ConfigurationError",
     "ExternalError",
     "UserError",
+    "Event"
 ]

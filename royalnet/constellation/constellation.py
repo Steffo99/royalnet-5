@@ -25,6 +25,14 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+UVICORN_LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {},
+    "handlers": {},
+    "loggers": {},
+}
+
 
 class Constellation:
     """The class that represents the webserver.
@@ -66,13 +74,16 @@ class Constellation:
             tables = tables.union(SelectedExcStar.tables)
         log.debug(f"Found Tables: {' '.join([table.__name__ for table in tables])}")
 
-        log.info(f"Creating Alchemy...")
-        self.alchemy: royalnet.alchemy.Alchemy = royalnet.alchemy.Alchemy(database_uri=database_uri, tables=tables)
+        self.alchemy = None
         """The :class:`Alchemy` of this Constellation."""
+
+        if database_uri is not None:
+            log.info(f"Creating Alchemy...")
+            self.alchemy: royalnet.alchemy.Alchemy = royalnet.alchemy.Alchemy(database_uri=database_uri, tables=tables)
 
         log.info("Registering PageStars...")
         for SelectedPageStar in page_stars:
-            log.info(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__class__.__name__}")
+            log.info(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__qualname__}")
             try:
                 page_star_instance = SelectedPageStar(constellation=self)
             except Exception as e:
@@ -82,7 +93,7 @@ class Constellation:
 
         log.info("Registering ExceptionStars...")
         for SelectedExcStar in exc_stars:
-            log.info(f"Registering: {SelectedExcStar.error} -> {SelectedExcStar.__class__.__name__}")
+            log.info(f"Registering: {SelectedExcStar.error} -> {SelectedExcStar.__name__}")
             try:
                 exc_star_instance = SelectedExcStar(constellation=self)
             except Exception as e:
@@ -141,10 +152,10 @@ class Constellation:
                                 release=release)
                 log.info(f"Sentry: enabled (Royalnet {release})")
         # Run the server
-        log.info(f"Running Constellation on {address}:{port}...")
+        log.info(f"Running Constellation on https://{address}:{port}/ ...")
         constellation.running = True
         try:
-            uvicorn.run(constellation.starlette, host=address, port=port)
+            uvicorn.run(constellation.starlette, host=address, port=port, log_config=UVICORN_LOGGING_CONFIG)
         finally:
             constellation.running = False
 

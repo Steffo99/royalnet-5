@@ -62,28 +62,30 @@ class Server:
             return matching or []
 
     async def listener(self, websocket: "websockets.server.WebSocketServerProtocol", path):
-        log.info(f"{websocket.remote_address} connected to the server.")
         connected_client = ConnectedClient(websocket)
         # Wait for identification
         identify_msg = await websocket.recv()
         log.debug(f"{websocket.remote_address} identified itself with: {identify_msg}.")
         if not isinstance(identify_msg, str):
+            log.warning(f"Failed Herald identification: {websocket.remote_address[0]}:{websocket.remote_address[1]}")
             await connected_client.send_service("error", "Invalid identification message (not a str)")
             return
         identification = re.match(r"Identify ([^:\s]+):([^:\s]+):([^:\s]+)", identify_msg)
         if identification is None:
+            log.warning(f"Failed Herald identification: {websocket.remote_address[0]}:{websocket.remote_address[1]}")
             await connected_client.send_service("error", "Invalid identification message (regex failed)")
             return
         secret = identification.group(3)
         if secret != self.config.secret:
+            log.warning(f"Invalid Herald secret: {websocket.remote_address[0]}:{websocket.remote_address[1]}")
             await connected_client.send_service("error", "Invalid secret")
             return
         # Identification successful
         connected_client.nid = identification.group(1)
         connected_client.link_type = identification.group(2)
+        log.info(f"Joined the Herald: {websocket.remote_address[0]}:{websocket.remote_address[1]}"
+                 f" ({connected_client.link_type})")
         self.identified_clients.append(connected_client)
-        log.debug(f"{websocket.remote_address} identified successfully as {connected_client.nid}"
-                  f" ({connected_client.link_type}).")
         await connected_client.send_service("success", "Identification successful!")
         log.debug(f"{connected_client.nid}'s identification confirmed.")
         # Main loop

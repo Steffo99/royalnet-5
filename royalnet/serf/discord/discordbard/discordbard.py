@@ -1,7 +1,10 @@
 from typing import Optional, AsyncGenerator, List, Tuple, Any, Dict
-from .ytdldiscord import YtdlDiscord
-from .fileaudiosource import FileAudioSource
-from .errors import UnsupportedError
+from royalnet.bard import YtdlDiscord, FileAudioSource, UnsupportedError
+
+try:
+    import discord
+except ImportError:
+    discord = None
 
 
 class DiscordBard:
@@ -9,11 +12,14 @@ class DiscordBard:
 
     Possible implementation may be playlist, song pools, multilayered tracks, and so on."""
 
-    def __init__(self):
+    def __init__(self, voice_client: "discord.VoiceClient"):
         """Create manually a :class:`DiscordBard`.
 
         Warning:
             Avoid calling this method, please use :meth:`create` instead!"""
+        self.voice_client: "discord.VoiceClient" = voice_client
+        """The voice client that this :class:`DiscordBard` refers to."""
+
         self.now_playing: Optional[YtdlDiscord] = None
         """The :class:`YtdlDiscord` that's currently being played."""
 
@@ -26,13 +32,13 @@ class DiscordBard:
         it can take a args+kwargs tuple in input to optionally select a different source.
 
         The generator should ``yield`` once before doing anything else."""
-        args, kwargs = yield
+        yield
         raise NotImplementedError()
 
     @classmethod
-    async def create(cls) -> "DiscordBard":
+    async def create(cls, voice_client: "discord.VoiceClient") -> "DiscordBard":
         """Create an instance of the :class:`DiscordBard`, and initialize its async generator."""
-        bard = cls()
+        bard = cls(voice_client=voice_client)
         # noinspection PyTypeChecker
         none = bard.generator.asend(None)
         assert none is None

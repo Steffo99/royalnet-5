@@ -3,8 +3,6 @@ from .ytdlfile import YtdlFile
 from .ytdlmp3 import YtdlMp3
 from .ytdldiscord import YtdlDiscord
 from .errors import *
-from .discordbard import DiscordBard
-from . import implementations
 
 try:
     from .fileaudiosource import FileAudioSource
@@ -21,6 +19,4 @@ __all__ = [
     "NotFoundError",
     "MultipleFilesError",
     "FileAudioSource",
-    "implementations",
-    "DiscordBard",
 ]
