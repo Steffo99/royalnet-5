@@ -5,6 +5,7 @@ from royalnet.serf import Serf
 from royalnet.serf.discord import DiscordSerf
 from royalnet.bard import DiscordBard
 from royalnet.bard.implementations import *
+import weakref
 
 try:
     import discord
@@ -17,18 +18,18 @@ class DiscordvoiceEvent(Event):
 
     def __init__(self, serf: Serf):
         super().__init__(serf)
-        self.bards: Dict["discord.Guild", DiscordBard] = {}
+        self.bards: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
 
-    async def run(self, data: dict):
+    async def run(self,
+                  operation: str,
+                  data: dict):
         if not isinstance(self.serf, DiscordSerf):
             raise ValueError("`discordvoice` event cannot run on other serfs.")
 
-        operation = data["operation"]
-
         if operation == "summon":
-            channel_name: str = data["data"]["channel_name"]
-            member_id: int = data["data"].get("member_id")
-            guild_id: int = data["data"].get("guild_id")
+            channel_name: str = data["channel_name"]
+            member_id: int = data.get("member_id")
+            guild_id: int = data.get("guild_id")
             client: discord.Client = self.serf.client
 
             # Get the guild, if it exists
@@ -105,9 +106,13 @@ class DiscordvoiceEvent(Event):
                 raise CommandError("The bot is already connected in another channel.\n"
                                    " Please disconnect it before resummoning!")
 
+            # Create a new bard, if it doesn't already exist
+            # TODO: does this work? are the voice clients correctly disposed of?
+            self.bards[channel.guild] = DBQueue()
 
             return {
                 "connected": True
             }
+        # TODO: play, skip, playmode, remove, something else?
         else:
             raise ValueError(f"Invalid operation received: {operation}")

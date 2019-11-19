@@ -33,14 +33,14 @@ class DiscordSerf(Serf):
     def __init__(self, *,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
-                 network_config: Optional[HeraldConfig] = None,
+                 herald_config: Optional[HeraldConfig] = None,
                  secrets_name: str = "__default__"):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 
         super().__init__(alchemy_config=alchemy_config,
                          commands=commands,
-                         network_config=network_config,
+                         herald_config=herald_config,
                          secrets_name=secrets_name)
 
         self.Client = self.client_factory()

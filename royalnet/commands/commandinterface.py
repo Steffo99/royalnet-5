@@ -27,28 +27,18 @@ class CommandInterface:
         A reference to a :class:`~royalnet.serf.telegram.TelegramSerf`."""
 
     @property
-    def alchemy(self):
+    def alchemy(self) -> "Alchemy":
         """A shortcut for :attr:`serf.alchemy`."""
         return self.serf.alchemy
 
     @property
-    def loop(self):
+    def loop(self) -> AbstractEventLoop:
         """A shortcut for :attr:`serf.loop`."""
         return self.serf.loop
 
     def __init__(self):
         self.command: Optional[Command] = None  # Will be bound after the command has been created
 
-    def register_herald_action(self,
-                               event_name: str,
-                               coroutine: Callable[[Any], Awaitable[dict]]):
+    async def call_herald_event(self, destination: str, event_name: str, args: dict) -> dict:
         # TODO: document this
-        raise UnsupportedError(f"{self.register_herald_action.__name__} is not supported on this platform")
-
-    def unregister_herald_action(self, event_name: str):
-        # TODO: document this
-        raise UnsupportedError(f"{self.unregister_herald_action.__name__} is not supported on this platform")
-
-    async def call_herald_action(self, destination: str, event_name: str, args: dict) -> dict:
-        # TODO: document this
-        raise UnsupportedError(f"{self.call_herald_action.__name__} is not supported on this platform")
+        raise UnsupportedError(f"{self.call_herald_event.__name__} is not supported on this platform")

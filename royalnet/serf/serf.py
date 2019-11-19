@@ -47,7 +47,8 @@ class Serf:
     def __init__(self, *,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
-                 network_config: Optional[HeraldConfig] = None,
+                 events: List[Type[Event]] = None,
+                 herald_config: Optional[HeraldConfig] = None,
                  secrets_name: str = "__default__"):
         self.secrets_name = secrets_name
 
@@ -87,22 +88,21 @@ class Serf:
         self.register_commands(commands)
         log.info(f"Commands: total {len(self.commands)}")
 
-        self.herald_handlers: Dict[str, Callable[["Serf", Any], Awaitable[Optional[dict]]]] = {}
-        """A :class:`dict` linking :class:`Request` event names to coroutines returning a :class:`dict` that will be
-        sent as :class:`Response` to the event."""
-
         self.herald: Optional[Link] = None
         """The :class:`Link` object connecting the Serf to the rest of the herald network."""
 
         self.herald_task: Optional[Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
 
+        self.events: Dict[str, Event] = {}
+        """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
+
         if Link is None:
             log.info("Herald: not installed")
-        elif network_config is None:
+        elif herald_config is None:
             log.info("Herald: disabled")
         else:
-            self.init_network(network_config)
+            self.init_herald(herald_config, events)
             log.info(f"Herald: {self.herald}")
 
         self.loop: Optional[AbstractEventLoop] = None
@@ -148,22 +148,7 @@ class Serf:
             alchemy: Alchemy = self.alchemy
             serf: "Serf" = self
 
-            def register_herald_action(ci,
-                                       event_name: str,
-                                       coroutine: Callable[[Any], Awaitable[Dict]]) -> None:
-                """Allow a coroutine to be called when a :class:`royalherald.Request` is received."""
-                if self.herald is None:
-                    raise UnsupportedError("`royalherald` is not enabled on this bot.")
-                self.herald_handlers[event_name] = coroutine
-
-            def unregister_herald_action(ci, event_name: str):
-                """Disable a previously registered coroutine from being called on reception of a
-                :class:`royalherald.Request`."""
-                if self.herald is None:
-                    raise UnsupportedError("`royalherald` is not enabled on this bot.")
-                del self.herald_handlers[event_name]
-
-            async def call_herald_action(ci, destination: str, event_name: str, args: Dict) -> Dict:
+            async def call_herald_event(ci, destination: str, event_name: str, args: Dict) -> Dict:
                 """Send a :class:`royalherald.Request` to a specific destination, and wait for a
                 :class:`royalherald.Response`."""
                 if self.herald is None:
@@ -228,34 +213,36 @@ class Serf:
                 else:
                     log.warning(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
 
-    def init_network(self, config: HeraldConfig):
+    def init_herald(self, config: HeraldConfig, events: List[Type[Event]]):
         """Create a :py:class:`Link`, and run it as a :py:class:`asyncio.Task`."""
-        log.debug(f"Initializing herald...")
         self.herald: Link = Link(config, self.network_handler)
+        log.debug(f"Binding events...")
+        for SelectedEvent in events:
+            log.debug(f"Binding event: {SelectedEvent.name}.")
+            self.events[SelectedEvent.name] = SelectedEvent(self)
 
     async def network_handler(self, message: Union[Request, Broadcast]) -> Response:
         try:
-            herald_handler = self.herald_handlers[message.handler]
+            event: Event = self.events[message.handler]
         except KeyError:
-            log.warning(f"Missing network_handler for {message.handler}")
-            return ResponseFailure("no_handler", f"This bot is missing a network handler for {message.handler}.")
-        else:
-            log.debug(f"Using {herald_handler} as handler for {message.handler}")
+            log.warning(f"No event for '{message.handler}'")
+            return ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
+        log.debug(f"Event called: {event.name}")
         if isinstance(message, Request):
             try:
-                response_data = await herald_handler(self, **message.data)
+                response_data = await event.run(**message.data)
                 return ResponseSuccess(data=response_data)
             except Exception as e:
                 sentry_sdk.capture_exception(e)
-                log.error(f"Exception {e} in {herald_handler}")
-                return ResponseFailure("exception_in_handler",
-                                       f"An exception was raised in {herald_handler} for {message.handler}.",
+                log.error(f"Event error: {e.__class__.__qualname__} in {event.name}")
+                return ResponseFailure("exception_in_event",
+                                       f"An exception was raised in the event for '{message.handler}'.",
                                        extra_info={
-                                           "type": e.__class__.__name__,
+                                           "type": e.__class__.__qualname__,
                                            "message": str(e)
                                        })
         elif isinstance(message, Broadcast):
-            await herald_handler(self, **message.data)
+            await event.run(**message.data)
 
     @staticmethod
     def init_sentry(dsn):

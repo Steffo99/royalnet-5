@@ -12,9 +12,9 @@ class Event:
     tables: set = set()
     """A set of :mod:`royalnet.alchemy` tables that must exist for this event to work."""
 
-    def __init__(self, serf: Serf):
+    def __init__(self, serf: "Serf"):
         """Bind the event to a :class:`~royalnet.serf.Serf`."""
-        self.serf: Serf = serf
+        self.serf: "Serf" = serf
 
     @property
     def alchemy(self):
@@ -26,5 +26,5 @@ class Event:
         """A shortcut for :attr:`.serf.loop`"""
         return self.serf.loop
 
-    async def run(self, data: dict):
+    async def run(self, **kwargs):
         raise NotImplementedError()
