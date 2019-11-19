@@ -85,10 +85,10 @@ class Link:
 
     async def connect(self):
         """Connect to the :class:`Server` at :attr:`.master_uri`."""
-        log.info(f"Connecting to {self.config.url}...")
+        log.debug(f"Connecting to Herald Server at {self.config.url}...")
         self.websocket = await websockets.connect(self.config.url, loop=self._loop)
         self.connect_event.set()
-        log.info(f"Connected!")
+        log.debug(f"Connected!")
 
     @requires_connection
     async def receive(self) -> Package:
@@ -103,7 +103,7 @@ class Link:
             self.error_event.set()
             self.connect_event.clear()
             self.identify_event.clear()
-            log.info(f"Connection to {self.config.url} was closed.")
+            log.warning(f"Herald Server connection closed: {self.config.url}")
             # What to do now? Let's just reraise.
             raise ConnectionClosedError()
         if self.identify_event.is_set() and package.destination != self.nid:
@@ -113,7 +113,7 @@ class Link:
 
     @requires_connection
     async def identify(self) -> None:
-        log.info(f"Identifying...")
+        log.debug(f"Identifying...")
         await self.websocket.send(f"Identify {self.nid}:{self.config.name}:{self.config.secret}")
         response: Package = await self.receive()
         if not response.source == "<server>":
@@ -124,7 +124,7 @@ class Link:
             raise ConnectionClosedError(f"Identification error: {response.data['type']}")
         assert response.data["type"] == "success"
         self.identify_event.set()
-        log.info(f"Identified successfully!")
+        log.debug(f"Identified successfully!")
 
     @requires_identification
     async def send(self, package: Package):

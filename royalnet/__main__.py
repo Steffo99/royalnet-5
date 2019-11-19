@@ -47,7 +47,7 @@ def run(telegram: typing.Optional[bool],
     royalnet_log: Logger = getLogger("royalnet")
     royalnet_log.setLevel(log_level)
     stream_handler = StreamHandler()
-    stream_handler.formatter = Formatter("{asctime}\t{name}\t{levelname}\t{message}", style="{")
+    stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {message}", style="{")
     royalnet_log.addHandler(stream_handler)
 
     def get_secret(username: str):
@@ -85,7 +85,7 @@ def run(telegram: typing.Optional[bool],
                                         secret=get_secret("herald"),
                                         secure=False,
                                         path="/")
-        herald_process = multiprocessing.Process(name="Herald",
+        herald_process = multiprocessing.Process(name="Herald Server",
                                                  target=r.herald.Server(config=herald_config).run_blocking,
                                                  daemon=True)
         herald_process.start()
@@ -103,6 +103,7 @@ def run(telegram: typing.Optional[bool],
     enabled_commands = []
     enabled_page_stars = []
     enabled_exception_stars = []
+    enabled_events = []
     for pack in packs:
         imported = importlib.import_module(pack)
         try:
@@ -117,20 +118,29 @@ def run(telegram: typing.Optional[bool],
             imported_exception_stars = imported.available_exception_stars
         except AttributeError:
             raise click.ClickException(f"{pack} isn't a Royalnet Pack as it is missing available_exception_stars.")
+        try:
+            imported_events = imported.available_events
+        except AttributeError:
+            raise click.ClickException(f"{pack} isn't a Royalnet Pack as it is missing available_events.")
         enabled_commands = [*enabled_commands, *imported_commands]
         enabled_page_stars = [*enabled_page_stars, *imported_page_stars]
         enabled_exception_stars = [*enabled_exception_stars, *imported_exception_stars]
+        enabled_events = [*enabled_events, *imported_events]
 
     telegram_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["telegram"]:
-        telegram_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
-                                                  master_table=r.backpack.tables.User,
-                                                  identity_table=r.backpack.tables.Telegram,
-                                                  identity_column="tg_id")
+        if alchemy_url is not None:
+            telegram_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
+                                                      master_table=r.backpack.tables.User,
+                                                      identity_table=r.backpack.tables.Telegram,
+                                                      identity_column="tg_id")
+        else:
+            telegram_db_config = None
         telegram_serf_kwargs = {
             'alchemy_config': telegram_db_config,
             'commands': enabled_commands,
-            'network_config': herald_config.copy(name="telegram"),
+            'events': enabled_events,
+            'herald_config': herald_config.copy(name="telegram"),
             'secrets_name': secrets_name
         }
         telegram_process = multiprocessing.Process(name="Telegram Serf",
@@ -141,14 +151,18 @@ def run(telegram: typing.Optional[bool],
 
     discord_process: typing.Optional[multiprocessing.Process] = None
     if interfaces["discord"]:
-        discord_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
-                                                 master_table=r.backpack.tables.User,
-                                                 identity_table=r.backpack.tables.Discord,
-                                                 identity_column="discord_id")
+        if alchemy_url is not None:
+            discord_db_config = r.serf.AlchemyConfig(database_url=alchemy_url,
+                                                     master_table=r.backpack.tables.User,
+                                                     identity_table=r.backpack.tables.Discord,
+                                                     identity_column="discord_id")
+        else:
+            discord_db_config = None
         discord_serf_kwargs = {
             'alchemy_config': discord_db_config,
             'commands': enabled_commands,
-            'network_config': herald_config.copy(name="discord"),
+            'events': enabled_events,
+            'herald_config': herald_config.copy(name="discord"),
             'secrets_name': secrets_name
         }
         discord_process = multiprocessing.Process(name="Discord Serf",

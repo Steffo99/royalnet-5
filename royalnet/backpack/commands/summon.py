@@ -29,14 +29,8 @@ class SummonCommand(Command):
             member = None
             guild = None
         try:
-            await self.interface.call_herald_event("discord", "discordvoice", {
-                "operation": "summon",
-                "data": {
-                    "channel_name": args.joined(),
-                    "member_id": member.id if member is not None else None,
-                    "guild_id": guild.id if member is not None else None,
-                }
-            })
+            # TODO: do something!
+            pass
         except Exception as e:
             breakpoint()
         await data.reply(f"✅ Connesso alla chat vocale.")

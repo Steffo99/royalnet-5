@@ -1,22 +1,26 @@
-from ..fileaudiosource import FileAudioSource
-from ..discordbard import DiscordBard
-from ..ytdldiscord import YtdlDiscord
+from royalnet.bard import FileAudioSource, YtdlDiscord
 from typing import List, AsyncGenerator, Tuple, Any, Dict, Optional
+from .discordbard import DiscordBard
+
+try:
+    import discord
+except ImportError:
+    discord = None
 
 
-class DBStack(DiscordBard):
-    """A First-In-Last-Out music queue.
+class DBQueue(DiscordBard):
+    """A First-In-First-Out music queue.
 
-    Not really sure if it is going to be useful..."""
-    def __init__(self):
-        super().__init__()
+    It is what was once called a ``playlist``."""
+    def __init__(self, voice_client: "discord.VoiceClient"):
+        super().__init__(voice_client)
         self.list: List[YtdlDiscord] = []
 
     async def _generator(self) -> AsyncGenerator[Optional[FileAudioSource], Tuple[Tuple[Any, ...], Dict[str, Any]]]:
         yield
         while True:
             try:
-                ytd = self.list.pop()
+                ytd = self.list.pop(0)
             except IndexError:
                 yield None
             else:

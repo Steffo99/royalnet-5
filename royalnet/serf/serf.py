@@ -103,7 +103,7 @@ class Serf:
             log.info("Herald: disabled")
         else:
             self.init_herald(herald_config, events)
-            log.info(f"Herald: {self.herald}")
+            log.info(f"Herald: {len(self.events)} events bound")
 
         self.loop: Optional[AbstractEventLoop] = None
         """The event loop this Serf is running on."""
@@ -316,4 +316,8 @@ class Serf:
                 serf.init_sentry(sentry_dsn)
 
         serf.loop = get_event_loop()
-        serf.loop.run_until_complete(serf.run())
+        try:
+            serf.loop.run_until_complete(serf.run())
+        except Exception as e:
+            log.error(f"Uncaught exception: {e}")
+            serf.sentry_exc(e)
