@@ -47,8 +47,9 @@ def run(telegram: typing.Optional[bool],
     royalnet_log: Logger = getLogger("royalnet")
     royalnet_log.setLevel(log_level)
     stream_handler = StreamHandler()
-    stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {message}", style="{")
+    stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}", style="{")
     royalnet_log.addHandler(stream_handler)
+    royalnet_log.debug("Logging: ready")
 
     def get_secret(username: str):
         return keyring.get_password(f"Royalnet/{secrets_name}", username)
@@ -141,7 +142,8 @@ def run(telegram: typing.Optional[bool],
             'commands': enabled_commands,
             'events': enabled_events,
             'herald_config': herald_config.copy(name="telegram"),
-            'secrets_name': secrets_name
+            'secrets_name': secrets_name,
+            'log_level': log_level,
         }
         telegram_process = multiprocessing.Process(name="Telegram Serf",
                                                    target=r.serf.telegram.TelegramSerf.run_process,
@@ -163,7 +165,8 @@ def run(telegram: typing.Optional[bool],
             'commands': enabled_commands,
             'events': enabled_events,
             'herald_config': herald_config.copy(name="discord"),
-            'secrets_name': secrets_name
+            'secrets_name': secrets_name,
+            'log_level': log_level,
         }
         discord_process = multiprocessing.Process(name="Discord Serf",
                                                   target=r.serf.discord.DiscordSerf.run_process,
@@ -181,6 +184,7 @@ def run(telegram: typing.Optional[bool],
             'database_uri': alchemy_url,
             'page_stars': enabled_page_stars,
             'exc_stars': enabled_exception_stars,
+            'log_level': log_level,
         }
         constellation_process = multiprocessing.Process(name="Constellation",
                                                         target=r.constellation.Constellation.run_process,

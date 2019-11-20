@@ -196,7 +196,7 @@ class TelegramSerf(Serf):
         else:
             session = None
         # Prepare data
-        data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
+        data = self.Data(interface=command.interface, session=session, loop=self.loop, update=update)
         # Call the command
         await self.call(command, data, parameters)
         # Close the alchemy session

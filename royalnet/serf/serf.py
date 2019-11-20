@@ -156,11 +156,22 @@ class Serf:
                 request: Request = Request(handler=event_name, data=args)
                 response: Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, ResponseFailure):
+                    # TODO: pretty sure there's a better way to do this
                     if response.extra_info["type"] == "CommandError":
                         raise CommandError(response.extra_info["message"])
-                    # TODO: change exception type
-                    raise Exception(f"Herald action call failed:\n"
-                                    f"[p]{response}[/p]")
+                    elif response.extra_info["type"] == "UserError":
+                        raise UserError(response.extra_info["message"])
+                    elif response.extra_info["type"] == "InvalidInputError":
+                        raise InvalidInputError(response.extra_info["message"])
+                    elif response.extra_info["type"] == "UnsupportedError":
+                        raise UnsupportedError(response.extra_info["message"])
+                    elif response.extra_info["type"] == "ConfigurationError":
+                        raise ConfigurationError(response.extra_info["message"])
+                    elif response.extra_info["type"] == "ExternalError":
+                        raise ExternalError(response.extra_info["message"])
+                    else:
+                        raise TypeError(f"Herald action call returned invalid error:\n"
+                                        f"[p]{response}[/p]")
                 elif isinstance(response, ResponseSuccess):
                     return response.data
                 else:
@@ -233,8 +244,6 @@ class Serf:
                 response_data = await event.run(**message.data)
                 return ResponseSuccess(data=response_data)
             except Exception as e:
-                sentry_sdk.capture_exception(e)
-                log.error(f"Event error: {e.__class__.__qualname__} in {event.name}")
                 return ResponseFailure("exception_in_event",
                                        f"An exception was raised in the event for '{message.handler}'.",
                                        extra_info={
@@ -290,8 +299,7 @@ class Serf:
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             self.sentry_exc(e)
-            error_message = f"⛔ [b]{e.__class__.__name__}[/b]\n" \
-                            '\n'.join(e.args)
+            error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args)
             await data.reply(error_message)
 
     async def run(self):
@@ -300,11 +308,20 @@ class Serf:
         # OVERRIDE THIS METHOD!
 
     @classmethod
-    def run_process(cls, *args, **kwargs):
+    def run_process(cls, *args, log_level: str = "WARNING", **kwargs):
         """Blockingly create and run the Serf.
 
         This should be used as the target of a :class:`multiprocessing.Process`."""
         serf = cls(*args, **kwargs)
+
+        royalnet_log: logging.Logger = logging.getLogger("royalnet")
+        royalnet_log.setLevel(log_level)
+        stream_handler = logging.StreamHandler()
+        stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+                                                     style="{")
+        if len(royalnet_log.handlers) < 1:
+            royalnet_log.addHandler(stream_handler)
+        royalnet_log.debug("Logging: ready")
 
         if sentry_sdk is None:
             log.info("Sentry: not installed")

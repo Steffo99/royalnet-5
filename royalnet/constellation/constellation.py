@@ -116,6 +116,7 @@ class Constellation:
                     database_uri: str,
                     page_stars: typing.List[typing.Type[PageStar]] = None,
                     exc_stars: typing.List[typing.Type[ExceptionStar]] = None,
+                    log_level: str = "WARNING",
                     *,
                     debug: bool = __debug__,):
         """Blockingly create and run the Constellation.
@@ -130,6 +131,16 @@ class Constellation:
                             page_stars=page_stars,
                             exc_stars=exc_stars,
                             debug=debug)
+
+        # Initialize logging, as Windows doesn't have fork
+        royalnet_log: logging.Logger = logging.getLogger("royalnet")
+        royalnet_log.setLevel(log_level)
+        stream_handler = logging.StreamHandler()
+        stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+                                                     style="{")
+        if len(royalnet_log.handlers) < 1:
+            royalnet_log.addHandler(stream_handler)
+        royalnet_log.debug("Logging: ready")
 
         # Initialize Sentry on the process
         if sentry_sdk is None:

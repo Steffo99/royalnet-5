@@ -1,9 +1,9 @@
 # Imports go here!
-
+from .summon import SummonEvent
 
 # Enter the commands of your Pack here!
 available_events = [
-
+    SummonEvent,
 ]
 
 # Don't change this, it should automatically generate __all__

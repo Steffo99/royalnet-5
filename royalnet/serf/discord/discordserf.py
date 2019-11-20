@@ -160,12 +160,12 @@ class DiscordSerf(Serf):
         await self.client.login(token)
         await self.client.connect()
 
-    async def find_channel(self,
-                           channel_type: Optional[Type["discord.abc.GuildChannel"]] = None,
-                           name: Optional[str] = None,
-                           guild: Optional["discord.Guild"] = None,
-                           accessible_to: List["discord.User"] = None,
-                           required_permissions: List[str] = None) -> Optional["discord.abc.GuildChannel"]:
+    def find_channel(self,
+                     channel_type: Optional[Type["discord.abc.GuildChannel"]] = None,
+                     name: Optional[str] = None,
+                     guild: Optional["discord.Guild"] = None,
+                     accessible_to: List["discord.User"] = None,
+                     required_permissions: List[str] = None) -> Optional["discord.abc.GuildChannel"]:
         """Find the best channel matching all requests.
 
         In case multiple channels match all requests, return the one with the most members connected.
@@ -201,11 +201,11 @@ class DiscordSerf(Serf):
                     pass
 
             ch_guild: "discord.Guild" = ch.guild
-            if ch.guild == ch_guild:
+            if ch.guild != ch_guild:
                 continue
 
             for user in accessible_to:
-                member: "discord.Member" = guild.get_member(user.id)
+                member: "discord.Member" = ch.guild.get_member(user.id)
                 if member is None:
                     continue
                 permissions: "discord.Permissions" = ch.permissions_for(member)
