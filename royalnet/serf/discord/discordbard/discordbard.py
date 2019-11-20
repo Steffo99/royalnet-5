@@ -52,6 +52,9 @@ class DiscordBard:
         self.now_playing = fas
         return fas
 
+    async def cut(self):
+        """Immediatly end the playback of the current file"""
+
     async def add(self, ytd: YtdlDiscord) -> None:
         """Add a new :class:`YtdlDiscord` to the :class:`DiscordBard`, if possible.
 

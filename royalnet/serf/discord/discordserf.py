@@ -248,3 +248,6 @@ class DiscordSerf(Serf):
             raise CommandError("The bot is already connected in another channel.\n"
                                " Please disconnect it before resummoning!")
         self.bards[channel.guild] = DBQueue(voice_client=voice_client)
+
+    async def voice_change(self, guild: "discord.Guild", bard: Type[DiscordBard]):
+        """Safely change the :class:`DiscordBard` for a guild."""

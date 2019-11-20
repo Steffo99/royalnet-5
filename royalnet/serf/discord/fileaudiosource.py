@@ -1,6 +1,3 @@
-from typing import Optional
-from .ytdlinfo import YtdlInfo
-
 try:
     import discord
 except ImportError:
@@ -21,6 +18,7 @@ class FileAudioSource(discord.AudioSource):
         Arguments:
             file: the file to be played back."""
         self.file = file
+        self._stopped = False
 
     def __repr__(self):
         if self.file.seekable():
@@ -35,13 +33,18 @@ class FileAudioSource(discord.AudioSource):
             ``False``."""
         return False
 
+    def stop(self):
+        """Stop the FileAudioSource. Once stopped, a FileAudioSource will immediatly stop reading more bytes from the
+        file."""
+        self._stopped = True
+
     def read(self):
-        """Reads 20ms worth of audio.
+        """Reads 20ms of audio.
 
         If the stream has ended, then return an empty :py:class:`bytes`-like object."""
         data: bytes = self.file.read(discord.opus.Encoder.FRAME_SIZE)
         # If there is no more data to be streamed
-        if len(data) != discord.opus.Encoder.FRAME_SIZE:
+        if self._stopped or len(data) != discord.opus.Encoder.FRAME_SIZE:
             # Return that the stream has ended
             return b""
         return data

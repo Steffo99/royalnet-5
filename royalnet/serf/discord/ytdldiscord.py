@@ -3,11 +3,10 @@ import re
 import os
 from contextlib import asynccontextmanager
 from royalnet.utils import asyncify, MultiLock
-from .ytdlinfo import YtdlInfo
-from .ytdlfile import YtdlFile
+from royalnet.bard import YtdlInfo, YtdlFile
 
 try:
-    from royalnet.bard.fileaudiosource import FileAudioSource
+    from royalnet.serf.discord.fileaudiosource import FileAudioSource
 except ImportError:
     FileAudioSource = None
 
