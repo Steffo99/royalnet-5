@@ -1,6 +1,7 @@
 import typing
 import re
 import os
+import logging
 from contextlib import asynccontextmanager
 from royalnet.utils import asyncify, MultiLock
 from royalnet.bard import YtdlInfo, YtdlFile
@@ -14,6 +15,9 @@ try:
     import ffmpeg
 except ImportError:
     ffmpeg = None
+
+
+log = logging.getLogger(__name__)
 
 
 class YtdlDiscord:
@@ -37,6 +41,7 @@ class YtdlDiscord:
             async with self.ytdl_file.lock.normal():
                 destination_filename = re.sub(r"\.[^.]+$", ".pcm", self.ytdl_file.filename)
                 async with self.lock.exclusive():
+                    log.debug(f"Converting to PCM: {self.ytdl_file.filename}")
                     await asyncify(
                         ffmpeg.input(self.ytdl_file.filename)
                               .output(destination_filename, format="s16le", ac=2, ar="48000")
@@ -47,9 +52,11 @@ class YtdlDiscord:
 
     async def delete_asap(self) -> None:
         """Delete the mp3 file."""
+        log.debug(f"Trying to delete: {self}")
         if self.is_converted:
             async with self.lock.exclusive():
                 os.remove(self.pcm_filename)
+                log.debug(f"Deleted: {self.pcm_filename}")
                 self.pcm_filename = None
 
     @classmethod
@@ -69,6 +76,7 @@ class YtdlDiscord:
 
     @asynccontextmanager
     async def spawn_audiosource(self):
+        log.debug(f"Spawning audio_source for: {self}")
         if FileAudioSource is None:
             raise ImportError("'discord' extra is not installed")
         await self.convert_to_pcm()

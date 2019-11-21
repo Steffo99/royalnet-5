@@ -1,4 +1,5 @@
 import os
+import logging
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
 from royalnet.utils import asyncify, MultiLock
@@ -10,6 +11,9 @@ try:
     from youtube_dl import YoutubeDL
 except ImportError:
     youtube_dl = None
+
+
+log = logging.getLogger(__name__)
 
 
 class YtdlFile:
@@ -71,11 +75,13 @@ class YtdlFile:
             """Download function block to be asyncified."""
             with YoutubeDL(self.ytdl_args) as ytdl:
                 filename = ytdl.prepare_filename(self.info.__dict__)
+            with YoutubeDL({**self.ytdl_args, "outtmpl": filename}) as ytdl:
                 ytdl.download([self.info.webpage_url])
                 self.filename = filename
 
         await self.retrieve_info()
         async with self.lock.exclusive():
+            log.debug(f"Downloading with youtube-dl: {self}")
             await asyncify(download, loop=self._loop)
 
     @asynccontextmanager
@@ -91,14 +97,19 @@ class YtdlFile:
         """
         await self.download_file()
         async with self.lock.normal():
+            log.debug(f"File opened: {self.filename}")
             with open(self.filename, "rb") as file:
                 yield file
+            log.debug(f"File closed: {self.filename}")
 
     async def delete_asap(self):
         """As soon as nothing is using the file, delete it."""
-        async with self.lock.exclusive():
-            os.remove(self.filename)
-            self.filename = None
+        log.debug(f"Trying to delete: {self.filename}")
+        if self.filename is not None:
+            async with self.lock.exclusive():
+                os.remove(self.filename)
+                log.debug(f"Deleted: {self.filename}")
+                self.filename = None
 
     @classmethod
     async def from_url(cls, url: str, **ytdl_args) -> List["YtdlFile"]:

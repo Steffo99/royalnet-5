@@ -34,6 +34,7 @@ class PlayEvent(Event):
                     break
         if guild is None:
             raise InvalidInputError("No guild_id or guild_name specified.")
+        log.debug(f"Selected guild: {guild}")
         # Find the bard
         bard: Optional[DiscordBard] = self.serf.bards.get(guild)
         if bard is None:

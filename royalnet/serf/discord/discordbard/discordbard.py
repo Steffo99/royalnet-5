@@ -50,7 +50,7 @@ class DiscordBard:
         """Get the next :class:`FileAudioSource` that should be played, and change :attr:`.now_playing`.
 
         Args and kwargs can be passed to the generator to select differently."""
-        fas: Optional[FileAudioSource] = await self.generator.asend((args, kwargs))
+        fas: Optional[FileAudioSource] = await self.generator.asend((args, kwargs,))
         self.now_playing = fas
         return fas
 

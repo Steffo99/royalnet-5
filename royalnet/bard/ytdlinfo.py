@@ -2,12 +2,16 @@ from asyncio import AbstractEventLoop, get_event_loop
 from typing import Optional, Dict, List, Any
 from datetime import datetime, timedelta
 import dateparser
+import logging
 from royalnet.utils import ytdldateformat, asyncify
 
 try:
     from youtube_dl import YoutubeDL
 except ImportError:
     YoutubeDL = None
+
+
+log = logging.getLogger(__name__)
 
 
 class YtdlInfo:
@@ -95,6 +99,7 @@ class YtdlInfo:
         if loop is None:
             loop: AbstractEventLoop = get_event_loop()
         # So many redundant options!
+        log.debug(f"Fetching info: {url}")
         with YoutubeDL({**cls._default_ytdl_args, **ytdl_args}) as ytdl:
             first_info = await asyncify(ytdl.extract_info, loop=loop, url=url, download=False)
         # No video was found
@@ -102,12 +107,14 @@ class YtdlInfo:
             return []
         # If it is a playlist, create multiple videos!
         if "entries" in first_info and first_info["entries"][0] is not None:
+            log.debug(f"Found a playlist: {url}")
             second_info_list = []
             for second_info in first_info["entries"]:
                 if second_info is None:
                     continue
                 second_info_list.append(YtdlInfo(second_info))
             return second_info_list
+        log.debug(f"Found a single video: {url}")
         return [YtdlInfo(first_info)]
 
     def __repr__(self):
