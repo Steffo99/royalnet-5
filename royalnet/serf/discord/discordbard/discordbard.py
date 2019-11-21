@@ -1,5 +1,7 @@
 from typing import Optional, AsyncGenerator, List, Tuple, Any, Dict
-from royalnet.bard import YtdlDiscord, FileAudioSource, UnsupportedError
+from royalnet.bard import UnsupportedError
+from .fileaudiosource import FileAudioSource
+from .ytdldiscord import YtdlDiscord
 
 try:
     import discord
@@ -20,7 +22,7 @@ class DiscordBard:
         self.voice_client: "discord.VoiceClient" = voice_client
         """The voice client that this :class:`DiscordBard` refers to."""
 
-        self.now_playing: Optional[YtdlDiscord] = None
+        self.now_playing: Optional[FileAudioSource] = None
         """The :class:`YtdlDiscord` that's currently being played."""
 
         self.generator: \
@@ -40,7 +42,7 @@ class DiscordBard:
         """Create an instance of the :class:`DiscordBard`, and initialize its async generator."""
         bard = cls(voice_client=voice_client)
         # noinspection PyTypeChecker
-        none = bard.generator.asend(None)
+        none = await bard.generator.asend(None)
         assert none is None
         return bard
 
@@ -90,3 +92,8 @@ class DiscordBard:
         Raises:
             UnsupportedError: If :meth:`.peek` is unsupported."""
         return len(await self.peek())
+
+    async def stop(self):
+        """Stop the playback of the current song."""
+        if self.now_playing is not None:
+            self.now_playing.stop()

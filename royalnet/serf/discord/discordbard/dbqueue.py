@@ -1,6 +1,7 @@
-from royalnet.bard import FileAudioSource, YtdlDiscord
+from royalnet.bard import FileAudioSource
 from typing import List, AsyncGenerator, Tuple, Any, Dict, Optional
 from .discordbard import DiscordBard
+from .ytdldiscord import YtdlDiscord
 
 try:
     import discord

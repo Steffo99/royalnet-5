@@ -247,7 +247,23 @@ class DiscordSerf(Serf):
             # TODO: safely move the bot somewhere else
             raise CommandError("The bot is already connected in another channel.\n"
                                " Please disconnect it before resummoning!")
-        self.bards[channel.guild] = DBQueue(voice_client=voice_client)
+        self.bards[channel.guild] = await DBQueue.create(voice_client=voice_client)
 
-    async def voice_change(self, guild: "discord.Guild", bard: Type[DiscordBard]):
-        """Safely change the :class:`DiscordBard` for a guild."""
+    async def voice_run(self, guild: "discord.Guild"):
+        """Send the data from the bard to the voice websocket for a specific client."""
+        bard: Optional[DiscordBard] = self.bards.get(guild)
+        if bard is None:
+            return
+
+        def finished_playing(error=None):
+            if error:
+                log.error(f"Finished playing with error: {error}")
+                return
+            self.loop.create_task(self.voice_run(guild))
+
+        if bard.now_playing is None:
+            fas = await bard.next()
+            # FIXME: possible race condition here, pls check
+            bard = self.bards.get(guild)
+            if bard.voice_client is not None and bard.voice_client.is_connected():
+                bard.voice_client.play(fas, after=finished_playing)

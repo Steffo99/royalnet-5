@@ -11,7 +11,7 @@ except ImportError:
 class SummonEvent(Event):
     name = "summon"
 
-    async def run(self, *, channel_name: str, guild_id: Optional[int], user_id: Optional[int], **kwargs):
+    async def run(self, *, channel_name: str, guild_id: Optional[int] = None, user_id: Optional[int] = None, **kwargs):
         if not isinstance(self.serf, DiscordSerf):
             raise UnsupportedError("Summon can't be called on interfaces other than Discord.")
         if discord is None:

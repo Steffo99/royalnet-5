@@ -6,7 +6,7 @@ from royalnet.utils import asyncify, MultiLock
 from royalnet.bard import YtdlInfo, YtdlFile
 
 try:
-    from royalnet.serf.discord.fileaudiosource import FileAudioSource
+    from .fileaudiosource import FileAudioSource
 except ImportError:
     FileAudioSource = None
 
@@ -72,5 +72,7 @@ class YtdlDiscord:
         if FileAudioSource is None:
             raise ImportError("'discord' extra is not installed")
         await self.convert_to_pcm()
-        with open(self.pcm_filename, "rb") as stream:
-            yield FileAudioSource(stream)
+        async with self.lock.normal():
+            with open(self.pcm_filename, "rb") as stream:
+                fas = FileAudioSource(stream)
+                yield fas
