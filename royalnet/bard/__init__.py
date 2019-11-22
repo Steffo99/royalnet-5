@@ -1,7 +1,7 @@
 from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
 from .ytdlmp3 import YtdlMp3
-from .errors import *
+from .ytdldiscord import YtdlDiscord
 
 try:
     from .fileaudiosource import FileAudioSource
@@ -13,10 +13,6 @@ __all__ = [
     "YtdlInfo",
     "YtdlFile",
     "YtdlMp3",
-    "BardError",
-    "YtdlError",
-    "NotFoundError",
-    "MultipleFilesError",
+    "YtdlDiscord",
     "FileAudioSource",
-    "UnsupportedError",
 ]
