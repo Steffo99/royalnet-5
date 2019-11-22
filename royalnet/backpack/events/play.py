@@ -3,6 +3,7 @@ from royalnet.commands import *
 from royalnet.serf.discord import DiscordSerf
 from royalnet.serf.discord.discordbard import YtdlDiscord, DiscordBard
 from royalnet.utils import asyncify
+import pickle
 import logging
 
 log = logging.getLogger(__name__)
@@ -52,4 +53,17 @@ class PlayEvent(Event):
             await bard.add(ytd)
         # Run the bard
         log.debug(f"Running voice for: {guild}")
-        await self.serf.voice_run(guild)
+        # FIXME: sure?
+        self.loop.create_task(self.serf.voice_run(guild))
+        # Return the results
+        log.debug(f"Sending results...")
+        results = {
+            "added": [{
+                "title": ytd.info.title,
+                "embed_pickle": pickle.dumps(ytd.embed())
+            } for ytd in ytdl],
+            "bard": {
+                "type": bard.__class__.__name__,
+            }
+        }
+        return results

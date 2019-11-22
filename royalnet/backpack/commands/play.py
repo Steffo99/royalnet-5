@@ -25,4 +25,6 @@ class PlayCommand(Command):
             "guild_id": guild.id,
             "url": url,
         })
-        await data.reply(f"✅ !")
+        message = f"▶️ Added to [c]{response['bard']['type']}[/c]:\n"
+        message += "\n".join([ytd['title'] for ytd in response['added']])
+        await data.reply(message)

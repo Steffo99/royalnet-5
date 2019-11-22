@@ -263,6 +263,8 @@ class DiscordSerf(Serf):
 
         if bard.now_playing is None:
             fas = await bard.next()
+            if fas is None:
+                return
             # FIXME: possible race condition here, pls check
             bard = self.bards.get(guild)
             if bard.voice_client is not None and bard.voice_client.is_connected():

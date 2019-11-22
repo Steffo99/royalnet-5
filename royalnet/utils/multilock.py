@@ -55,4 +55,4 @@ class MultiLock:
 
     def __repr__(self):
         return f"<MultiLock {self._counter} " \
-               f"{'N' if self._normal_event.is_set() else '_'}{'E' if self._exclusive_event.is_set() else '_'}>"
+               f"{'_' if self._normal_event.is_set() else 'N'}{'_' if self._exclusive_event.is_set() else 'E'}>"

@@ -12,7 +12,7 @@
     classifiers = [
         "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)"
     ]
 

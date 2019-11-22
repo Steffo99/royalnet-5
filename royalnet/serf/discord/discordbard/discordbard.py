@@ -54,8 +54,10 @@ class DiscordBard:
         self.now_playing = fas
         return fas
 
-    async def cut(self):
-        """Immediatly end the playback of the current file"""
+    async def stop(self):
+        """Stop the playback of the current song."""
+        if self.now_playing is not None:
+            self.now_playing.stop()
 
     async def add(self, ytd: YtdlDiscord) -> None:
         """Add a new :class:`YtdlDiscord` to the :class:`DiscordBard`, if possible.
@@ -93,7 +95,3 @@ class DiscordBard:
             UnsupportedError: If :meth:`.peek` is unsupported."""
         return len(await self.peek())
 
-    async def stop(self):
-        """Stop the playback of the current song."""
-        if self.now_playing is not None:
-            self.now_playing.stop()

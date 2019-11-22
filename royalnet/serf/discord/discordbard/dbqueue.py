@@ -25,8 +25,11 @@ class DBQueue(DiscordBard):
             except IndexError:
                 yield None
             else:
-                async with ytd.spawn_audiosource() as fas:
-                    yield fas
+                try:
+                    async with ytd.spawn_audiosource() as fas:
+                        yield fas
+                finally:
+                    await ytd.delete_asap()
 
     async def add(self, ytd: YtdlDiscord):
         self.list.append(ytd)
@@ -40,3 +43,4 @@ class DBQueue(DiscordBard):
     async def cleanup(self) -> None:
         for ytd in self.list:
             await ytd.delete_asap()
+        await self.stop()
