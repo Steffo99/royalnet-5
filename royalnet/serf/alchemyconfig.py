@@ -1,6 +1,3 @@
-from typing import TYPE_CHECKING
-
-
 class AlchemyConfig:
     """A helper class to configure :class:`Alchemy` in a :class:`Serf`."""
     def __init__(self,

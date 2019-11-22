@@ -1,12 +1,10 @@
 import asyncio
 import logging
-from typing import Type, Optional, List, Union
+from typing import Type, Optional, List, Union, Dict
 from royalnet.commands import *
 from royalnet.utils import asyncify
 from royalnet.serf import Serf
 from .escape import escape
-from .discordbard import *
-from .barddict import BardsDict
 
 
 try:
@@ -53,9 +51,6 @@ class DiscordSerf(Serf):
 
         self.client = self.Client()
         """The custom :class:`discord.Client` instance."""
-
-        self.bards: BardsDict = BardsDict(self.client)
-        """A dictionary containing all bards spawned by this :class:`DiscordSerf`."""
 
     def interface_factory(self) -> Type[CommandInterface]:
         # noinspection PyPep8Naming
@@ -201,7 +196,7 @@ class DiscordSerf(Serf):
                     pass
 
             ch_guild: "discord.Guild" = ch.guild
-            if ch.guild != ch_guild:
+            if guild is not None and guild != ch_guild:
                 continue
 
             for user in accessible_to:
@@ -229,25 +224,6 @@ class DiscordSerf(Serf):
             channels.sort(key=people_count, reverse=True)
 
             return channels[0]
-
-    async def voice_connect(self, channel: "discord.VoiceChannel"):
-        """Try to connect to a :class:`discord.VoiceChannel` and to create the corresponing :class:`DiscordBard`.
-
-        Info:
-            Command-compatible! This method will raise :exc:`CommandError`s for all its errors, so it can be called
-            inside a command!"""
-        try:
-            voice_client = await channel.connect()
-        except asyncio.TimeoutError:
-            raise ExternalError("Timed out while trying to connect to the channel")
-        except discord.opus.OpusNotLoaded:
-            raise ConfigurationError("[c]libopus[/c] is not loaded in the serf")
-        except discord.ClientException:
-            # The bot is already connected to a voice channel
-            # TODO: safely move the bot somewhere else
-            raise CommandError("The bot is already connected in another channel.\n"
-                               " Please disconnect it before resummoning!")
-        self.bards[channel.guild] = await DBQueue.create(voice_client=voice_client)
 
     async def voice_run(self, guild: "discord.Guild"):
         """Send the data from the bard to the voice websocket for a specific client."""

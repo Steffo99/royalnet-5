@@ -4,6 +4,7 @@ from .sleep_until import sleep_until
 from .formatters import andformat, underscorize, ytdldateformat, numberemojiformat, ordinalformat
 from .urluuid import to_urluuid, from_urluuid
 from .multilock import MultiLock
+from .fileaudiosource import FileAudioSource
 
 __all__ = [
     "asyncify",
@@ -17,4 +18,5 @@ __all__ = [
     "to_urluuid",
     "from_urluuid",
     "MultiLock",
+    "FileAudioSource",
 ]

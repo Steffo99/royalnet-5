@@ -12,7 +12,3 @@ class NotFoundError(YtdlError):
 
 class MultipleFilesError(YtdlError):
     """The resource contains multiple media files."""
-
-
-class UnsupportedError(BardError):
-    """The method you tried to call on a :class:`DiscordBard` is not supported on that particular Bard."""

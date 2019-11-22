@@ -3,9 +3,8 @@ import re
 import os
 import logging
 from contextlib import asynccontextmanager
-from royalnet.utils import asyncify, MultiLock
+from royalnet.utils import asyncify, MultiLock, FileAudioSource
 from royalnet.bard import YtdlInfo, YtdlFile
-from .fileaudiosource import FileAudioSource
 
 try:
     import ffmpeg

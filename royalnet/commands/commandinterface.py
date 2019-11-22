@@ -39,6 +39,8 @@ class CommandInterface:
     def __init__(self):
         self.command: Optional[Command] = None  # Will be bound after the command has been created
 
-    async def call_herald_event(self, destination: str, event_name: str, args: dict) -> dict:
-        # TODO: document this
+    async def call_herald_event(self, destination: str, event_name: str, **kwargs) -> dict:
+        """Call an event function on a different :class:`Serf`.
+
+        For example, you can run a function on a :class:`DiscordSerf` from a :class:`TelegramSerf`."""
         raise UnsupportedError(f"{self.call_herald_event.__name__} is not supported on this platform")

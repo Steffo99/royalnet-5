@@ -49,7 +49,7 @@ class TelegramSerf(Serf):
                          herald_config=herald_config,
                          secrets_name=secrets_name)
 
-        self.client = telegram.Bot(self.get_secret("telegram"), request=TRequest(5, read_timeout=30))
+        self.client = telegram.Bot(self.get_secret("telegram"), request=TRequest(50, read_timeout=30))
         """The :class:`telegram.Bot` instance that will be used from the Serf."""
 
         self.update_offset: int = -100

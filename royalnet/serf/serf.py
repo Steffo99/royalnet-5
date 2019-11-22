@@ -148,12 +148,12 @@ class Serf:
             alchemy: Alchemy = self.alchemy
             serf: "Serf" = self
 
-            async def call_herald_event(ci, destination: str, event_name: str, args: Dict) -> Dict:
+            async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
                 """Send a :class:`royalherald.Request` to a specific destination, and wait for a
                 :class:`royalherald.Response`."""
                 if self.herald is None:
                     raise UnsupportedError("`royalherald` is not enabled on this bot.")
-                request: Request = Request(handler=event_name, data=args)
+                request: Request = Request(handler=event_name, data=kwargs)
                 response: Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, ResponseFailure):
                     # TODO: pretty sure there's a better way to do this
