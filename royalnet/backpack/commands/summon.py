@@ -29,7 +29,7 @@ class SummonCommand(Command):
             member = None
             guild = None
         name = args.joined()
-        response: dict = await self.interface.call_herald_event("discord", "summon", {
+        response: dict = await self.interface.call_herald_event("discord", "summon", **{
             "channel_name": name,
             "guild_id": guild.id if guild is not None else None,
             "user_id": member.id if member is not None else None,

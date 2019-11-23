@@ -1,12 +1,7 @@
 from typing import Optional
 from royalnet.commands import *
-from royalnet.serf.discord import DiscordSerf
-from royalnet.serf.discord.discordbard import YtdlDiscord, DiscordBard
-from royalnet.utils import asyncify
-import pickle
-import logging
-
-log = logging.getLogger(__name__)
+from royalnet.serf.discord import DiscordSerf, PlayableYTDQueue
+from royalnet.bard import YtdlDiscord
 
 try:
     import discord
@@ -17,53 +12,12 @@ except ImportError:
 class PlayEvent(Event):
     name = "play"
 
-    async def run(self, *, url: str, guild_id: Optional[int] = None, guild_name: Optional[str] = None, **kwargs):
+    async def run(self, *, url: str):
         if not isinstance(self.serf, DiscordSerf):
-            raise UnsupportedError("Play can't be called on interfaces other than Discord.")
+            raise UnsupportedError("Summon can't be called on interfaces other than Discord.")
         if discord is None:
             raise UnsupportedError("'discord' extra is not installed.")
-        # Variables
-        client = self.serf.client
-        # Find the guild
-        guild: Optional["discord.Guild"] = None
-        if guild_id is not None:
-            guild = client.get_guild(guild_id)
-        elif guild_name is not None:
-            for g in client.guilds:
-                if g.name == guild_name:
-                    guild = g
-                    break
-        if guild is None:
-            raise InvalidInputError("No guild_id or guild_name specified.")
-        log.debug(f"Selected guild: {guild}")
-        # Find the bard
-        bard: Optional[DiscordBard] = self.serf.bards.get(guild)
-        if bard is None:
-            raise CommandError("Bot is not connected to voice chat.")
-        # Create the YtdlDiscords
-        log.debug(f"Downloading: {url}")
-        try:
-            ytdl = await YtdlDiscord.from_url(url)
-        except Exception as exc:
-            breakpoint()
-            return
-        # Add the YtdlDiscords to the queue
-        log.debug(f"Adding to bard: {ytdl}")
-        for ytd in ytdl:
-            await bard.add(ytd)
-        # Run the bard
-        log.debug(f"Running voice for: {guild}")
-        # FIXME: sure?
-        self.loop.create_task(self.serf.voice_run(guild))
-        # Return the results
-        log.debug(f"Sending results...")
-        results = {
-            "added": [{
-                "title": ytd.info.title,
-                "embed_pickle": pickle.dumps(ytd.embed())
-            } for ytd in ytdl],
-            "bard": {
-                "type": bard.__class__.__name__,
-            }
-        }
-        return results
+        ytd = await YtdlDiscord.from_url(url)
+        self.serf.voice_players[0].playing.contents.append(ytd[0])
+        await self.serf.voice_players[0].start()
+        return {"ok": "ok"}

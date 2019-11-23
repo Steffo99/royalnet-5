@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/royalnet.iml" filepath="$PROJECT_DIR$/.idea/royalnet.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../royalpack/.idea/royalpack.iml" filepath="$PROJECT_DIR$/../royalpack/.idea/royalpack.iml" />
     </modules>
   </component>
 </project>

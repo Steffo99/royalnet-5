@@ -1,6 +1,6 @@
 from typing import Optional
 from royalnet.commands import *
-from royalnet.serf.discord import DiscordSerf
+from royalnet.serf.discord import DiscordSerf, VoicePlayer, PlayableYTDQueue
 
 try:
     import discord
@@ -38,11 +38,13 @@ class SummonEvent(Event):
                                                                            required_permissions=["connect", "speak"])
         if channel is None:
             raise InvalidInputError("No channels found with the specified name.")
+        # Create a new VoicePlayer
+        vp = VoicePlayer(loop=self.loop)
+        vp.playing = await PlayableYTDQueue.create()
         # Connect to the channel
-        await self.serf.voice_connect(channel)
-        # Find the created bard
-        bard = self.serf.bards[channel.guild]
-        bard_peek = await bard.peek()
+        await vp.connect(channel)
+        # Add the created VoicePlayer to the list
+        self.serf.voice_players.append(vp)
         # Reply to the request
         return {
             "channel": {
@@ -51,9 +53,5 @@ class SummonEvent(Event):
                 "guild": {
                     "name": channel.guild.name,
                 },
-            },
-            "bard": {
-                "type": bard.__class__.__qualname__,
-                "peek": bard_peek,
             }
         }

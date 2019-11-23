@@ -1,10 +1,12 @@
 import asyncio
 import logging
+import warnings
 from typing import Type, Optional, List, Union, Dict
 from royalnet.commands import *
 from royalnet.utils import asyncify
 from royalnet.serf import Serf
 from .escape import escape
+from .voiceplayer import VoicePlayer
 
 
 try:
@@ -51,6 +53,9 @@ class DiscordSerf(Serf):
 
         self.client = self.Client()
         """The custom :class:`discord.Client` instance."""
+
+        self.voice_players: List[VoicePlayer] = []
+        """A :class:`list` of the :class:`VoicePlayer` in use by this :class:`DiscordSerf`."""
 
     def interface_factory(self) -> Type[CommandInterface]:
         # noinspection PyPep8Naming
@@ -178,6 +183,7 @@ class DiscordSerf(Serf):
 
         Returns:
             Either a :class:`~discord.abc.GuildChannel`, or :const:`None` if no channels were found."""
+        warnings.warn("This function will be removed soon.", category=DeprecationWarning)
         if accessible_to is None:
             accessible_to = []
         if required_permissions is None:
@@ -225,23 +231,3 @@ class DiscordSerf(Serf):
 
             return channels[0]
 
-    async def voice_run(self, guild: "discord.Guild"):
-        """Send the data from the bard to the voice websocket for a specific client."""
-        bard: Optional[DiscordBard] = self.bards.get(guild)
-        if bard is None:
-            return
-
-        def finished_playing(error=None):
-            if error:
-                log.error(f"Finished playing with error: {error}")
-                return
-            self.loop.create_task(self.voice_run(guild))
-
-        if bard.now_playing is None:
-            fas = await bard.next()
-            if fas is None:
-                return
-            # FIXME: possible race condition here, pls check
-            bard = self.bards.get(guild)
-            if bard.voice_client is not None and bard.voice_client.is_connected():
-                bard.voice_client.play(fas, after=finished_playing)

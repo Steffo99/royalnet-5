@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, List, AsyncGenerator, Tuple, Any, Dict
 from royalnet.bard import YtdlDiscord
 from .playable import Playable
@@ -7,6 +8,9 @@ except ImportError:
     discord = None
 
 
+log = logging.getLogger(__name__)
+
+
 class PlayableYTDQueue(Playable):
     """A queue of :class:`YtdlDiscord` to be played in sequence."""
     def __init__(self, start_with: Optional[List[YtdlDiscord]] = None):
@@ -14,24 +18,28 @@ class PlayableYTDQueue(Playable):
         self.contents: List[YtdlDiscord] = []
         if start_with is not None:
             self.contents = [*self.contents, *start_with]
+        log.debug(f"Created new PlayableYTDQueue containing: {self.contents}")
 
     async def _generator(self) \
             -> AsyncGenerator[Optional["discord.AudioSource"], Tuple[Tuple[Any, ...], Dict[str, Any]]]:
         yield
         while True:
+            log.debug(f"Dequeuing an item...")
             try:
                 # Try to get the first YtdlDiscord of the queue
                 ytd: YtdlDiscord = self.contents.pop(0)
             except IndexError:
                 # If there isn't anything, yield None
+                log.debug(f"Nothing to dequeue, yielding None.")
                 yield None
                 continue
-            try:
-                # Create a FileAudioSource from the YtdlDiscord
-                # If the file hasn't been fetched / downloaded / converted yet, it will do so before yielding
-                async with ytd.spawn_audiosource() as fas:
-                    # Yield the resulting AudioSource
-                    yield fas
-            finally:
-                # Delete the YtdlDiscord file
-                await ytd.delete_asap()
+            log.debug(f"Yielding FileAudioSource from: {ytd}")
+            # Create a FileAudioSource from the YtdlDiscord
+            # If the file hasn't been fetched / downloaded / converted yet, it will do so before yielding
+            async with ytd.spawn_audiosource() as fas:
+                # Yield the resulting AudioSource
+                yield fas
+            # Delete the YtdlDiscord file
+            log.debug(f"Deleting: {ytd}")
+            await ytd.delete_asap()
+            log.debug(f"Deleted successfully!")

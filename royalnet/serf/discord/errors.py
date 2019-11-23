@@ -36,3 +36,7 @@ class PlayerNotConnectedError(VoicePlayerError):
     """The :class:`VoicePlayer` isn't connected to the Discord voice servers.
 
     Use :meth:`VoicePlayer.connect` first!"""
+
+
+class PlayerAlreadyPlaying(VoicePlayerError):
+    """The :class:`VoicePlayer` is already playing audio and cannot start playing audio again."""

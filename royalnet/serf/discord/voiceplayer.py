@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import Optional
 from .errors import *
 from .playable import Playable
@@ -7,11 +8,17 @@ try:
 except ImportError:
     discord = None
 
+log = logging.getLogger(__name__)
+
 
 class VoicePlayer:
-    def __init__(self):
+    def __init__(self, *, loop: Optional[asyncio.AbstractEventLoop] = None):
         self.voice_client: Optional["discord.VoiceClient"] = None
         self.playing: Optional[Playable] = None
+        if loop is None:
+            self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        else:
+            self.loop = loop
 
     async def connect(self, channel: "discord.VoiceChannel") -> "discord.VoiceClient":
         """Connect the :class:`VoicePlayer` to a :class:`discord.VoiceChannel`, creating a :class:`discord.VoiceClient`
@@ -32,6 +39,7 @@ class VoicePlayer:
         """
         if self.voice_client is not None and self.voice_client.is_connected():
             raise PlayerAlreadyConnectedError()
+        log.debug(f"Connecting to: {channel}")
         try:
             self.voice_client = await channel.connect()
         except asyncio.TimeoutError:
@@ -51,6 +59,7 @@ class VoicePlayer:
         """
         if self.voice_client is None or not self.voice_client.is_connected():
             raise PlayerNotConnectedError()
+        log.debug(f"Disconnecting...")
         await self.voice_client.disconnect(force=True)
         self.voice_client = None
 
@@ -58,15 +67,37 @@ class VoicePlayer:
         """Move the :class:`VoicePlayer` to a different channel.
 
         This requires the :class:`VoicePlayer` to already be connected, and for the passed :class:`discord.VoiceChannel`
-        to be in the same :class:`discord.Guild` as """
+        to be in the same :class:`discord.Guild` of the :class:`VoicePlayer`."""
         if self.voice_client is None or not self.voice_client.is_connected():
             raise PlayerNotConnectedError()
+        if self.voice_client.guild != channel.guild:
+            raise ValueError("Can't move between two guilds.")
+        log.debug(f"Moving to: {channel}")
         await self.voice_client.move_to(channel)
 
     async def start(self):
-        """Start playing music on the :class:`discord.VoiceClient`."""
+        """Start playing music on the :class:`discord.VoiceClient`.
+
+        Info:
+            Doesn't pass any ``*args`` or ``**kwargs`` to the :class:`Playable`.
+        """
         if self.voice_client is None or not self.voice_client.is_connected():
             raise PlayerNotConnectedError()
+        if self.voice_client.is_playing():
+            raise PlayerAlreadyPlaying()
+        log.debug("Getting next AudioSource...")
+        next_source: Optional["discord.AudioSource"] = await self.playing.next()
+        if next_source is None:
+            log.debug(f"Next source would be None, stopping here...")
+            return
+        log.debug(f"Next: {next_source}")
+        self.voice_client.play(next_source, after=self._playback_ended)
 
-    def _playback_ended(self, error=None):
-        ...
+    def _playback_ended(self, error: Exception = None):
+        """An helper method that is called when the :attr:`.voice_client._player` has finished playing."""
+        if error is not None:
+            # TODO: capture exception with Sentry
+            log.error(f"Error during playback: {error}")
+            return
+        # Create a new task to create
+        self.loop.create_task(self.start())
