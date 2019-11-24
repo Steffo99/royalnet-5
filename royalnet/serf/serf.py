@@ -1,4 +1,6 @@
 import logging
+import sys
+import traceback
 from asyncio import Task, AbstractEventLoop, get_event_loop
 from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
 from keyring import get_password
@@ -161,22 +163,25 @@ class Serf:
                 request: Request = Request(handler=event_name, data=kwargs)
                 response: Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, ResponseFailure):
-                    # TODO: pretty sure there's a better way to do this
-                    if response.extra_info["type"] == "CommandError":
-                        raise CommandError(response.extra_info["message"])
-                    elif response.extra_info["type"] == "UserError":
-                        raise UserError(response.extra_info["message"])
-                    elif response.extra_info["type"] == "InvalidInputError":
-                        raise InvalidInputError(response.extra_info["message"])
-                    elif response.extra_info["type"] == "UnsupportedError":
-                        raise UnsupportedError(response.extra_info["message"])
-                    elif response.extra_info["type"] == "ConfigurationError":
-                        raise ConfigurationError(response.extra_info["message"])
-                    elif response.extra_info["type"] == "ExternalError":
-                        raise ExternalError(response.extra_info["message"])
-                    else:
-                        raise TypeError(f"Herald action call returned invalid error:\n"
-                                        f"[p]{response}[/p]")
+                    if response.name == "no_event":
+                        raise CommandError(f"There is no event named {event_name} in {destination}.")
+                    elif response.name == "exception_in_event":
+                        # TODO: pretty sure there's a better way to do this
+                        if response.extra_info["type"] == "CommandError":
+                            raise CommandError(response.extra_info["message"])
+                        elif response.extra_info["type"] == "UserError":
+                            raise UserError(response.extra_info["message"])
+                        elif response.extra_info["type"] == "InvalidInputError":
+                            raise InvalidInputError(response.extra_info["message"])
+                        elif response.extra_info["type"] == "UnsupportedError":
+                            raise UnsupportedError(response.extra_info["message"])
+                        elif response.extra_info["type"] == "ConfigurationError":
+                            raise ConfigurationError(response.extra_info["message"])
+                        elif response.extra_info["type"] == "ExternalError":
+                            raise ExternalError(response.extra_info["message"])
+                        else:
+                            raise TypeError(f"Herald action call returned invalid error:\n"
+                                            f"[p]{response}[/p]")
                 elif isinstance(response, ResponseSuccess):
                     return response.data
                 else:
@@ -249,6 +254,7 @@ class Serf:
                 response_data = await event.run(**message.data)
                 return ResponseSuccess(data=response_data)
             except Exception as e:
+                self.sentry_exc(e)
                 return ResponseFailure("exception_in_event",
                                        f"An exception was raised in the event for '{message.handler}'.",
                                        extra_info={
@@ -273,11 +279,19 @@ class Serf:
                         release=release)
         log.info(f"Sentry: enabled (Royalnet {release})")
 
+    # noinspection PyUnreachableCode
     @staticmethod
-    def sentry_exc(exc: Exception):
+    def sentry_exc(exc: Exception,
+                   level: str = "error"):
         if sentry_sdk is not None:
-            sentry_sdk.capture_exception(exc)
-        log.error(f"Captured error: {exc}")
+            with sentry_sdk.configure_scope() as scope:
+                scope.set_level(level)
+                sentry_sdk.capture_exception(exc)
+        log.log(level, f"Captured {level}: {exc}")
+        # If started in debug mode (without -O), raise the exception, allowing you to see its source
+        if __debug__:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
 
     def get_secret(self, username: str):
         """Get a Royalnet secret from the keyring.
@@ -325,14 +339,14 @@ class Serf:
         royalnet_log.setLevel(log_level)
         stream_handler = logging.StreamHandler()
         if coloredlogs is not None:
-            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t|"
-                                                                    " {message}", style="{")
+            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                                    style="{")
         else:
-            stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
-                                                 style="{")
+            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                         style="{")
         if len(royalnet_log.handlers) < 1:
             royalnet_log.addHandler(stream_handler)
-        royalnet_log.debug("Logging: ready")
+        log.debug("Logging: ready")
 
         if sentry_sdk is None:
             log.info("Sentry: not installed")
@@ -347,5 +361,4 @@ class Serf:
         try:
             serf.loop.run_until_complete(serf.run())
         except Exception as e:
-            log.error(f"Uncaught exception: {e}")
-            serf.sentry_exc(e)
+            serf.sentry_exc(e, level="fatal")

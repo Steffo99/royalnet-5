@@ -1,3 +1,4 @@
+import logging
 import typing
 import re
 import datetime
@@ -6,6 +7,11 @@ import asyncio
 import logging as _logging
 from .package import Package
 from .config import Config
+
+try:
+    import coloredlogs
+except ImportError:
+    coloredlogs = None
 
 try:
     import websockets
@@ -144,7 +150,10 @@ class Server:
         if self.config.secure:
             raise Exception("Secure servers aren't supported yet")
         log.debug(f"Serving on {self.config.url}")
-        self.loop.run_until_complete(self.run())
+        try:
+            self.loop.run_until_complete(self.run())
+        except OSError as e:
+            log.fatal(f"OSError: {e}")
         self.loop.run_forever()
 
     async def run(self):
@@ -153,7 +162,20 @@ class Server:
                                port=self.config.port,
                                loop=self.loop)
 
-    def run_blocking(self):
+    def run_blocking(self, log_level):
+        # Initialize logging, as Windows doesn't have fork
+        royalnet_log: logging.Logger = logging.getLogger("royalnet")
+        royalnet_log.setLevel(log_level)
+        stream_handler = logging.StreamHandler()
+        if coloredlogs is not None:
+            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                                    style="{")
+        else:
+            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                         style="{")
+        if len(royalnet_log.handlers) < 1:
+            royalnet_log.addHandler(stream_handler)
+        log.debug("Logging: ready")
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
         self.serve()

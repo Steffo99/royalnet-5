@@ -53,10 +53,10 @@ def run(telegram: typing.Optional[bool],
     royalnet_log.setLevel(log_level)
     stream_handler = StreamHandler()
     if coloredlogs is not None:
-        stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t|"
-                                                                " {message}", style="{")
+        stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                                style="{")
     else:
-        stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+        stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
                                              style="{")
     royalnet_log.addHandler(stream_handler)
     royalnet_log.debug("Logging: ready")
@@ -96,8 +96,12 @@ def run(telegram: typing.Optional[bool],
                                         secret=get_secret("herald"),
                                         secure=False,
                                         path="/")
+        herald_kwargs = {
+            "log_level": log_level
+        }
         herald_process = multiprocessing.Process(name="Herald Server",
                                                  target=r.herald.Server(config=herald_config).run_blocking,
+                                                 kwargs=herald_kwargs,
                                                  daemon=True)
         herald_process.start()
     else:

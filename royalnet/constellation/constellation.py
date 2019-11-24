@@ -142,14 +142,14 @@ class Constellation:
         royalnet_log.setLevel(log_level)
         stream_handler = logging.StreamHandler()
         if coloredlogs is not None:
-            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t|"
-                                                                    " {name}\t| {message}", style="{")
+            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
+                                                                    style="{")
         else:
-            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
                                                          style="{")
         if len(royalnet_log.handlers) < 1:
             royalnet_log.addHandler(stream_handler)
-        royalnet_log.debug("Logging: ready")
+        log.debug("Logging: ready")
 
         # Initialize Sentry on the process
         if sentry_sdk is None:
@@ -172,7 +172,7 @@ class Constellation:
                                 release=release)
                 log.info(f"Sentry: enabled (Royalnet {release})")
         # Run the server
-        log.info(f"Running Constellation on https://{address}:{port}/ ...")
+        log.info(f"Running Constellation on https://{address}:{port}/...")
         constellation.running = True
         try:
             uvicorn.run(constellation.starlette, host=address, port=port, log_config=UVICORN_LOGGING_CONFIG)
