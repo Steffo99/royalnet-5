@@ -1,4 +1,6 @@
-"""A Pack that is imported by default by all :mod:`royalnet` instances."""
+"""A Pack that is imported by default by all :mod:`royalnet` instances.
+
+Keep things here to a minimum!"""
 
 from . import commands, tables, stars, events
 from .commands import available_commands

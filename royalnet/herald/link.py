@@ -159,7 +159,7 @@ class Link:
 
     async def run(self):
         """Blockingly run the Link."""
-        log.debug(f"Running main client loop for {self.nid}.")
+        log.debug(f"Running link: {self.config.name}")
         if self.error_event.is_set():
             raise ConnectionClosedError("RoyalnetLinks can't be rerun after an error.")
         while True:

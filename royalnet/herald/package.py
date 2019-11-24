@@ -34,8 +34,7 @@ class Package:
         self.destination_conv_id: typing.Optional[str] = destination_conv_id
 
     def __repr__(self):
-        return f"<{self.__class__.__qualname__} {self.source} ({self.source_conv_id})" \
-               f" to {self.destination} ({self.destination_conv_id}>"
+        return f"<{self.__class__.__qualname__} {self.source} » {self.destination}>"
 
     def __eq__(self, other):
         if isinstance(other, Package):

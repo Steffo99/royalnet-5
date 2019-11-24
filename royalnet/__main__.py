@@ -6,6 +6,11 @@ import multiprocessing
 import keyring
 from logging import Formatter, StreamHandler, getLogger, Logger
 
+try:
+    import coloredlogs
+except ImportError:
+    coloredlogs = None
+
 
 @click.command()
 @click.option("--telegram/--no-telegram", default=None,
@@ -47,7 +52,12 @@ def run(telegram: typing.Optional[bool],
     royalnet_log: Logger = getLogger("royalnet")
     royalnet_log.setLevel(log_level)
     stream_handler = StreamHandler()
-    stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}", style="{")
+    if coloredlogs is not None:
+        stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t|"
+                                                                " {message}", style="{")
+    else:
+        stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+                                             style="{")
     royalnet_log.addHandler(stream_handler)
     royalnet_log.debug("Logging: ready")
 
@@ -192,7 +202,7 @@ def run(telegram: typing.Optional[bool],
                                                         daemon=True)
         constellation_process.start()
 
-    click.echo("Royalnet is now running! You can stop its execution by pressing Ctrl+C at any time.")
+    royalnet_log.info("Royalnet is now running!")
     if herald_process is not None:
         herald_process.join()
     if telegram_process is not None:

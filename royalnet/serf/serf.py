@@ -36,6 +36,11 @@ except ImportError:
     AioHttpIntegration = None
     LoggingIntegration = None
 
+try:
+    import coloredlogs
+except ImportError:
+    coloredlogs = None
+
 log = logging.getLogger(__name__)
 
 
@@ -272,6 +277,7 @@ class Serf:
     def sentry_exc(exc: Exception):
         if sentry_sdk is not None:
             sentry_sdk.capture_exception(exc)
+        log.error(f"Captured error: {exc}")
 
     def get_secret(self, username: str):
         """Get a Royalnet secret from the keyring.
@@ -281,6 +287,7 @@ class Serf:
         return get_password(f"Royalnet/{self.secrets_name}", username)
 
     async def call(self, command: Command, data: CommandData, parameters: List[str]):
+        log.info(f"Calling command: {command.name}")
         try:
             # Run the command
             await command.run(CommandArgs(parameters), data)
@@ -317,8 +324,12 @@ class Serf:
         royalnet_log: logging.Logger = logging.getLogger("royalnet")
         royalnet_log.setLevel(log_level)
         stream_handler = logging.StreamHandler()
-        stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
-                                                     style="{")
+        if coloredlogs is not None:
+            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t|"
+                                                                    " {message}", style="{")
+        else:
+            stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+                                                 style="{")
         if len(royalnet_log.handlers) < 1:
             royalnet_log.addHandler(stream_handler)
         royalnet_log.debug("Logging: ready")

@@ -22,6 +22,11 @@ except ImportError:
     SqlalchemyIntegration = None
     LoggingIntegration = None
 
+try:
+    import coloredlogs
+except ImportError:
+    coloredlogs = None
+
 
 log = logging.getLogger(__name__)
 
@@ -136,8 +141,12 @@ class Constellation:
         royalnet_log: logging.Logger = logging.getLogger("royalnet")
         royalnet_log.setLevel(log_level)
         stream_handler = logging.StreamHandler()
-        stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
-                                                     style="{")
+        if coloredlogs is not None:
+            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {levelname}\t|"
+                                                                    " {name}\t| {message}", style="{")
+        else:
+            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {levelname}\t| {name}\t| {message}",
+                                                         style="{")
         if len(royalnet_log.handlers) < 1:
             royalnet_log.addHandler(stream_handler)
         royalnet_log.debug("Logging: ready")
