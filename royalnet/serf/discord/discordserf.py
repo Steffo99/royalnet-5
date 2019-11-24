@@ -34,19 +34,21 @@ class DiscordSerf(Serf):
     interface_name = "discord"
 
     def __init__(self, *,
+                 token: str,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
                  events: List[Type[Event]] = None,
-                 herald_config: Optional[HeraldConfig] = None,
-                 secrets_name: str = "__default__"):
+                 herald_config: Optional[HeraldConfig] = None):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 
         super().__init__(alchemy_config=alchemy_config,
                          commands=commands,
                          events=events,
-                         herald_config=herald_config,
-                         secrets_name=secrets_name)
+                         herald_config=herald_config)
+
+        self.token = token
+        """The Discord bot token."""
 
         self.Client = self.client_factory()
         """The custom :class:`discord.Client` class that will be instantiated later."""
@@ -154,10 +156,7 @@ class DiscordSerf(Serf):
 
     async def run(self):
         await super().run()
-        token = self.get_secret("discord")
-        if token is None:
-            raise ValueError("Missing discord token")
-        await self.client.login(token)
+        await self.client.login(self.token)
         await self.client.connect()
 
     def find_channel(self,
@@ -230,4 +229,3 @@ class DiscordSerf(Serf):
             channels.sort(key=people_count, reverse=True)
 
             return channels[0]
-

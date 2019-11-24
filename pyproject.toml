@@ -20,7 +20,7 @@
 [tool.poetry.dependencies]
     python = "^3.8"
     dateparser = "^0.7.2"
-    keyring = "^19.2.0"  # TODO: Maybe remove this when possible?
+    toml = "^0.10.0"
 
     # telegram
     python_telegram_bot = {version="^12.2.0", optional=true}

@@ -3,3 +3,4 @@
 .idea/royalnet.iml
 dist/
 **/__pycache__/
+config.toml

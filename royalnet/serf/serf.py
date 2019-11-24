@@ -3,7 +3,6 @@ import sys
 import traceback
 from asyncio import Task, AbstractEventLoop, get_event_loop
 from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
-from keyring import get_password
 from sqlalchemy.schema import Table
 from royalnet import __version__ as version
 from royalnet.commands import *
@@ -56,9 +55,7 @@ class Serf:
                  commands: List[Type[Command]] = None,
                  events: List[Type[Event]] = None,
                  herald_config: Optional[HeraldConfig] = None,
-                 secrets_name: str = "__default__"):
-        self.secrets_name = secrets_name
-
+                 sentry_dsn: Optional[str] = None):
         self.alchemy: Optional[Alchemy] = None
         """The :class:`Alchemy` object connecting this Serf to the database."""
 
@@ -114,6 +111,9 @@ class Serf:
 
         self.loop: Optional[AbstractEventLoop] = None
         """The event loop this Serf is running on."""
+
+        self.sentry_dsn: Optional[str] = sentry_dsn
+        """The Sentry DSN / Token. If :const:`None`, Sentry is disabled."""
 
     @staticmethod
     def find_tables(alchemy_config: AlchemyConfig, commands: List[Type[Command]]) -> Set[type]:
@@ -268,16 +268,16 @@ class Serf:
     def init_sentry(dsn):
         # noinspection PyUnreachableCode
         if __debug__:
-            release = f"Dev"
+            release = f"royalnet"
         else:
-            release = f"{version}"
+            release = f"royalnet=={version}"
         log.debug("Initializing Sentry...")
         sentry_sdk.init(dsn,
                         integrations=[AioHttpIntegration(),
                                       SqlalchemyIntegration(),
                                       LoggingIntegration(event_level=None)],
                         release=release)
-        log.info(f"Sentry: enabled (Royalnet {release})")
+        log.info(f"Sentry: enabled (release {release})")
 
     # noinspection PyUnreachableCode
     @staticmethod
@@ -292,13 +292,6 @@ class Serf:
         if __debug__:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback.print_exception(exc_type, exc_value, exc_traceback)
-
-    def get_secret(self, username: str):
-        """Get a Royalnet secret from the keyring.
-
-        Args:
-            username: the name of the secret that should be retrieved."""
-        return get_password(f"Royalnet/{self.secrets_name}", username)
 
     async def call(self, command: Command, data: CommandData, parameters: List[str]):
         log.info(f"Calling command: {command.name}")
@@ -351,11 +344,10 @@ class Serf:
         if sentry_sdk is None:
             log.info("Sentry: not installed")
         else:
-            sentry_dsn = serf.get_secret("sentry")
-            if sentry_dsn is None:
+            if serf.sentry_dsn is None:
                 log.info("Sentry: disabled")
             else:
-                serf.init_sentry(sentry_dsn)
+                serf.init_sentry(serf.sentry_dsn)
 
         serf.loop = get_event_loop()
         try:

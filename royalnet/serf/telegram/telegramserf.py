@@ -35,11 +35,14 @@ class TelegramSerf(Serf):
     interface_name = "telegram"
 
     def __init__(self, *,
+                 token: str,
+                 pool_size: int = 8,
+                 read_timeout: int = 60,
                  alchemy_config: Optional[AlchemyConfig] = None,
                  commands: List[Type[Command]] = None,
                  events: List[Type[Event]] = None,
                  herald_config: Optional[HeraldConfig] = None,
-                 secrets_name: str = "__default__"):
+                 sentry_dsn: Optional[str] = None):
         if telegram is None:
             raise ImportError("'telegram' extra is not installed")
 
@@ -47,9 +50,9 @@ class TelegramSerf(Serf):
                          commands=commands,
                          events=events,
                          herald_config=herald_config,
-                         secrets_name=secrets_name)
+                         sentry_dsn=sentry_dsn)
 
-        self.client = telegram.Bot(self.get_secret("telegram"), request=TRequest(50, read_timeout=30))
+        self.client = telegram.Bot(token, request=TRequest(pool_size, read_timeout=read_timeout))
         """The :class:`telegram.Bot` instance that will be used from the Serf."""
 
         self.update_offset: int = -100
