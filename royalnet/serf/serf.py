@@ -1,14 +1,12 @@
 import logging
-import sys
-import traceback
 import importlib
 import asyncio as aio
 from typing import *
 
 from sqlalchemy.schema import Table
 
-from royalnet import __version__
 from royalnet.commands import *
+import royalnet.utils as ru
 import royalnet.alchemy as ra
 import royalnet.backpack as rb
 import royalnet.herald as rh
@@ -44,9 +42,8 @@ class Serf:
     def __init__(self,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],
-                 sentry_cfg: Dict[str, Any],
                  packs_cfg: Dict[str, Any],
-                 serf_cfg: Dict[str, Any]):
+                 **_):
 
         # Import packs
         pack_names = packs_cfg["active"]
@@ -57,30 +54,6 @@ class Serf:
                 packs[pack_name] = importlib.import_module(pack_name)
             except ImportError as e:
                 log.error(f"Error during the import of {pack_name}: {e}")
-            # pack_commands = []
-            # try:
-            #     pack_commands = pack.available_commands
-            # except AttributeError:
-            #     log.warning(f"No commands in pack: {pack_name}")
-            # else:
-            #     log.debug(f"Imported: {len(pack_commands)} commands")
-            # commands = [*commands, *pack_commands]
-            # pack_events = []
-            # try:
-            #     pack_events = pack.available_events
-            # except AttributeError:
-            #     log.warning(f"No events in pack: {pack_name}")
-            # else:
-            #     log.debug(f"Imported: {len(pack_events)} events")
-            # events = [*events, *pack_events]
-            # pack_tables = []
-            # try:
-            #     pack_tables = pack.available_events
-            # except AttributeError:
-            #     log.warning(f"No tables in pack: {pack_name}")
-            # else:
-            #     log.debug(f"Imported: {len(pack_tables)} tables")
-            # tables = [*tables, *pack_tables]
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None
@@ -96,21 +69,22 @@ class Serf:
         # TODO: I'm not sure what this is either
         self.identity_column: Optional[str] = None
 
-        # Find all tables
-        tables = set()
-        for pack in packs.values():
-            try:
-                tables = tables.union(pack.available_tables)
-            except AttributeError:
-                log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
-                continue
-
+        # Alchemy
         if ra.Alchemy is None:
             log.info("Alchemy: not installed")
         elif not alchemy_cfg["enabled"]:
             log.info("Alchemy: disabled")
         else:
-            self.init_alchemy(alchemy_cfg["database_url"], tables)
+            # Find all tables
+            tables = set()
+            for pack in packs.values():
+                try:
+                    tables = tables.union(pack.available_tables)
+                except AttributeError:
+                    log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
+                    continue
+            # Create the Alchemy
+            self.init_alchemy(alchemy_cfg, tables)
             log.info(f"Alchemy: {self.alchemy}")
 
         self.herald: Optional[rh.Link] = None
@@ -133,7 +107,7 @@ class Serf:
 
         for pack_name in packs:
             pack = packs[pack_name]
-            pack_cfg = packs_cfg.get(pack_name, default={})
+            pack_cfg = packs_cfg.get(pack_name, {})
             try:
                 events = pack.available_events
             except AttributeError:
@@ -146,7 +120,7 @@ class Serf:
                 log.warning(f"Pack `{pack}` does not have the `available_commands` attribute.")
             else:
                 self.register_commands(commands, pack_cfg)
-        log.info(f"Events: {len(self.commands)} events")
+        log.info(f"Events: {len(self.events)} events")
         log.info(f"Commands: {len(self.commands)} commands")
 
         if rh.Link is None:
@@ -159,9 +133,6 @@ class Serf:
 
         self.loop: Optional[aio.AbstractEventLoop] = None
         """The event loop this Serf is running on."""
-
-        self.sentry_dsn: Optional[str] = sentry_cfg["dsn"] if sentry_cfg["enabled"] else None
-        """The Sentry DSN / Token. If :const:`None`, Sentry is disabled."""
 
     def init_alchemy(self, alchemy_cfg: Dict[str, Any], tables: Set[type]) -> None:
         """Create and initialize the :class:`Alchemy` with the required tables, and find the link between the master
@@ -190,7 +161,7 @@ class Serf:
                 """Send a :class:`royalherald.Request` to a specific destination, and wait for a
                 :class:`royalherald.Response`."""
                 if self.herald is None:
-                    raise UnsupportedError("`royalherald` is not enabled on this bot.")
+                    raise UnsupportedError("`royalherald` is not enabled on this serf.")
                 request: rh.Request = rh.Request(handler=event_name, data=kwargs)
                 response: rh.Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, rh.ResponseFailure):
@@ -211,13 +182,13 @@ class Serf:
                         elif response.extra_info["type"] == "ExternalError":
                             raise ExternalError(response.extra_info["message"])
                         else:
-                            raise TypeError(f"Herald action call returned invalid error:\n"
-                                            f"[p]{response}[/p]")
+                            raise ValueError(f"Herald action call returned invalid error:\n"
+                                             f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
-                    raise TypeError(f"Other Herald Link returned unknown response:\n"
-                                    f"[p]{response}[/p]")
+                    raise ValueError(f"Other Herald Link returned unknown response:\n"
+                                     f"[p]{response}[/p]")
 
         return GenericInterface
 
@@ -237,7 +208,7 @@ class Serf:
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedCommand.__qualname__} - {e.__class__.__qualname__} in the initialization.")
-                self.sentry_exc(e)
+                ru.sentry_exc(e)
                 continue
             # Link the interface to the command
             interface.command = command
@@ -263,7 +234,7 @@ class Serf:
     def init_herald(self, herald_cfg: Dict[str, Any]):
         """Create a :class:`Link` and bind :class:`Event`."""
         herald_cfg["name"] = self.interface_name
-        self.herald: rh.Link = rh.Link(rh.Config(**herald_cfg), self.network_handler)
+        self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
     def register_events(self, events: List[Type[Event]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
@@ -275,7 +246,7 @@ class Serf:
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
-                self.sentry_exc(e)
+                ru.sentry_exc(e)
                 continue
             # Register the event
             if SelectedEvent.name in self.events:
@@ -296,7 +267,7 @@ class Serf:
                 response_data = await event.run(**message.data)
                 return rh.ResponseSuccess(data=response_data)
             except Exception as e:
-                self.sentry_exc(e)
+                ru.sentry_exc(e)
                 return rh.ResponseFailure("exception_in_event",
                                           f"An exception was raised in the event for '{message.handler}'.",
                                           extra_info={
@@ -305,31 +276,6 @@ class Serf:
                                           })
         elif isinstance(message, rh.Broadcast):
             await event.run(**message.data)
-
-    @staticmethod
-    def init_sentry(dsn):
-        log.debug("Initializing Sentry...")
-        release = f"royalnet@{__version__}"
-        sentry_sdk.init(dsn,
-                        integrations=[AioHttpIntegration(),
-                                      SqlalchemyIntegration(),
-                                      LoggingIntegration(event_level=None)],
-                        release=release)
-        log.info(f"Sentry: {release}")
-
-    # noinspection PyUnreachableCode
-    @staticmethod
-    def sentry_exc(exc: Exception,
-                   level: str = "error"):
-        if sentry_sdk is not None:
-            with sentry_sdk.configure_scope() as scope:
-                scope.set_level(level)
-                sentry_sdk.capture_exception(exc)
-        log.log(level, f"Captured {level}: {exc}")
-        # If started in debug mode (without -O), raise the exception, allowing you to see its source
-        if __debug__:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_exception(exc_type, exc_value, exc_traceback)
 
     async def call(self, command: Command, data: CommandData, parameters: List[str]):
         log.info(f"Calling command: {command.name}")
@@ -350,7 +296,7 @@ class Serf:
         except CommandError as e:
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
-            self.sentry_exc(e)
+            ru.sentry_exc(e)
             error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args)
             await data.reply(error_message)
 
@@ -360,34 +306,24 @@ class Serf:
         # OVERRIDE THIS METHOD!
 
     @classmethod
-    def run_process(cls, *args, log_level: str = "WARNING", **kwargs):
+    def run_process(cls, **kwargs):
         """Blockingly create and run the Serf.
 
         This should be used as the target of a :class:`multiprocessing.Process`."""
-        serf = cls(*args, **kwargs)
+        ru.init_logging(kwargs["logging_cfg"])
 
-        royalnet_log: logging.Logger = logging.getLogger("royalnet")
-        royalnet_log.setLevel(log_level)
-        stream_handler = logging.StreamHandler()
-        if coloredlogs is not None:
-            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                                                    style="{")
-        else:
-            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                                         style="{")
-        if len(royalnet_log.handlers) < 1:
-            royalnet_log.addHandler(stream_handler)
-        log.debug("Logging: ready")
-
-        if sentry_sdk is None:
-            log.info("Sentry: not installed")
-        elif serf.sentry_dsn is None:
+        if kwargs["sentry_cfg"] is None or not kwargs["sentry_cfg"]["enabled"]:
             log.info("Sentry: disabled")
         else:
-            serf.init_sentry(serf.sentry_dsn)
+            try:
+                ru.init_sentry(kwargs["sentry_cfg"])
+            except ImportError:
+                log.info("Sentry: not installed")
+
+        serf = cls(**kwargs)
 
         serf.loop = aio.get_event_loop()
         try:
             serf.loop.run_until_complete(serf.run())
         except Exception as e:
-            serf.sentry_exc(e, level="fatal")
+            ru.sentry_exc(e, level="fatal")

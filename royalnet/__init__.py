@@ -1,6 +1,6 @@
-__version__ = "5.1a1"
+from . import alchemy, bard, commands, constellation, herald, backpack, serf, utils, version
 
-from . import alchemy, bard, commands, constellation, herald, backpack, serf, utils
+__version__ = version.semantic
 
 __all__ = [
     "alchemy",

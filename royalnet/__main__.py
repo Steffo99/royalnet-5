@@ -1,10 +1,11 @@
 import click
-import typing
-import importlib
-import royalnet as r
 import multiprocessing
+import royalnet.constellation as rc
+import royalnet.serf as rs
+import royalnet.utils as ru
+import royalnet.herald as rh
 import toml
-from logging import Formatter, StreamHandler, getLogger, Logger
+import logging
 
 try:
     import coloredlogs
@@ -12,7 +13,7 @@ except ImportError:
     coloredlogs = None
 
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 @click.command()
@@ -23,20 +24,104 @@ def run(config_filename: str):
     with open(config_filename, "r") as t:
         config: dict = toml.load(t)
 
-    # Initialize logging
-    royalnet_log: Logger = getLogger("royalnet")
-    royalnet_log.setLevel(config["Logging"]["log_level"])
-    stream_handler = StreamHandler()
-    if coloredlogs is not None:
-        stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                                                style="{")
-    else:
-        stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                             style="{")
-    royalnet_log.addHandler(stream_handler)
-    log.info("Logging: ready")
+    ru.init_logging(config["Logging"])
 
-    ...
+    if config["Sentry"] is None or not config["Sentry"]["enabled"]:
+        log.info("Sentry: disabled")
+    else:
+        try:
+            ru.init_sentry(config["Sentry"])
+        except ImportError:
+            log.info("Sentry: not installed")
+
+    # Herald Server
+    herald_cfg = None
+    herald_process = None
+    if config["Herald"]["Local"]["enabled"]:
+        # Create a Herald server
+        herald_server = rh.Server(rh.Config.from_config(name="<server>", **config["Herald"]["Local"]))
+        # Run the Herald server on a new process
+        herald_process = multiprocessing.Process(name="Herald.Local",
+                                                 target=herald_server.run_blocking,
+                                                 daemon=True,
+                                                 kwargs={
+                                                     "logging_cfg": config["Logging"]
+                                                 })
+        herald_process.start()
+        herald_cfg = config["Herald"]["Local"]
+        log.info("Herald: Enabled (Local)")
+    elif config["Herald"]["Remote"]["enabled"]:
+        log.info("Herald: Enabled (Remote)")
+        herald_cfg = config["Herald"]["Remote"]
+    else:
+        log.info("Herald: Disabled")
+
+    # Serfs
+    telegram_process = None
+    if config["Serfs"]["Telegram"]["enabled"]:
+        telegram_process = multiprocessing.Process(name="Serf.Telegram",
+                                                   target=rs.telegram.TelegramSerf.run_process,
+                                                   daemon=True,
+                                                   kwargs={
+                                                       "alchemy_cfg": config["Alchemy"],
+                                                       "herald_cfg": herald_cfg,
+                                                       "packs_cfg": config["Packs"],
+                                                       "sentry_cfg": config["Sentry"],
+                                                       "logging_cfg": config["Logging"],
+                                                       "serf_cfg": config["Serfs"]["Telegram"],
+                                                   })
+        telegram_process.start()
+        log.info("Serf.Telegram: Started")
+    else:
+        log.info("Serf.Telegram: Disabled")
+
+    discord_process = None
+    if config["Serfs"]["Discord"]["enabled"]:
+        discord_process = multiprocessing.Process(name="Serf.Discord",
+                                                  target=rs.discord.DiscordSerf.run_process,
+                                                  daemon=True,
+                                                  kwargs={
+                                                      "alchemy_cfg": config["Alchemy"],
+                                                      "herald_cfg": herald_cfg,
+                                                      "packs_cfg": config["Packs"],
+                                                      "sentry_cfg": config["Sentry"],
+                                                      "logging_cfg": config["Logging"],
+                                                      "serf_cfg": config["Serfs"]["Discord"],
+                                                  })
+        discord_process.start()
+        log.info("Serf.Discord: Started")
+    else:
+        log.info("Serf.Discord: Disabled")
+
+    # Constellation
+    constellation_process = None
+    if config["Constellation"]["enabled"]:
+        constellation_process = multiprocessing.Process(name="Constellation",
+                                                        target=rc.Constellation.run_process,
+                                                        daemon=True,
+                                                        kwargs={
+                                                            "alchemy_cfg": config["Alchemy"],
+                                                            "herald_cfg": herald_cfg,
+                                                            "packs_cfg": config["Packs"],
+                                                            "sentry_cfg": config["Sentry"],
+                                                            "logging_cfg": config["Logging"],
+                                                            "constellation_cfg": config["Constellation"],
+                                                        })
+        constellation_process.start()
+        log.info("Constellation: Started")
+    else:
+        log.info("Constellation: Disabled")
+
+    log.info("All processes started!")
+    if constellation_process is not None:
+        constellation_process.join()
+    if telegram_process is not None:
+        telegram_process.join()
+    if discord_process is not None:
+        discord_process.join()
+    if herald_process is not None:
+        herald_process.join()
+
 
 
 if __name__ == "__main__":

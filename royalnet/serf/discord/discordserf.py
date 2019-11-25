@@ -42,7 +42,8 @@ class DiscordSerf(Serf):
                  herald_cfg: Dict[str, Any],
                  sentry_cfg: Dict[str, Any],
                  packs_cfg: Dict[str, Any],
-                 serf_cfg: Dict[str, Any]):
+                 serf_cfg: Dict[str, Any],
+                 **_):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 

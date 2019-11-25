@@ -1,10 +1,10 @@
-import logging
-import typing
+from typing import *
 import re
 import datetime
 import uuid
 import asyncio
 import logging as _logging
+import royalnet.utils as ru
 from .package import Package
 from .config import Config
 
@@ -26,8 +26,8 @@ class ConnectedClient:
     """The :py:class:`Server`-side representation of a connected :py:class:`Link`."""
     def __init__(self, socket: "websockets.WebSocketServerProtocol"):
         self.socket: "websockets.WebSocketServerProtocol" = socket
-        self.nid: typing.Optional[str] = None
-        self.link_type: typing.Optional[str] = None
+        self.nid: Optional[str] = None
+        self.link_type: Optional[str] = None
         self.connection_datetime: datetime.datetime = datetime.datetime.now()
 
     def __repr__(self):
@@ -51,13 +51,13 @@ class ConnectedClient:
 class Server:
     def __init__(self, config: Config, *, loop: asyncio.AbstractEventLoop = None):
         self.config: Config = config
-        self.identified_clients: typing.List[ConnectedClient] = []
+        self.identified_clients: List[ConnectedClient] = []
         self.loop = loop
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__}>"
 
-    def find_client(self, *, nid: str = None, link_type: str = None) -> typing.List[ConnectedClient]:
+    def find_client(self, *, nid: str = None, link_type: str = None) -> List[ConnectedClient]:
         assert not (nid and link_type)
         if nid:
             matching = [client for client in self.identified_clients if client.nid == nid]
@@ -108,7 +108,7 @@ class Server:
             # noinspection PyAsyncCall
             self.loop.create_task(self.route_package(package))
 
-    def find_destination(self, package: Package) -> typing.List[ConnectedClient]:
+    def find_destination(self, package: Package) -> List[ConnectedClient]:
         """Find a list of destinations for the package.
 
         Parameters:
@@ -162,20 +162,8 @@ class Server:
                                port=self.config.port,
                                loop=self.loop)
 
-    def run_blocking(self, log_level):
-        # Initialize logging, as Windows doesn't have fork
-        royalnet_log: logging.Logger = logging.getLogger("royalnet")
-        royalnet_log.setLevel(log_level)
-        stream_handler = logging.StreamHandler()
-        if coloredlogs is not None:
-            stream_handler.formatter = coloredlogs.ColoredFormatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                                                    style="{")
-        else:
-            stream_handler.formatter = logging.Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
-                                                         style="{")
-        if len(royalnet_log.handlers) < 1:
-            royalnet_log.addHandler(stream_handler)
-        log.debug("Logging: ready")
+    def run_blocking(self, logging_cfg: Dict[str, Any]):
+        ru.init_logging(logging_cfg)
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
         self.serve()

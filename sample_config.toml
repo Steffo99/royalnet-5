@@ -83,8 +83,8 @@ token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 [Logging]
 # Print to stderr all logging events of an equal or greater level than this
-# Possible values are "debug", "info", "warning", "error", "fatal"
-log_level = "info"
+# Possible values are "DEBUG", "INFO", "WARNING", "ERROR", "FATAL"
+log_level = "INFO"
 # Optional: install the `coloredlogs` extra for colored output!
 
 [Sentry]
@@ -104,7 +104,6 @@ active = [
 ]
 
 # Configuration settings for specific packs
-# Be aware that packs have access to the whole config file
 [Packs."royalnet.backpack"]
 # Enable exception debug commands and stars
 exc_debug = false

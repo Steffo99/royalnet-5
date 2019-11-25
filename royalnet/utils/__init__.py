@@ -5,6 +5,8 @@ from .formatters import andformat, underscorize, ytdldateformat, numberemojiform
 from .urluuid import to_urluuid, from_urluuid
 from .multilock import MultiLock
 from .fileaudiosource import FileAudioSource
+from .sentry import init_sentry, sentry_exc
+from .log import init_logging
 
 __all__ = [
     "asyncify",
@@ -19,4 +21,7 @@ __all__ = [
     "from_urluuid",
     "MultiLock",
     "FileAudioSource",
+    "init_sentry",
+    "sentry_exc",
+    "init_logging",
 ]

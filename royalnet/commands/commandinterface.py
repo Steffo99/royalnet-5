@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from .command import Command
     from ..alchemy import Alchemy
     from ..serf import Serf
+    from ..constellation import Constellation
 
 
 class CommandInterface:
@@ -19,13 +20,20 @@ class CommandInterface:
     """The prefix used by commands on the interface.
     
     Examples:
-        ``/`` on Telegram, ``!`` on Discord"""
+        ``/`` on Telegram, ``!`` on Discord."""
 
-    serf: "Serf" = NotImplemented
+    serf: Optional["Serf"] = None
     """A reference to the Serf that is implementing this :class:`CommandInterface`.
     
-    Examples:
+    Example:
         A reference to a :class:`~royalnet.serf.telegram.TelegramSerf`."""
+
+    constellation: Optional["Constellation"] = None
+    """A reference to the Constellation that is implementing this :class:`CommandInterface`.
+    
+    Example:
+        A reference to a :class:`~royalnet.constellation.Constellation`."""
+
 
     @property
     def alchemy(self) -> "Alchemy":

@@ -8,9 +8,7 @@ class Config:
                  port: int,
                  secret: str,
                  secure: bool = False,
-                 path: str = "/",
-                 *,
-                 enabled: ... = ...,  # Ignored, but useful to allow creating a config from the config dict
+                 path: str = "/"
                  ):
         if ":" in name:
             raise ValueError("Herald names cannot contain colons (:)")
@@ -53,3 +51,22 @@ class Config:
 
     def __repr__(self):
         return f"<HeraldConfig for {self.url}>"
+
+    @classmethod
+    def from_config(cls, *,
+                    name: str,
+                    address: str,
+                    port: int,
+                    secret: str,
+                    secure: bool = False,
+                    path: str = "/",
+                    enabled: ... = ...
+                    ):
+        return cls(
+            name=name,
+            address=address,
+            port=port,
+            secret=secret,
+            secure=secure,
+            path=path
+        )

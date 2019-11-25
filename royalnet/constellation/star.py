@@ -1,4 +1,4 @@
-from typing import Type, TYPE_CHECKING, List, Union
+from typing import *
 
 if TYPE_CHECKING:
     from .constellation import Constellation
@@ -10,10 +10,8 @@ class Star:
     """A Star is a class representing a part of the website.
 
     It shouldn't be used directly: please use :class:`PageStar` and :class:`ExceptionStar` instead!"""
-    tables: set = {}
-    """The set of :mod:`~royalnet.alchemy` table classes required by this :class:`Star` to function."""
-
-    def __init__(self, constellation: "Constellation"):
+    def __init__(self, config: Dict[str, Any], constellation: "Constellation"):
+        self.config: Dict[str, Any] = config
         self.constellation: "Constellation" = constellation
 
     async def page(self, request: "Request") -> "Response":
@@ -27,6 +25,7 @@ class Star:
         """A shortcut for the :class:`Alchemy` of the :class:`Constellation`."""
         return self.constellation.alchemy
 
+    # noinspection PyPep8Naming
     @property
     def Session(self):
         """A shortcut for the alchemy :class:`Session` of the :class:`Constellation`."""
