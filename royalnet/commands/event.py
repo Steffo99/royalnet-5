@@ -1,3 +1,4 @@
+from .commandinterface import CommandInterface
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from serf import Serf
@@ -9,22 +10,20 @@ class Event:
     name = NotImplemented
     """The event_name that will trigger this event."""
 
-    tables: set = set()
-    """A set of :mod:`royalnet.alchemy` tables that must exist for this event to work."""
-
-    def __init__(self, serf: "Serf"):
+    def __init__(self, interface: CommandInterface):
         """Bind the event to a :class:`~royalnet.serf.Serf`."""
-        self.serf: "Serf" = serf
+        self.interface: CommandInterface = interface
+        """The :class:`CommandInterface` available to this :class:`Event`."""
 
     @property
     def alchemy(self):
         """A shortcut for :attr:`.serf.alchemy`."""
-        return self.serf.alchemy
+        return self.interface.serf.alchemy
 
     @property
     def loop(self):
         """A shortcut for :attr:`.serf.loop`"""
-        return self.serf.loop
+        return self.interface.serf.loop
 
     async def run(self, **kwargs):
         raise NotImplementedError()

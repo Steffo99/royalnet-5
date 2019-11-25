@@ -1,8 +1,9 @@
 import logging
-import asyncio
-from typing import Type, Optional, List, Callable
+import asyncio as aio
+from typing import *
 from royalnet.commands import *
 from royalnet.utils import asyncify
+import royalnet.backpack as rb
 from .escape import escape
 from ..serf import Serf
 
@@ -17,15 +18,10 @@ except ImportError:
 
 try:
     from sqlalchemy.orm.session import Session
-    from ..alchemyconfig import AlchemyConfig
 except ImportError:
     Session = None
-    AlchemyConfig = None
 
-try:
-    from royalnet.herald import Config as HeraldConfig
-except ImportError:
-    HeraldConfig = None
+import royalnet.herald as rh
 
 log = logging.getLogger(__name__)
 
@@ -34,25 +30,27 @@ class TelegramSerf(Serf):
     """A Serf that connects to `Telegram <https://telegram.org/>`_ as a bot."""
     interface_name = "telegram"
 
-    def __init__(self, *,
-                 token: str,
-                 pool_size: int = 8,
-                 read_timeout: int = 60,
-                 alchemy_config: Optional[AlchemyConfig] = None,
-                 commands: List[Type[Command]] = None,
-                 events: List[Type[Event]] = None,
-                 herald_config: Optional[HeraldConfig] = None,
-                 sentry_dsn: Optional[str] = None):
+    _identity_table = rb.tables.Telegram
+    _identity_column = "tg_id"
+
+    def __init__(self,
+                 alchemy_cfg: Dict[str, Any],
+                 herald_cfg: Dict[str, Any],
+                 sentry_cfg: Dict[str, Any],
+                 packs_cfg: Dict[str, Any],
+                 serf_cfg: Dict[str, Any]):
         if telegram is None:
             raise ImportError("'telegram' extra is not installed")
 
-        super().__init__(alchemy_config=alchemy_config,
-                         commands=commands,
-                         events=events,
-                         herald_config=herald_config,
-                         sentry_dsn=sentry_dsn)
+        super().__init__(alchemy_cfg=alchemy_cfg,
+                         herald_cfg=herald_cfg,
+                         sentry_cfg=sentry_cfg,
+                         packs_cfg=packs_cfg,
+                         serf_cfg=serf_cfg)
 
-        self.client = telegram.Bot(token, request=TRequest(pool_size, read_timeout=read_timeout))
+        self.client = telegram.Bot(serf_cfg["token"],
+                                   request=TRequest(serf_cfg["pool_size"],
+                                                    read_timeout=serf_cfg["read_timeout"]))
         """The :class:`telegram.Bot` instance that will be used from the Serf."""
 
         self.update_offset: int = -100
@@ -77,11 +75,11 @@ class TelegramSerf(Serf):
                 break
             except telegram.error.RetryAfter as error:
                 log.warning(f"Rate limited during {f.__qualname__} (retrying in 15s): {error}")
-                await asyncio.sleep(15)
+                await aio.sleep(15)
                 continue
             except urllib3.exceptions.HTTPError as error:
                 log.warning(f"urllib3 HTTPError during {f.__qualname__} (retrying in 15s): {error}")
-                await asyncio.sleep(15)
+                await aio.sleep(15)
                 continue
             except Exception as error:
                 log.error(f"{error.__class__.__qualname__} during {f} (skipping): {error}")
@@ -106,7 +104,7 @@ class TelegramSerf(Serf):
             def __init__(data,
                          interface: CommandInterface,
                          session,
-                         loop: asyncio.AbstractEventLoop,
+                         loop: aio.AbstractEventLoop,
                          update: telegram.Update):
                 super().__init__(interface=interface, session=session, loop=loop)
                 data.update = update
@@ -128,10 +126,10 @@ class TelegramSerf(Serf):
                     if error_if_none:
                         raise CommandError("No command caller for this message")
                     return None
-                query = data.session.query(self._master_table)
-                for link in self._identity_chain:
+                query = data.session.query(self.master_table)
+                for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
-                query = query.filter(self._identity_column == user.id)
+                query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
                     raise CommandError("Command caller is not registered")

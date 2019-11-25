@@ -8,7 +8,10 @@ class Config:
                  port: int,
                  secret: str,
                  secure: bool = False,
-                 path: str = "/"):
+                 path: str = "/",
+                 *,
+                 enabled: ... = ...,  # Ignored, but useful to allow creating a config from the config dict
+                 ):
         if ":" in name:
             raise ValueError("Herald names cannot contain colons (:)")
         self.name = name

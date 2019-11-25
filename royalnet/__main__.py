@@ -12,6 +12,9 @@ except ImportError:
     coloredlogs = None
 
 
+log = getLogger(__name__)
+
+
 @click.command()
 @click.option("-c", "--config-filename", default="./config.toml", type=str,
               help="The filename of the Royalnet configuration file.")
@@ -31,7 +34,7 @@ def run(config_filename: str):
         stream_handler.formatter = Formatter("{asctime}\t| {processName}\t| {name}\t| {message}",
                                              style="{")
     royalnet_log.addHandler(stream_handler)
-    royalnet_log.info("Logging: ready")
+    log.info("Logging: ready")
 
     herald_process: typing.Optional[multiprocessing.Process] = None
     herald_config = r.herald.Config(name="<server>",

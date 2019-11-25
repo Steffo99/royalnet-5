@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import warnings
-from typing import Type, Optional, List, Union, Dict
+from typing import *
+import royalnet.backpack as rb
 from royalnet.commands import *
 from royalnet.utils import asyncify
 from royalnet.serf import Serf
@@ -33,21 +34,25 @@ class DiscordSerf(Serf):
     """A :class:`Serf` that connects to `Discord <https://discordapp.com/>`_ as a bot."""
     interface_name = "discord"
 
-    def __init__(self, *,
-                 token: str,
-                 alchemy_config: Optional[AlchemyConfig] = None,
-                 commands: List[Type[Command]] = None,
-                 events: List[Type[Event]] = None,
-                 herald_config: Optional[HeraldConfig] = None):
+    _identity_table = rb.tables.Discord
+    _identity_column = "discord_id"
+
+    def __init__(self,
+                 alchemy_cfg: Dict[str, Any],
+                 herald_cfg: Dict[str, Any],
+                 sentry_cfg: Dict[str, Any],
+                 packs_cfg: Dict[str, Any],
+                 serf_cfg: Dict[str, Any]):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 
-        super().__init__(alchemy_config=alchemy_config,
-                         commands=commands,
-                         events=events,
-                         herald_config=herald_config)
+        super().__init__(alchemy_cfg=alchemy_cfg,
+                         herald_cfg=herald_cfg,
+                         sentry_cfg=sentry_cfg,
+                         packs_cfg=packs_cfg,
+                         serf_cfg=serf_cfg)
 
-        self.token = token
+        self.token = serf_cfg["token"]
         """The Discord bot token."""
 
         self.Client = self.client_factory()
@@ -86,10 +91,10 @@ class DiscordSerf(Serf):
 
             async def get_author(data, error_if_none=False):
                 user: "discord.Member" = data.message.author
-                query = data.session.query(self._master_table)
-                for link in self._identity_chain:
+                query = data.session.query(self.master_table)
+                for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
-                query = query.filter(self._identity_column == user.id)
+                query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
                     raise CommandError("You must be registered to use this command.")

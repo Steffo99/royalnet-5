@@ -1,30 +1,17 @@
 import logging
 import sys
 import traceback
-from asyncio import Task, AbstractEventLoop, get_event_loop
-from typing import Type, Optional, Awaitable, Dict, List, Any, Callable, Union, Set
+import importlib
+import asyncio as aio
+from typing import *
+
 from sqlalchemy.schema import Table
-from royalnet import __version__ as version
+
+from royalnet import __version__
 from royalnet.commands import *
-from .alchemyconfig import AlchemyConfig
-
-try:
-    from royalnet.alchemy import Alchemy, table_dfs
-except ImportError:
-    Alchemy = None
-    table_dfs = None
-
-try:
-    from royalnet.herald import Response, ResponseSuccess, Broadcast, ResponseFailure, Request, Link
-    from royalnet.herald import Config as HeraldConfig
-except ImportError:
-    Response = None
-    ResponseSuccess = None
-    Broadcast = None
-    ResponseFailure = None
-    Request = None
-    Link = None
-    HeraldConfig = None
+import royalnet.alchemy as ra
+import royalnet.backpack as rb
+import royalnet.herald as rh
 
 try:
     import sentry_sdk
@@ -50,33 +37,90 @@ class Serf:
     Discord)."""
     interface_name = NotImplemented
 
-    def __init__(self, *,
-                 alchemy_config: Optional[AlchemyConfig] = None,
-                 commands: List[Type[Command]] = None,
-                 events: List[Type[Event]] = None,
-                 herald_config: Optional[HeraldConfig] = None,
-                 sentry_dsn: Optional[str] = None):
-        self.alchemy: Optional[Alchemy] = None
-        """The :class:`Alchemy` object connecting this Serf to the database."""
+    _master_table: type = rb.tables.User
+    _identity_table: type = NotImplemented
+    _identity_column: str = NotImplemented
 
-        self._master_table: Optional[Table] = None
+    def __init__(self,
+                 alchemy_cfg: Dict[str, Any],
+                 herald_cfg: Dict[str, Any],
+                 sentry_cfg: Dict[str, Any],
+                 packs_cfg: Dict[str, Any],
+                 serf_cfg: Dict[str, Any]):
+
+        # Import packs
+        pack_names = packs_cfg["active"]
+        packs = {}
+        for pack_name in pack_names:
+            log.debug(f"Importing pack: {pack_name}")
+            try:
+                packs[pack_name] = importlib.import_module(pack_name)
+            except ImportError as e:
+                log.error(f"Error during the import of {pack_name}: {e}")
+            # pack_commands = []
+            # try:
+            #     pack_commands = pack.available_commands
+            # except AttributeError:
+            #     log.warning(f"No commands in pack: {pack_name}")
+            # else:
+            #     log.debug(f"Imported: {len(pack_commands)} commands")
+            # commands = [*commands, *pack_commands]
+            # pack_events = []
+            # try:
+            #     pack_events = pack.available_events
+            # except AttributeError:
+            #     log.warning(f"No events in pack: {pack_name}")
+            # else:
+            #     log.debug(f"Imported: {len(pack_events)} events")
+            # events = [*events, *pack_events]
+            # pack_tables = []
+            # try:
+            #     pack_tables = pack.available_events
+            # except AttributeError:
+            #     log.warning(f"No tables in pack: {pack_name}")
+            # else:
+            #     log.debug(f"Imported: {len(pack_tables)} tables")
+            # tables = [*tables, *pack_tables]
+        log.info(f"Packs: {len(packs)} imported")
+
+        self.alchemy: Optional[ra.Alchemy] = None
+        """The :class:`Alchemy` object connecting this Serf to a database."""
+
+        self.master_table: Optional[Table] = None
         """The central table listing all users. It usually is :class:`User`."""
 
-        self._identity_table: Optional[Table] = None
+        self.identity_table: Optional[Table] = None
         """The identity table containing the interface data (such as the Telegram user data) and that is in a 
         many-to-one relationship with the master table."""
 
         # TODO: I'm not sure what this is either
-        self._identity_column: Optional[str] = None
+        self.identity_column: Optional[str] = None
 
-        if Alchemy is None:
+        # Find all tables
+        tables = set()
+        for pack in packs.values():
+            try:
+                tables = tables.union(pack.available_tables)
+            except AttributeError:
+                log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
+                continue
+
+        if ra.Alchemy is None:
             log.info("Alchemy: not installed")
-        elif alchemy_config is None:
+        elif not alchemy_cfg["enabled"]:
             log.info("Alchemy: disabled")
         else:
-            tables = self.find_tables(alchemy_config, commands)
-            self.init_alchemy(alchemy_config, tables)
+            self.init_alchemy(alchemy_cfg["database_url"], tables)
             log.info(f"Alchemy: {self.alchemy}")
+
+        self.herald: Optional[rh.Link] = None
+        """The :class:`Link` object connecting the Serf to the rest of the herald network."""
+
+        self.herald_task: Optional[aio.Task] = None
+        """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
+
+        self.events: Dict[str, Event] = {}
+        """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
 
         self.Interface: Type[CommandInterface] = self.interface_factory()
         """The :class:`CommandInterface` class of this Serf."""
@@ -87,72 +131,59 @@ class Serf:
         self.commands: Dict[str, Command] = {}
         """The :class:`dict` connecting each command name to its :class:`Command` object."""
 
-        if commands is None:
-            commands = []
-        self.register_commands(commands)
-        log.info(f"Commands: total {len(self.commands)}")
+        for pack_name in packs:
+            pack = packs[pack_name]
+            pack_cfg = packs_cfg.get(pack_name, default={})
+            try:
+                events = pack.available_events
+            except AttributeError:
+                log.warning(f"Pack `{pack}` does not have the `available_events` attribute.")
+            else:
+                self.register_events(events, pack_cfg)
+            try:
+                commands = pack.available_commands
+            except AttributeError:
+                log.warning(f"Pack `{pack}` does not have the `available_commands` attribute.")
+            else:
+                self.register_commands(commands, pack_cfg)
+        log.info(f"Events: {len(self.commands)} events")
+        log.info(f"Commands: {len(self.commands)} commands")
 
-        self.herald: Optional[Link] = None
-        """The :class:`Link` object connecting the Serf to the rest of the herald network."""
-
-        self.herald_task: Optional[Task] = None
-        """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
-
-        self.events: Dict[str, Event] = {}
-        """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
-
-        if Link is None:
+        if rh.Link is None:
             log.info("Herald: not installed")
-        elif herald_config is None:
+        elif not herald_cfg["enabled"]:
             log.info("Herald: disabled")
         else:
-            self.init_herald(herald_config, events)
-            log.info(f"Herald: {len(self.events)} events bound")
+            self.init_herald(herald_cfg)
+            log.info(f"Herald: enabled")
 
-        self.loop: Optional[AbstractEventLoop] = None
+        self.loop: Optional[aio.AbstractEventLoop] = None
         """The event loop this Serf is running on."""
 
-        self.sentry_dsn: Optional[str] = sentry_dsn
+        self.sentry_dsn: Optional[str] = sentry_cfg["dsn"] if sentry_cfg["enabled"] else None
         """The Sentry DSN / Token. If :const:`None`, Sentry is disabled."""
 
-    @staticmethod
-    def find_tables(alchemy_config: AlchemyConfig, commands: List[Type[Command]]) -> Set[type]:
-        """Find the :class:`Table`s required by the Serf.
-
-        Warning:
-            This function will return a wrong result if there are tables between the master table and the identity table
-            that aren't included by a command.
-
-        Returns:
-            A :class:`list` of :class:`Table`s."""
-        # FIXME: breaks if there are nonincluded tables between master and identity.
-        tables = {alchemy_config.master_table, alchemy_config.identity_table}
-        for command in commands:
-            tables = tables.union(command.tables)
-        return tables
-
-    def init_alchemy(self, alchemy_config: AlchemyConfig, tables: Set[type]) -> None:
+    def init_alchemy(self, alchemy_cfg: Dict[str, Any], tables: Set[type]) -> None:
         """Create and initialize the :class:`Alchemy` with the required tables, and find the link between the master
         table and the identity table."""
-        self.alchemy = Alchemy(alchemy_config.database_url, tables)
-        self._master_table = self.alchemy.get(alchemy_config.master_table)
-        self._identity_table = self.alchemy.get(alchemy_config.identity_table)
+        self.alchemy = ra.Alchemy(alchemy_cfg["database_url"], tables)
+        self.master_table = self.alchemy.get(self._master_table)
+        self.identity_table = self.alchemy.get(self._identity_table)
         # This is fine, as Pycharm doesn't know that identity_table is a class and not an object
         # noinspection PyArgumentList
-        self._identity_column = self._identity_table.__getattribute__(self._identity_table,
-                                                                      alchemy_config.identity_column)
+        self.identity_column = self.identity_table.__getattribute__(self.identity_table, self._identity_column)
 
     @property
-    def _identity_chain(self) -> tuple:
+    def identity_chain(self) -> tuple:
         """Find a relationship path starting from the master table and ending at the identity table, and return it."""
-        return table_dfs(self._master_table, self._identity_table)
+        return ra.table_dfs(self.master_table, self.identity_table)
 
     def interface_factory(self) -> Type[CommandInterface]:
         """Create the :class:`CommandInterface` class for the Serf."""
 
         # noinspection PyMethodParameters
         class GenericInterface(CommandInterface):
-            alchemy: Alchemy = self.alchemy
+            alchemy: ra.Alchemy = self.alchemy
             serf: "Serf" = self
 
             async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
@@ -160,9 +191,9 @@ class Serf:
                 :class:`royalherald.Response`."""
                 if self.herald is None:
                     raise UnsupportedError("`royalherald` is not enabled on this bot.")
-                request: Request = Request(handler=event_name, data=kwargs)
-                response: Response = await self.herald.request(destination=destination, request=request)
-                if isinstance(response, ResponseFailure):
+                request: rh.Request = rh.Request(handler=event_name, data=kwargs)
+                response: rh.Response = await self.herald.request(destination=destination, request=request)
+                if isinstance(response, rh.ResponseFailure):
                     if response.name == "no_event":
                         raise CommandError(f"There is no event named {event_name} in {destination}.")
                     elif response.name == "exception_in_event":
@@ -182,7 +213,7 @@ class Serf:
                         else:
                             raise TypeError(f"Herald action call returned invalid error:\n"
                                             f"[p]{response}[/p]")
-                elif isinstance(response, ResponseSuccess):
+                elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
                     raise TypeError(f"Other Herald Link returned unknown response:\n"
@@ -194,35 +225,29 @@ class Serf:
         """Create the :class:`CommandData` for the Serf."""
         raise NotImplementedError()
 
-    def register_commands(self, commands: List[Type[Command]]) -> None:
-        """Initialize and register all commands passed as argument.
-
-        If called again during the execution of the bot, all current commands will be replaced with the new ones.
-
-        Warning:
-            Hot-replacing commands was never tested and probably doesn't work."""
-        log.info(f"Registering {len(commands)} commands...")
+    def register_commands(self, commands: List[Type[Command]], pack_cfg: Dict[str, Any]) -> None:
+        """Initialize and register all commands passed as argument."""
         # Instantiate the Commands
         for SelectedCommand in commands:
-            # Warn if the command would be overriding something
-            if f"{self.Interface.prefix}{SelectedCommand.name}" in self.commands:
-                log.warning(f"Overriding (already defined): "
-                            f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
-            else:
-                log.debug(f"Registering: "
-                          f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
             # Create a new interface
-            interface = self.Interface()
+            interface = self.Interface(cfg=pack_cfg)
             # Try to instantiate the command
             try:
                 command = SelectedCommand(interface)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedCommand.__qualname__} - {e.__class__.__qualname__} in the initialization.")
-                sentry_sdk.capture_exception(e)
+                self.sentry_exc(e)
                 continue
             # Link the interface to the command
             interface.command = command
+            # Warn if the command would be overriding something
+            if f"{self.Interface.prefix}{SelectedCommand.name}" in self.commands:
+                log.info(f"Overriding (already defined): "
+                         f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
+            else:
+                log.debug(f"Registering: "
+                          f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
             # Register the command in the commands dict
             self.commands[f"{interface.prefix}{SelectedCommand.name}"] = command
             # Register aliases, but don't override anything
@@ -232,52 +257,65 @@ class Serf:
                     self.commands[f"{interface.prefix}{alias}"] = \
                         self.commands[f"{interface.prefix}{SelectedCommand.name}"]
                 else:
-                    log.warning(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
+                    log.warning(
+                        f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
 
-    def init_herald(self, config: HeraldConfig, events: List[Type[Event]]):
-        """Create a :py:class:`Link`, and run it as a :py:class:`asyncio.Task`."""
-        self.herald: Link = Link(config, self.network_handler)
-        log.debug(f"Binding events...")
+    def init_herald(self, herald_cfg: Dict[str, Any]):
+        """Create a :class:`Link` and bind :class:`Event`."""
+        herald_cfg["name"] = self.interface_name
+        self.herald: rh.Link = rh.Link(rh.Config(**herald_cfg), self.network_handler)
+
+    def register_events(self, events: List[Type[Event]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
-            log.debug(f"Binding event: {SelectedEvent.name}.")
-            self.events[SelectedEvent.name] = SelectedEvent(self)
+            # Create a new interface
+            interface = self.Interface(cfg=pack_cfg)
+            # Initialize the event
+            try:
+                event = SelectedEvent(interface)
+            except Exception as e:
+                log.error(f"Skipping: "
+                          f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
+                self.sentry_exc(e)
+                continue
+            # Register the event
+            if SelectedEvent.name in self.events:
+                log.warning(f"Overriding (already defined): {SelectedEvent.__qualname__} -> {SelectedEvent.name}")
+            else:
+                log.debug(f"Registering: {SelectedEvent.__qualname__} -> {SelectedEvent.name}")
+            self.events[SelectedEvent.name] = event
 
-    async def network_handler(self, message: Union[Request, Broadcast]) -> Response:
+    async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
             event: Event = self.events[message.handler]
         except KeyError:
             log.warning(f"No event for '{message.handler}'")
-            return ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
+            return rh.ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
         log.debug(f"Event called: {event.name}")
-        if isinstance(message, Request):
+        if isinstance(message, rh.Request):
             try:
                 response_data = await event.run(**message.data)
-                return ResponseSuccess(data=response_data)
+                return rh.ResponseSuccess(data=response_data)
             except Exception as e:
                 self.sentry_exc(e)
-                return ResponseFailure("exception_in_event",
-                                       f"An exception was raised in the event for '{message.handler}'.",
-                                       extra_info={
-                                           "type": e.__class__.__qualname__,
-                                           "message": str(e)
-                                       })
-        elif isinstance(message, Broadcast):
+                return rh.ResponseFailure("exception_in_event",
+                                          f"An exception was raised in the event for '{message.handler}'.",
+                                          extra_info={
+                                              "type": e.__class__.__qualname__,
+                                              "message": str(e)
+                                          })
+        elif isinstance(message, rh.Broadcast):
             await event.run(**message.data)
 
     @staticmethod
     def init_sentry(dsn):
-        # noinspection PyUnreachableCode
-        if __debug__:
-            release = f"royalnet"
-        else:
-            release = f"royalnet=={version}"
         log.debug("Initializing Sentry...")
+        release = f"royalnet@{__version__}"
         sentry_sdk.init(dsn,
                         integrations=[AioHttpIntegration(),
                                       SqlalchemyIntegration(),
                                       LoggingIntegration(event_level=None)],
                         release=release)
-        log.info(f"Sentry: enabled (release {release})")
+        log.info(f"Sentry: {release}")
 
     # noinspection PyUnreachableCode
     @staticmethod
@@ -343,13 +381,12 @@ class Serf:
 
         if sentry_sdk is None:
             log.info("Sentry: not installed")
+        elif serf.sentry_dsn is None:
+            log.info("Sentry: disabled")
         else:
-            if serf.sentry_dsn is None:
-                log.info("Sentry: disabled")
-            else:
-                serf.init_sentry(serf.sentry_dsn)
+            serf.init_sentry(serf.sentry_dsn)
 
-        serf.loop = get_event_loop()
+        serf.loop = aio.get_event_loop()
         try:
             serf.loop.run_until_complete(serf.run())
         except Exception as e:

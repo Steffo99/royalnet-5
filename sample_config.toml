@@ -1,11 +1,12 @@
 # ROYALNET CONFIGURATION FILE
 
 [Herald]
-# Please note that either Herald.Local or Herald.Remote should be enabled!
+# Enable the herald module, allowing different parts of Royalnet to talk to each other
+# Requires the `herald` extra to be installed
+enabled = true
 
 [Herald.Local]
 # Run locally a Herald web server (websocket) that other parts of Royalnet can connect to
-# Requires the `herald` extra to be installed
 enabled = true
 # The address of the network interface on which the Herald server should listen for connections
 # If 0.0.0.0, listen for connections on all interfaces
@@ -91,7 +92,7 @@ log_level = "info"
 # Requires the `sentry` extra to be installed
 enabled = false
 # Get one at https://sentry.io/settings/YOUR-ORG/projects/YOUR-PROJECT/keys/
-sentry_dsn = "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@sentry.io/1111111"
+dsn = "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@sentry.io/1111111"
 
 [Packs]
 # The Python package name of the Packs you want to be usable in Royalnet
@@ -104,10 +105,9 @@ active = [
 
 # Configuration settings for specific packs
 # Be aware that packs have access to the whole config file
-[Pack]
-[Pack.Backpack]
+[Packs."royalnet.backpack"]
 # Enable exception debug commands and stars
 exc_debug = false
 
 # Add your packs config here!
-# [Pack.YourPackName]
+# [Packs."yourpack"]

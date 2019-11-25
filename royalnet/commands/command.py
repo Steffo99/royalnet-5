@@ -24,9 +24,6 @@ class Command:
     """The syntax of the command, to be displayed when a :py:exc:`InvalidInputError` is raised,
      in the format ``(required_arg) [optional_arg]``."""
 
-    tables: typing.Set = set()
-    """A set of :mod:`royalnet.alchemy` tables that must exist for this command to work."""
-
     def __init__(self, interface: CommandInterface):
         self.interface = interface
 
