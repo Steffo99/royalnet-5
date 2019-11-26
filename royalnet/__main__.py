@@ -123,6 +123,5 @@ def run(config_filename: str):
         herald_process.join()
 
 
-
 if __name__ == "__main__":
     run()
