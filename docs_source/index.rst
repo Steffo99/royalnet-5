@@ -4,10 +4,9 @@ royalnet
 Welcome to the documentation of Royalnet!
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
 
-   runningroyalnet
-   creatingacommand
+   randomdiscoveries
    apireference
 
 

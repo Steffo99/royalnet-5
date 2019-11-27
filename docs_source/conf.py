@@ -14,24 +14,37 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from royalnet import __version__ as royalnet_version
 
 # -- Project information -----------------------------------------------------
 
 project = 'Royalnet'
 copyright = '2019, Stefano Pigozzi'
 author = 'Stefano Pigozzi'
+version = royalnet_version
+release = royalnet_version
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.intersphinx"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3.7", None),
-                       "discord": ("https://discordpy.readthedocs.io/en/latest/", None),
-                       "telegram": ("https://python-telegram-bot.readthedocs.io/en/stable/", None),
-                       "sqlalchemy": ("https://docs.sqlalchemy.org/en/13/", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3.8", None),
+    "keyring": ("https://keyring.readthedocs.io/en/latest/", None),
+    "telegram": ("https://python-telegram-bot.readthedocs.io/en/stable/", None),
+    "discord": ("https://discordpy.readthedocs.io/en/latest/", None),
+    "ffmpeg_python": ("https://kkroening.github.io/ffmpeg-python/", None),
+    "sqlalchemy": ("https://docs.sqlalchemy.org/en/13/", None),
+    "psycopg2": ("http://initd.org/psycopg/docs/", None),
+    "websockets": ("https://websockets.readthedocs.io/en/stable/", None),
+}
 
 
 def skip(app, what, name: str, obj, would_skip, options):
@@ -65,3 +78,7 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Display warnings on the pages... for now.
+keep_warnings = True
+nitpicky = True

@@ -1,0 +1,112 @@
+# ROYALNET CONFIGURATION FILE
+
+[Herald]
+# Enable the herald module, allowing different parts of Royalnet to talk to each other
+# Requires the `herald` extra to be installed
+enabled = true
+
+[Herald.Local]
+# Run locally a Herald web server (websocket) that other parts of Royalnet can connect to
+enabled = true
+# The address of the network interface on which the Herald server should listen for connections
+# If 0.0.0.0, listen for connections on all interfaces
+# If 127.0.0.1, listen only for connections coming from the local machine
+address = "0.0.0.0"
+# The port on which the Herald server should run
+port = 44444
+# A password required to connect to the local Herald server
+secret = "CHANGE-ME"
+# Use HTTPS instead of HTTP for Herald connections
+secure = false  # Not supported yet!
+# Use a different HTTP path for Herald connections
+path = "/"  # Different values aren't supported yet
+
+[Herald.Remote]
+# Connect to a remote Herald web server (websocket)
+# Requires the `herald` extra to be installed
+enabled = false
+# The address of the remote Herald server
+address = "0.0.0.0"
+# The port of the remote Herald server
+port = 44444
+# The password required to connect to the remote Herald server
+secret = "CHANGE-ME"
+# Use HTTPS instead of HTTP for Herald connections
+secure = false  # Not supported yet!
+# Use a different HTTP path for Herald connections
+path = "/"  # Different values aren't supported yet
+
+
+[Alchemy]
+# Use the Alchemy module of Royalnet to connect to a PostgreSQL server
+# Requires either the `alchemy_easy` or the `alchemy_hard` extras to be installed
+enabled = true
+# The URL of the database you want to connect to, in sqlalchemy format:
+# https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+database_url = "postgresql://username:password@host:port/database"
+
+[Constellation]
+# Run locally a Constellation web server (uvicorn+starlette) serving the Stars contained in the enabled Packs
+# Requires the `constellation` extra to be installed
+enabled = true
+# The address of the network interface on which the Constellation should listen for requests
+# If 0.0.0.0, listen for requests on all interfaces
+# If 127.0.0.1, listen only for requests coming from the local machine
+address = "0.0.0.0"
+# The port on which the Constellation should run
+port = 44445
+
+[Serfs]
+
+[Serfs.Telegram]
+# Use the Telegram Serf (python-telegram-bot) included in Royalnet
+# Requires the `telegram` extra to be installed
+enabled = true
+# The Bot API Token of the bot you want to use for Royalnet
+# Obtain one at https://t.me/BotFather
+token = "0000000000:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+# The size of the Connection Pool used by python-telegram-bot
+# 8 should be fine, but if you start getting `TimeoutError: QueuePool limit of size X overflow Y reached" errors,
+# increasing this number should fix them
+pool_size = 8
+# The maximum amount of time to wait for a response from Telegram before raising a `TimeoutError`
+# It also is the time that python-telegram-bot will wait before sending a new request if no updates are being received.
+read_timeout = 60
+
+[Serfs.Discord]
+# Use the Discord Serf (discord.py) included in Royalnet
+# Requires the `discord` extra to be installed
+enabled = true
+# The Discord Bot Token of the bot you want to use for Royalnet
+# Obtain one at https://discordapp.com/developers/applications/ > Bot > Token
+token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+[Logging]
+# Print to stderr all logging events of an equal or greater level than this
+# Possible values are "DEBUG", "INFO", "WARNING", "ERROR", "FATAL"
+log_level = "INFO"
+# Optional: install the `coloredlogs` extra for colored output!
+
+[Sentry]
+# Connect Royalnet to a https://sentry.io/ project for error logging
+# Requires the `sentry` extra to be installed
+enabled = false
+# Get one at https://sentry.io/settings/YOUR-ORG/projects/YOUR-PROJECT/keys/
+dsn = "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@sentry.io/1111111"
+
+[Packs]
+# The Python package name of the Packs you want to be usable in Royalnet
+# Please note that the `royalnet.backpack` Pack should always be available!
+active = [
+    "royalnet.backpack",  # DO NOT REMOVE THIS OR THINGS WILL BREAK
+    # "yourpack",
+
+]
+
+# Configuration settings for specific packs
+[Packs."royalnet.backpack"]
+# Enable exception debug commands and stars
+exc_debug = false
+
+# Add your packs config here!
+# [Packs."yourpack"]

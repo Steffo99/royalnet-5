@@ -1,3 +1,14 @@
-from . import audio, bots, commands, packs, database, utils, error, web, version
+from . import alchemy, bard, commands, constellation, herald, backpack, serf, utils, version
 
-__all__ = ["audio", "bots", "commands", "database", "utils", "error", "web", "version"]
+__version__ = version.semantic
+
+__all__ = [
+    "alchemy",
+    "bard",
+    "commands",
+    "constellation",
+    "herald",
+    "serf",
+    "utils",
+    "backpack",
+]

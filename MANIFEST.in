@@ -1,3 +1,0 @@
-recursive-include **/templates *.html
-recursive-include **/static *
-prune venv

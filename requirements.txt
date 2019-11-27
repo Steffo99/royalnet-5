@@ -1,9 +1,0 @@
-dateparser
-youtube_dl
-ffmpeg_python
-urllib3
-sqlalchemy
-starlette
-keyring
-click
-royalherald

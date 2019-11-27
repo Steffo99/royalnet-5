@@ -1,0 +1,30 @@
+import typing
+
+
+class Request:
+    """A request sent from a :class:`Link` to another.
+
+     It contains the name of the requested handler, in addition to the data."""
+
+    def __init__(self, handler: str, data: dict, msg_type: typing.Optional[str] = None):
+        super().__init__()
+        if msg_type is not None:
+            assert msg_type == self.__class__.__name__
+        self.msg_type = self.__class__.__name__
+        self.handler: str = handler
+        self.data: dict = data
+
+    def to_dict(self):
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        return cls(**d)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.handler == other.handler and self.data == other.data
+        return False
+
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}(handler={self.handler}, data={self.data})"
