@@ -1,6 +1,5 @@
 *.egg-info
-.idea/misc.xml
-.idea/royalnet.iml
+.idea/
 dist/
 **/__pycache__/
 config.toml
