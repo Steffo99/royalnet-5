@@ -8,5 +8,5 @@ __all__ = [
     "Alchemy",
     "table_dfs",
     "AlchemyException",
-    "TableNotFoundException"
+    "TableNotFoundError"
 ]

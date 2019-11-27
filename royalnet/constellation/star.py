@@ -1,9 +1,9 @@
 from typing import *
+from starlette.requests import Request
+from starlette.responses import Response
 
 if TYPE_CHECKING:
     from .constellation import Constellation
-    from starlette.requests import Request
-    from starlette.responses import Response
 
 
 class Star:
@@ -14,7 +14,7 @@ class Star:
         self.config: Dict[str, Any] = config
         self.constellation: "Constellation" = constellation
 
-    async def page(self, request: "Request") -> "Response":
+    async def page(self, request: Request) -> Response:
         """The function generating the :class:`~starlette.Response` to a web :class:`~starlette.Request`.
 
         If it raises an error, the corresponding :class:`ExceptionStar` will be used to handle the request instead."""
@@ -22,18 +22,18 @@ class Star:
 
     @property
     def alchemy(self):
-        """A shortcut for the :class:`Alchemy` of the :class:`Constellation`."""
+        """A shortcut for the :class:`~royalnet.alchemy.Alchemy` of the :class:`Constellation`."""
         return self.constellation.alchemy
 
     # noinspection PyPep8Naming
     @property
     def Session(self):
-        """A shortcut for the alchemy :class:`Session` of the :class:`Constellation`."""
+        """A shortcut for the :class:`~royalnet.alchemy.Alchemy` :class:`Session` of the :class:`Constellation`."""
         return self.constellation.alchemy.Session
 
     @property
     def session_acm(self):
-        """A shortcut for the :func:`Alchemy.session_acm` of the :class:`Constellation`."""
+        """A shortcut for :func:`.alchemy.session_acm` of the :class:`Constellation`."""
         return self.constellation.alchemy.session_acm
 
     def __repr__(self):
@@ -44,7 +44,7 @@ class PageStar(Star):
     """A PageStar is a class representing a single route of the website (for example, ``/api/user/get``).
 
     To create a new website route you should create a new class inheriting from this class with a function overriding
-    :meth:`page` and changing the values of :attr:`path` and optionally :attr:`methods` and :attr:`tables`."""
+    :meth:`.page` and changing the values of :attr:`.path` and optionally :attr:`.methods`."""
     path: str = NotImplemented
     """The route of the star.
     
@@ -75,13 +75,13 @@ class ExceptionStar(Star):
     """An ExceptionStar is a class that handles an :class:`Exception` raised by another star by returning a different
     response than the one originally intended.
 
-    The handled exception type is specified in the :attr:`error`.
+    The handled exception type is specified in the :attr:`.error`.
 
     It can also handle standard webserver errors, such as ``404 Not Found``:
-    to handle them, set :attr:`error` to an :class:`int` of the corresponding error code.
+    to handle them, set :attr:`.error` to an :class:`int` of the corresponding error code.
 
     To create a new exception handler you should create a new class inheriting from this class with a function
-    overriding :meth:`page` and changing the values of :attr:`error` and optionally :attr:`tables`."""
+    overriding :meth:`.page` and changing the value of :attr:`.error`."""
     error: Union[Type[Exception], int]
     """The error that should be handled by this star. It should be either a subclass of :exc:`Exception`, 
     or the :class:`int` of an HTTP error code.

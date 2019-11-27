@@ -84,7 +84,7 @@ class Link:
             return f"<{self.__class__.__qualname__} (disconnected)>"
 
     async def connect(self):
-        """Connect to the :class:`Server` at :attr:`.master_uri`."""
+        """Connect to the :class:`Server` at :attr:`.config.url`."""
         log.debug(f"Connecting to Herald Server at {self.config.url}...")
         self.websocket = await websockets.connect(self.config.url, loop=self._loop)
         self.connect_event.set()

@@ -57,14 +57,15 @@ def underscorize(string: str) -> str:
 
 
 def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
-    """Convert the date :class:`str` returned by :mod:`youtube-dl` into the ``YYYY-MM-DD`` format.
+    """Convert the date :class:`str` returned by `youtube_dl <https://ytdl-org.github.io/youtube-dl/index.html>`_  into
+     the ``YYYY-MM-DD`` format.
     
     Parameters:
-        string: the input string, in the ``YYYYMMDD`` format used by :mod:`youtube_dl`.
-        separator: the string to add between the years, the months and the days. Defaults to ``-``.
+        string: the input :class:`str`, in the ``YYYYMMDD`` format used by youtube_dl.
+        separator: the :class:`str` to add between the years, the months and the days. Defaults to ``"-"``.
         
     Returns:
-        The resulting string in the new format.
+        The resulting :class:`str` in the new format.
 
     Example:
         ::

@@ -115,7 +115,7 @@ class Server:
             package: The package to find the destination of.
 
         Returns:
-            A :py:class:`list` of :py:class:`ConnectedClient` to send the package to."""
+            A :class:`list` of :class:`ConnectedClient` to send the package to."""
         # Parse destination
         # Is it nothing?
         if package.destination == "<none>":
@@ -134,7 +134,7 @@ class Server:
         return self.find_client(link_type=package.destination)
 
     async def route_package(self, package: Package) -> None:
-        """Executed every time a package is received and must be routed somewhere."""
+        """Executed every time a :class:`Package` is received and must be routed somewhere."""
         destinations = self.find_destination(package)
         log.debug(f"Routing package: {package} -> {destinations}")
         for destination in destinations:

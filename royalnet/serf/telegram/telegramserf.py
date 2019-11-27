@@ -21,8 +21,6 @@ try:
 except ImportError:
     Session = None
 
-import royalnet.herald as rh
-
 log = logging.getLogger(__name__)
 
 

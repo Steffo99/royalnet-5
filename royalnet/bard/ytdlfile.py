@@ -10,14 +10,14 @@ from .errors import NotFoundError, MultipleFilesError
 try:
     from youtube_dl import YoutubeDL
 except ImportError:
-    youtube_dl = None
+    YoutubeDL = None
 
 
 log = logging.getLogger(__name__)
 
 
 class YtdlFile:
-    """A representation of a file download with :mod:`youtube_dl`."""
+    """A representation of a file download with `youtube_dl <https://ytdl-org.github.io/youtube-dl/index.html>`_."""
 
     default_ytdl_args = {
         "quiet": not __debug__,  # Do not print messages to stdout.
@@ -33,7 +33,7 @@ class YtdlFile:
                  filename: Optional[str] = None,
                  ytdl_args: Optional[Dict[str, Any]] = None,
                  loop: Optional[AbstractEventLoop] = None):
-        """Create a YtdlFile instance.
+        """Create a :class:`YtdlFile` instance.
 
         Warning:
             Please avoid using directly :meth:`.__init__`, use :meth:`.from_url` instead!"""
@@ -48,11 +48,11 @@ class YtdlFile:
 
     @property
     def has_info(self) -> bool:
-        """Does the YtdlFile have info available?"""
+        """Does the :class:`YtdlFile` have info available?"""
         return self.info is not None
 
     async def retrieve_info(self) -> None:
-        """Retrieve info about the YtdlFile through :mod:`youtube_dl`."""
+        """Retrieve info about the :class:`YtdlFile` through :class:`YoutubeDL`."""
         if not self.has_info:
             infos = await asyncify(YtdlInfo.from_url, self.url, loop=self._loop, **self.ytdl_args)
             if len(infos) == 0:

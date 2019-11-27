@@ -23,7 +23,7 @@ class CommandInterface:
         ``/`` on Telegram, ``!`` on Discord."""
 
     serf: Optional["Serf"] = None
-    """A reference to the Serf that is implementing this :class:`CommandInterface`.
+    """A reference to the :class:`~royalnet.serf.Serf` that is implementing this :class:`CommandInterface`.
     
     Example:
         A reference to a :class:`~royalnet.serf.telegram.TelegramSerf`."""
@@ -37,12 +37,12 @@ class CommandInterface:
 
     @property
     def alchemy(self) -> "Alchemy":
-        """A shortcut for :attr:`serf.alchemy`."""
+        """A shortcut for :attr:`.serf.alchemy`."""
         return self.serf.alchemy
 
     @property
     def loop(self) -> AbstractEventLoop:
-        """A shortcut for :attr:`serf.loop`."""
+        """A shortcut for :attr:`.serf.loop`."""
         return self.serf.loop
 
     def __init__(self, cfg: Dict[str, Any]):
@@ -54,7 +54,10 @@ class CommandInterface:
         self.event: Optional[Event] = None
 
     async def call_herald_event(self, destination: str, event_name: str, **kwargs) -> dict:
-        """Call an event function on a different :class:`Serf`.
+        """Call an event function on a different :class:`~royalnet.serf.Serf`.
 
-        For example, you can run a function on a :class:`DiscordSerf` from a :class:`TelegramSerf`."""
+        Example:
+            You can run a function on a :class:`~royalnet.serf.discord.DiscordSerf` from a
+            :class:`~royalnet.serf.telegram.TelegramSerf`.
+        """
         raise UnsupportedError(f"{self.call_herald_event.__name__} is not supported on this platform")

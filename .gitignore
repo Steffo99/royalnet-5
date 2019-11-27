@@ -26,4 +26,5 @@ dist/
 .idea/**/gradle.xml
 .idea/**/libraries
 .idea/**/markdown-navigator.xml
+.idea/**/markdown-exported-files.xml
 .idea/**/misc.xml

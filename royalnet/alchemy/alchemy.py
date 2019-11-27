@@ -1,7 +1,7 @@
 from typing import Set, Dict, Union
 from contextlib import contextmanager, asynccontextmanager
 from royalnet.utils import asyncify
-from royalnet.alchemy.errors import TableNotFoundException
+from royalnet.alchemy.errors import TableNotFoundError
 
 try:
     from sqlalchemy import create_engine
@@ -61,13 +61,13 @@ class Alchemy:
         if isinstance(table, str):
             result = self._tables.get(table)
             if result is None:
-                raise TableNotFoundException(f"Table '{table}' isn't present in this Alchemy instance")
+                raise TableNotFoundError(f"Table '{table}' isn't present in this Alchemy instance")
             return result
         elif isinstance(table, type):
             name = table.__name__
             result = self._tables.get(name)
             if result is None:
-                raise TableNotFoundException(f"Table '{table}' isn't present in this Alchemy instance")
+                raise TableNotFoundError(f"Table '{table}' isn't present in this Alchemy instance")
             return result
         else:
             raise TypeError(f"Can't get tables with objects of type '{table.__class__.__qualname__}'")

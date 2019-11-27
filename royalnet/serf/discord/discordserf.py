@@ -17,10 +17,8 @@ except ImportError:
 
 try:
     from sqlalchemy.orm.session import Session
-    from ..alchemyconfig import AlchemyConfig
 except ImportError:
     Session = None
-    AlchemyConfig = None
 
 try:
     from royalnet.herald import Config as HeraldConfig

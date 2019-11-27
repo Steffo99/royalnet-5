@@ -1,4 +1,4 @@
-"""A Pack that is imported by default by all :mod:`royalnet` instances.
+"""A Pack that is imported by default by all Royalnet instances.
 
 Keep things here to a minimum!"""
 

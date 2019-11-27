@@ -3,20 +3,18 @@ from typing import Optional, TYPE_CHECKING
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
 from ..utils import asyncify
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.session import Session
 
 
 class CommandData:
-    def __init__(self, interface: CommandInterface, session: Optional["Session"], loop: AbstractEventLoop):
+    def __init__(self, interface: CommandInterface, session: Optional[Session], loop: AbstractEventLoop):
         self._interface: CommandInterface = interface
-        self._session: Optional["Session"] = session
+        self._session: Optional[Session] = session
         self.loop: AbstractEventLoop = loop
 
     @property
-    def session(self) -> "Session":
-        """Get the :class:`Alchemy` :class:`Session`, if it is available.
+    def session(self) -> Session:
+        """Get the :class:`~royalnet.alchemy.Alchemy` :class:`Session`, if it is available.
 
         Raises:
             UnsupportedError: if no session is available."""

@@ -43,9 +43,9 @@ UVICORN_LOGGING_CONFIG = {
 class Constellation:
     """The class that represents the webserver.
 
-    It runs multiple :class:`Star` , which represent the routes of the website.
+    It runs multiple :class:`Star`, which represent the routes of the website.
 
-    It also handles the :class:`Alchemy` connection, and it *will eventually* support Herald connections too."""
+    It also handles the :class:`Alchemy` connection, and Herald connections too."""
     def __init__(self,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],
@@ -67,7 +67,7 @@ class Constellation:
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy = None
-        """The :class:`Alchemy` of this Constellation."""
+        """The :class:`~ra.Alchemy` of this Constellation."""
 
         # Alchemy
         if ra.Alchemy is None:
@@ -89,19 +89,19 @@ class Constellation:
 
         # Herald
         self.herald: Optional[rh.Link] = None
-        """The :class:`Link` object connecting the Serf to the rest of the herald network."""
+        """The :class:`Link` object connecting the :class:`Constellation` to the rest of the herald network."""
 
         self.herald_task: Optional[aio.Task] = None
-        """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
+        """A reference to the :class:`aio.Task` that runs the :class:`rh.Link`."""
 
         self.Interface: Type[rc.CommandInterface] = self.interface_factory()
-        """The :class:`CommandInterface` class of this Constellation."""
+        """The :class:`~rc.CommandInterface` class of this :class:`Constellation`."""
 
         self.events: Dict[str, rc.Event] = {}
-        """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
+        """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
         self.starlette = Starlette(debug=__debug__)
-        """The :class:`starlette.Starlette` app."""
+        """The :class:`~starlette.Starlette` app."""
 
         # Register Events
         for pack_name in packs:
@@ -143,17 +143,17 @@ class Constellation:
         log.info(f"ExceptionStars: {len(self.starlette.exception_handlers)} stars")
 
         self.running: bool = False
-        """Is the Constellation server currently running?"""
+        """Is the :class:`Constellation` server currently running?"""
 
         self.address: str = constellation_cfg["address"]
-        """The address that the Constellation will bind to when run."""
+        """The address that the :class:`Constellation` will bind to when run."""
 
         self.port: int = constellation_cfg["port"]
-        """The port on which the Constellation will listen for connection on."""
+        """The port on which the :class:`Constellation` will listen for connection on."""
 
     # TODO: is this a good idea?
     def interface_factory(self) -> Type[rc.CommandInterface]:
-        """Create the :class:`CommandInterface` class for the Constellation."""
+        """Create the :class:`rc.CommandInterface` class for the :class:`Constellation`."""
 
         # noinspection PyMethodParameters
         class GenericInterface(rc.CommandInterface):
@@ -161,8 +161,8 @@ class Constellation:
             constellation = self
 
             async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
-                """Send a :class:`royalherald.Request` to a specific destination, and wait for a
-                :class:`royalherald.Response`."""
+                """Send a :class:`rh.Request` to a specific destination, and wait for a
+                :class:`rh.Response`."""
                 if self.herald is None:
                     raise rc.UnsupportedError("`royalherald` is not enabled on this Constellation.")
                 request: rh.Request = rh.Request(handler=event_name, data=kwargs)
@@ -196,7 +196,7 @@ class Constellation:
         return GenericInterface
 
     def init_herald(self, herald_cfg: Dict[str, Any]):
-        """Create a :class:`Link` and bind :class:`Event`."""
+        """Create a :class:`rh.Link`."""
         herald_cfg["name"] = "constellation"
         self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
@@ -301,7 +301,6 @@ class Constellation:
                             herald_cfg=herald_cfg,
                             packs_cfg=packs_cfg,
                             constellation_cfg=constellation_cfg)
-
 
         # Run the server
         constellation.run_blocking()

@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 class YtdlDiscord:
-    """A representation of a YtdlFile conversion to the :mod:`discord` PCM format."""
+    """A representation of a :class:`YtdlFile` conversion to the :mod:`discord` PCM format."""
 
     def __init__(self, ytdl_file: YtdlFile):
         self.ytdl_file: YtdlFile = ytdl_file

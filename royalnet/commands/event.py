@@ -17,12 +17,12 @@ class Event:
 
     @property
     def alchemy(self):
-        """A shortcut for :attr:`.serf.alchemy`."""
+        """A shortcut for :attr:`.interface.serf.alchemy`."""
         return self.interface.serf.alchemy
 
     @property
     def loop(self):
-        """A shortcut for :attr:`.serf.loop`"""
+        """A shortcut for :attr:`.interface.serf.loop`"""
         return self.interface.serf.loop
 
     async def run(self, **kwargs):

@@ -12,7 +12,7 @@ class CommandArgs(list):
         """Access arguments as if they were a :class:`list`.
 
         Raises:
-            royalnet.error.InvalidInputError: if the requested argument does not exist.
+            InvalidInputError: if the requested argument does not exist.
 
         Examples:
             ::
@@ -44,11 +44,10 @@ class CommandArgs(list):
         """Get the arguments as a space-joined string.
 
         Parameters:
-            require_at_least: the minimum amount of arguments required, will raise :exc:`InvalidInputError` if the
-            requirement is not fullfilled.
+            require_at_least: the minimum amount of arguments required.
 
         Raises:
-            royalnet.error.InvalidInputError: if there are less than ``require_at_least`` arguments.
+            InvalidInputError: if there are less than ``require_at_least`` arguments.
 
         Returns:
             The space-joined string.

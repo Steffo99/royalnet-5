@@ -29,12 +29,12 @@ class Command:
 
     @property
     def alchemy(self):
-        """A shortcut for :attr:`interface.alchemy`."""
+        """A shortcut for :attr:`.interface.alchemy`."""
         return self.interface.alchemy
 
     @property
     def loop(self):
-        """A shortcut for :attr:`interface.loop`."""
+        """A shortcut for :attr:`.interface.loop`."""
         return self.interface.loop
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:

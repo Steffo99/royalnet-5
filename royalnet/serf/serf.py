@@ -57,7 +57,7 @@ class Serf:
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None
-        """The :class:`Alchemy` object connecting this Serf to a database."""
+        """The :class:`Alchemy` object connecting this :class:`Serf` to a database."""
 
         self.master_table: Optional[Table] = None
         """The central table listing all users. It usually is :class:`User`."""
@@ -88,7 +88,7 @@ class Serf:
             log.info(f"Alchemy: {self.alchemy}")
 
         self.herald: Optional[rh.Link] = None
-        """The :class:`Link` object connecting the Serf to the rest of the herald network."""
+        """The :class:`Link` object connecting the :class:`Serf` to the rest of the Herald network."""
 
         self.herald_task: Optional[aio.Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""

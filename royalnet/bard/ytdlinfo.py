@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 
 class YtdlInfo:
-    """A wrapper around youtube_dl extracted info."""
+    """A wrapper around `youtube_dl <https://ytdl-org.github.io/youtube-dl/index.html>`_ extracted info."""
 
     _default_ytdl_args = {
         "quiet": True,  # Do not print messages to stdout.
@@ -26,7 +26,7 @@ class YtdlInfo:
     }
 
     def __init__(self, info: Dict[str, Any]):
-        """Create a YtdlInfo from the dict returned by the :func:`youtube_dl.YoutubeDL.extract_info` function.
+        """Create a :class:`YtdlInfo` from the dict returned by the :func:`YoutubeDL.extract_info` function.
 
         Warning:
             Does not download the info, to do that use :func:`.retrieve_for_url`."""
@@ -89,7 +89,7 @@ class YtdlInfo:
 
     @classmethod
     async def from_url(cls, url, loop: Optional[AbstractEventLoop] = None, **ytdl_args) -> List["YtdlInfo"]:
-        """Fetch the info for an url through :mod:`youtube_dl`.
+        """Fetch the info for an url through :class:`YoutubeDL`.
 
         Returns:
             A :class:`list` containing the infos for the requested videos."""
