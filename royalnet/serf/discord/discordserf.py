@@ -1,4 +1,4 @@
-import asyncio
+import asyncio as aio
 import logging
 import warnings
 from typing import *
@@ -36,6 +36,7 @@ class DiscordSerf(Serf):
     _identity_column = "discord_id"
 
     def __init__(self,
+                 loop: aio.AbstractEventLoop,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],
                  sentry_cfg: Dict[str, Any],
@@ -45,7 +46,8 @@ class DiscordSerf(Serf):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
 
-        super().__init__(alchemy_cfg=alchemy_cfg,
+        super().__init__(loop=loop,
+                         alchemy_cfg=alchemy_cfg,
                          herald_cfg=herald_cfg,
                          sentry_cfg=sentry_cfg,
                          packs_cfg=packs_cfg,
@@ -80,7 +82,7 @@ class DiscordSerf(Serf):
             def __init__(data,
                          interface: CommandInterface,
                          session,
-                         loop: asyncio.AbstractEventLoop,
+                         loop: aio.AbstractEventLoop,
                          message: "discord.Message"):
                 super().__init__(interface=interface, session=session, loop=loop)
                 data.message = message

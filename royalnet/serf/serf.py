@@ -40,10 +40,13 @@ class Serf:
     _identity_column: str = NotImplemented
 
     def __init__(self,
+                 loop: aio.AbstractEventLoop,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],
                  packs_cfg: Dict[str, Any],
                  **_):
+        self.loop: Optional[aio.AbstractEventLoop] = loop
+        """The event loop this Serf is running on."""
 
         # Import packs
         pack_names = packs_cfg["active"]
@@ -130,9 +133,6 @@ class Serf:
         else:
             self.init_herald(herald_cfg)
             log.info(f"Herald: enabled")
-
-        self.loop: Optional[aio.AbstractEventLoop] = None
-        """The event loop this Serf is running on."""
 
     def init_alchemy(self, alchemy_cfg: Dict[str, Any], tables: Set[type]) -> None:
         """Create and initialize the :class:`Alchemy` with the required tables, and find the link between the master
@@ -320,9 +320,8 @@ class Serf:
             except ImportError:
                 log.info("Sentry: not installed")
 
-        serf = cls(**kwargs)
+        serf = cls(loop=aio.get_event_loop(), **kwargs)
 
-        serf.loop = aio.get_event_loop()
         try:
             serf.loop.run_until_complete(serf.run())
         except Exception as e:

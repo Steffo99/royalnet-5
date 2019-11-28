@@ -34,7 +34,6 @@ class CommandInterface:
     Example:
         A reference to a :class:`~royalnet.constellation.Constellation`."""
 
-
     @property
     def alchemy(self) -> "Alchemy":
         """A shortcut for :attr:`.serf.alchemy`."""
@@ -43,7 +42,11 @@ class CommandInterface:
     @property
     def loop(self) -> AbstractEventLoop:
         """A shortcut for :attr:`.serf.loop`."""
-        return self.serf.loop
+        if self.serf:
+            return self.serf.loop
+        else:
+            # TODO
+            raise Exception("TODO")
 
     def __init__(self, cfg: Dict[str, Any]):
         self.cfg: Dict[str, Any] = cfg

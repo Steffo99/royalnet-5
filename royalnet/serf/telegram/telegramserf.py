@@ -32,6 +32,7 @@ class TelegramSerf(Serf):
     _identity_column = "tg_id"
 
     def __init__(self,
+                 loop: aio.AbstractEventLoop,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],
                  sentry_cfg: Dict[str, Any],
@@ -41,7 +42,8 @@ class TelegramSerf(Serf):
         if telegram is None:
             raise ImportError("'telegram' extra is not installed")
 
-        super().__init__(alchemy_cfg=alchemy_cfg,
+        super().__init__(loop=loop,
+                         alchemy_cfg=alchemy_cfg,
                          herald_cfg=herald_cfg,
                          sentry_cfg=sentry_cfg,
                          packs_cfg=packs_cfg,
