@@ -167,8 +167,7 @@ class Serf:
                 if isinstance(response, rh.ResponseFailure):
                     if response.name == "no_event":
                         raise CommandError(f"There is no event named {event_name} in {destination}.")
-                    elif response.name == "exception_in_event":
-                        # TODO: pretty sure there's a better way to do this
+                    elif response.name == "error_in_event":
                         if response.extra_info["type"] == "CommandError":
                             raise CommandError(response.extra_info["message"])
                         elif response.extra_info["type"] == "UserError":
@@ -182,13 +181,16 @@ class Serf:
                         elif response.extra_info["type"] == "ExternalError":
                             raise ExternalError(response.extra_info["message"])
                         else:
-                            raise ValueError(f"Herald action call returned invalid error:\n"
-                                             f"[p]{response}[/p]")
+                            raise ProgramError(f"Invalid error in Herald event '{event_name}':\n"
+                                               f"[p]{response}[/p]")
+                    elif response.name == "unhandled_exception_in_event":
+                        raise ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
+                                           f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
-                    raise ValueError(f"Other Herald Link returned unknown response:\n"
-                                     f"[p]{response}[/p]")
+                    raise ProgramError(f"Other Herald Link returned unknown response:\n"
+                                       f"[p]{response}[/p]")
 
         return GenericInterface
 
@@ -266,10 +268,18 @@ class Serf:
             try:
                 response_data = await event.run(**message.data)
                 return rh.ResponseSuccess(data=response_data)
+            except CommandError as e:
+                return rh.ResponseFailure("error_in_event",
+                                          f"The event '{message.handler}' raised a {e.__class__.__qualname__}.",
+                                          extra_info={
+                                              "type": e.__class__.__qualname__,
+                                              "message": str(e)
+                                          })
             except Exception as e:
                 ru.sentry_exc(e)
-                return rh.ResponseFailure("exception_in_event",
-                                          f"An exception was raised in the event for '{message.handler}'.",
+                return rh.ResponseFailure("unhandled_exception_in_event",
+                                          f"The event '{message.handler}' raised an unhandled"
+                                          f" {e.__class__.__qualname__}.",
                                           extra_info={
                                               "type": e.__class__.__qualname__,
                                               "message": str(e)
@@ -293,12 +303,13 @@ class Serf:
             await data.reply(f"⚠️ {e.message}")
         except ConfigurationError as e:
             await data.reply(f"⚠️ {e.message}")
+        except ProgramError as e:
+            await data.reply(f"⛔️ {e.message}")
         except CommandError as e:
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             ru.sentry_exc(e)
-            error_message = f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args)
-            await data.reply(error_message)
+            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""

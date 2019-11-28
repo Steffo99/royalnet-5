@@ -28,3 +28,7 @@ class ConfigurationError(CommandError):
 class ExternalError(CommandError):
     """The command failed to execute, but the problem was because of an external factor (such as an external API going
     down)."""
+
+
+class ProgramError(CommandError):
+    """The command encountered an error in the program."""

@@ -8,7 +8,8 @@ from .errors import CommandError, \
                     UnsupportedError, \
                     ConfigurationError, \
                     ExternalError, \
-                    UserError
+                    UserError, \
+                    ProgramError
 
 __all__ = [
     "CommandInterface",
@@ -21,5 +22,6 @@ __all__ = [
     "ConfigurationError",
     "ExternalError",
     "UserError",
+    "ProgramError",
     "Event"
 ]
