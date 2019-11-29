@@ -28,6 +28,11 @@ class Command:
         self.interface = interface
 
     @property
+    def serf(self):
+        """A shortcut for :attr:`.interface.serf`."""
+        return self.interface.serf
+
+    @property
     def alchemy(self):
         """A shortcut for :attr:`.interface.alchemy`."""
         return self.interface.alchemy
@@ -36,6 +41,11 @@ class Command:
     def loop(self):
         """A shortcut for :attr:`.interface.loop`."""
         return self.interface.loop
+
+    @property
+    def config(self):
+        """A shortcut for :attr:`.interface.config`."""
+        return self.interface.config
 
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         raise NotImplementedError()

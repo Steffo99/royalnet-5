@@ -48,8 +48,8 @@ class CommandInterface:
             # TODO
             raise Exception("TODO")
 
-    def __init__(self, cfg: Dict[str, Any]):
-        self.cfg: Dict[str, Any] = cfg
+    def __init__(self, config: Dict[str, Any]):
+        self.config: Dict[str, Any] = config
         """The config section for the pack of the command."""
 
         # Will be bound after the command/event has been created

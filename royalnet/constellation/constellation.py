@@ -225,7 +225,7 @@ class Constellation:
     def register_events(self, events: List[Type[rc.Event]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
             # Create a new interface
-            interface = self.Interface(cfg=pack_cfg)
+            interface = self.Interface(config=pack_cfg)
             # Initialize the event
             try:
                 event = SelectedEvent(interface)
