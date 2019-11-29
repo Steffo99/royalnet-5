@@ -27,6 +27,9 @@ class Command:
     def __init__(self, interface: CommandInterface):
         self.interface = interface
 
+    def __str__(self):
+        return f"[c]{self.interface.prefix}{self.name}[/c]"
+
     @property
     def serf(self):
         """A shortcut for :attr:`.interface.serf`."""

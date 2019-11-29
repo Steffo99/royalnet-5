@@ -1,0 +1,13 @@
+import royalnet
+from royalnet.commands import *
+
+#set($CAPITALIZED_NAME = $NAME.substring(0,1).toUpperCase() + $NAME.substring(1))
+class ${CAPITALIZED_NAME}Command(Command):
+    name: str = "$NAME"
+
+    description: str = ""
+
+    syntax: str = ""
+
+    async def run(self, args: CommandArgs, data: CommandData) -> None:
+        ...

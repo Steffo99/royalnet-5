@@ -1,0 +1,10 @@
+from typing import *
+from royalnet.commands import *
+
+
+#set($CAPITALIZED_NAME = $NAME.substring(0,1).toUpperCase() + $NAME.substring(1))
+class ${CAPITALIZED_NAME}Event(Event):
+    name = "$NAME"
+
+    async def run(self, **kwargs) -> dict:
+        ...
