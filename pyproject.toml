@@ -66,7 +66,7 @@
     alchemy_easy = ["sqlalchemy", "psycopg2_binary"]
     alchemy_hard = ["sqlalchemy", "psycopg2"]
     bard = ["ffmpeg_python", "youtube_dl"]
-    constellation = ["starlette", "uvicorn"]
+    constellation = ["starlette", "uvicorn", "python-multipart"]
     sentry = ["sentry_sdk"]
     herald = ["websockets"]
     coloredlogs = ["coloredlogs"]

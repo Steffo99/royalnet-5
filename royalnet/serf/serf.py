@@ -166,7 +166,7 @@ class Serf:
                 response: rh.Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, rh.ResponseFailure):
                     if response.name == "no_event":
-                        raise CommandError(f"There is no event named {event_name} in {destination}.")
+                        raise ProgramError(f"There is no event named {event_name} in {destination}.")
                     elif response.name == "error_in_event":
                         if response.extra_info["type"] == "CommandError":
                             raise CommandError(response.extra_info["message"])

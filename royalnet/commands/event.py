@@ -16,14 +16,24 @@ class Event:
         """The :class:`CommandInterface` available to this :class:`Event`."""
 
     @property
+    def serf(self):
+        """A shortcut for :attr:`.interface.serf`."""
+        return self.interface.serf
+
+    @property
     def alchemy(self):
-        """A shortcut for :attr:`.interface.serf.alchemy`."""
-        return self.interface.serf.alchemy
+        """A shortcut for :attr:`.interface.alchemy`."""
+        return self.interface.alchemy
 
     @property
     def loop(self):
-        """A shortcut for :attr:`.interface.serf.loop`"""
-        return self.interface.serf.loop
+        """A shortcut for :attr:`.interface.loop`."""
+        return self.interface.loop
+
+    @property
+    def config(self):
+        """A shortcut for :attr:`.interface.config`."""
+        return self.interface.config
 
     async def run(self, **kwargs):
         raise NotImplementedError()
