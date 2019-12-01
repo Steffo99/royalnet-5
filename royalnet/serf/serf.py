@@ -331,7 +331,9 @@ class Serf:
             except ImportError:
                 log.info("Sentry: not installed")
 
-        serf = cls(loop=aio.get_event_loop(), **kwargs)
+        loop = aio.get_event_loop()
+
+        serf = cls(loop=loop, **kwargs)
 
         try:
             serf.loop.run_until_complete(serf.run())

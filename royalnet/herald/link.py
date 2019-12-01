@@ -129,14 +129,20 @@ class Link:
     @requires_identification
     async def send(self, package: Package):
         """Send a package to the :class:`Server`."""
-        await self.websocket.send(package.to_json_bytes())
+        log.debug(f"Trying to send package: {package}")
+        try:
+            jbytes = package.to_json_bytes()
+        except TypeError as e:
+            log.fatal(f"Could not send package: {' '.join(e.args)}")
+            raise
+        await self.websocket.send(jbytes)
         log.debug(f"Sent package: {package}")
 
     @requires_identification
     async def broadcast(self, destination: str, broadcast: Broadcast) -> None:
         package = Package(broadcast.to_dict(), source=self.nid, destination=destination)
         await self.send(package)
-        log.debug(f"Sent broadcast: {broadcast}")
+        log.debug(f"Sent broadcast to {destination}: {broadcast}")
 
     @requires_identification
     async def request(self, destination: str, request: Request) -> Response:

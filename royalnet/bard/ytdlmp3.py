@@ -18,6 +18,16 @@ class YtdlMp3:
         self.mp3_filename: typing.Optional[str] = None
         self.lock: MultiLock = MultiLock()
 
+    def __repr__(self):
+        if not self.ytdl_file.has_info:
+            return f"<{self.__class__.__qualname__} without info>"
+        elif not self.ytdl_file.is_downloaded:
+            return f"<{self.__class__.__qualname__} not downloaded>"
+        elif not self.is_converted:
+            return f"<{self.__class__.__qualname__} at '{self.ytdl_file.filename}' not converted>"
+        else:
+            return f"<{self.__class__.__qualname__} at '{self.mp3_filename}'>"
+
     @property
     def is_converted(self):
         """Has the file been converted?"""

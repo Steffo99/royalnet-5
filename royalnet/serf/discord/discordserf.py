@@ -229,9 +229,16 @@ class DiscordSerf(Serf):
             return None
         else:
             # Give priority to channels with the most people
-            def people_count(c: discord.VoiceChannel):
+            def people_count(c: "discord.VoiceChannel"):
                 return len(c.members)
 
             channels.sort(key=people_count, reverse=True)
 
             return channels[0]
+
+    def find_voice_player(self, guild: "discord.Guild") -> Optional[VoicePlayer]:
+        for voice_player in self.voice_players:
+            if voice_player.voice_client.guild == guild:
+                return voice_player
+        else:
+            return None

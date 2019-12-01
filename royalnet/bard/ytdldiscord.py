@@ -27,6 +27,16 @@ class YtdlDiscord:
         self.pcm_filename: typing.Optional[str] = None
         self.lock: MultiLock = MultiLock()
 
+    def __repr__(self):
+        if not self.ytdl_file.has_info:
+            return f"<{self.__class__.__qualname__} without info>"
+        elif not self.ytdl_file.is_downloaded:
+            return f"<{self.__class__.__qualname__} not downloaded>"
+        elif not self.is_converted:
+            return f"<{self.__class__.__qualname__} at '{self.ytdl_file.filename}' not converted>"
+        else:
+            return f"<{self.__class__.__qualname__} at '{self.pcm_filename}'>"
+
     @property
     def is_converted(self):
         """Has the file been converted?"""
@@ -44,9 +54,9 @@ class YtdlDiscord:
                     log.debug(f"Converting to PCM: {self.ytdl_file.filename}")
                     await asyncify(
                         ffmpeg.input(self.ytdl_file.filename)
-                            .output(destination_filename, format="s16le", ac=2, ar="48000")
-                            .overwrite_output()
-                            .run
+                              .output(destination_filename, format="s16le", ac=2, ar="48000")
+                              .overwrite_output()
+                              .run
                     )
             self.pcm_filename = destination_filename
 

@@ -1,4 +1,5 @@
 import asyncio
+import threading
 import logging
 from typing import Optional
 from .errors import *
@@ -19,6 +20,8 @@ class VoicePlayer:
             self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         else:
             self.loop = loop
+        # FIXME: this looks like spaghetti
+        self._playback_ended_event: threading.Event = threading.Event()
 
     async def connect(self, channel: "discord.VoiceChannel") -> "discord.VoiceClient":
         """Connect the :class:`VoicePlayer` to a :class:`discord.VoiceChannel`, creating a :class:`discord.VoiceClient`
@@ -92,12 +95,20 @@ class VoicePlayer:
             return
         log.debug(f"Next: {next_source}")
         self.voice_client.play(next_source, after=self._playback_ended)
+        self.loop.create_task(self._playback_check())
 
-    def _playback_ended(self, error: Exception = None):
-        """An helper method that is called when the :attr:`.voice_client._player` has finished playing."""
+    async def _playback_check(self):
+        # FIXME: quite spaghetti
+        while True:
+            if self._playback_ended_event.is_set():
+                self._playback_ended_event.clear()
+                await self.start()
+                break
+            await asyncio.sleep(1)
+
+    def _playback_ended(self, error=None):
         if error is not None:
-            # TODO: capture exception with Sentry
-            log.error(f"Error during playback: {error}")
+            # TODO: catch with Sentry
+            log.error(error)
             return
-        # Create a new task to create
-        self.loop.create_task(self.start())
+        self._playback_ended_event.set()

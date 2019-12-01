@@ -1,8 +1,9 @@
 import os
 import logging
+import re
 from contextlib import asynccontextmanager
-from typing import Optional, List, Dict, Any
-from royalnet.utils import asyncify, MultiLock
+from typing import *
+from royalnet.utils import *
 from asyncio import AbstractEventLoop, get_event_loop
 from .ytdlinfo import YtdlInfo
 from .errors import NotFoundError, MultipleFilesError
@@ -23,7 +24,7 @@ class YtdlFile:
         "quiet": not __debug__,  # Do not print messages to stdout.
         "noplaylist": True,  # Download single video instead of a playlist if in doubt.
         "no_warnings": not __debug__,  # Do not print out anything for warnings.
-        "outtmpl": "%(epoch)s-%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
+        "outtmpl": "./downloads/%(epoch)s-%(title)s-%(id)s.%(ext)s",  # Use the default outtmpl.
         "ignoreerrors": True  # Ignore unavailable videos
     }
 
@@ -45,6 +46,14 @@ class YtdlFile:
         if not loop:
             loop = get_event_loop()
         self._loop = loop
+
+    def __repr__(self):
+        if not self.has_info:
+            return f"<{self.__class__.__qualname__} without info>"
+        elif not self.is_downloaded:
+            return f"<{self.__class__.__qualname__} not downloaded>"
+        else:
+            return f"<{self.__class__.__qualname__} at '{self.filename}'>"
 
     @property
     def has_info(self) -> bool:
@@ -77,12 +86,16 @@ class YtdlFile:
                 filename = ytdl.prepare_filename(self.info.__dict__)
             with YoutubeDL({**self.ytdl_args, "outtmpl": filename}) as ytdl:
                 ytdl.download([self.info.webpage_url])
-                self.filename = filename
+            # "WARNING: Requested formats are incompatible for merge and will be merged into mkv."
+            if not os.path.exists(filename):
+                filename = re.sub(r"\.[^.]+$", ".mkv", filename)
+            self.filename = filename
 
         await self.retrieve_info()
-        async with self.lock.exclusive():
-            log.debug(f"Downloading with youtube-dl: {self}")
-            await asyncify(download, loop=self._loop)
+        if not self.is_downloaded:
+            async with self.lock.exclusive():
+                log.debug(f"Downloading with youtube-dl: {self}")
+                await asyncify(download, loop=self._loop)
 
     @asynccontextmanager
     async def aopen(self):

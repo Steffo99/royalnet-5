@@ -82,10 +82,15 @@ enabled = true
 token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 [Logging]
-# Print to stderr all logging events of an equal or greater level than this
-# Possible values are "DEBUG", "INFO", "WARNING", "ERROR", "FATAL"
-log_level = "INFO"
-# Optional: install the `coloredlogs` extra for colored output!
+# TODO: document this
+log_format = "{asctime}\t| {processName}\t| {name}\t| {message}"
+
+[Logging.Loggers]
+root = "ERROR"
+"royalnet" = "INFO"
+# "royalnet.commands" = "DEBUG"
+# "websockets.protocol" = "ERROR"
+# ...
 
 [Sentry]
 # Connect Royalnet to a https://sentry.io/ project for error logging

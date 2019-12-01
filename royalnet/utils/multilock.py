@@ -46,11 +46,11 @@ class MultiLock:
         log.debug(f"Waiting for normal lock end: {self}")
         await self._normal_event.wait()
         try:
-            log.debug("Acquiring exclusive lock: {self}")
+            log.debug(f"Acquiring exclusive lock: {self}")
             self._exclusive_event.clear()
             yield
         finally:
-            log.debug("Releasing exclusive lock: {self}")
+            log.debug(f"Releasing exclusive lock: {self}")
             self._exclusive_event.set()
 
     def __repr__(self):
