@@ -106,7 +106,11 @@ class YtdlInfo:
         if first_info is None:
             return []
         # If it is a playlist, create multiple videos!
-        if "entries" in first_info and first_info["entries"][0] is not None:
+        if "entries" in first_info:
+            if len(first_info["entries"]) == 0:
+                return []
+            if first_info["entries"][0] is None:
+                return []
             log.debug(f"Found a playlist: {url}")
             second_info_list = []
             for second_info in first_info["entries"]:

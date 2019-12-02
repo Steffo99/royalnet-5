@@ -16,6 +16,7 @@ class PlayableYTDQueue(Playable):
     def __init__(self, start_with: Optional[List[YtdlDiscord]] = None):
         super().__init__()
         self.contents: List[YtdlDiscord] = []
+        self.now_playing: Optional[YtdlDiscord] = None
         if start_with is not None:
             self.contents = [*self.contents, *start_with]
         log.debug(f"Created new PlayableYTDQueue containing: {self.contents}")
@@ -27,19 +28,19 @@ class PlayableYTDQueue(Playable):
             log.debug(f"Dequeuing an item...")
             try:
                 # Try to get the first YtdlDiscord of the queue
-                ytd: YtdlDiscord = self.contents.pop(0)
+                self.now_playing: YtdlDiscord = self.contents.pop(0)
             except IndexError:
                 # If there isn't anything, yield None
                 log.debug(f"Nothing to dequeue, yielding None.")
                 yield None
                 continue
-            log.debug(f"Yielding FileAudioSource from: {ytd}")
+            log.debug(f"Yielding FileAudioSource from: {self.now_playing}")
             # Create a FileAudioSource from the YtdlDiscord
             # If the file hasn't been fetched / downloaded / converted yet, it will do so before yielding
-            async with ytd.spawn_audiosource() as fas:
+            async with self.now_playing.spawn_audiosource() as fas:
                 # Yield the resulting AudioSource
                 yield fas
             # Delete the YtdlDiscord file
-            log.debug(f"Deleting: {ytd}")
-            await ytd.delete_asap()
+            log.debug(f"Deleting: {self.now_playing}")
+            await self.now_playing.delete_asap()
             log.debug(f"Deleted successfully!")
