@@ -182,10 +182,12 @@ class Serf:
                             raise ExternalError(response.extra_info["message"])
                         else:
                             raise ProgramError(f"Invalid error in Herald event '{event_name}':\n"
-                                               f"[p]{response}[/p]")
+                                               f"[b]{response.extra_info['type']}[/b]\n"
+                                               f"{response.extra_info['message']}")
                     elif response.name == "unhandled_exception_in_event":
                         raise ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
-                                           f"[p]{response}[/p]")
+                                           f"[b]{response.extra_info['type']}[/b]\n"
+                                           f"{response.extra_info['message']}")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
