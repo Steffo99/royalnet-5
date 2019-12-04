@@ -82,11 +82,14 @@ enabled = true
 token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 [Logging]
-# TODO: document this
+# The output format for the Royalnet logs
+# See https://docs.python.org/3/library/logging.html#logrecord-attributes for {}-formatting
 log_format = "{asctime}\t| {processName}\t| {name}\t| {message}"
 
 [Logging.Loggers]
-root = "ERROR"
+# Set the logging levels for the various loggers
+# Valid levels are FATAL, ERROR, WARNING, INFO, and DEBUG
+root = "WARNING"
 "royalnet" = "INFO"
 # "royalnet.commands" = "DEBUG"
 # "websockets.protocol" = "ERROR"

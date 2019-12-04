@@ -45,7 +45,7 @@ poetry install -E telegram -E discord -E alchemy_easy -E bard -E constellation -
 
 ## Developing `royalnet` packages
 
-> TODO
+See the [royalnet-pack-template](https://github.com/Steffo99/royalnet-pack-template) project.
 
 ## Documentation
 
