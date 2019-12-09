@@ -7,6 +7,7 @@ import royalnet.herald as rh
 import royalnet.utils as ru
 import royalnet.commands as rc
 from .star import PageStar, ExceptionStar
+from ..utils import init_logging
 
 try:
     import uvicorn
@@ -51,7 +52,8 @@ class Constellation:
                  herald_cfg: Dict[str, Any],
                  packs_cfg: Dict[str, Any],
                  constellation_cfg: Dict[str, Any],
-                 **_):
+                 logging_cfg: Dict[str, Any]
+                 ):
         if Starlette is None:
             raise ImportError("`constellation` extra is not installed")
 
@@ -87,9 +89,19 @@ class Constellation:
             self.alchemy = ra.Alchemy(alchemy_cfg["database_url"], tables)
             log.info(f"Alchemy: {self.alchemy}")
 
+        # Logging
+        self._logging_cfg: Dict[str, Any] = logging_cfg
+        """The logging config for the :class:`Constellation` is stored to initialize the logger when the first page is
+        requested, as disabling the :mod:`uvicorn` logging also disables all logging in the process in general."""
+
         # Herald
         self.herald: Optional[rh.Link] = None
-        """The :class:`Link` object connecting the :class:`Constellation` to the rest of the herald network."""
+        """The :class:`Link` object connecting the :class:`Constellation` to the rest of the herald network.
+        As is the case with the logging module, it will be started on the first request received by the 
+        :class:`Constellation`, as the event loop won't be available before that."""
+
+        self._herald_cfg: Dict[str, Any] = herald_cfg
+        """The herald config for the :class:`Constellation` is stored to initialize the :class:`rh.Herald` later."""
 
         self.herald_task: Optional[aio.Task] = None
         """A reference to the :class:`aio.Task` that runs the :class:`rh.Link`."""
@@ -120,8 +132,7 @@ class Constellation:
         elif not herald_cfg["enabled"]:
             log.info("Herald: disabled")
         else:
-            self.init_herald(herald_cfg)
-            log.info(f"Herald: enabled")
+            log.info(f"Herald: will be enabled on first request")
 
         # Register PageStars and ExceptionStars
         for pack_name in packs:
@@ -150,6 +161,11 @@ class Constellation:
 
         self.port: int = constellation_cfg["port"]
         """The port on which the :class:`Constellation` will listen for connection on."""
+
+        self.loop: Optional[aio.AbstractEventLoop] = None
+        """The event loop of the :class:`Constellation`. 
+        
+        Because of how :mod:`uvicorn` runs, it will stay :const:`None` until the first page is requested."""
 
     # TODO: is this a good idea?
     def interface_factory(self) -> Type[rc.CommandInterface]:
@@ -241,29 +257,52 @@ class Constellation:
                 log.debug(f"Registering: {SelectedEvent.__qualname__} -> {SelectedEvent.name}")
             self.events[SelectedEvent.name] = event
 
+    def _first_page_check(self):
+        if self.loop is None:
+            self.loop = aio.get_running_loop()
+            self.init_herald(self._herald_cfg)
+            self.loop.create_task(self.herald.run())
+            init_logging(self._logging_cfg)
+
+    def _page_star_wrapper(self, page_star: PageStar):
+        async def f(request):
+            self._first_page_check()
+            log.info(f"Running {page_star}")
+            return await page_star.page(request)
+
+        return page_star.path, f, page_star.methods
+
+    def _exc_star_wrapper(self, exc_star: ExceptionStar):
+        async def f(request):
+            self._first_page_check()
+            log.info(f"Running {exc_star}")
+            return await exc_star.page(request)
+
+        return exc_star.error, f
+
     def register_page_stars(self, page_stars: List[Type[PageStar]], pack_cfg: Dict[str, Any]):
         for SelectedPageStar in page_stars:
             log.debug(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__qualname__}")
             try:
-                page_star_instance = SelectedPageStar(constellation=self, config=pack_cfg)
+                page_star_instance = SelectedPageStar(interface=self.Interface(pack_cfg))
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedPageStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
                 ru.sentry_exc(e)
                 continue
-            self.starlette.add_route(page_star_instance.path, page_star_instance.page, page_star_instance.methods)
+            self.starlette.add_route(*self._page_star_wrapper(page_star_instance))
 
     def register_exc_stars(self, exc_stars: List[Type[ExceptionStar]], pack_cfg: Dict[str, Any]):
-        for SelectedPageStar in exc_stars:
-            log.debug(f"Registering: {SelectedPageStar.error} -> {SelectedPageStar.__qualname__}")
+        for SelectedExcStar in exc_stars:
+            log.debug(f"Registering: {SelectedExcStar.error} -> {SelectedExcStar.__qualname__}")
             try:
-                page_star_instance = SelectedPageStar(constellation=self, config=pack_cfg)
+                exc_star_instance = SelectedExcStar(interface=self.Interface(pack_cfg))
             except Exception as e:
                 log.error(f"Skipping: "
-                          f"{SelectedPageStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
+                          f"{SelectedExcStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
                 ru.sentry_exc(e)
                 continue
-            self.starlette.add_exception_handler(page_star_instance.error, page_star_instance.page)
+            self.starlette.add_exception_handler(*self._exc_star_wrapper(exc_star_instance))
 
     def run_blocking(self):
         log.info(f"Running Constellation on https://{self.address}:{self.port}/...")
@@ -300,7 +339,8 @@ class Constellation:
         constellation = cls(alchemy_cfg=alchemy_cfg,
                             herald_cfg=herald_cfg,
                             packs_cfg=packs_cfg,
-                            constellation_cfg=constellation_cfg)
+                            constellation_cfg=constellation_cfg,
+                            logging_cfg=logging_cfg)
 
         # Run the server
         constellation.run_blocking()
