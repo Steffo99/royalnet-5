@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("-c", "--config-filename", default="./config.toml", type=str,
+@click.option("-c", "--config-filename", default="./config.toml", type=click.Path(exists=True),
               help="The filename of the Royalnet configuration file.")
 def run(config_filename: str):
     # Read the configuration file
