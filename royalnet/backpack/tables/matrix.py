@@ -15,7 +15,7 @@ class Matrix:
 
     @declared_attr
     def user(self):
-        return relationship("User", backref="telegram")
+        return relationship("User", backref="matrix")
 
     @declared_attr
     def matrix_id(self):
