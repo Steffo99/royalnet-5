@@ -2,12 +2,14 @@
 from .users import User
 from .telegram import Telegram
 from .discord import Discord
+from .matrix import Matrix
 
 # Enter the tables of your Pack here!
 available_tables = {
     User,
     Telegram,
-    Discord
+    Discord,
+    Matrix,
 }
 
 # Don't change this, it should automatically generate __all__

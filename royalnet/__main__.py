@@ -93,6 +93,24 @@ def run(config_filename: str):
     else:
         log.info("Serf.Discord: Disabled")
 
+    matrix_process = None
+    if config["Serfs"]["Matrix"]["enabled"]:
+        matrix_process = multiprocessing.Process(name="Serf.Matrix",
+                                                  target=rs.matrix.MatrixSerf.run_process,
+                                                  daemon=True,
+                                                  kwargs={
+                                                      "alchemy_cfg": config["Alchemy"],
+                                                      "herald_cfg": herald_cfg,
+                                                      "packs_cfg": config["Packs"],
+                                                      "sentry_cfg": config["Sentry"],
+                                                      "logging_cfg": config["Logging"],
+                                                      "serf_cfg": config["Serfs"]["Matrix"],
+                                                  })
+        matrix_process.start()
+        log.info("Serf.Discord: Started")
+    else:
+        log.info("Serf.Discord: Disabled")
+
     # Constellation
     constellation_process = None
     if config["Constellation"]["enabled"]:
