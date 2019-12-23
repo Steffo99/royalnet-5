@@ -95,7 +95,7 @@ class MatrixSerf(Serf):
 
         return DiscordData
 
-    async def handle_message(self, room: nio.MatrixRoom, event: nio.RoomMessageText):
+    async def handle_message(self, room: "nio.MatrixRoom", event: "nio.RoomMessageText"):
         # Skip events happened before the startup of the Serf
         if event.server_timestamp < self._started_timestamp:
             return
