@@ -28,4 +28,5 @@ dist/
 .idea/**/markdown-navigator.xml
 .idea/**/markdown-exported-files.xml
 .idea/**/misc.xml
+.idea/**/discord.xml
 .idea/**/*.iml

@@ -81,6 +81,18 @@ enabled = true
 # Obtain one at https://discordapp.com/developers/applications/ > Bot > Token
 token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
+[Serfs.Matrix]
+# Use the Matrix Serf (matrix-nio) included in Royalnet
+# Requires the `matrix` extra to be installed
+enabled = true
+# The homeserver to login at
+homeserver = "https://example.org"
+# The full matrix id to login as
+matrix_id = "@username:example.org"
+# The password of the matrix account to login as
+password = "xxxxxxx"
+
+
 [Logging]
 # The output format for the Royalnet logs
 # See https://docs.python.org/3/library/logging.html#logrecord-attributes for {}-formatting

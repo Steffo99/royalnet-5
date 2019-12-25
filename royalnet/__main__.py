@@ -58,7 +58,7 @@ def run(config_filename: str):
 
     # Serfs
     telegram_process = None
-    if config["Serfs"]["Telegram"]["enabled"]:
+    if "Telegram" in config["Serfs"] and config["Serfs"]["Telegram"]["enabled"]:
         telegram_process = multiprocessing.Process(name="Serf.Telegram",
                                                    target=rs.telegram.TelegramSerf.run_process,
                                                    daemon=True,
@@ -76,7 +76,7 @@ def run(config_filename: str):
         log.info("Serf.Telegram: Disabled")
 
     discord_process = None
-    if config["Serfs"]["Discord"]["enabled"]:
+    if "Discord" in config["Serfs"] and config["Serfs"]["Discord"]["enabled"]:
         discord_process = multiprocessing.Process(name="Serf.Discord",
                                                   target=rs.discord.DiscordSerf.run_process,
                                                   daemon=True,
@@ -89,6 +89,24 @@ def run(config_filename: str):
                                                       "serf_cfg": config["Serfs"]["Discord"],
                                                   })
         discord_process.start()
+        log.info("Serf.Discord: Started")
+    else:
+        log.info("Serf.Discord: Disabled")
+
+    matrix_process = None
+    if "Matrix" in config["Serfs"] and config["Serfs"]["Matrix"]["enabled"]:
+        matrix_process = multiprocessing.Process(name="Serf.Matrix",
+                                                  target=rs.matrix.MatrixSerf.run_process,
+                                                  daemon=True,
+                                                  kwargs={
+                                                      "alchemy_cfg": config["Alchemy"],
+                                                      "herald_cfg": herald_cfg,
+                                                      "packs_cfg": config["Packs"],
+                                                      "sentry_cfg": config["Sentry"],
+                                                      "logging_cfg": config["Logging"],
+                                                      "serf_cfg": config["Serfs"]["Matrix"],
+                                                  })
+        matrix_process.start()
         log.info("Serf.Discord: Started")
     else:
         log.info("Serf.Discord: Disabled")

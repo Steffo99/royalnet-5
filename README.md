@@ -10,6 +10,7 @@ A multipurpose bot framework and webserver
 
 - [Telegram](https://core.telegram.org/bots)
 - [Discord](https://discordapp.com/developers/docs/)
+- [Matrix]() (no E2E support yet)
 
 ## Installing
 
