@@ -6,6 +6,7 @@ import royalnet.backpack as rb
 import royalnet.commands as rc
 import royalnet.utils as ru
 from ..serf import Serf
+from .escape import escape
 
 
 try:
@@ -77,7 +78,7 @@ class MatrixSerf(Serf):
             async def reply(data, text: str):
                 await self.client.room_send(room_id=data.room.room_id, message_type="m.room.message", content={
                     "msgtype": "m.text",
-                    "body": text
+                    "body": escape(text)
                 })
 
             async def get_author(data, error_if_none=False):
