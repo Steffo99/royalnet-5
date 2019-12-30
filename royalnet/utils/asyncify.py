@@ -4,10 +4,16 @@ import typing
 
 
 async def asyncify(function: typing.Callable, *args, loop: typing.Optional[asyncio.AbstractEventLoop] = None, **kwargs):
-    """Asyncronously run the function in a different thread or process, preventing it from blocking the event loop.
+    """Asyncronously run the function in a executor, allowing it to run asyncronously.
+
+    Args:
+        function: The function to call.
+        args: The arguments to pass to the function.
+        kwargs: The keyword arguments to pass to the function.
+        loop: The loop to run the function in. If :const:`None`, run it in in the current event loop.
 
     Warning:
-        If the function has side effects, it may behave strangely."""
+        The called function must be thread-safe!"""
     if not loop:
         loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, functools.partial(function, *args, **kwargs))
