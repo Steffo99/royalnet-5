@@ -188,6 +188,10 @@ class Serf:
                         raise ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
                                            f"[b]{response.extra_info['type']}[/b]\n"
                                            f"{response.extra_info['message']}")
+                    else:
+                        raise ProgramError(f"Unknown response in Herald event '{event_name}':\n"
+                                           f"[b]{response.name}[/b]"
+                                           f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
