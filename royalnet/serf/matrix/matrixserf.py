@@ -51,6 +51,8 @@ class MatrixSerf(Serf):
 
         self._started_timestamp: Optional[int] = None
 
+        self.Data: Type[rc.CommandData] = self.data_factory()
+
     def interface_factory(self) -> Type[rc.CommandInterface]:
         # noinspection PyPep8Naming
         GenericInterface = super().interface_factory()
@@ -64,14 +66,13 @@ class MatrixSerf(Serf):
 
     def data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
-        class DiscordData(rc.CommandData):
+        class MatrixData(rc.CommandData):
             def __init__(data,
                          interface: rc.CommandInterface,
-                         session,
                          loop: aio.AbstractEventLoop,
                          room: nio.MatrixRoom,
                          event: nio.Event):
-                super().__init__(interface=interface, session=session, loop=loop)
+                super().__init__(interface=interface, loop=loop)
                 data.room: nio.MatrixRoom = room
                 data.event: nio.Event = event
 
@@ -94,7 +95,7 @@ class MatrixSerf(Serf):
 
             # Delete invoking does not really make sense on Matrix
 
-        return DiscordData
+        return MatrixData
 
     async def handle_message(self, room: "nio.MatrixRoom", event: "nio.RoomMessageText"):
         # Skip events happened before the startup of the Serf
@@ -123,7 +124,7 @@ class MatrixSerf(Serf):
         else:
             session = None
         # Prepare data
-        data = self.Data(interface=command.interface, session=session, loop=self.loop, room=room, event=event)
+        data = self.Data(interface=command.interface, loop=self.loop, room=room, event=event)
         # Call the command
         await self.call(command, data, parameters)
         # Close the alchemy session

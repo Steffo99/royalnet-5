@@ -3,7 +3,7 @@ import logging
 import warnings
 from typing import *
 import royalnet.backpack as rb
-from royalnet.commands import *
+import royalnet.commands as rc
 from royalnet.utils import asyncify
 from royalnet.serf import Serf
 from .escape import escape
@@ -65,7 +65,9 @@ class DiscordSerf(Serf):
         self.voice_players: List[VoicePlayer] = []
         """A :class:`list` of the :class:`VoicePlayer` in use by this :class:`DiscordSerf`."""
 
-    def interface_factory(self) -> Type[CommandInterface]:
+        self.Data: Type[rc.CommandData] = self.data_factory()
+
+    def interface_factory(self) -> Type[rc.CommandInterface]:
         # noinspection PyPep8Naming
         GenericInterface = super().interface_factory()
 
@@ -76,15 +78,14 @@ class DiscordSerf(Serf):
 
         return DiscordInterface
 
-    def data_factory(self) -> Type[CommandData]:
+    def data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
-        class DiscordData(CommandData):
+        class DiscordData(rc.CommandData):
             def __init__(data,
-                         interface: CommandInterface,
-                         session,
+                         interface: rc.CommandInterface,
                          loop: aio.AbstractEventLoop,
                          message: "discord.Message"):
-                super().__init__(interface=interface, session=session, loop=loop)
+                super().__init__(interface=interface, loop=loop)
                 data.message = message
 
             async def reply(data, text: str):
@@ -98,7 +99,7 @@ class DiscordSerf(Serf):
                 query = query.filter(self.identity_column == user.id)
                 result = await asyncify(query.one_or_none)
                 if result is None and error_if_none:
-                    raise CommandError("You must be registered to use this command.")
+                    raise rc.CommandError("You must be registered to use this command.")
                 return result
 
             async def delete_invoking(data, error_if_unavailable=False):
@@ -138,7 +139,7 @@ class DiscordSerf(Serf):
             else:
                 session = None
             # Prepare data
-            data = self.Data(interface=command.interface, session=session, loop=self.loop, message=message)
+            data = self.Data(interface=command.interface, loop=self.loop, message=message)
             # Call the command
             await self.call(command, data, parameters)
             # Close the alchemy session
