@@ -10,6 +10,7 @@ from .errors import CommandError, \
                     ExternalError, \
                     UserError, \
                     ProgramError
+from .keyboardkey import KeyboardKey
 
 __all__ = [
     "CommandInterface",
@@ -23,5 +24,6 @@ __all__ = [
     "ExternalError",
     "UserError",
     "ProgramError",
-    "Event"
+    "Event",
+    "KeyboardKey",
 ]

@@ -177,17 +177,16 @@ class Constellation:
             constellation = self
 
             async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
-                """Send a :class:`rh.Request` to a specific destination, and wait for a
-                :class:`rh.Response`."""
+                """Send a :class:`royalherald.Request` to a specific destination, and wait for a
+                :class:`royalherald.Response`."""
                 if self.herald is None:
-                    raise rc.UnsupportedError("`royalherald` is not enabled on this Constellation.")
+                    raise rc.UnsupportedError("`royalherald` is not enabled on this serf.")
                 request: rh.Request = rh.Request(handler=event_name, data=kwargs)
                 response: rh.Response = await self.herald.request(destination=destination, request=request)
                 if isinstance(response, rh.ResponseFailure):
                     if response.name == "no_event":
-                        raise rc.CommandError(f"There is no event named {event_name} in {destination}.")
-                    elif response.name == "exception_in_event":
-                        # TODO: pretty sure there's a better way to do this
+                        raise rc.ProgramError(f"There is no event named {event_name} in {destination}.")
+                    elif response.name == "error_in_event":
                         if response.extra_info["type"] == "CommandError":
                             raise rc.CommandError(response.extra_info["message"])
                         elif response.extra_info["type"] == "UserError":
@@ -201,13 +200,22 @@ class Constellation:
                         elif response.extra_info["type"] == "ExternalError":
                             raise rc.ExternalError(response.extra_info["message"])
                         else:
-                            raise TypeError(f"Herald action call returned invalid error:\n"
-                                            f"[p]{response}[/p]")
+                            raise rc.ProgramError(f"Invalid error in Herald event '{event_name}':\n"
+                                                  f"[b]{response.extra_info['type']}[/b]\n"
+                                                  f"{response.extra_info['message']}")
+                    elif response.name == "unhandled_exception_in_event":
+                        raise rc.ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
+                                              f"[b]{response.extra_info['type']}[/b]\n"
+                                              f"{response.extra_info['message']}")
+                    else:
+                        raise rc.ProgramError(f"Unknown response in Herald event '{event_name}':\n"
+                                              f"[b]{response.name}[/b]"
+                                              f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
-                    raise TypeError(f"Other Herald Link returned unknown response:\n"
-                                    f"[p]{response}[/p]")
+                    raise rc.ProgramError(f"Other Herald Link returned unknown response:\n"
+                                          f"[p]{response}[/p]")
 
         return GenericInterface
 

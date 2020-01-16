@@ -1,5 +1,5 @@
 from typing import *
-from asyncio import AbstractEventLoop
+import asyncio as aio
 from .errors import UnsupportedError
 if TYPE_CHECKING:
     from .event import Event
@@ -40,7 +40,7 @@ class CommandInterface:
         return self.serf.alchemy
 
     @property
-    def loop(self) -> AbstractEventLoop:
+    def loop(self) -> aio.AbstractEventLoop:
         """A shortcut for :attr:`.serf.loop`."""
         if self.serf:
             return self.serf.loop
@@ -63,4 +63,4 @@ class CommandInterface:
             You can run a function on a :class:`~royalnet.serf.discord.DiscordSerf` from a
             :class:`~royalnet.serf.telegram.TelegramSerf`.
         """
-        raise UnsupportedError(f"{self.call_herald_event.__name__} is not supported on this platform")
+        raise UnsupportedError(f"{self.call_herald_event.__name__} is not supported on this platform.")

@@ -102,9 +102,6 @@ class Serf:
         self.Interface: Type[CommandInterface] = self.interface_factory()
         """The :class:`CommandInterface` class of this Serf."""
 
-        self.Data: Type[CommandData] = self.data_factory()
-        """The :class:`CommandData` class of this Serf."""
-
         self.commands: Dict[str, Command] = {}
         """The :class:`dict` connecting each command name to its :class:`Command` object."""
 
@@ -188,6 +185,10 @@ class Serf:
                         raise ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
                                            f"[b]{response.extra_info['type']}[/b]\n"
                                            f"{response.extra_info['message']}")
+                    else:
+                        raise ProgramError(f"Unknown response in Herald event '{event_name}':\n"
+                                           f"[b]{response.name}[/b]"
+                                           f"[p]{response}[/p]")
                 elif isinstance(response, rh.ResponseSuccess):
                     return response.data
                 else:
@@ -195,10 +196,6 @@ class Serf:
                                        f"[p]{response}[/p]")
 
         return GenericInterface
-
-    def data_factory(self) -> Type[CommandData]:
-        """Create the :class:`CommandData` for the Serf."""
-        raise NotImplementedError()
 
     def register_commands(self, commands: List[Type[Command]], pack_cfg: Dict[str, Any]) -> None:
         """Initialize and register all commands passed as argument."""
@@ -312,6 +309,34 @@ class Serf:
         except Exception as e:
             ru.sentry_exc(e)
             await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
+        finally:
+            await data.session_close()
+
+    async def press(self, key: KeyboardKey, data: CommandData):
+        log.info(f"Calling key_callback: {repr(key)}")
+        try:
+            await key.press(data)
+        except InvalidInputError as e:
+            await data.reply(f"⚠️ {e.message}\n"
+                             f"Syntax: [c]{command.interface.prefix}{command.name} {command.syntax}[/c]")
+        except UserError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except UnsupportedError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except ExternalError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except ConfigurationError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except ProgramError as e:
+            await data.reply(f"⛔️ {e.message}")
+        except CommandError as e:
+            await data.reply(f"⚠️ {e.message}")
+        except Exception as e:
+            ru.sentry_exc(e)
+            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
+        finally:
+            await data.session_close()
+
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""
