@@ -1,11 +1,11 @@
 # Remember to run `poetry update` editing this file!
 
 # Install everything with
-# poetry install -E telegram -E discord -E alchemy_easy -E alchemy_hard -E bard -E constellation -E sentry -E herald -E coloredlogs
+# poetry install -E telegram -E discord -E matrix -E alchemy_easy -E alchemy_hard -E bard -E constellation -E sentry -E herald -E coloredlogs
 
 [tool.poetry]
     name = "royalnet"
-    version = "5.2.4"
+    version = "5.3"
     description = "A multipurpose bot and web framework"
     authors = ["Stefano Pigozzi <ste.pigozzi@gmail.com>"]
     license = "AGPL-3.0+"
