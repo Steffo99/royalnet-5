@@ -23,7 +23,8 @@ class CommandData:
         if self._session is None:
             if self._interface.alchemy is None:
                 raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
-            self._session = ru.asyncify(self._interface.alchemy.Session)
+            # FIXME: this may take a while
+            self._session = self._interface.alchemy.Session()
         return self._session
 
     async def session_commit(self):

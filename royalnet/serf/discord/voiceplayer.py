@@ -44,7 +44,7 @@ class VoicePlayer:
             raise PlayerAlreadyConnectedError()
         log.debug(f"Connecting to: {channel}")
         try:
-            self.voice_client = await channel.connect()
+            self.voice_client = await channel.connect(reconnect=False, timeout=3)
         except asyncio.TimeoutError:
             raise DiscordTimeoutError()
         except discord.ClientException:
