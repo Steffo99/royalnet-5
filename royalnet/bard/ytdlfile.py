@@ -105,6 +105,7 @@ class YtdlFile:
         tag_file = eyed3.load(self.filename)
         if not tag_file:
             log.debug(f"No ID3 tags found: {self}")
+            return
         tag: eyed3.core.Tag = tag_file.tag
         if tag.title:
             log.debug(f"Found title: {self}")
