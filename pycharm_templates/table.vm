@@ -1,0 +1,14 @@
+from sqlalchemy import *
+from sqlalchemy.orm import *
+from sqlalchemy.ext.declarative import declared_attr
+
+
+#set($CAPITALIZED_NAME = $NAME.substring(0,1).toUpperCase() + $NAME.substring(1))
+class ${CAPITALIZED_NAME}:
+    __tablename__ = "${NAME}"
+
+    @declared_attr
+    def id(self):
+        return Column(Integer, primary_key=True)
+
+    ...
