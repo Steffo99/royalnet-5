@@ -105,6 +105,7 @@ class YtdlDiscord:
             "Clyp": 0x3DBEB3,
             "Bandcamp": 0x1DA0C3,
             "PeerTube": 0xF1680D,
+            "generic": 0x4F545C,
         }
         embed = discord.Embed(title=self.info.title,
                               colour=discord.Colour(colors.get(self.info.extractor, 0x4F545C)),
@@ -114,9 +115,14 @@ class YtdlDiscord:
         if self.info.uploader:
             embed.set_author(name=self.info.uploader,
                              url=self.info.uploader_url if self.info.uploader_url is not None else discord.embeds.EmptyEmbed)
-        # embed.set_footer(text="Source: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
+        elif self.info.artist:
+            embed.set_author(name=self.info.artist,
+                             url=discord.embeds.EmptyEmbed)
+        if self.info.album:
+            embed.add_field(name="Album", value=self.info.album, inline=True)
         if self.info.duration:
             embed.add_field(name="Duration", value=str(self.info.duration), inline=True)
-        if self.info.upload_date:
+        if self.info.extractor != "generic" and self.info.upload_date:
             embed.add_field(name="Published on", value=self.info.upload_date.strftime("%d %b %Y"), inline=True)
+        # embed.set_footer(text="Source: youtube-dl", icon_url="https://i.imgur.com/TSvSRYn.png")
         return embed

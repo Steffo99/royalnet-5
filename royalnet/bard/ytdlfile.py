@@ -1,6 +1,7 @@
 import os
 import logging
 import re
+import eyed3
 from contextlib import asynccontextmanager
 from typing import *
 from royalnet.utils import *
@@ -96,6 +97,24 @@ class YtdlFile:
             async with self.lock.exclusive():
                 log.debug(f"Downloading with youtube-dl: {self}")
                 await asyncify(download, loop=self._loop)
+                if self.info.extractor == "generic":
+                    log.debug(f"Generic extractor detected, updating info from the downloaded file: {self}")
+                    self.set_ytdlinfo_from_id3_tags()
+
+    def set_ytdlinfo_from_id3_tags(self):
+        tag_file = eyed3.load(self.filename)
+        if not tag_file:
+            log.debug(f"No ID3 tags found: {self}")
+        tag: eyed3.core.Tag = tag_file.tag
+        if tag.title:
+            log.debug(f"Found title: {self}")
+            self.info.title = tag.title
+        if tag.album:
+            log.debug(f"Found album: {self}")
+            self.info.album = tag.album
+        if tag.artist:
+            log.debug(f"Found artist: {self}")
+            self.info.artist = tag.artist
 
     @asynccontextmanager
     async def aopen(self):

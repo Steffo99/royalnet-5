@@ -86,6 +86,8 @@ class YtdlInfo:
         self.acodec: Optional[str] = info.get("acodec")
         self.abr: Optional[int] = info.get("abr")
         self.ext: Optional[str] = info.get("ext")
+        # Additional custom information
+        self.album: Optional[str] = None
 
     @classmethod
     async def from_url(cls, url, loop: Optional[AbstractEventLoop] = None, **ytdl_args) -> List["YtdlInfo"]:
