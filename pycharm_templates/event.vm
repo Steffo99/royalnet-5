@@ -1,5 +1,6 @@
 from typing import *
-from royalnet.commands import *
+import royalnet
+import royalnet.commands as rc
 
 
 #set($CAPITALIZED_NAME = $NAME.substring(0,1).toUpperCase() + $NAME.substring(1))
