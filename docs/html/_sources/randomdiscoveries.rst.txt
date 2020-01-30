@@ -9,6 +9,8 @@ Discord websocket undocumented error codes
 ====== =====================
  Code     Reason
 ====== =====================
+1004   Discord timed out...?
+------ ---------------------
 1006   Heartbeat stopped
 ------ ---------------------
 1006   Failed authentication

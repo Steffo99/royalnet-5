@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; Royalnet 5.1a2 documentation</title>
+  <title>API Reference &mdash; Royalnet 5.3.2 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                5.1a2
+                5.3.2
               </div>
             
           
@@ -360,6 +360,11 @@ Check the tables submodule for more details.</p></li>
 <dd><p>Retrieve info about the <a class="reference internal" href="#royalnet.bard.YtdlFile" title="royalnet.bard.YtdlFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">YtdlFile</span></code></a> through <code class="xref py py-class docutils literal notranslate"><span class="pre">YoutubeDL</span></code>.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="royalnet.bard.YtdlFile.set_ytdlinfo_from_id3_tags">
+<code class="sig-name descname">set_ytdlinfo_from_id3_tags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.bard.YtdlFile.set_ytdlinfo_from_id3_tags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -417,7 +422,7 @@ Check the tables submodule for more details.</p></li>
 <dl class="method">
 <dt id="royalnet.bard.YtdlDiscord.embed">
 <code class="sig-name descname">embed</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; discord.embeds.Embed<a class="headerlink" href="#royalnet.bard.YtdlDiscord.embed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return this info as a <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.Embed" title="(in discord.py v1.3.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.Embed</span></code></a>.</p>
+<dd><p>Return this info as a <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.Embed" title="(in discord.py v1.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.Embed</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -577,7 +582,7 @@ in the format <code class="docutils literal notranslate"><span class="pre">(requ
 
 <dl class="class">
 <dt id="royalnet.commands.CommandData">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.commands.</code><code class="sig-name descname">CommandData</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface, session: Optional[sqlalchemy.orm.session.Session], loop: asyncio.events.AbstractEventLoop</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.commands.</code><code class="sig-name descname">CommandData</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em>, <em class="sig-param">loop: asyncio.events.AbstractEventLoop</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="royalnet.commands.CommandData.delete_invoking">
 <em class="property">async </em><code class="sig-name descname">delete_invoking</code><span class="sig-paren">(</span><em class="sig-param">error_if_unavailable=False</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.commands.CommandData.delete_invoking" title="Permalink to this definition">¶</a></dt>
@@ -603,6 +608,11 @@ That probably means, the database row identifying the user.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="royalnet.commands.CommandData.keyboard">
+<code class="sig-name descname">keyboard</code><span class="sig-paren">(</span><em class="sig-param">text, keys: List[KeyboardKey]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData.keyboard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="royalnet.commands.CommandData.reply">
 <em class="property">async </em><code class="sig-name descname">reply</code><span class="sig-paren">(</span><em class="sig-param">text: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.commands.CommandData.reply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a text message to the channel where the call was made.</p>
@@ -616,19 +626,17 @@ That probably means, the database row identifying the user.</p>
 <dl class="method">
 <dt id="royalnet.commands.CommandData.session">
 <em class="property">property </em><code class="sig-name descname">session</code><a class="headerlink" href="#royalnet.commands.CommandData.session" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the <a class="reference internal" href="#royalnet.alchemy.Alchemy" title="royalnet.alchemy.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Alchemy</span></code></a> <code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code>, if it is available.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#royalnet.commands.UnsupportedError" title="royalnet.commands.UnsupportedError"><strong>UnsupportedError</strong></a> – if no session is available.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="royalnet.commands.CommandData.session_close">
+<em class="property">async </em><code class="sig-name descname">session_close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData.session_close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="royalnet.commands.CommandData.session_commit">
 <em class="property">async </em><code class="sig-name descname">session_commit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData.session_commit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Commit the changes to the session.</p>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -829,6 +837,16 @@ down).</p>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="royalnet.commands.KeyboardKey">
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.commands.</code><code class="sig-name descname">KeyboardKey</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface, short: str, text: str, callback: Callable[[royalnet.commands.commanddata.CommandData], Awaitable[None]]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.KeyboardKey" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="royalnet.commands.KeyboardKey.press">
+<em class="property">async </em><code class="sig-name descname">press</code><span class="sig-paren">(</span><em class="sig-param">data: royalnet.commands.commanddata.CommandData</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.KeyboardKey.press" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-royalnet.constellation">
 <span id="constellation"></span><h2>Constellation<a class="headerlink" href="#module-royalnet.constellation" title="Permalink to this headline">¶</a></h2>
@@ -836,7 +854,7 @@ down).</p>
 <p>It uses many features of <code class="xref py py-mod docutils literal notranslate"><span class="pre">starlette</span></code>.</p>
 <dl class="class">
 <dt id="royalnet.constellation.Constellation">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">Constellation</code><span class="sig-paren">(</span><em class="sig-param">alchemy_cfg: Dict[str, Any], herald_cfg: Dict[str, Any], packs_cfg: Dict[str, Any], constellation_cfg: Dict[str, Any], **_</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Constellation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">Constellation</code><span class="sig-paren">(</span><em class="sig-param">alchemy_cfg: Dict[str, Any], herald_cfg: Dict[str, Any], packs_cfg: Dict[str, Any], constellation_cfg: Dict[str, Any], logging_cfg: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Constellation" title="Permalink to this definition">¶</a></dt>
 <dd><p>The class that represents the webserver.</p>
 <p>It runs multiple <a class="reference internal" href="#royalnet.constellation.Star" title="royalnet.constellation.Star"><code class="xref py py-class docutils literal notranslate"><span class="pre">Star</span></code></a>, which represent the routes of the website.</p>
 <p>It also handles the <code class="xref py py-class docutils literal notranslate"><span class="pre">Alchemy</span></code> connection, and Herald connections too.</p>
@@ -867,7 +885,9 @@ down).</p>
 <dl class="attribute">
 <dt id="royalnet.constellation.Constellation.herald">
 <code class="sig-name descname">herald</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.constellation.Constellation.herald" title="Permalink to this definition">¶</a></dt>
-<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code> object connecting the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a> to the rest of the herald network.</p>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code> object connecting the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a> to the rest of the herald network.
+As is the case with the logging module, it will be started on the first request received by the
+<a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>, as the event loop won’t be available before that.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -886,6 +906,13 @@ down).</p>
 <dt id="royalnet.constellation.Constellation.interface_factory">
 <code class="sig-name descname">interface_factory</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Type[royalnet.commands.commandinterface.CommandInterface]<a class="headerlink" href="#royalnet.constellation.Constellation.interface_factory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the <code class="xref py py-class docutils literal notranslate"><span class="pre">rc.CommandInterface</span></code> class for the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="royalnet.constellation.Constellation.loop">
+<code class="sig-name descname">loop</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.constellation.Constellation.loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>The event loop of the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
+<p>Because of how <code class="xref py py-mod docutils literal notranslate"><span class="pre">uvicorn</span></code> runs, it will stay <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code> until the first page is requested.</p>
 </dd></dl>
 
 <dl class="method">
@@ -942,7 +969,7 @@ down).</p>
 
 <dl class="class">
 <dt id="royalnet.constellation.Star">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">Star</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any], constellation: Constellation</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Star" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">Star</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Star" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Star is a class representing a part of the website.</p>
 <p>It shouldn’t be used directly: please use <a class="reference internal" href="#royalnet.constellation.PageStar" title="royalnet.constellation.PageStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">PageStar</span></code></a> and <a class="reference internal" href="#royalnet.constellation.ExceptionStar" title="royalnet.constellation.ExceptionStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionStar</span></code></a> instead!</p>
 <dl class="method">
@@ -955,6 +982,18 @@ down).</p>
 <dt id="royalnet.constellation.Star.alchemy">
 <em class="property">property </em><code class="sig-name descname">alchemy</code><a class="headerlink" href="#royalnet.constellation.Star.alchemy" title="Permalink to this definition">¶</a></dt>
 <dd><p>A shortcut for the <a class="reference internal" href="#royalnet.alchemy.Alchemy" title="royalnet.alchemy.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Alchemy</span></code></a> of the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.constellation.Star.config">
+<em class="property">property </em><code class="sig-name descname">config</code><a class="headerlink" href="#royalnet.constellation.Star.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut for the Pack configuration of the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="royalnet.constellation.Star.constellation">
+<em class="property">property </em><code class="sig-name descname">constellation</code><a class="headerlink" href="#royalnet.constellation.Star.constellation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut for the <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -974,7 +1013,7 @@ down).</p>
 
 <dl class="class">
 <dt id="royalnet.constellation.PageStar">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">PageStar</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any], constellation: Constellation</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.PageStar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">PageStar</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.PageStar" title="Permalink to this definition">¶</a></dt>
 <dd><p>A PageStar is a class representing a single route of the website (for example, <code class="docutils literal notranslate"><span class="pre">/api/user/get</span></code>).</p>
 <p>To create a new website route you should create a new class inheriting from this class with a function overriding
 <a class="reference internal" href="#royalnet.constellation.Star.page" title="royalnet.constellation.Star.page"><code class="xref py py-meth docutils literal notranslate"><span class="pre">page()</span></code></a> and changing the values of <a class="reference internal" href="#royalnet.constellation.PageStar.path" title="royalnet.constellation.PageStar.path"><code class="xref py py-attr docutils literal notranslate"><span class="pre">path</span></code></a> and optionally <a class="reference internal" href="#royalnet.constellation.PageStar.methods" title="royalnet.constellation.PageStar.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">methods</span></code></a>.</p>
@@ -1003,7 +1042,7 @@ down).</p>
 
 <dl class="class">
 <dt id="royalnet.constellation.ExceptionStar">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">ExceptionStar</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any], constellation: Constellation</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.ExceptionStar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">ExceptionStar</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.ExceptionStar" title="Permalink to this definition">¶</a></dt>
 <dd><p>An ExceptionStar is a class that handles an <a class="reference external" href="https://docs.python.org/3.8/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a> raised by another star by returning a different
 response than the one originally intended.</p>
 <p>The handled exception type is specified in the <a class="reference internal" href="#royalnet.constellation.ExceptionStar.error" title="royalnet.constellation.ExceptionStar.error"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code></a>.</p>
@@ -1334,12 +1373,6 @@ Akin to the sequence number on IP packets.</p></li>
 <dd><p>An abstract class, to be used as base to implement Royalnet bots on multiple interfaces (such as Telegram or
 Discord).</p>
 <dl class="attribute">
-<dt id="royalnet.serf.Serf.Data">
-<code class="sig-name descname">Data</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.serf.Serf.Data" title="Permalink to this definition">¶</a></dt>
-<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData</span></code> class of this Serf.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="royalnet.serf.Serf.Interface">
 <code class="sig-name descname">Interface</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.serf.Serf.Interface" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CommandInterface</span></code> class of this Serf.</p>
@@ -1360,12 +1393,6 @@ Discord).</p>
 <dt id="royalnet.serf.Serf.commands">
 <code class="sig-name descname">commands</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.serf.Serf.commands" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> connecting each command name to its <code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code> object.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="royalnet.serf.Serf.data_factory">
-<code class="sig-name descname">data_factory</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Type[royalnet.commands.commanddata.CommandData]<a class="headerlink" href="#royalnet.serf.Serf.data_factory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create the <code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData</span></code> for the Serf.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1441,6 +1468,11 @@ table and the identity table.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="royalnet.serf.Serf.press">
+<em class="property">async </em><code class="sig-name descname">press</code><span class="sig-paren">(</span><em class="sig-param">key: royalnet.commands.keyboardkey.KeyboardKey</em>, <em class="sig-param">data: royalnet.commands.commanddata.CommandData</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.serf.Serf.press" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="royalnet.serf.Serf.register_commands">
 <code class="sig-name descname">register_commands</code><span class="sig-paren">(</span><em class="sig-param">commands: List[Type[royalnet.commands.command.Command]], pack_cfg: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#royalnet.serf.Serf.register_commands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize and register all commands passed as argument.</p>
@@ -1478,10 +1510,20 @@ table and the identity table.</p>
 <dl class="function">
 <dt id="royalnet.utils.asyncify">
 <em class="property">async </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">asyncify</code><span class="sig-paren">(</span><em class="sig-param">function: Callable</em>, <em class="sig-param">*args</em>, <em class="sig-param">loop: Optional[asyncio.events.AbstractEventLoop] = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.asyncify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asyncronously run the function in a different thread or process, preventing it from blocking the event loop.</p>
+<dd><p>Asyncronously run the function in a executor, allowing it to run asyncronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> – The function to call.</p></li>
+<li><p><strong>args</strong> – The arguments to pass to the function.</p></li>
+<li><p><strong>kwargs</strong> – The keyword arguments to pass to the function.</p></li>
+<li><p><strong>loop</strong> – The loop to run the function in. If <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code>, run it in in the current event loop.</p></li>
+</ul>
+</dd>
+</dl>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>If the function has side effects, it may behave strangely.</p>
+<p>The called function must be thread-safe!</p>
 </div>
 </dd></dl>
 
@@ -1652,7 +1694,7 @@ table and the identity table.</p>
 <dl class="class">
 <dt id="royalnet.utils.FileAudioSource">
 <em class="property">class </em><code class="sig-prename descclassname">royalnet.utils.</code><code class="sig-name descname">FileAudioSource</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.utils.FileAudioSource" title="Permalink to this definition">¶</a></dt>
-<dd><p>A <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.AudioSource" title="(in discord.py v1.3.0a)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.AudioSource</span></code></a> that uses a <a class="reference external" href="https://docs.python.org/3.8/library/io.html#io.BufferedIOBase" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> as an input instead of memory.</p>
+<dd><p>A <a class="reference external" href="https://discordpy.readthedocs.io/en/latest/api.html#discord.AudioSource" title="(in discord.py v1.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">discord.AudioSource</span></code></a> that uses a <a class="reference external" href="https://docs.python.org/3.8/library/io.html#io.BufferedIOBase" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedIOBase</span></code></a> as an input instead of memory.</p>
 <p>The stream should be in the usual PCM encoding.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
