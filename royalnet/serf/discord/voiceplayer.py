@@ -87,6 +87,7 @@ class VoicePlayer:
             raise PlayerNotConnectedError()
         if self.voice_client.is_playing():
             raise PlayerAlreadyPlaying()
+        self.playing = None
         log.debug("Getting next AudioSource...")
         next_source: Optional["discord.AudioSource"] = await self.playing.next()
         if next_source is None:
@@ -97,7 +98,6 @@ class VoicePlayer:
         self.loop.create_task(self._playback_check())
 
     async def _playback_check(self):
-        # FIXME: quite spaghetti
         while True:
             if self._playback_ended_event.is_set():
                 self._playback_ended_event.clear()

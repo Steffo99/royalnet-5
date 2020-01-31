@@ -1,11 +1,17 @@
 # `royalnet.constellation`
 
-The part of `royalnet` that handles the webserver and webpages.
+The subpackage providing all functions and classes that handle the webserver and the webpages.
 
-It uses many features of [`starlette`](https://www.starlette.io).
+It requires the `constellation` extra to be installed ([`starlette`](https://github.com/encode/starlette)).
 
-## Hierarchy
+You can install it with:
+```
+pip install royalnet[constellation]
+```
 
-- `constellation`
-    - `star`
-        - `shoot`
+It optionally uses the `sentry` extra.
+
+You can install it with:
+```
+pip install royalnet[constellation,sentry]
+```

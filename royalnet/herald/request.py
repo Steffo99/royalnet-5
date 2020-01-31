@@ -1,4 +1,4 @@
-import typing
+from typing import *
 
 
 class Request:
@@ -6,7 +6,7 @@ class Request:
 
      It contains the name of the requested handler, in addition to the data."""
 
-    def __init__(self, handler: str, data: dict, msg_type: typing.Optional[str] = None):
+    def __init__(self, handler: str, data: dict, msg_type: Optional[str] = None):
         super().__init__()
         if msg_type is not None:
             assert msg_type == self.__class__.__name__

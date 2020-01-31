@@ -1,5 +1,17 @@
+"""The subpackage providing all functions and classes to handle communication between process (even over the Internet).
+
+It is based on :mod:`websockets`.
+
+It requires the ``herald`` extra to be installed.
+
+You can install it with: ::
+
+    pip install royalnet[herald]
+
+"""
+
 from .config import Config
-from .errors import HeraldError, ConnectionClosedError, LinkError, InvalidServerResponseError, ServerError
+from .errors import *
 from .link import Link
 from .package import Package
 from .request import Request

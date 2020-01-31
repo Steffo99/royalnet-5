@@ -1,5 +1,7 @@
+import asyncio as aio
 from .commandinterface import CommandInterface
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from serf import Serf
 
@@ -16,7 +18,7 @@ class Event:
         """The :class:`CommandInterface` available to this :class:`Event`."""
 
     @property
-    def serf(self):
+    def serf(self) -> "Serf":
         """A shortcut for :attr:`.interface.serf`."""
         return self.interface.serf
 
@@ -26,12 +28,12 @@ class Event:
         return self.interface.alchemy
 
     @property
-    def loop(self):
+    def loop(self) -> aio.AbstractEventLoop:
         """A shortcut for :attr:`.interface.loop`."""
         return self.interface.loop
 
     @property
-    def config(self):
+    def config(self) -> dict:
         """A shortcut for :attr:`.interface.config`."""
         return self.interface.config
 

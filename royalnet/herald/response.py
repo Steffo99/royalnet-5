@@ -1,4 +1,4 @@
-import typing
+from typing import *
 
 
 class Response:
@@ -28,7 +28,7 @@ class Response:
 class ResponseSuccess(Response):
     """A response to a successful :py:class:`Request`."""
 
-    def __init__(self, data: typing.Optional[dict] = None):
+    def __init__(self, data: Optional[dict] = None):
         if data is None:
             self.data = {}
         else:
@@ -41,10 +41,10 @@ class ResponseSuccess(Response):
 class ResponseFailure(Response):
     """A response to a invalid :py:class:`Request`."""
 
-    def __init__(self, name: str, description: str, extra_info: typing.Optional[dict] = None):
+    def __init__(self, name: str, description: str, extra_info: Optional[dict] = None):
         self.name: str = name
         self.description: str = description
-        self.extra_info: typing.Optional[dict] = extra_info
+        self.extra_info: Optional[dict] = extra_info
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}(name={self.name}, description={self.description}, extra_info={self.extra_info})"

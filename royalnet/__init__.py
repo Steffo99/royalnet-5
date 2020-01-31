@@ -1,14 +1,5 @@
-from . import alchemy, bard, commands, constellation, herald, backpack, serf, utils, version
+from .version import semantic
 
-__version__ = version.semantic
+__version__ = semantic
 
-__all__ = [
-    "alchemy",
-    "bard",
-    "commands",
-    "constellation",
-    "herald",
-    "serf",
-    "utils",
-    "backpack",
-]
+__all__ = []

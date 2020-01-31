@@ -1,6 +1,7 @@
 from typing import *
 import asyncio as aio
-from .errors import *
+from .errors import UnsupportedError
+
 if TYPE_CHECKING:
     from .event import Event
     from .command import Command

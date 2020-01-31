@@ -1,33 +1,15 @@
+from typing import *
+import asyncio as aio
 import logging
 import importlib
-import asyncio as aio
-from typing import *
+import uvicorn
+import starlette.applications
 import royalnet.alchemy as ra
 import royalnet.herald as rh
 import royalnet.utils as ru
 import royalnet.commands as rc
 from .star import PageStar, ExceptionStar
 from ..utils import init_logging
-
-try:
-    import uvicorn
-    from starlette.applications import Starlette
-except ImportError:
-    uvicorn = None
-    Starlette = None
-
-try:
-    import sentry_sdk
-except ImportError:
-    sentry_sdk = None
-    AioHttpIntegration = None
-    SqlalchemyIntegration = None
-    LoggingIntegration = None
-
-try:
-    import coloredlogs
-except ImportError:
-    coloredlogs = None
 
 
 log = logging.getLogger(__name__)
@@ -54,9 +36,6 @@ class Constellation:
                  constellation_cfg: Dict[str, Any],
                  logging_cfg: Dict[str, Any]
                  ):
-        if Starlette is None:
-            raise ImportError("`constellation` extra is not installed")
-
         # Import packs
         pack_names = packs_cfg["active"]
         packs = {}
@@ -112,7 +91,7 @@ class Constellation:
         self.events: Dict[str, rc.Event] = {}
         """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
-        self.starlette = Starlette(debug=__debug__)
+        self.starlette = starlette.applications.Starlette(debug=__debug__)
         """The :class:`~starlette.Starlette` app."""
 
         # Register Events

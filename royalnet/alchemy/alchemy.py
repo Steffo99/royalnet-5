@@ -2,21 +2,12 @@ from typing import Set, Dict, Union
 from contextlib import contextmanager, asynccontextmanager
 from royalnet.utils import asyncify
 from royalnet.alchemy.errors import TableNotFoundError
-
-try:
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.schema import Table
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.ext.declarative.api import DeclarativeMeta
-    from sqlalchemy.orm import sessionmaker
-except ImportError:
-    create_engine = None
-    Engine = None
-    Table = None
-    declarative_base = None
-    DeclarativeMeta = None
-    sessionmaker = None
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy.schema import Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy.orm import sessionmaker
 
 
 class Alchemy:
@@ -31,9 +22,6 @@ class Alchemy:
             tables: The :class:`set` of tables to be created and used in the selected database.
                     Check the tables submodule for more details.
         """
-        if create_engine is None:
-            raise ImportError("'alchemy' extra is not installed")
-
         if database_uri.startswith("sqlite"):
             raise NotImplementedError("sqlite databases aren't supported, as they can't be used in multithreaded"
                                       " applications")

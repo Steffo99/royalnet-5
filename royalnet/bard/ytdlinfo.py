@@ -1,14 +1,10 @@
-from asyncio import AbstractEventLoop, get_event_loop
-from typing import Optional, Dict, List, Any
-from datetime import datetime, timedelta
+from typing import *
+import asyncio as aio
+import datetime
 import dateparser
 import logging
-from royalnet.utils import ytdldateformat, asyncify
-
-try:
-    from youtube_dl import YoutubeDL
-except ImportError:
-    YoutubeDL = None
+import royalnet.utils as ru
+import youtube_dl
 
 
 log = logging.getLogger(__name__)
@@ -36,7 +32,7 @@ class YtdlInfo:
         self.uploader_url: Optional[str] = info.get("uploader_url")
         self.channel_id: Optional[str] = info.get("channel_id")
         self.channel_url: Optional[str] = info.get("channel_url")
-        self.upload_date: Optional[datetime] = dateparser.parse(ytdldateformat(info.get("upload_date")))
+        self.upload_date: Optional[datetime.datetime] = dateparser.parse(ru.ytdldateformat(info.get("upload_date")))
         self.license: Optional[str] = info.get("license")
         self.creator: Optional[...] = info.get("creator")
         self.title: Optional[str] = info.get("title")
@@ -47,7 +43,7 @@ class YtdlInfo:
         self.tags: Optional[List[str]] = info.get("tags")
         self.subtitles: Optional[Dict[str, List[Dict[str, str]]]] = info.get("subtitles")
         self.automatic_captions: Optional[dict] = info.get("automatic_captions")
-        self.duration: Optional[timedelta] = timedelta(seconds=info.get("duration", 0))
+        self.duration: Optional[datetime.timedelta] = datetime.timedelta(seconds=info.get("duration", 0))
         self.age_limit: Optional[int] = info.get("age_limit")
         self.annotations: Optional[...] = info.get("annotations")
         self.chapters: Optional[...] = info.get("chapters")
@@ -90,20 +86,17 @@ class YtdlInfo:
         self.album: Optional[str] = None
 
     @classmethod
-    async def from_url(cls, url, loop: Optional[AbstractEventLoop] = None, **ytdl_args) -> List["YtdlInfo"]:
+    async def from_url(cls, url, loop: Optional[aio.AbstractEventLoop] = None, **ytdl_args) -> List["YtdlInfo"]:
         """Fetch the info for an url through :class:`YoutubeDL`.
 
         Returns:
             A :class:`list` containing the infos for the requested videos."""
-        if YoutubeDL is None:
-            raise ImportError("'bard' extra is not installed")
-
         if loop is None:
-            loop: AbstractEventLoop = get_event_loop()
+            loop: aio.AbstractEventLoop = aio.get_event_loop()
         # So many redundant options!
         log.debug(f"Fetching info: {url}")
-        with YoutubeDL({**cls._default_ytdl_args, **ytdl_args}) as ytdl:
-            first_info = await asyncify(ytdl.extract_info, loop=loop, url=url, download=False)
+        with youtube_dl.YoutubeDL({**cls._default_ytdl_args, **ytdl_args}) as ytdl:
+            first_info = await ru.asyncify(ytdl.extract_info, loop=loop, url=url, download=False)
         # No video was found
         if first_info is None:
             return []
