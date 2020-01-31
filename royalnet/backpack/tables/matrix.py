@@ -23,7 +23,6 @@ class Matrix:
 
     @property
     def username(self):
-        # TODO: check this regex
         match = re.match("^@(.+):.+$", self.matrix_id)
         result = match.group(1)
         assert result is not None
@@ -31,7 +30,6 @@ class Matrix:
 
     @property
     def homeserver(self):
-        # TODO: check this regex
         match = re.match("^@.+:(.+)$", self.matrix_id)
         result = match.group(1)
         assert result is not None

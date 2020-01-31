@@ -1,6 +1,6 @@
 from typing import *
 import asyncio as aio
-from .errors import UnsupportedError
+from .errors import *
 if TYPE_CHECKING:
     from .event import Event
     from .command import Command
@@ -34,20 +34,6 @@ class CommandInterface:
     Example:
         A reference to a :class:`~royalnet.constellation.Constellation`."""
 
-    @property
-    def alchemy(self) -> "Alchemy":
-        """A shortcut for :attr:`.serf.alchemy`."""
-        return self.serf.alchemy
-
-    @property
-    def loop(self) -> aio.AbstractEventLoop:
-        """A shortcut for :attr:`.serf.loop`."""
-        if self.serf:
-            return self.serf.loop
-        else:
-            # TODO
-            raise Exception("TODO")
-
     def __init__(self, config: Dict[str, Any]):
         self.config: Dict[str, Any] = config
         """The config section for the pack of the command."""
@@ -55,6 +41,28 @@ class CommandInterface:
         # Will be bound after the command/event has been created
         self.command: Optional[Command] = None
         self.event: Optional[Event] = None
+
+    @property
+    def alchemy(self) -> "Alchemy":
+        """A shortcut for :attr:`.serf.alchemy`."""
+        return self.serf.alchemy
+
+    @property
+    def table(self) -> "Callable":
+        """A shortcut for :func:`.serf.alchemy.get`.
+
+        Raises:
+            UnsupportedError: if :attr:`.alchemy` is :const:`None`."""
+        if self.alchemy is None:
+            raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
+        return self.alchemy.get
+
+    @property
+    def loop(self) -> aio.AbstractEventLoop:
+        """A shortcut for :attr:`.serf.loop`."""
+        if self.serf:
+            return self.serf.loop
+        raise UnsupportedError("This command is not being run in a serf.")
 
     async def call_herald_event(self, destination: str, event_name: str, **kwargs) -> dict:
         """Call an event function on a different :class:`~royalnet.serf.Serf`.

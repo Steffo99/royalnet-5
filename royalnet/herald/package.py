@@ -26,7 +26,6 @@ class Package:
             source_conv_id: The conversation id of the node that created this package.
                             Akin to the sequence number on IP packets.
             destination_conv_id: The conversation id of the node that this Package is a reply to."""
-        # TODO: something is not right in these type hints. Check them.
         self.data: dict = data
         self.source: str = source
         self.source_conv_id: str = source_conv_id or str(uuid.uuid4())

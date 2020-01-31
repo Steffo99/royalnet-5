@@ -316,8 +316,6 @@ class Constellation:
         log.info(f"Running Constellation on https://{self.address}:{self.port}/...")
         loop: aio.AbstractEventLoop = aio.get_event_loop()
         self.running = True
-        # TODO: figure out how to run the correct event loop
-        # loop.create_task(self.herald.run())
         try:
             uvicorn.run(self.starlette, host=self.address, port=self.port, log_config=UVICORN_LOGGING_CONFIG)
         finally:

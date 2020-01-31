@@ -20,7 +20,6 @@ class VoicePlayer:
             self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         else:
             self.loop = loop
-        # FIXME: this looks like spaghetti
         self._playback_ended_event: threading.Event = threading.Event()
 
     async def connect(self, channel: "discord.VoiceChannel") -> "discord.VoiceClient":

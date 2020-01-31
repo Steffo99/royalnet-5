@@ -102,7 +102,7 @@ class Server:
             log.debug(f"Received package: {package}")
             # Check if the package destination is the server itself.
             if package.destination == "<server>":
-                # TODO: do stuff
+                # Do... nothing for now?
                 pass
             # Otherwise, route the package to its destination
             # noinspection PyAsyncCall
