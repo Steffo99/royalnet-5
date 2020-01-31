@@ -8,6 +8,7 @@ import royalnet.utils as ru
 import royalnet.alchemy as ra
 import royalnet.backpack as rb
 import royalnet.herald as rh
+import traceback
 
 
 log = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class Serf:
             try:
                 packs[pack_name] = importlib.import_module(pack_name)
             except ImportError as e:
-                log.error(f"Error during the import of {pack_name}: {e}")
+                log.error(f"{e.__class__.__name__} during the import of {pack_name}: {e}")
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None

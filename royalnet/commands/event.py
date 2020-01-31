@@ -18,7 +18,7 @@ class Event:
         """The :class:`CommandInterface` available to this :class:`Event`."""
 
     @property
-    def serf(self) -> Serf:
+    def serf(self) -> "Serf":
         """A shortcut for :attr:`.interface.serf`."""
         return self.interface.serf
 

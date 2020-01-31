@@ -1,5 +1,5 @@
 import re
-from typing import *
+import typing
 from .errors import InvalidInputError
 
 
@@ -66,7 +66,7 @@ class CommandArgs(list):
             raise InvalidInputError(f"Not enough arguments specified (minimum is {require_at_least}).")
         return " ".join(self)
 
-    def match(self, pattern: Union[str, Pattern], *flags) -> Sequence[AnyStr]:
+    def match(self, pattern: typing.Union[str, typing.Pattern], *flags) -> typing.Sequence[typing.AnyStr]:
         """Match the :meth:`.joined` string to a :class:`re.Pattern`-like object.
 
         Parameters:
@@ -83,7 +83,7 @@ class CommandArgs(list):
             raise InvalidInputError("Invalid syntax.")
         return match.groups()
 
-    def optional(self, index: int, default=None) -> Optional[str]:
+    def optional(self, index: int, default=None) -> typing.Optional[str]:
         """Get the argument at a specific index, but don't raise an error if nothing is found, instead returning the
         ``default`` value.
 
