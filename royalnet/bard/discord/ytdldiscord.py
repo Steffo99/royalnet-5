@@ -2,19 +2,12 @@ import typing
 import re
 import os
 import logging
+import ffmpeg
+import discord
 from contextlib import asynccontextmanager
-from royalnet.utils import asyncify, MultiLock, FileAudioSource
+from royalnet.utils import asyncify, MultiLock
 from royalnet.bard import YtdlInfo, YtdlFile
-
-try:
-    import ffmpeg
-except ImportError:
-    ffmpeg = None
-
-try:
-    import discord
-except ImportError:
-    discord = None
+from .fileaudiosource import FileAudioSource
 
 log = logging.getLogger(__name__)
 
@@ -44,8 +37,6 @@ class YtdlDiscord:
 
     async def convert_to_pcm(self) -> None:
         """Convert the file to pcm with :mod:`ffmpeg`."""
-        if ffmpeg is None:
-            raise ImportError("'bard' extra is not installed")
         await self.ytdl_file.download_file()
         if self.pcm_filename is None:
             async with self.ytdl_file.lock.normal():
@@ -87,8 +78,6 @@ class YtdlDiscord:
     @asynccontextmanager
     async def spawn_audiosource(self):
         log.debug(f"Spawning audio_source for: {self}")
-        if FileAudioSource is None:
-            raise ImportError("'discord' extra is not installed")
         await self.convert_to_pcm()
         async with self.lock.normal():
             with open(self.pcm_filename, "rb") as stream:
@@ -97,8 +86,6 @@ class YtdlDiscord:
 
     def embed(self) -> "discord.Embed":
         """Return this info as a :py:class:`discord.Embed`."""
-        if discord is None:
-            raise ImportError("'discord' extra is not installed")
         colors = {
             "youtube": 0xCC0000,
             "soundcloud": 0xFF5400,

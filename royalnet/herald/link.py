@@ -1,8 +1,9 @@
-import asyncio
+from typing import *
+import asyncio as aio
 import uuid
 import functools
-import logging as _logging
-import typing
+import logging
+import websockets
 from .package import Package
 from .request import Request
 from .response import Response, ResponseSuccess, ResponseFailure
@@ -10,23 +11,18 @@ from .broadcast import Broadcast
 from .errors import ConnectionClosedError, InvalidServerResponseError
 from .config import Config
 
-try:
-    import websockets
-except ImportError:
-    websockets = None
 
-
-log = _logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class PendingRequest:
-    def __init__(self, *, loop: asyncio.AbstractEventLoop = None):
+    def __init__(self, *, loop: aio.AbstractEventLoop = None):
         if loop is None:
-            self.loop = asyncio.get_event_loop()
+            self.loop = aio.get_event_loop()
         else:
             self.loop = loop
-        self.event: asyncio.Event = asyncio.Event(loop=loop)
-        self.data: typing.Optional[dict] = None
+        self.event: aio.Event = aio.Event(loop=loop)
+        self.data: Optional[dict] = None
 
     def __repr__(self):
         if self.event.is_set():
@@ -56,22 +52,20 @@ def requires_identification(func):
 
 class Link:
     def __init__(self, config: Config, request_handler, *,
-                 loop: asyncio.AbstractEventLoop = None):
-        if websockets is None:
-            raise ImportError("'websockets' extra is not installed")
+                 loop: aio.AbstractEventLoop = None):
         self.config: Config = config
         self.nid: str = str(uuid.uuid4())
-        self.websocket: typing.Optional["websockets.WebSocketClientProtocol"] = None
-        self.request_handler: typing.Callable[[typing.Union[Request, Broadcast]],
-                                              typing.Awaitable[Response]] = request_handler
-        self._pending_requests: typing.Dict[str, PendingRequest] = {}
+        self.websocket: Optional["websockets.WebSocketClientProtocol"] = None
+        self.request_handler: Callable[[Union[Request, Broadcast]],
+                                       Awaitable[Response]] = request_handler
+        self._pending_requests: Dict[str, PendingRequest] = {}
         if loop is None:
-            self._loop = asyncio.get_event_loop()
+            self._loop = aio.get_event_loop()
         else:
             self._loop = loop
-        self.error_event: asyncio.Event = asyncio.Event(loop=self._loop)
-        self.connect_event: asyncio.Event = asyncio.Event(loop=self._loop)
-        self.identify_event: asyncio.Event = asyncio.Event(loop=self._loop)
+        self.error_event: aio.Event = aio.Event(loop=self._loop)
+        self.connect_event: aio.Event = aio.Event(loop=self._loop)
+        self.identify_event: aio.Event = aio.Event(loop=self._loop)
 
     def __repr__(self):
         if self.identify_event.is_set():

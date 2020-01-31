@@ -1,6 +1,6 @@
 import json
 import uuid
-import typing
+from typing import *
 
 
 class Package:
@@ -14,8 +14,8 @@ class Package:
                  *,
                  source: str,
                  destination: str,
-                 source_conv_id: typing.Optional[str] = None,
-                 destination_conv_id: typing.Optional[str] = None):
+                 source_conv_id: Optional[str] = None,
+                 destination_conv_id: Optional[str] = None):
         """Create a Package.
 
         Parameters:
@@ -31,7 +31,7 @@ class Package:
         self.source: str = source
         self.source_conv_id: str = source_conv_id or str(uuid.uuid4())
         self.destination: str = destination
-        self.destination_conv_id: typing.Optional[str] = destination_conv_id
+        self.destination_conv_id: Optional[str] = destination_conv_id
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__} {self.source} » {self.destination}>"

@@ -1,11 +1,13 @@
 import click
 import multiprocessing
-import royalnet.constellation as rc
-import royalnet.serf as rs
-import royalnet.utils as ru
-import royalnet.herald as rh
 import toml
 import logging
+import royalnet.constellation as rc
+import royalnet.serf.telegram as rst
+import royalnet.serf.discord as rsd
+import royalnet.serf.matrix as rsm
+import royalnet.utils as ru
+import royalnet.herald as rh
 
 try:
     import coloredlogs
@@ -60,7 +62,7 @@ def run(config_filename: str):
     telegram_process = None
     if "Telegram" in config["Serfs"] and config["Serfs"]["Telegram"]["enabled"]:
         telegram_process = multiprocessing.Process(name="Serf.Telegram",
-                                                   target=rs.telegram.TelegramSerf.run_process,
+                                                   target=rst.TelegramSerf.run_process,
                                                    daemon=True,
                                                    kwargs={
                                                        "alchemy_cfg": config["Alchemy"],
@@ -78,7 +80,7 @@ def run(config_filename: str):
     discord_process = None
     if "Discord" in config["Serfs"] and config["Serfs"]["Discord"]["enabled"]:
         discord_process = multiprocessing.Process(name="Serf.Discord",
-                                                  target=rs.discord.DiscordSerf.run_process,
+                                                  target=rsd.DiscordSerf.run_process,
                                                   daemon=True,
                                                   kwargs={
                                                       "alchemy_cfg": config["Alchemy"],
@@ -96,7 +98,7 @@ def run(config_filename: str):
     matrix_process = None
     if "Matrix" in config["Serfs"] and config["Serfs"]["Matrix"]["enabled"]:
         matrix_process = multiprocessing.Process(name="Serf.Matrix",
-                                                  target=rs.matrix.MatrixSerf.run_process,
+                                                  target=rsm.MatrixSerf.run_process,
                                                   daemon=True,
                                                   kwargs={
                                                       "alchemy_cfg": config["Alchemy"],

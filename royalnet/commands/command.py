@@ -1,4 +1,4 @@
-import typing
+from typing import *
 from .commandinterface import CommandInterface
 from .commandargs import CommandArgs
 from .commanddata import CommandData
@@ -11,7 +11,7 @@ class Command:
     Example:
         To be able to call ``/example`` on Telegram, the name should be ``"example"``."""
 
-    aliases: typing.List[str] = []
+    aliases: List[str] = []
     """A list of possible aliases for a command.
     
     Example:

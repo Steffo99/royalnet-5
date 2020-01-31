@@ -8,11 +8,7 @@ from royalnet.utils import *
 from asyncio import AbstractEventLoop, get_event_loop
 from .ytdlinfo import YtdlInfo
 from .errors import NotFoundError, MultipleFilesError
-
-try:
-    from youtube_dl import YoutubeDL
-except ImportError:
-    YoutubeDL = None
+from youtube_dl import YoutubeDL
 
 
 log = logging.getLogger(__name__)
@@ -78,9 +74,6 @@ class YtdlFile:
 
     async def download_file(self) -> None:
         """Download the file."""
-        if YoutubeDL is None:
-            raise ImportError("'bard' extra is not installed")
-
         def download():
             """Download function block to be asyncified."""
             with YoutubeDL(self.ytdl_args) as ytdl:

@@ -1,25 +1,16 @@
 from typing import *
+import asyncio as aio
 import re
 import datetime
 import uuid
-import asyncio
-import logging as _logging
+import logging
+import websockets
 import royalnet.utils as ru
 from .package import Package
 from .config import Config
 
-try:
-    import coloredlogs
-except ImportError:
-    coloredlogs = None
 
-try:
-    import websockets
-except ImportError:
-    websockets = None
-
-
-log = _logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class ConnectedClient:
@@ -49,7 +40,7 @@ class ConnectedClient:
 
 
 class Server:
-    def __init__(self, config: Config, *, loop: asyncio.AbstractEventLoop = None):
+    def __init__(self, config: Config, *, loop: aio.AbstractEventLoop = None):
         self.config: Config = config
         self.identified_clients: List[ConnectedClient] = []
         self.loop = loop
@@ -165,5 +156,5 @@ class Server:
     def run_blocking(self, logging_cfg: Dict[str, Any]):
         ru.init_logging(logging_cfg)
         if self.loop is None:
-            self.loop = asyncio.get_event_loop()
+            self.loop = aio.get_event_loop()
         self.serve()

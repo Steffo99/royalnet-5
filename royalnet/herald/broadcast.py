@@ -1,8 +1,8 @@
-import typing
+from typing import *
 
 
 class Broadcast:
-    def __init__(self, handler: str, data: dict, msg_type: typing.Optional[str] = None):
+    def __init__(self, handler: str, data: dict, msg_type: Optional[str] = None):
         super().__init__()
         if msg_type is not None:
             assert msg_type == self.__class__.__name__

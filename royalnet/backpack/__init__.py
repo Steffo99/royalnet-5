@@ -1,6 +1,4 @@
-"""A Pack that is imported by default by all Royalnet instances.
-
-Keep things here to a minimum!"""
+"""A Pack that is imported by default by all Royalnet instances."""
 
 from . import commands, tables, stars, events
 from .commands import available_commands

@@ -1,7 +1,4 @@
-try:
-    import discord
-except ImportError:
-    discord = None
+import discord
 
 
 class FileAudioSource(discord.AudioSource):

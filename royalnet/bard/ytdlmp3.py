@@ -1,22 +1,18 @@
-import typing
+from typing import *
 import re
 import os
-from royalnet.utils import asyncify, MultiLock
+import ffmpeg
+import royalnet.utils as ru
 from .ytdlinfo import YtdlInfo
 from .ytdlfile import YtdlFile
-
-try:
-    import ffmpeg
-except ImportError:
-    ffmpeg = None
 
 
 class YtdlMp3:
     """A representation of a :class:`YtdlFile` conversion to mp3."""
     def __init__(self, ytdl_file: YtdlFile):
         self.ytdl_file: YtdlFile = ytdl_file
-        self.mp3_filename: typing.Optional[str] = None
-        self.lock: MultiLock = MultiLock()
+        self.mp3_filename: Optional[str] = None
+        self.lock: ru.MultiLock = ru.MultiLock()
 
     def __repr__(self):
         if not self.ytdl_file.has_info:
@@ -35,14 +31,12 @@ class YtdlMp3:
 
     async def convert_to_mp3(self) -> None:
         """Convert the file to mp3 with :mod:`ffmpeg`."""
-        if ffmpeg is None:
-            raise ImportError("'bard' extra is not installed")
         await self.ytdl_file.download_file()
         if self.mp3_filename is None:
             async with self.ytdl_file.lock.normal():
                 destination_filename = re.sub(r"\.[^.]+$", ".mp3", self.ytdl_file.filename)
                 async with self.lock.exclusive():
-                    await asyncify(
+                    await ru.asyncify(
                         ffmpeg.input(self.ytdl_file.filename)
                               .output(destination_filename, format="mp3")
                               .overwrite_output()
@@ -58,7 +52,7 @@ class YtdlMp3:
                 self.mp3_filename = None
 
     @classmethod
-    async def from_url(cls, url, **ytdl_args) -> typing.List["YtdlMp3"]:
+    async def from_url(cls, url, **ytdl_args) -> List["YtdlMp3"]:
         """Create a :class:`list` of :class:`YtdlMp3` from a URL."""
         files = await YtdlFile.from_url(url, **ytdl_args)
         dfiles = []
@@ -68,6 +62,6 @@ class YtdlMp3:
         return dfiles
 
     @property
-    def info(self) -> typing.Optional[YtdlInfo]:
+    def info(self) -> Optional[YtdlInfo]:
         """Shortcut to get the :class:`YtdlInfo` of the object."""
         return self.ytdl_file.info

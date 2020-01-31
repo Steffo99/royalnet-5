@@ -1,11 +1,11 @@
+from typing import *
 import contextlib
 import logging
 import asyncio as aio
-from typing import *
-from sqlalchemy.orm.session import Session
+import royalnet.utils as ru
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
-import royalnet.utils as ru
+
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
 
@@ -14,26 +14,28 @@ log = logging.getLogger(__name__)
 
 class CommandData:
     def __init__(self, interface: CommandInterface, loop: aio.AbstractEventLoop):
-        self._interface: CommandInterface = interface
         self.loop: aio.AbstractEventLoop = loop
+        self._interface: CommandInterface = interface
         self._session = None
 
+    # TODO: make this asyncronous... somehow?
     @property
     def session(self):
         if self._session is None:
             if self._interface.alchemy is None:
                 raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
-            # FIXME: this may take a while
             self._session = self._interface.alchemy.Session()
         return self._session
 
     async def session_commit(self):
+        """Asyncronously commit the :attr:`.session` of this object."""
         if self._session:
             log.warning("Session had to be created to be committed")
         # noinspection PyUnresolvedReferences
         await ru.asyncify(self.session.commit)
 
     async def session_close(self):
+        """Asyncronously close the :attr:`.session` of this object."""
         if self._session is not None:
             await ru.asyncify(self._session.close)
 

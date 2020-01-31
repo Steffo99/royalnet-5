@@ -1,5 +1,5 @@
 import re
-from typing import Pattern, AnyStr, Optional, Sequence, Union
+from typing import *
 from .errors import InvalidInputError
 
 

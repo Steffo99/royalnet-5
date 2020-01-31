@@ -2,30 +2,13 @@ import logging
 import importlib
 import asyncio as aio
 from typing import *
-
 from sqlalchemy.schema import Table
-
 from royalnet.commands import *
 import royalnet.utils as ru
 import royalnet.alchemy as ra
 import royalnet.backpack as rb
 import royalnet.herald as rh
 
-try:
-    import sentry_sdk
-    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-    from sentry_sdk.integrations.aiohttp import AioHttpIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
-except ImportError:
-    sentry_sdk = None
-    SqlalchemyIntegration = None
-    AioHttpIntegration = None
-    LoggingIntegration = None
-
-try:
-    import coloredlogs
-except ImportError:
-    coloredlogs = None
 
 log = logging.getLogger(__name__)
 
@@ -317,8 +300,7 @@ class Serf:
         try:
             await key.press(data)
         except InvalidInputError as e:
-            await data.reply(f"⚠️ {e.message}\n"
-                             f"Syntax: [c]{command.interface.prefix}{command.name} {command.syntax}[/c]")
+            await data.reply(f"⚠️ {e.message}")
         except UserError as e:
             await data.reply(f"⚠️ {e.message}")
         except UnsupportedError as e:
@@ -336,7 +318,6 @@ class Serf:
             await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
         finally:
             await data.session_close()
-
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""
