@@ -1,4 +1,4 @@
-royalnet
+Royalnet
 ====================================
 
 Welcome to the documentation of Royalnet!
@@ -6,6 +6,7 @@ Welcome to the documentation of Royalnet!
 .. toctree::
    :maxdepth: 5
 
+   packs/pack
    randomdiscoveries
    apireference
 

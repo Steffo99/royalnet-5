@@ -10,17 +10,28 @@ A multipurpose bot framework and webserver
 
 - [Telegram](https://core.telegram.org/bots)
 - [Discord](https://discordapp.com/developers/docs/)
-- [Matrix]() (no E2E support yet)
+- [Matrix](https://matrix.org/) (no E2E support yet)
 
 ## Installing
 
+To install `royalnet`, run:
+```
+pip install royalnet
+```
+
+To install a specific module, run:
+```
+pip install royalnet[MODULENAME]
+```
+
 To install all `royalnet` modules, run:
-
 ```
-royalnet[telegram,discord,alchemy_easy,bard,constellation,sentry,herald,coloredlogs]
+pip install royalnet[telegram,discord,matrix,alchemy_easy,bard,constellation,sentry,herald,coloredlogs]
 ```
 
-> You will soon be able to install only the modules you need instead of the full package, but the feature isn't ready yet...
+## Documentation
+
+`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet).
 
 ## Developing `royalnet`
 
@@ -41,13 +52,5 @@ cd royalnet
 And finally install all dependencies and the package:
 
 ```
-poetry install -E telegram -E discord -E alchemy_easy -E bard -E constellation -E sentry -E herald -E coloredlogs
+poetry install -E telegram -E discord -E matrix -E alchemy_easy -E bard -E constellation -E sentry -E herald -E coloredlogs
 ```
-
-## Developing `royalnet` packages
-
-See the [royalnet-pack-template](https://github.com/Steffo99/royalnet-pack-template) project.
-
-## Documentation
-
-`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet).
