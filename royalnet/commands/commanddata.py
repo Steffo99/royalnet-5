@@ -5,9 +5,11 @@ import asyncio as aio
 import royalnet.utils as ru
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
+from royalnet.backpack.tables.aliases import Alias
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
+    from royalnet.backpack.tables.users import User
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +65,16 @@ class CommandData:
             error_if_unavailable: if True, raise an exception if the message cannot been deleted."""
         if error_if_unavailable:
             raise UnsupportedError(f"'{self.delete_invoking.__name__}' is not supported")
+
+    async def find_user(self, alias: str) -> Optional["User"]:
+        """Find the User having a specific Alias.
+
+        Parameters:
+            alias: the Alias to search for."""
+        return await ru.asyncify(
+            Alias.find_user(self._interface.alchemy, self.session, alias)
+        )
+
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
