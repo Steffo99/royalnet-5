@@ -1,6 +1,7 @@
 import logging
 import importlib
 import asyncio as aio
+import sys
 from typing import *
 from sqlalchemy.schema import Table
 from royalnet.commands import *
@@ -40,7 +41,8 @@ class Serf:
             try:
                 packs[pack_name] = importlib.import_module(pack_name)
             except ImportError as e:
-                log.error(f"{e.__class__.__name__} during the import of {pack_name}: {e}")
+                log.error(f"{e.__class__.__name__} during the import of {pack_name}:\n"
+                          f"{traceback.format_exception(*sys.exc_info())}")
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None
