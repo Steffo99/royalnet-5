@@ -8,7 +8,7 @@ import royalnet.alchemy as ra
 import royalnet.herald as rh
 import royalnet.utils as ru
 import royalnet.commands as rc
-from .star import PageStar, ExceptionStar
+from .pagestar import PageStar
 from ..utils import init_logging
 
 
@@ -42,7 +42,12 @@ class Constellation:
         for pack_name in pack_names:
             log.debug(f"Importing pack: {pack_name}")
             try:
-                packs[pack_name] = importlib.import_module(pack_name)
+                packs[pack_name] = {
+                    "commands": importlib.import_module(f"{pack_name}.commands"),
+                    "events": importlib.import_module(f"{pack_name}.events"),
+                    "stars": importlib.import_module(f"{pack_name}.stars"),
+                    "tables": importlib.import_module(f"{pack_name}.tables"),
+                }
             except ImportError as e:
                 log.error(f"Error during the import of {pack_name}: {e}")
         log.info(f"Packs: {len(packs)} imported")
@@ -60,7 +65,7 @@ class Constellation:
             tables = set()
             for pack in packs.values():
                 try:
-                    tables = tables.union(pack.available_tables)
+                    tables = tables.union(pack["tables"].available_tables)
                 except AttributeError:
                     log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
                     continue
@@ -99,7 +104,7 @@ class Constellation:
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
-                events = pack.available_events
+                events = pack["events"].available_events
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_events` attribute.")
             else:
@@ -118,17 +123,11 @@ class Constellation:
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
-                page_stars = pack.available_page_stars
+                page_stars = pack["stars"].available_page_stars
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_page_stars` attribute.")
             else:
                 self.register_page_stars(page_stars, pack_cfg)
-            try:
-                exc_stars = pack.available_exception_stars
-            except AttributeError:
-                log.warning(f"Pack `{pack}` does not have the `available_exception_stars` attribute.")
-            else:
-                self.register_exc_stars(exc_stars, pack_cfg)
         log.info(f"PageStars: {len(self.starlette.routes)} stars")
         log.info(f"ExceptionStars: {len(self.starlette.exception_handlers)} stars")
 
@@ -259,14 +258,6 @@ class Constellation:
 
         return page_star.path, f, page_star.methods
 
-    def _exc_star_wrapper(self, exc_star: ExceptionStar):
-        async def f(request):
-            self._first_page_check()
-            log.info(f"Running {exc_star}")
-            return await exc_star.page(request)
-
-        return exc_star.error, f
-
     def register_page_stars(self, page_stars: List[Type[PageStar]], pack_cfg: Dict[str, Any]):
         for SelectedPageStar in page_stars:
             log.debug(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__qualname__}")
@@ -278,18 +269,6 @@ class Constellation:
                 ru.sentry_exc(e)
                 continue
             self.starlette.add_route(*self._page_star_wrapper(page_star_instance))
-
-    def register_exc_stars(self, exc_stars: List[Type[ExceptionStar]], pack_cfg: Dict[str, Any]):
-        for SelectedExcStar in exc_stars:
-            log.debug(f"Registering: {SelectedExcStar.error} -> {SelectedExcStar.__qualname__}")
-            try:
-                exc_star_instance = SelectedExcStar(interface=self.Interface(pack_cfg))
-            except Exception as e:
-                log.error(f"Skipping: "
-                          f"{SelectedExcStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
-                ru.sentry_exc(e)
-                continue
-            self.starlette.add_exception_handler(*self._exc_star_wrapper(exc_star_instance))
 
     def run_blocking(self):
         log.info(f"Running Constellation on https://{self.address}:{self.port}/...")
