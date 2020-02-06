@@ -1,4 +1,5 @@
 import datetime
+import secrets
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declared_attr
@@ -26,3 +27,16 @@ class Token:
     @property
     def expired(self):
         return datetime.datetime.now() > self.expiration
+
+    @classmethod
+    def generate(cls, user, expiration_delta: datetime.timedelta):
+        # noinspection PyArgumentList
+        token = cls(user=user, expiration=datetime.datetime.now() + expiration_delta, token=secrets.token_urlsafe())
+        return token
+
+    def json(self) -> dict:
+        return {
+            "user": self.user.json(),
+            "token": self.token,
+            "expiration": self.expiration.isoformat()
+        }
