@@ -27,6 +27,7 @@ def api_error(error: Exception, code: int = 500) -> JSONResponse:
     result = {
         "success": False,
         "error_type": error.__class__.__qualname__,
-        "error_args": list(error.args)
+        "error_args": list(error.args),
+        "error_code": code,
     }
     return api_response(result, code=code)

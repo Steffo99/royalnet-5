@@ -4,6 +4,7 @@ from sqlalchemy import Column, \
                        ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
+import royalnet.utils as ru
 
 
 class Alias:
@@ -22,10 +23,10 @@ class Alias:
         return relationship("User", backref="aliases")
 
     @classmethod
-    def find_user(cls, alchemy, session, alias: str):
-        result = session.query(alchemy.get(cls)).filter_by(alias=alias.lower()).one_or_none()
+    async def find_user(cls, alchemy, session, alias: str):
+        result = await ru.asyncify(session.query(alchemy.get(cls)).filter_by(alias=alias.lower()).one_or_none)
         if result is not None:
-            result = result.royal
+            result = result.user
         return result
 
     def __init__(self, user: str, alias: str):

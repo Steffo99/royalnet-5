@@ -75,7 +75,6 @@ class CommandData:
             Alias.find_user(self._interface.alchemy, self.session, alias)
         )
 
-
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
         yield

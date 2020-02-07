@@ -3,6 +3,8 @@ import secrets
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declared_attr
+import royalnet.utils as ru
+from .users import User
 
 
 class Token:
@@ -40,3 +42,7 @@ class Token:
             "token": self.token,
             "expiration": self.expiration.isoformat()
         }
+
+    @classmethod
+    async def authenticate(cls, alchemy, session, token: str) -> "Token":
+        return await ru.asyncify(session.query(alchemy.get(cls)).filter_by(token=token).one_or_none)

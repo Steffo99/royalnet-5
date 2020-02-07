@@ -6,10 +6,10 @@ from ..tables.aliases import Alias
 from ..tables.tokens import Token
 
 
-class ApiRoyalnetLoginStar(ApiStar):
-    path = "/api/royalnet/login/v1"
+class ApiLoginRoyalnetStar(ApiStar):
+    path = "/api/login/royalnet/v1"
 
-    async def api(self, data: ApiDataDict) -> dict:
+    async def api(self, data: ApiData) -> dict:
         TokenT = self.alchemy.get(Token)
         UserT = self.alchemy.get(User)
         AliasT = self.alchemy.get(Alias)
@@ -20,7 +20,7 @@ class ApiRoyalnetLoginStar(ApiStar):
         async with self.session_acm() as session:
             user: User = await ru.asyncify(session.query(UserT).filter_by(username=username).one_or_none)
             if user is None:
-                raise NotFoundException("User not found")
+                raise NotFoundError("User not found")
             pswd_check = user.test_password(password)
             if not pswd_check:
                 raise ApiError("Invalid password")

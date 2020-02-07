@@ -1,12 +1,14 @@
 # Imports go here!
 from .api_royalnet_version import ApiRoyalnetVersionStar
-from .api_royalnet_login import ApiRoyalnetLoginStar
+from .api_login_royalnet import ApiLoginRoyalnetStar
+from .api_token_info import ApiTokenInfoStar
 
 
 # Enter the PageStars of your Pack here!
 available_page_stars = [
     ApiRoyalnetVersionStar,
-    ApiRoyalnetLoginStar,
+    ApiLoginRoyalnetStar,
+    ApiTokenInfoStar,
 ]
 
 # Don't change this, it should automatically generate __all__

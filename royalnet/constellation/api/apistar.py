@@ -5,8 +5,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from ..pagestar import PageStar
 from .jsonapi import api_error, api_success
-from .apidatadict import ApiDataDict
-from .apierrors import ApiError, NotFoundException
+from .apidata import ApiData
+from .apierrors import *
 
 
 class ApiStar(PageStar, ABC):
@@ -19,9 +19,13 @@ class ApiStar(PageStar, ABC):
             except JSONDecodeError:
                 data = {}
         try:
-            response = await self.api(ApiDataDict(data))
-        except NotFoundException as e:
+            response = await self.api(ApiData(data, self))
+        except NotFoundError as e:
             return api_error(e, code=404)
+        except ForbiddenError as e:
+            return api_error(e, code=403)
+        except NotImplementedError as e:
+            return api_error(e, code=501)
         except ApiError as e:
             return api_error(e, code=400)
         except Exception as e:

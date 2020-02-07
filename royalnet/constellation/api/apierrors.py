@@ -2,13 +2,21 @@ class ApiError(Exception):
     pass
 
 
-class NotFoundException(ApiError):
+class NotFoundError(ApiError):
     pass
 
 
-class UnauthorizedException(ApiError):
+class ForbiddenError(ApiError):
     pass
 
 
-class MissingParameterException(ApiError):
+class MissingParameterError(ApiError):
+    pass
+
+
+class NotImplementedError(ApiError):
+    pass
+
+
+class UnsupportedError(NotImplementedError):
     pass
