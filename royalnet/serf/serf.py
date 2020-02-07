@@ -47,7 +47,7 @@ class Serf:
                 }
             except ImportError as e:
                 log.error(f"{e.__class__.__name__} during the import of {pack_name}:\n"
-                          f"{traceback.format_exception(*sys.exc_info())}")
+                          f"{''.join(traceback.format_exception(*sys.exc_info()))}")
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None

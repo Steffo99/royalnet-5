@@ -26,6 +26,7 @@ class CommandData:
         if self._session is None:
             if self._interface.alchemy is None:
                 raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
+            log.debug("Creating Session...")
             self._session = self._interface.alchemy.Session()
         return self._session
 
@@ -34,11 +35,13 @@ class CommandData:
         if self._session:
             log.warning("Session had to be created to be committed")
         # noinspection PyUnresolvedReferences
+        log.debug("Committing Session...")
         await ru.asyncify(self.session.commit)
 
     async def session_close(self):
         """Asyncronously close the :attr:`.session` of this object."""
         if self._session is not None:
+            log.debug("Closing Session...")
             await ru.asyncify(self._session.close)
 
     async def reply(self, text: str) -> None:
@@ -71,9 +74,7 @@ class CommandData:
 
         Parameters:
             alias: the Alias to search for."""
-        return await ru.asyncify(
-            Alias.find_user(self._interface.alchemy, self.session, alias)
-        )
+        return await Alias.find_user(self._interface.alchemy, self.session, alias)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):

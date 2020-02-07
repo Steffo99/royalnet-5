@@ -10,7 +10,19 @@ class ForbiddenError(ApiError):
     pass
 
 
-class MissingParameterError(ApiError):
+class BadRequestError(ApiError):
+    pass
+
+
+class ParameterError(BadRequestError):
+    pass
+
+
+class MissingParameterError(ParameterError):
+    pass
+
+
+class InvalidParameterError(ParameterError):
     pass
 
 

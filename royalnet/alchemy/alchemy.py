@@ -1,4 +1,4 @@
-from typing import Set, Dict, Union
+from typing import *
 from contextlib import contextmanager, asynccontextmanager
 from royalnet.utils import asyncify
 from royalnet.alchemy.errors import TableNotFoundError
@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy.ext.declarative.api import DeclarativeMeta, AbstractConcreteBase
 from sqlalchemy.orm import sessionmaker
 
 
@@ -26,7 +26,7 @@ class Alchemy:
             raise NotImplementedError("sqlite databases aren't supported, as they can't be used in multithreaded"
                                       " applications")
         self._engine: Engine = create_engine(database_uri)
-        self._Base: DeclarativeMeta = declarative_base(bind=self._engine)
+        self._Base = declarative_base(bind=self._engine)
         self.Session: sessionmaker = sessionmaker(bind=self._engine)
         self._tables: Dict[str, Table] = {}
         for table in tables:
@@ -38,7 +38,7 @@ class Alchemy:
             self._tables[name] = bound_table
         self._Base.metadata.create_all()
 
-    def get(self, table: Union[str, type]) -> Table:
+    def get(self, table: Union[str, type]) -> DeclarativeMeta:
         """Get the table with a specified name or class.
 
         Args:
