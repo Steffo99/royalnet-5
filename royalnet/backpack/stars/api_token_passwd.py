@@ -9,7 +9,9 @@ from ..tables.tokens import Token
 class ApiTokenPasswdStar(ApiStar):
     path = "/api/token/passwd/v1"
 
-    async def api(self, data: ApiData) -> dict:
+    methods = ["POST"]
+
+    async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         token = await data.token()
         user = token.user

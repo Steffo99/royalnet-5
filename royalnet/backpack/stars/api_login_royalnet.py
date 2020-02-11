@@ -9,7 +9,9 @@ from ..tables.tokens import Token
 class ApiLoginRoyalnetStar(ApiStar):
     path = "/api/login/royalnet/v1"
 
-    async def api(self, data: ApiData) -> dict:
+    methods = ["POST"]
+
+    async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         UserT = self.alchemy.get(User)
         AliasT = self.alchemy.get(Alias)

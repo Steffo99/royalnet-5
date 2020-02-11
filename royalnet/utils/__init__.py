@@ -5,6 +5,7 @@ from .urluuid import to_urluuid, from_urluuid
 from .multilock import MultiLock
 from .sentry import init_sentry, sentry_exc
 from .log import init_logging
+from .royaltyping import JSON
 
 __all__ = [
     "asyncify",
@@ -20,4 +21,5 @@ __all__ = [
     "init_sentry",
     "sentry_exc",
     "init_logging",
+    "JSON",
 ]

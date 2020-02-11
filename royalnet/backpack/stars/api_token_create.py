@@ -3,13 +3,14 @@ import datetime
 import royalnet.utils as ru
 from royalnet.constellation.api import *
 from ..tables.tokens import Token
-from sqlalchemy import and_
 
 
 class ApiTokenCreateStar(ApiStar):
     path = "/api/token/create/v1"
 
-    async def api(self, data: ApiData) -> dict:
+    methods = ["POST"]
+
+    async def api(self, data: ApiData) -> ru.JSON:
         user = await data.user()
         try:
             duration = int(data["duration"])

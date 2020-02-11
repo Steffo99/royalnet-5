@@ -7,7 +7,7 @@ from ..pagestar import PageStar
 from .jsonapi import api_error, api_success
 from .apidata import ApiData
 from .apierrors import *
-from royalnet.utils import sentry_exc
+import royalnet.utils as ru
 
 
 class ApiStar(PageStar, ABC):
@@ -31,12 +31,12 @@ class ApiStar(PageStar, ABC):
         except BadRequestError as e:
             return api_error(e, code=400)
         except Exception as e:
-            sentry_exc(e)
+            ru.sentry_exc(e)
             return api_error(e, code=500)
         else:
             return api_success(response)
         finally:
             await apidata.session_close()
 
-    async def api(self, data: dict) -> dict:
+    async def api(self, data: ApiData) -> ru.JSON:
         raise NotImplementedError()
