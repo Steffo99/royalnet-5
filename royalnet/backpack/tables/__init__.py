@@ -4,6 +4,7 @@ from .telegram import Telegram
 from .discord import Discord
 from .matrix import Matrix
 from .aliases import Alias
+from .tokens import Token
 
 # Enter the tables of your Pack here!
 available_tables = {
@@ -11,7 +12,8 @@ available_tables = {
     Telegram,
     Discord,
     Matrix,
-    Alias
+    Alias,
+    Token,
 }
 
 # Don't change this, it should automatically generate __all__

@@ -7,7 +7,7 @@ from sqlalchemy.schema import Table
 from royalnet.commands import *
 import royalnet.utils as ru
 import royalnet.alchemy as ra
-import royalnet.backpack as rb
+import royalnet.backpack.tables as rbt
 import royalnet.herald as rh
 import traceback
 
@@ -20,7 +20,7 @@ class Serf:
     Discord)."""
     interface_name = NotImplemented
 
-    _master_table: type = rb.tables.User
+    _master_table: type = rbt.User
     _identity_table: type = NotImplemented
     _identity_column: str = NotImplemented
 
@@ -39,10 +39,15 @@ class Serf:
         for pack_name in pack_names:
             log.debug(f"Importing pack: {pack_name}")
             try:
-                packs[pack_name] = importlib.import_module(pack_name)
+                packs[pack_name] = {
+                    "commands": importlib.import_module(f"{pack_name}.commands"),
+                    "events": importlib.import_module(f"{pack_name}.events"),
+                    "stars": importlib.import_module(f"{pack_name}.stars"),
+                    "tables": importlib.import_module(f"{pack_name}.tables"),
+                }
             except ImportError as e:
                 log.error(f"{e.__class__.__name__} during the import of {pack_name}:\n"
-                          f"{traceback.format_exception(*sys.exc_info())}")
+                          f"{''.join(traceback.format_exception(*sys.exc_info()))}")
         log.info(f"Packs: {len(packs)} imported")
 
         self.alchemy: Optional[ra.Alchemy] = None
@@ -68,7 +73,7 @@ class Serf:
             tables = set()
             for pack in packs.values():
                 try:
-                    tables = tables.union(pack.available_tables)
+                    tables = tables.union(pack["tables"].available_tables)
                 except AttributeError:
                     log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
                     continue
@@ -95,13 +100,13 @@ class Serf:
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
-                events = pack.available_events
+                events = pack["events"].available_events
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_events` attribute.")
             else:
                 self.register_events(events, pack_cfg)
             try:
-                commands = pack.available_commands
+                commands = pack["commands"].available_commands
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_commands` attribute.")
             else:

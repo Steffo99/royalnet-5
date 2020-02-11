@@ -13,8 +13,12 @@ class Discord:
     __tablename__ = "discord"
 
     @declared_attr
-    def royal_id(self):
+    def user_id(self):
         return Column(Integer, ForeignKey("users.uid"))
+
+    @declared_attr
+    def user(self):
+        return relationship("User", backref="discord")
 
     @declared_attr
     def discord_id(self):
@@ -29,12 +33,8 @@ class Discord:
         return Column(String)
 
     @declared_attr
-    def avatar_hash(self):
+    def avatar_url(self):
         return Column(String)
-
-    @declared_attr
-    def royal(self):
-        return relationship("User", backref="discord")
 
     def __repr__(self):
         return f"<Discord {str(self)}>"

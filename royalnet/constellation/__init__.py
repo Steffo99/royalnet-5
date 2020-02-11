@@ -15,13 +15,11 @@ You can install them with: ::
 """
 
 from .constellation import Constellation
-from .star import Star, PageStar, ExceptionStar
-from .shoot import shoot
+from .star import Star
+from .pagestar import PageStar
 
 __all__ = [
     "Constellation",
     "Star",
     "PageStar",
-    "ExceptionStar",
-    "shoot",
 ]

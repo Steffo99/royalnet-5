@@ -5,7 +5,7 @@
 
 [tool.poetry]
     name = "royalnet"
-    version = "5.4.1"
+    version = "5.5"
     description = "A multipurpose bot and web framework"
     authors = ["Stefano Pigozzi <ste.pigozzi@gmail.com>"]
     license = "AGPL-3.0+"
@@ -44,6 +44,7 @@
     sqlalchemy = {version="^1.3.10", optional=true}
     psycopg2 = {version="^2.8.4", optional=true}  # Requires quite a bit of stuff http://initd.org/psycopg/docs/install.html#install-from-source
     psycopg2_binary = {version="^2.8.4", optional=true}  # Prebuilt alternative to psycopg2, not recommended
+    bcrypt = {version="^3.1.7", optional=true}
 
     # constellation
     starlette = {version="^0.12.13", optional=true}
@@ -71,8 +72,8 @@
     telegram = ["python_telegram_bot"]
     discord = ["discord.py", "pynacl"]
     matrix = ["matrix-nio"]
-    alchemy_easy = ["sqlalchemy", "psycopg2_binary"]
-    alchemy_hard = ["sqlalchemy", "psycopg2"]
+    alchemy_easy = ["sqlalchemy", "psycopg2_binary", "bcrypt"]
+    alchemy_hard = ["sqlalchemy", "psycopg2", "bcrypt"]
     bard = ["ffmpeg_python", "youtube_dl", "eyed3"]
     constellation = ["starlette", "uvicorn", "python-multipart"]
     sentry = ["sentry_sdk"]

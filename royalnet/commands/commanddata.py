@@ -5,9 +5,11 @@ import asyncio as aio
 import royalnet.utils as ru
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
+from royalnet.backpack.tables.aliases import Alias
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
+    from royalnet.backpack.tables.users import User
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ class CommandData:
         if self._session is None:
             if self._interface.alchemy is None:
                 raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
+            log.debug("Creating Session...")
             self._session = self._interface.alchemy.Session()
         return self._session
 
@@ -32,11 +35,13 @@ class CommandData:
         if self._session:
             log.warning("Session had to be created to be committed")
         # noinspection PyUnresolvedReferences
+        log.debug("Committing Session...")
         await ru.asyncify(self.session.commit)
 
     async def session_close(self):
         """Asyncronously close the :attr:`.session` of this object."""
         if self._session is not None:
+            log.debug("Closing Session...")
             await ru.asyncify(self._session.close)
 
     async def reply(self, text: str) -> None:
@@ -63,6 +68,13 @@ class CommandData:
             error_if_unavailable: if True, raise an exception if the message cannot been deleted."""
         if error_if_unavailable:
             raise UnsupportedError(f"'{self.delete_invoking.__name__}' is not supported")
+
+    async def find_user(self, alias: str) -> Optional["User"]:
+        """Find the User having a specific Alias.
+
+        Parameters:
+            alias: the Alias to search for."""
+        return await Alias.find_user(self._interface.alchemy, self.session, alias)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):

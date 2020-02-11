@@ -1,5 +1,4 @@
 from typing import *
-import royalnet
 import royalnet.commands as rc
 
 

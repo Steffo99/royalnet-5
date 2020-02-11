@@ -1,15 +1,12 @@
-import royalnet
-from starlette.requests import Request
-from starlette.responses import *
-from royalnet.constellation import PageStar
+import royalnet.version as rv
+from royalnet.constellation.api import *
+import royalnet.utils as ru
 
 
-class ApiRoyalnetVersionStar(PageStar):
-    path = "/api/royalnet/version"
+class ApiRoyalnetVersionStar(ApiStar):
+    path = "/api/royalnet/version/v1"
 
-    async def page(self, request: Request) -> JSONResponse:
-        return JSONResponse({
-            "version": {
-                "semantic": royalnet.__version__,
-            }
-        })
+    async def api(self, data: ApiData) -> ru.JSON:
+        return {
+            "semantic": rv.semantic
+        }

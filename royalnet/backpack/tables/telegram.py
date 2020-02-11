@@ -13,8 +13,12 @@ class Telegram:
     __tablename__ = "telegram"
 
     @declared_attr
-    def royal_id(self):
+    def user_id(self):
         return Column(Integer, ForeignKey("users.uid"))
+
+    @declared_attr
+    def user(self):
+        return relationship("User", backref="telegram")
 
     @declared_attr
     def tg_id(self):
@@ -31,10 +35,6 @@ class Telegram:
     @declared_attr
     def username(self):
         return Column(String)
-
-    @declared_attr
-    def royal(self):
-        return relationship("User", backref="telegram")
 
     def __repr__(self):
         return f"<Telegram {str(self)}>"
