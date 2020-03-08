@@ -48,37 +48,27 @@ class ApiStar(PageStar, ABC):
         raise NotImplementedError()
 
     @classmethod
-    def swagger(cls) -> str:
+    def swagger(cls) -> ru.JSON:
         """Generate one or more swagger paths for this ApiStar."""
-        string = [f'{cls.path}:\n']
+        result = {}
         for method in cls.methods:
-            string.append(
-                f'    {method.lower()}:\n'
-                f'      summary: "{cls.summary}"\n'
-                f'      description: "{cls.description}"\n'
-                f'      produces:\n'
-                f'      - "application/json"\n'
-                f'      responses:\n'
-                f'        200:\n'
-                f'          description: "Success"\n'
-                f'        400:\n'
-                f'          description: "Bad request"\n'
-                f'        403:\n'
-                f'          description: "Forbidden"\n'
-                f'        404:\n'
-                f'          description: "Not found"\n'
-                f'        500:\n'
-                f'          description: "Serverside unhandled exception"\n'
-                f'        501:\n'
-                f'          description: "Not yet implemented"\n'
-            )
-            if len(cls.parameters) > 0:
-                string.append(f'      parameters:\n')
-            for parameter in cls.parameters:
-                string.append(
-                    f'        - name: "{parameter}"\n'
-                    f'          in: "query"\n'
-                    f'          description: "{cls.parameters[parameter]}"\n'
-                    f'          type: "string"\n'
-                )
-        return "".join(string).rstrip("\n")
+            result[method.lower()] = {
+                "summary": cls.summary,
+                "description": cls.description,
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {"description": "Success"},
+                    "400": {"description": "Bad request"},
+                    "403": {"description": "Forbidden"},
+                    "404": {"description": "Not found"},
+                    "500": {"description": "Serverside unhandled exception"},
+                    "501": {"description": "Not yet implemented"}
+                },
+                "paameters": [{
+                    "name": parameter,
+                    "in": "query",
+                    "description": cls.parameters[parameter],
+                    "type": "string"
+                } for parameter in cls.parameters]
+            }
+        return result
