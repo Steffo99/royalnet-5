@@ -6,6 +6,8 @@ import royalnet.utils as ru
 class ApiRoyalnetVersionStar(ApiStar):
     path = "/api/royalnet/version/v1"
 
+    summary = "Get the current Royalnet version."
+
     async def api(self, data: ApiData) -> ru.JSON:
         return {
             "semantic": rv.semantic

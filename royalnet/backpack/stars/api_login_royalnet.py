@@ -11,6 +11,13 @@ class ApiLoginRoyalnetStar(ApiStar):
 
     methods = ["POST"]
 
+    summary = "Login as a Royalnet user, creating a 7-day login token."
+
+    parameters = {
+        "username": "The name of the user you are logging in as.",
+        "password": "The password of the user you are logging in as."
+    }
+
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         UserT = self.alchemy.get(User)

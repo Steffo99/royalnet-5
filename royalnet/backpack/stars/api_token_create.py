@@ -10,6 +10,13 @@ class ApiTokenCreateStar(ApiStar):
 
     methods = ["POST"]
 
+    summary = "Create a new login token of any duration."
+
+    parameters = {
+        "token": "Your current login token.",
+        "duration": "The duration in seconds of the new token."
+    }
+
     async def api(self, data: ApiData) -> ru.JSON:
         user = await data.user()
         try:
