@@ -99,6 +99,9 @@ class Constellation:
         self.starlette = starlette.applications.Starlette(debug=__debug__)
         """The :class:`~starlette.Starlette` app."""
 
+        self.stars: List[PageStar] = []
+        """A list of all the :class:`PageStar` registered to this :class:`Constellation`."""
+
         # Register Events
         for pack_name in packs:
             pack = packs[pack_name]
@@ -268,6 +271,7 @@ class Constellation:
                           f"{SelectedPageStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
                 ru.sentry_exc(e)
                 continue
+            self.stars.append(page_star_instance)
             self.starlette.add_route(*self._page_star_wrapper(page_star_instance))
 
     def run_blocking(self):

@@ -11,6 +11,14 @@ import royalnet.utils as ru
 
 
 class ApiStar(PageStar, ABC):
+    summary: str = ""
+
+    description: str = ""
+
+    parameters: Dict[str, str] = {}
+
+    tags: List[str] = []
+
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
             data = request.query_params
@@ -40,3 +48,30 @@ class ApiStar(PageStar, ABC):
 
     async def api(self, data: ApiData) -> ru.JSON:
         raise NotImplementedError()
+
+    @classmethod
+    def swagger(cls) -> ru.JSON:
+        """Generate one or more swagger paths for this ApiStar."""
+        result = {}
+        for method in cls.methods:
+            result[method.lower()] = {
+                "operationId": cls.__name__,
+                "summary": cls.summary,
+                "description": cls.description,
+                "responses": {
+                    "200": {"description": "Success"},
+                    "400": {"description": "Bad request"},
+                    "403": {"description": "Forbidden"},
+                    "404": {"description": "Not found"},
+                    "500": {"description": "Serverside unhandled exception"},
+                    "501": {"description": "Not yet implemented"}
+                },
+                "tags": cls.tags,
+                "parameters": [{
+                    "name": parameter,
+                    "in": "query",
+                    "description": cls.parameters[parameter],
+                    "type": "string"
+                } for parameter in cls.parameters]
+            }
+        return result

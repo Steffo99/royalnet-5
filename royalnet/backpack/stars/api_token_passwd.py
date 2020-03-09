@@ -11,6 +11,14 @@ class ApiTokenPasswdStar(ApiStar):
 
     methods = ["POST"]
 
+    summary = "Change Royalnet password for an user."
+
+    parameters = {
+        "new_password": "The password you want to set."
+    }
+
+    tags = ["royalnet"]
+
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         token = await data.token()

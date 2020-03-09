@@ -1,6 +1,7 @@
 import toml
 import importlib
 import click
+from .version import semantic
 
 p = click.echo
 
