@@ -4,7 +4,6 @@ from .api_login_royalnet import ApiLoginRoyalnetStar
 from .api_token_info import ApiTokenInfoStar
 from .api_token_passwd import ApiTokenPasswdStar
 from .api_token_create import ApiTokenCreateStar
-from .api_docs import ApiDocsStar
 from .docs import DocsStar
 
 # Enter the PageStars of your Pack here!
@@ -14,7 +13,6 @@ available_page_stars = [
     ApiTokenInfoStar,
     ApiTokenPasswdStar,
     ApiTokenCreateStar,
-    ApiDocsStar,
     DocsStar,
 ]
 

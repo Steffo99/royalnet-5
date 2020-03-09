@@ -13,7 +13,6 @@ class ApiTokenCreateStar(ApiStar):
     summary = "Create a new login token of any duration."
 
     parameters = {
-        "token": "Your current login token.",
         "duration": "The duration in seconds of the new token."
     }
 

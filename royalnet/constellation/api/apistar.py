@@ -56,7 +56,6 @@ class ApiStar(PageStar, ABC):
                 "operationId": cls.__name__,
                 "summary": cls.summary,
                 "description": cls.description,
-                "produces": ["application/json"],
                 "responses": {
                     "200": {"description": "Success"},
                     "400": {"description": "Bad request"},
