@@ -7,6 +7,8 @@ class ApiTokenInfoStar(ApiStar):
 
     summary = "Get info the current login token."
 
+    tags = ["royalnet"]
+
     async def api(self, data: ApiData) -> ru.JSON:
         token = await data.token()
         return token.json()

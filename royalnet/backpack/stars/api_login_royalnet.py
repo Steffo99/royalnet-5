@@ -18,6 +18,8 @@ class ApiLoginRoyalnetStar(ApiStar):
         "password": "The password of the user you are logging in as."
     }
 
+    tags = ["royalnet"]
+
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         UserT = self.alchemy.get(User)

@@ -8,6 +8,8 @@ class ApiRoyalnetVersionStar(ApiStar):
 
     summary = "Get the current Royalnet version."
 
+    tags = ["royalnet"]
+
     async def api(self, data: ApiData) -> ru.JSON:
         return {
             "semantic": rv.semantic

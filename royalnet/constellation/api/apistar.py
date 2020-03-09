@@ -17,6 +17,8 @@ class ApiStar(PageStar, ABC):
 
     parameters: Dict[str, str] = {}
 
+    tags: List[str] = []
+
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
             data = request.query_params
@@ -64,6 +66,7 @@ class ApiStar(PageStar, ABC):
                     "500": {"description": "Serverside unhandled exception"},
                     "501": {"description": "Not yet implemented"}
                 },
+                "tags": cls.tags,
                 "parameters": [{
                     "name": parameter,
                     "in": "query",
