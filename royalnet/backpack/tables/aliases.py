@@ -1,3 +1,4 @@
+from typing import *
 from sqlalchemy import Column, \
                        Integer, \
                        String, \
@@ -23,7 +24,7 @@ class Alias:
         return relationship("User", backref="aliases")
 
     @classmethod
-    async def find_user(cls, alchemy, session, alias: str):
+    async def find_user(cls, alchemy, session, alias: Union[str, int]):
         result = await ru.asyncify(session.query(alchemy.get(cls)).filter_by(alias=alias.lower()).one_or_none)
         if result is not None:
             result = result.user

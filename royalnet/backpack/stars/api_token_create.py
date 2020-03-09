@@ -16,7 +16,7 @@ class ApiTokenCreateStar(ApiStar):
         "duration": "The duration in seconds of the new token."
     }
 
-    tags = ["royalnet"]
+    tags = ["token"]
 
     async def api(self, data: ApiData) -> ru.JSON:
         user = await data.user()

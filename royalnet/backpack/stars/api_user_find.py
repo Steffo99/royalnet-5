@@ -1,0 +1,21 @@
+from royalnet.utils import *
+from royalnet.backpack.tables import *
+from royalnet.constellation.api import *
+
+
+class ApiUserFindStar(ApiStar):
+    path = "/api/user/find/v1"
+
+    summary = "Find a Royalnet user by one of their aliases."
+
+    parameters = {
+        "alias": "One of the aliases of the user to get."
+    }
+
+    tags = ["user"]
+
+    async def api(self, data: ApiData) -> dict:
+        user = await Alias.find_user(self.alchemy, data.session, data["alias"])
+        if user is None:
+            raise NotFoundError("No such user.")
+        return user.json()

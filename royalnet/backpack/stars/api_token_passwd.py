@@ -17,7 +17,7 @@ class ApiTokenPasswdStar(ApiStar):
         "new_password": "The password you want to set."
     }
 
-    tags = ["royalnet"]
+    tags = ["token"]
 
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
