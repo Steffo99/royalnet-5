@@ -9,15 +9,17 @@ from ..tables.tokens import Token
 class ApiTokenPasswdStar(ApiStar):
     path = "/api/token/passwd/v1"
 
-    methods = ["POST"]
+    methods = ["PUT"]
 
     summary = "Change Royalnet password for an user."
+
+    tags = ["token"]
 
     parameters = {
         "new_password": "The password you want to set."
     }
 
-    tags = ["token"]
+    requires_auth = True
 
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)

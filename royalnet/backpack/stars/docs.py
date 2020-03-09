@@ -28,16 +28,13 @@ class DocsStar(PageStar):
             "paths": paths,
             "components": {
                 "securitySchemes": {
-                    "LoginTokenAuth": {
+                    "RoyalnetLoginToken": {
                         "type": "apiKey",
                         "in": "query",
                         "name": "token",
                     }
                 }
-            },
-            "security": [
-                {"LoginTokenAuth": []}
-            ]
+            }
         })
 
         return HTMLResponse(

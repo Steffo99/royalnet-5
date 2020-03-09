@@ -9,6 +9,8 @@ class ApiTokenInfoStar(ApiStar):
 
     tags = ["token"]
 
+    requires_auth = True
+
     async def api(self, data: ApiData) -> ru.JSON:
         token = await data.token()
         return token.json()

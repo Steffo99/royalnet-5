@@ -8,11 +8,11 @@ class ApiUserFindStar(ApiStar):
 
     summary = "Find a Royalnet user by one of their aliases."
 
+    tags = ["user"]
+
     parameters = {
         "alias": "One of the aliases of the user to get."
     }
-
-    tags = ["user"]
 
     async def api(self, data: ApiData) -> dict:
         user = await Alias.find_user(self.alchemy, data.session, data["alias"])

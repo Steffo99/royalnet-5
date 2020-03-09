@@ -18,6 +18,8 @@ class ApiTokenCreateStar(ApiStar):
 
     tags = ["token"]
 
+    requires_auth = True
+
     async def api(self, data: ApiData) -> ru.JSON:
         user = await data.user()
         try:

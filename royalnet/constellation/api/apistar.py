@@ -19,6 +19,8 @@ class ApiStar(PageStar, ABC):
 
     tags: List[str] = []
 
+    requires_auth: bool = False
+
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
             data = request.query_params
@@ -74,4 +76,6 @@ class ApiStar(PageStar, ABC):
                     "type": "string"
                 } for parameter in cls.parameters]
             }
+            if cls.requires_auth:
+                result[method.lower()]["security"] = [{"RoyalnetLoginToken": ["logged_in"]}]
         return result
