@@ -53,6 +53,7 @@ class ApiStar(PageStar, ABC):
         result = {}
         for method in cls.methods:
             result[method.lower()] = {
+                "operationId": cls.__name__,
                 "summary": cls.summary,
                 "description": cls.description,
                 "produces": ["application/json"],
@@ -64,7 +65,7 @@ class ApiStar(PageStar, ABC):
                     "500": {"description": "Serverside unhandled exception"},
                     "501": {"description": "Not yet implemented"}
                 },
-                "paameters": [{
+                "parameters": [{
                     "name": parameter,
                     "in": "query",
                     "description": cls.parameters[parameter],
