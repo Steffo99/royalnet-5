@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Royalnet &mdash; Royalnet 5.4a2 documentation</title>
+  <title>Royalnet &mdash; Royalnet 5.6.2 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/rygdocs.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Creating a Royalnet Pack" href="packs/pack.html" /> 
+    <link rel="next" title="Royalnet Packs" href="packs/pack.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                5.4a2
+                5.6.2
               </div>
             
           
@@ -85,7 +85,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Creating a Royalnet Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Royalnet Packs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="randomdiscoveries.html">Random discoveries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a></li>
 </ul>
@@ -157,55 +157,9 @@
 <p>Welcome to the documentation of Royalnet!</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Creating a Royalnet Pack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="packs/command.html">Adding a Command to the Pack</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#creating-a-new-command">Creating a new Command</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#command-arguments">Command arguments</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#direct-access">Direct access</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#optional-access">Optional access</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#full-string">Full string</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#regular-expressions">Regular expressions</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#raising-errors">Raising errors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#delete-the-invoking-message">Delete the invoking message</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#using-the-database">Using the database</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#querying-the-database">Querying the database</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#adding-filters-to-the-query">Adding filters to the query</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#ordering-the-results-of-a-query">Ordering the results of a query</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#fetching-the-results-of-a-query">Fetching the results of a query</a></li>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#more-alchemy">More Alchemy</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#calling-events">Calling Events</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#displaying-keyboards">Displaying Keyboards</a></li>
-<li class="toctree-l3"><a class="reference internal" href="packs/command.html#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="packs/command.html#running-repeating-jobs">Running repeating jobs</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="packs/star.html">Adding a Star to the Pack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="packs/event.html">Using Events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="packs/table.html">Using Tables and databases</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="randomdiscoveries.html">Random discoveries</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="randomdiscoveries.html#discord-websocket-undocumented-error-codes">Discord websocket undocumented error codes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.alchemy">Alchemy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.backpack">Backpack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.bard">Bard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.commands">Commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.constellation">Constellation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.herald">Herald</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.serf">Serf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="apireference.html#module-royalnet.utils">Utils</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Royalnet Packs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="randomdiscoveries.html">Random discoveries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apireference.html">API Reference</a></li>
 </ul>
 </div>
 <div class="section" id="some-useful-links">
@@ -225,7 +179,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="packs/pack.html" class="btn btn-neutral float-right" title="Creating a Royalnet Pack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="packs/pack.html" class="btn btn-neutral float-right" title="Royalnet Packs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

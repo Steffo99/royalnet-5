@@ -4,7 +4,7 @@ Royalnet
 Welcome to the documentation of Royalnet!
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 1
 
    packs/pack
    randomdiscoveries

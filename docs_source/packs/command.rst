@@ -1,6 +1,6 @@
 .. currentmodule:: royalnet.commands
 
-Adding a Command to the Pack
+Creating a new Command
 ====================================
 
 A Royalnet Command is a small script that is run whenever a specific message is sent to a Royalnet interface.
@@ -327,7 +327,7 @@ if you want the command to raise an error if the number of results is greater th
 More Alchemy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can read more about :mod:`sqlalchemy` at their `website <https://www.sqlalchemy.org/>`_.
+You can read more about sqlalchemy at their `website <https://www.sqlalchemy.org/>`_.
 
 Calling Events
 ------------------------------------
@@ -346,5 +346,10 @@ This section is not documented yet.
 
 Running repeating jobs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section is not documented yet.
+
+Adding the command to __init__.py
+---------------------------------------------
 
 This section is not documented yet.

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; Royalnet 5.4a2 documentation</title>
+  <title>API Reference &mdash; Royalnet 5.6.2 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                5.4a2
+                5.6.2
               </div>
             
           
@@ -85,7 +85,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Creating a Royalnet Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packs/pack.html">Royalnet Packs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="randomdiscoveries.html">Random discoveries</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-royalnet.alchemy">Alchemy</a></li>
@@ -200,7 +200,7 @@ Check the tables submodule for more details.</p></li>
 
 <dl class="method">
 <dt id="royalnet.alchemy.Alchemy.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">table: Union[str, type]</em><span class="sig-paren">)</span> &#x2192; sqlalchemy.sql.schema.Table<a class="headerlink" href="#royalnet.alchemy.Alchemy.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">table: Union[str, type]</em><span class="sig-paren">)</span> &#x2192; sqlalchemy.ext.declarative.api.DeclarativeMeta<a class="headerlink" href="#royalnet.alchemy.Alchemy.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the table with a specified name or class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -565,6 +565,17 @@ in the format <code class="docutils literal notranslate"><span class="pre">(requ
 </dd></dl>
 
 <dl class="method">
+<dt id="royalnet.commands.CommandData.find_user">
+<em class="property">async </em><code class="sig-name descname">find_user</code><span class="sig-paren">(</span><em class="sig-param">alias: str</em><span class="sig-paren">)</span> &#x2192; Optional[User]<a class="headerlink" href="#royalnet.commands.CommandData.find_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the User having a specific Alias.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>alias</strong> – the Alias to search for.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="royalnet.commands.CommandData.get_author">
 <em class="property">async </em><code class="sig-name descname">get_author</code><span class="sig-paren">(</span><em class="sig-param">error_if_none: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.commands.CommandData.get_author" title="Permalink to this definition">¶</a></dt>
 <dd><p>Try to find the identifier of the user that sent the message.
@@ -912,13 +923,8 @@ As is the case with the logging module, it will be started on the first request 
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="royalnet.constellation.Constellation.register_exc_stars">
-<code class="sig-name descname">register_exc_stars</code><span class="sig-paren">(</span><em class="sig-param">exc_stars: List[Type[royalnet.constellation.star.ExceptionStar]], pack_cfg: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Constellation.register_exc_stars" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="royalnet.constellation.Constellation.register_page_stars">
-<code class="sig-name descname">register_page_stars</code><span class="sig-paren">(</span><em class="sig-param">page_stars: List[Type[royalnet.constellation.star.PageStar]], pack_cfg: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Constellation.register_page_stars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">register_page_stars</code><span class="sig-paren">(</span><em class="sig-param">page_stars: List[Type[royalnet.constellation.pagestar.PageStar]], pack_cfg: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Constellation.register_page_stars" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -945,13 +951,19 @@ As is the case with the logging module, it will be started on the first request 
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Starlette</span></code> app.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="royalnet.constellation.Constellation.stars">
+<code class="sig-name descname">stars</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.constellation.Constellation.stars" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of all the <a class="reference internal" href="#royalnet.constellation.PageStar" title="royalnet.constellation.PageStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">PageStar</span></code></a> registered to this <a class="reference internal" href="#royalnet.constellation.Constellation" title="royalnet.constellation.Constellation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Constellation</span></code></a>.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="royalnet.constellation.Star">
 <em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">Star</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.Star" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Star is a class representing a part of the website.</p>
-<p>It shouldn’t be used directly: please use <a class="reference internal" href="#royalnet.constellation.PageStar" title="royalnet.constellation.PageStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">PageStar</span></code></a> and <a class="reference internal" href="#royalnet.constellation.ExceptionStar" title="royalnet.constellation.ExceptionStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionStar</span></code></a> instead!</p>
+<p>It shouldn’t be used directly: please use <a class="reference internal" href="#royalnet.constellation.PageStar" title="royalnet.constellation.PageStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">PageStar</span></code></a> and <code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionStar</span></code> instead!</p>
 <dl class="method">
 <dt id="royalnet.constellation.Star.Session">
 <em class="property">property </em><code class="sig-name descname">Session</code><a class="headerlink" href="#royalnet.constellation.Star.Session" title="Permalink to this definition">¶</a></dt>
@@ -980,7 +992,7 @@ As is the case with the logging module, it will be started on the first request 
 <dt id="royalnet.constellation.Star.page">
 <em class="property">async </em><code class="sig-name descname">page</code><span class="sig-paren">(</span><em class="sig-param">request: starlette.requests.Request</em><span class="sig-paren">)</span> &#x2192; starlette.responses.Response<a class="headerlink" href="#royalnet.constellation.Star.page" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function generating the <code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code> to a web <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code>.</p>
-<p>If it raises an error, the corresponding <a class="reference internal" href="#royalnet.constellation.ExceptionStar" title="royalnet.constellation.ExceptionStar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionStar</span></code></a> will be used to handle the request instead.</p>
+<p>If it raises an error, the corresponding <code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionStar</span></code> will be used to handle the request instead.</p>
 </dd></dl>
 
 <dl class="method">
@@ -996,7 +1008,7 @@ As is the case with the logging module, it will be started on the first request 
 <em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">PageStar</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.PageStar" title="Permalink to this definition">¶</a></dt>
 <dd><p>A PageStar is a class representing a single route of the website (for example, <code class="docutils literal notranslate"><span class="pre">/api/user/get</span></code>).</p>
 <p>To create a new website route you should create a new class inheriting from this class with a function overriding
-<a class="reference internal" href="#royalnet.constellation.Star.page" title="royalnet.constellation.Star.page"><code class="xref py py-meth docutils literal notranslate"><span class="pre">page()</span></code></a> and changing the values of <a class="reference internal" href="#royalnet.constellation.PageStar.path" title="royalnet.constellation.PageStar.path"><code class="xref py py-attr docutils literal notranslate"><span class="pre">path</span></code></a> and optionally <a class="reference internal" href="#royalnet.constellation.PageStar.methods" title="royalnet.constellation.PageStar.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">methods</span></code></a>.</p>
+<a class="reference internal" href="#royalnet.constellation.Star.page" title="royalnet.constellation.Star.page"><code class="xref py py-meth docutils literal notranslate"><span class="pre">page()</span></code></a>, <a class="reference internal" href="#royalnet.constellation.PageStar.path" title="royalnet.constellation.PageStar.path"><code class="xref py py-attr docutils literal notranslate"><span class="pre">path</span></code></a> and optionally <a class="reference internal" href="#royalnet.constellation.PageStar.methods" title="royalnet.constellation.PageStar.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">methods</span></code></a>.</p>
 <dl class="attribute">
 <dt id="royalnet.constellation.PageStar.methods">
 <code class="sig-name descname">methods</code><em class="property"> = ['GET']</em><a class="headerlink" href="#royalnet.constellation.PageStar.methods" title="Permalink to this definition">¶</a></dt>
@@ -1018,38 +1030,6 @@ As is the case with the logging module, it will be started on the first request 
 </div>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="class">
-<dt id="royalnet.constellation.ExceptionStar">
-<em class="property">class </em><code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">ExceptionStar</code><span class="sig-paren">(</span><em class="sig-param">interface: royalnet.commands.commandinterface.CommandInterface</em><span class="sig-paren">)</span><a class="headerlink" href="#royalnet.constellation.ExceptionStar" title="Permalink to this definition">¶</a></dt>
-<dd><p>An ExceptionStar is a class that handles an <a class="reference external" href="https://docs.python.org/3.8/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a> raised by another star by returning a different
-response than the one originally intended.</p>
-<p>The handled exception type is specified in the <a class="reference internal" href="#royalnet.constellation.ExceptionStar.error" title="royalnet.constellation.ExceptionStar.error"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code></a>.</p>
-<p>It can also handle standard webserver errors, such as <code class="docutils literal notranslate"><span class="pre">404</span> <span class="pre">Not</span> <span class="pre">Found</span></code>:
-to handle them, set <a class="reference internal" href="#royalnet.constellation.ExceptionStar.error" title="royalnet.constellation.ExceptionStar.error"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code></a> to an <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> of the corresponding error code.</p>
-<p>To create a new exception handler you should create a new class inheriting from this class with a function
-overriding <a class="reference internal" href="#royalnet.constellation.Star.page" title="royalnet.constellation.Star.page"><code class="xref py py-meth docutils literal notranslate"><span class="pre">page()</span></code></a> and changing the value of <a class="reference internal" href="#royalnet.constellation.ExceptionStar.error" title="royalnet.constellation.ExceptionStar.error"><code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code></a>.</p>
-<dl class="attribute">
-<dt id="royalnet.constellation.ExceptionStar.error">
-<code class="sig-name descname">error</code><em class="property"> = None</em><a class="headerlink" href="#royalnet.constellation.ExceptionStar.error" title="Permalink to this definition">¶</a></dt>
-<dd><p>The error that should be handled by this star. It should be either a subclass of <a class="reference external" href="https://docs.python.org/3.8/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a>,
-or the <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> of an HTTP error code.</p>
-<p class="rubric">Examples</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">404</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="ne">ValueError</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="royalnet.constellation.shoot">
-<code class="sig-prename descclassname">royalnet.constellation.</code><code class="sig-name descname">shoot</code><span class="sig-paren">(</span><em class="sig-param">code: int</em>, <em class="sig-param">description: str</em><span class="sig-paren">)</span> &#x2192; starlette.responses.JSONResponse<a class="headerlink" href="#royalnet.constellation.shoot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a error <code class="xref py py-class docutils literal notranslate"><span class="pre">JSONResponse</span></code> with the passed error code and description.</p>
 </dd></dl>
 
 </div>

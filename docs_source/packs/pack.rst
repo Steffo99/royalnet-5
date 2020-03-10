@@ -1,11 +1,15 @@
-Creating a Royalnet Pack
+.. currentmodule:: royalnet
+
+Royalnet Packs
 ====================================
 
-This section is not documented yet.
+A **Royalnet Pack** is a Python `module <https://docs.python.org/3/tutorial/modules.html>`_ that can be loaded in a
+Royalnet instance to add more features, such as more commands, more webpages and more events.
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 1
 
+   newpack
    command
    star
    event

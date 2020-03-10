@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Adding a Command to the Pack &mdash; Royalnet 5.4a2 documentation</title>
+  <title>Creating a new Command &mdash; Royalnet 5.6.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Adding a Star to the Pack" href="star.html" />
-    <link rel="prev" title="Creating a Royalnet Pack" href="pack.html" /> 
+    <link rel="prev" title="Creating a new Pack" href="newpack.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                5.4a2
+                5.6.2
               </div>
             
           
@@ -86,9 +86,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="pack.html">Creating a Royalnet Pack</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding a Command to the Pack</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-new-command">Creating a new Command</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pack.html">Royalnet Packs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="newpack.html">Creating a new Pack</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating a new Command</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Creating a new Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#command-arguments">Command arguments</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#direct-access">Direct access</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#optional-access">Optional access</a></li>
@@ -113,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#running-repeating-jobs">Running repeating jobs</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-the-command-to-init-py">Adding the command to __init__.py</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="star.html">Adding a Star to the Pack</a></li>
@@ -167,9 +169,9 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="pack.html">Creating a Royalnet Pack</a> &raquo;</li>
+          <li><a href="pack.html">Royalnet Packs</a> &raquo;</li>
         
-      <li>Adding a Command to the Pack</li>
+      <li>Creating a new Command</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -188,8 +190,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="adding-a-command-to-the-pack">
-<h1>Adding a Command to the Pack<a class="headerlink" href="#adding-a-command-to-the-pack" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="creating-a-new-command">
+<h1>Creating a new Command<a class="headerlink" href="#creating-a-new-command" title="Permalink to this headline">¶</a></h1>
 <p>A Royalnet Command is a small script that is run whenever a specific message is sent to a Royalnet interface.</p>
 <p>A Command code looks like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">royalnet.commands</span> <span class="k">as</span> <span class="nn">rc</span>
@@ -208,8 +210,8 @@
         <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;Pong!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="creating-a-new-command">
-<h2>Creating a new Command<a class="headerlink" href="#creating-a-new-command" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>Creating a new Command<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>First, think of a <code class="docutils literal notranslate"><span class="pre">name</span></code> for your command.
 It’s the name your command will be called with: for example, the “spaghetti” command will be called by typing <strong>/spaghetti</strong> in chat.
 Try to keep the name as short as possible, while staying specific enough so no other command will have the same name.</p>
@@ -482,7 +484,7 @@ if you want the command to raise an error if the number of results is greater th
 </div>
 <div class="section" id="more-alchemy">
 <h3>More Alchemy<a class="headerlink" href="#more-alchemy" title="Permalink to this headline">¶</a></h3>
-<p>You can read more about <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlalchemy</span></code> at their <a class="reference external" href="https://www.sqlalchemy.org/">website</a>.</p>
+<p>You can read more about sqlalchemy at their <a class="reference external" href="https://www.sqlalchemy.org/">website</a>.</p>
 </div>
 </div>
 <div class="section" id="calling-events">
@@ -501,6 +503,10 @@ if you want the command to raise an error if the number of results is greater th
 <p>This section is not documented yet.</p>
 </div>
 </div>
+<div class="section" id="adding-the-command-to-init-py">
+<h2>Adding the command to __init__.py<a class="headerlink" href="#adding-the-command-to-init-py" title="Permalink to this headline">¶</a></h2>
+<p>This section is not documented yet.</p>
+</div>
 </div>
 
 
@@ -514,7 +520,7 @@ if you want the command to raise an error if the number of results is greater th
         <a href="star.html" class="btn btn-neutral float-right" title="Adding a Star to the Pack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pack.html" class="btn btn-neutral float-left" title="Creating a Royalnet Pack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="newpack.html" class="btn btn-neutral float-left" title="Creating a new Pack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

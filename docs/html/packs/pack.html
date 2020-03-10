@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating a Royalnet Pack &mdash; Royalnet 5.4a2 documentation</title>
+  <title>Royalnet Packs &mdash; Royalnet 5.6.2 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/rygdocs.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Adding a Command to the Pack" href="command.html" />
+    <link rel="next" title="Creating a new Pack" href="newpack.html" />
     <link rel="prev" title="Royalnet" href="../index.html" /> 
 </head>
 
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                5.4a2
+                5.6.2
               </div>
             
           
@@ -86,8 +86,9 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Creating a Royalnet Pack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="command.html">Adding a Command to the Pack</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Royalnet Packs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="newpack.html">Creating a new Pack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="command.html">Creating a new Command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="star.html">Adding a Star to the Pack</a></li>
 <li class="toctree-l2"><a class="reference internal" href="event.html">Using Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="table.html">Using Tables and databases</a></li>
@@ -140,7 +141,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Creating a Royalnet Pack</li>
+      <li>Royalnet Packs</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -159,39 +160,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="creating-a-royalnet-pack">
-<h1>Creating a Royalnet Pack<a class="headerlink" href="#creating-a-royalnet-pack" title="Permalink to this headline">¶</a></h1>
-<p>This section is not documented yet.</p>
+  <div class="section" id="royalnet-packs">
+<h1>Royalnet Packs<a class="headerlink" href="#royalnet-packs" title="Permalink to this headline">¶</a></h1>
+<p>A <strong>Royalnet Pack</strong> is a Python <a class="reference external" href="https://docs.python.org/3/tutorial/modules.html">module</a> that can be loaded in a
+Royalnet instance to add more features, such as more commands, more webpages and more events.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="command.html">Adding a Command to the Pack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="command.html#creating-a-new-command">Creating a new Command</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#command-arguments">Command arguments</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="command.html#direct-access">Direct access</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#optional-access">Optional access</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#full-string">Full string</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#regular-expressions">Regular expressions</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#raising-errors">Raising errors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#delete-the-invoking-message">Delete the invoking message</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#using-the-database">Using the database</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="command.html#querying-the-database">Querying the database</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#adding-filters-to-the-query">Adding filters to the query</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#ordering-the-results-of-a-query">Ordering the results of a query</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#fetching-the-results-of-a-query">Fetching the results of a query</a></li>
-<li class="toctree-l3"><a class="reference internal" href="command.html#more-alchemy">More Alchemy</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#calling-events">Calling Events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#displaying-keyboards">Displaying Keyboards</a></li>
-<li class="toctree-l2"><a class="reference internal" href="command.html#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="command.html#running-repeating-jobs">Running repeating jobs</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="newpack.html">Creating a new Pack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command.html">Creating a new Command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="star.html">Adding a Star to the Pack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="event.html">Using Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table.html">Using Tables and databases</a></li>
@@ -207,7 +183,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="command.html" class="btn btn-neutral float-right" title="Adding a Command to the Pack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="newpack.html" class="btn btn-neutral float-right" title="Creating a new Pack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../index.html" class="btn btn-neutral float-left" title="Royalnet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
