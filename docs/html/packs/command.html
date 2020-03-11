@@ -114,7 +114,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#running-repeating-jobs">Running repeating jobs</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#adding-the-command-to-init-py">Adding the command to __init__.py</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="star.html">Adding a Star to the Pack</a></li>
@@ -246,7 +245,20 @@ The previously mentioned “spaghetti” command should have a file called <code
         <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;🍝&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And… it’s done! The command is ready to be <a class="reference internal" href="pack.html"><span class="doc">added to your pack</span></a>!</p>
+<p>Finally, open the <code class="docutils literal notranslate"><span class="pre">commands/__init__.py</span></code> file, and import your command there, then add a reference to your imported
+command to the <code class="docutils literal notranslate"><span class="pre">available_commands</span></code> list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Imports go here!</span>
+<span class="kn">from</span> <span class="nn">.spaghetti</span> <span class="kn">import</span> <span class="n">SpaghettiCommand</span>
+
+<span class="c1"># Enter the commands of your Pack here!</span>
+<span class="n">available_commands</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SpaghettiCommand</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Don&#39;t change this, it should automatically generate __all__</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="n">command</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">available_commands</span><span class="p">]</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="command-arguments">
 <h2>Command arguments<a class="headerlink" href="#command-arguments" title="Permalink to this headline">¶</a></h2>
@@ -502,10 +514,6 @@ if you want the command to raise an error if the number of results is greater th
 <h3>Running repeating jobs<a class="headerlink" href="#running-repeating-jobs" title="Permalink to this headline">¶</a></h3>
 <p>This section is not documented yet.</p>
 </div>
-</div>
-<div class="section" id="adding-the-command-to-init-py">
-<h2>Adding the command to __init__.py<a class="headerlink" href="#adding-the-command-to-init-py" title="Permalink to this headline">¶</a></h2>
-<p>This section is not documented yet.</p>
 </div>
 </div>
 

@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Creating a new Pack &mdash; Royalnet 5.6.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/rygdocs.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Creating a new Command" href="command.html" />
+    <link rel="prev" title="Royalnet Packs" href="pack.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Royalnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.6.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pack.html">Royalnet Packs</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating a new Pack</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-the-repository">Creating the repository</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyproject-toml">pyproject.toml</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#examplepack">examplepack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#version-py">version.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-commands-folder">The commands folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-events-folder">The events folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-stars-folder">The stars folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-tables-folder">The tables folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-utils-folder">The utils folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-types-folder">The types folder</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-new-dependencies-to-the-pack">Adding new dependencies to the Pack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#publishing-the-pack">Publishing the pack</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="command.html">Creating a new Command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="star.html">Adding a Star to the Pack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event.html">Using Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="table.html">Using Tables and databases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../randomdiscoveries.html">Random discoveries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apireference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Royalnet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pack.html">Royalnet Packs</a> &raquo;</li>
+        
+      <li>Creating a new Pack</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/packs/newpack.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="creating-a-new-pack">
+<h1>Creating a new Pack<a class="headerlink" href="#creating-a-new-pack" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>You’ll need to have <a class="reference external" href="https://www.python.org/downloads/release/python-382/">Python 3.8</a> and <a class="reference external" href="https://github.com/python-poetry/poetry">poetry</a>
+to develop Royalnet Packs.</p>
+</div>
+<div class="section" id="creating-the-repository">
+<h2>Creating the repository<a class="headerlink" href="#creating-the-repository" title="Permalink to this headline">¶</a></h2>
+<p>To create a new pack, create a new repository based on the <a class="reference external" href="https://github.com/Steffo99/royalnet-pack-template">Royalnet Pack template</a>
+and clone it to your workspace.</p>
+<p>After cloning the template, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code> to install the dependencies for the pack, creating the <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code> file.</p>
+<div class="section" id="pyproject-toml">
+<h3>pyproject.toml<a class="headerlink" href="#pyproject-toml" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file contains information about your Python project that will be read by <code class="docutils literal notranslate"><span class="pre">poetry</span></code> while building
+the pack and publishing it to PyPI.</p>
+<p>Choose a name for your Pack and set it in the <code class="docutils literal notranslate"><span class="pre">tool.property.name</span></code> field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">poetry</span><span class="p">]</span>
+    <span class="c1"># TODO: Insert here your Pack name!</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;pastapack&quot;</span>
+    <span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>Follow the instructions in the other <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TODO</span></code> comments to finish editing the file.</p>
+</div>
+<div class="section" id="examplepack">
+<h3>examplepack<a class="headerlink" href="#examplepack" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">examplepack</span></code> folder contains the source code of your pack, and should be renamed to the name you set in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file.</p>
+<p>It should contain a <code class="docutils literal notranslate"><span class="pre">version.py</span></code> file and six folders:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>examplepack
+├── commands
+├── events
+├── stars
+├── tables
+├── types
+├── utils
+└── version.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="version-py">
+<h3>version.py<a class="headerlink" href="#version-py" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">version.py</span></code> file contains the version number of your pack.</p>
+<p>If you changed the <code class="docutils literal notranslate"><span class="pre">version</span></code> field in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file, change the value of <code class="docutils literal notranslate"><span class="pre">semantic</span></code> in <code class="docutils literal notranslate"><span class="pre">version.py</span></code> to the same value.</p>
+<p>Remember to use <a class="reference external" href="https://semver.org/">semantic versioning</a>!</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">semantic</span> <span class="o">=</span> <span class="s2">&quot;1.0.0&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-commands-folder">
+<h3>The commands folder<a class="headerlink" href="#the-commands-folder" title="Permalink to this headline">¶</a></h3>
+<p>The commands folder should contain all commands that your Pack will add to the Royalnet instances it is installed in.</p>
+<p>To learn how to create a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code>, read the <a class="reference internal" href="command.html"><span class="doc">Creating a new Command</span></a> page.</p>
+</div>
+<div class="section" id="the-events-folder">
+<h3>The events folder<a class="headerlink" href="#the-events-folder" title="Permalink to this headline">¶</a></h3>
+<p>The events folder should contain all events (remote procedure calls) that your Pack will add to the Royalnet instances it is installed in.</p>
+<p>To learn how to create a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code>, read the <a class="reference internal" href="event.html"><span class="doc">Using Events</span></a> page.</p>
+</div>
+<div class="section" id="the-stars-folder">
+<h3>The stars folder<a class="headerlink" href="#the-stars-folder" title="Permalink to this headline">¶</a></h3>
+<p>The stars folder should contain all stars (webserver routes) that your Pack will add to the Royalnet instances it is installed in.</p>
+<p>To learn how to create a new <code class="xref py py-class docutils literal notranslate"><span class="pre">PageStar</span></code>, read the <a class="reference internal" href="star.html"><span class="doc">Adding a Star to the Pack</span></a> page.</p>
+</div>
+<div class="section" id="the-tables-folder">
+<h3>The tables folder<a class="headerlink" href="#the-tables-folder" title="Permalink to this headline">¶</a></h3>
+<p>The tables folder should contain all Alchemy tables (SQLAlchemy-compatible SQL tables) that your Pack will add to the Royalnet instances it is installed in.</p>
+<p>To learn how to create a new table, read the <a class="reference internal" href="table.html"><span class="doc">Using Tables and databases</span></a> page.</p>
+</div>
+<div class="section" id="the-utils-folder">
+<h3>The utils folder<a class="headerlink" href="#the-utils-folder" title="Permalink to this headline">¶</a></h3>
+<p>The utils folder should contain the utility functions and classes that your Pack uses.</p>
+<p>Its contents are imported <strong>before</strong> the commands, events and stars but <strong>after</strong> the tables, so <strong>you can’t import them</strong> in the files contained in the <code class="docutils literal notranslate"><span class="pre">tables</span></code> folder, or you will create a <a class="reference external" href="https://stackabuse.com/python-circular-imports/">circular import</a>!</p>
+<p>Files in this folder are <strong>forbidden from importing modules</strong> from the <code class="docutils literal notranslate"><span class="pre">commands</span></code>, <code class="docutils literal notranslate"><span class="pre">events</span></code> and <code class="docutils literal notranslate"><span class="pre">stars</span></code> folders, as that will create a circular import too.</p>
+</div>
+<div class="section" id="the-types-folder">
+<h3>The types folder<a class="headerlink" href="#the-types-folder" title="Permalink to this headline">¶</a></h3>
+<p>The types folder should contain the enums and custom types that are used in your tables.</p>
+<p>Please note that the contents of this folder are imported <strong>before</strong> everything else in the pack.</p>
+<p>Its contents <strong>can be imported anywhere</strong> in the Pack, including the <code class="docutils literal notranslate"><span class="pre">tables</span></code> folder, without creating a circular import.</p>
+<p>However, its files are <strong>forbidden from importing anything else</strong> from the rest of the pack!</p>
+</div>
+</div>
+<div class="section" id="adding-new-dependencies-to-the-pack">
+<h2>Adding new dependencies to the Pack<a class="headerlink" href="#adding-new-dependencies-to-the-pack" title="Permalink to this headline">¶</a></h2>
+<p>As the Pack is actually a Python package, you can use <code class="docutils literal notranslate"><span class="pre">poetry</span></code> (or <code class="docutils literal notranslate"><span class="pre">pip</span></code>) to add new dependencies!</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">add</span> <span class="pre">packagename</span></code> to add and install a new dependency from the PyPI.</p>
+</div>
+<div class="section" id="publishing-the-pack">
+<h2>Publishing the pack<a class="headerlink" href="#publishing-the-pack" title="Permalink to this headline">¶</a></h2>
+<p>To publish your Pack on the PyPI, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">build</span></code>, then <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">publish</span></code>.</p>
+<p>Poetry will build your Pack and upload it to the PyPI for you.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="command.html" class="btn btn-neutral float-right" title="Creating a new Command" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pack.html" class="btn btn-neutral float-left" title="Royalnet Packs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Stefano Pigozzi
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
