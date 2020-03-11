@@ -13,6 +13,8 @@ Creating the repository
 To create a new pack, create a new repository based on the `Royalnet Pack template <https://github.com/Steffo99/royalnet-pack-template>`_
 and clone it to your workspace.
 
+After cloning the template, run ``poetry install`` to install the dependencies for the pack, creating the ``poetry.lock`` file.
+
 pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -103,7 +105,16 @@ Its contents **can be imported anywhere** in the Pack, including the ``tables`` 
 
 However, its files are **forbidden from importing anything else** from the rest of the pack!
 
+Adding new dependencies to the Pack
+------------------------------------
+
+As the Pack is actually a Python package, you can use ``poetry`` (or ``pip``) to add new dependencies!
+
+Use ``poetry add packagename`` to add and install a new dependency from the PyPI.
+
 Publishing the pack
 ------------------------------------
 
-This section is not documented yet.
+To publish your Pack on the PyPI, run ``poetry build``, then ``poetry publish``.
+
+Poetry will build your Pack and upload it to the PyPI for you.

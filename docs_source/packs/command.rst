@@ -62,7 +62,19 @@ To send a message in the chat the command was called in, you can use the :meth:`
         async def run(self, args: rc.CommandArgs, data: rc.CommandData):
             await data.reply("🍝")
 
-And... it's done! The command is ready to be :doc:`added to your pack <pack>`!
+Finally, open the ``commands/__init__.py`` file, and import your command there, then add a reference to your imported
+command to the ``available_commands`` list: ::
+
+    # Imports go here!
+    from .spaghetti import SpaghettiCommand
+
+    # Enter the commands of your Pack here!
+    available_commands = [
+        SpaghettiCommand,
+    ]
+
+    # Don't change this, it should automatically generate __all__
+    __all__ = [command.__name__ for command in available_commands]
 
 Command arguments
 ------------------------------------
@@ -346,10 +358,5 @@ This section is not documented yet.
 
 Running repeating jobs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This section is not documented yet.
-
-Adding the command to __init__.py
----------------------------------------------
 
 This section is not documented yet.
