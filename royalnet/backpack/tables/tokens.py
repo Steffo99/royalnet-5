@@ -51,5 +51,5 @@ class Token:
         }
 
     @classmethod
-    async def authenticate(cls, alchemy, session, token: str) -> "Token":
+    async def find(cls, alchemy, session, token: str) -> "Token":
         return await ru.asyncify(session.query(alchemy.get(cls)).filter_by(token=token).one_or_none)

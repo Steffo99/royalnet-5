@@ -18,9 +18,11 @@ class ApiData(dict):
         raise MissingParameterError(f"Missing '{key}'")
 
     async def token(self) -> Token:
-        token = await Token.authenticate(self.star.alchemy, self.session, self["token"])
+        token = await Token.find(self.star.alchemy, self.session, self["token"])
         if token is None:
             raise ForbiddenError("'token' is invalid")
+        if token.expired:
+            raise ForbiddenError("Login token has expired")
         return token
 
     async def user(self) -> User:
