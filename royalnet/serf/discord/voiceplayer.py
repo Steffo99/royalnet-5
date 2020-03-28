@@ -110,3 +110,7 @@ class VoicePlayer:
             log.error(error)
             return
         self._playback_ended_event.set()
+
+    async def change_playing(self, value: Playable):
+        await self.playing.destroy()
+        self.playing = value

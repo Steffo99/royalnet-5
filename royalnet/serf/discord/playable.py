@@ -59,3 +59,7 @@ class Playable:
             should ``yield`` once before doing anything else."""
         yield
         raise NotImplementedError()
+
+    async def destroy(self):
+        """Clean up the Playable, as it is about to be replaced or deleted."""
+        raise NotImplementedError()
