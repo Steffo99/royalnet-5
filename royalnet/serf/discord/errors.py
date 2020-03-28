@@ -38,5 +38,5 @@ class PlayerNotConnectedError(VoicePlayerError):
     Use :meth:`VoicePlayer.connect` first!"""
 
 
-class PlayerAlreadyPlaying(VoicePlayerError):
+class PlayerAlreadyPlayingError(VoicePlayerError):
     """The :class:`VoicePlayer` is already playing audio and cannot start playing audio again."""

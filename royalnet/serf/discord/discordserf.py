@@ -237,7 +237,7 @@ class DiscordSerf(Serf):
 
             return channels[0]
 
-    def find_voice_player(self, guild: "discord.Guild") -> Optional[VoicePlayer]:
+    def find_voice_players(self, guild: "discord.Guild") -> List[VoicePlayer]:
         candidate_players: List[VoicePlayer] = []
         for player in self.voice_players:
             player: VoicePlayer
@@ -246,4 +246,6 @@ class DiscordSerf(Serf):
             if guild is not None and guild != player.voice_client.guild:
                 continue
             candidate_players.append(player)
-        return candidate_players[0] if len(candidate_players) > 0 else None
+        if guild:
+            assert len(candidate_players) <= 1
+        return candidate_players
