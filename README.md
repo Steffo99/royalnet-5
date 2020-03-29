@@ -31,7 +31,7 @@ pip install royalnet[telegram,discord,matrix,alchemy_easy,bard,constellation,sen
 
 ## Documentation
 
-`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet).
+`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet/html).
 
 ## Developing `royalnet`
 
