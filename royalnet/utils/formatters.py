@@ -2,11 +2,12 @@ import typing
 import re
 
 
-def andformat(l: typing.Collection[str], middle=", ", final=" and ") -> str:
-    """Convert a iterable (such as a :class:`list`) to a :class:`str` by adding ``final`` between the last two elements and ``middle`` between the others.
+def andformat(coll: typing.Collection[str], middle=", ", final=" and ") -> str:
+    """Convert a collection (such as a :class:`list`) to a :class:`str` by adding ``final`` between the last two
+    elements and ``middle`` between the others.
 
     Args:
-        l: the input iterable.
+        coll: the input collection.
         middle: the :class:`str` to be added between the middle elements.
         final: the :class:`str` to be added between the last two elements.
 
@@ -26,11 +27,11 @@ def andformat(l: typing.Collection[str], middle=", ", final=" and ") -> str:
             "Paltri+Spaggia+Gesù+Mallllco"
     """
     result = ""
-    for index, item in enumerate(l):
+    for index, item in enumerate(coll):
         result += item
-        if index == len(l) - 2:
+        if index == len(coll) - 2:
             result += final
-        elif index != len(l) - 1:
+        elif index != len(coll) - 1:
             result += middle
     return result
 
@@ -50,7 +51,7 @@ def underscorize(string: str) -> str:
         ::
 
             >>> underscorize("LE EPIC PRANK [GONE WRONG!?!?]")
-            "LE EPIC PRANK _GONE WRONG_____"
+            "LE_EPIC_PRANK__GONE_WRONG_____"
 
     """
     return re.sub(r"\W", "_", string)
@@ -82,11 +83,11 @@ def ytdldateformat(string: typing.Optional[str], separator: str = "-") -> str:
     return f"{string[0:4]}{separator}{string[4:6]}{separator}{string[6:8]}"
 
 
-def numberemojiformat(l: typing.List[str]) -> str:
-    """Convert a :class:`list` to a Unicode string with one item on every line numbered with emojis.
+def numberemojiformat(li: typing.Collection[str]) -> str:
+    """Convert a collection to a string with one item on every line numbered with emojis.
 
     Parameters:
-        l: the list to convert.
+        li: the list to convert.
 
     Returns:
         The resulting Unicode string.
@@ -97,7 +98,7 @@ def numberemojiformat(l: typing.List[str]) -> str:
     number_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     extra_emoji = "*️⃣"
     result = ""
-    for index, element in enumerate(l):
+    for index, element in enumerate(li):
         try:
             result += f"{number_emojis[index]} {element}\n"
         except IndexError:
