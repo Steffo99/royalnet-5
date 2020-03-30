@@ -10,12 +10,13 @@ import royalnet.alchemy as ra
 import royalnet.backpack.tables as rbt
 import royalnet.herald as rh
 import traceback
+import abc
 
 
 log = logging.getLogger(__name__)
 
 
-class Serf:
+class Serf(abc.ABC):
     """An abstract class, to be used as base to implement Royalnet bots on multiple interfaces (such as Telegram or
     Discord)."""
     interface_name = NotImplemented
