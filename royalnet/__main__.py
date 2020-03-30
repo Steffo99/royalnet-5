@@ -98,20 +98,20 @@ def run(config_filename: str):
     matrix_process = None
     if "Matrix" in config["Serfs"] and config["Serfs"]["Matrix"]["enabled"]:
         matrix_process = multiprocessing.Process(name="Serf.Matrix",
-                                                  target=rsm.MatrixSerf.run_process,
-                                                  daemon=True,
-                                                  kwargs={
-                                                      "alchemy_cfg": config["Alchemy"],
-                                                      "herald_cfg": herald_cfg,
-                                                      "packs_cfg": config["Packs"],
-                                                      "sentry_cfg": config["Sentry"],
-                                                      "logging_cfg": config["Logging"],
-                                                      "serf_cfg": config["Serfs"]["Matrix"],
-                                                  })
+                                                 target=rsm.MatrixSerf.run_process,
+                                                 daemon=True,
+                                                 kwargs={
+                                                     "alchemy_cfg": config["Alchemy"],
+                                                     "herald_cfg": herald_cfg,
+                                                     "packs_cfg": config["Packs"],
+                                                     "sentry_cfg": config["Sentry"],
+                                                     "logging_cfg": config["Logging"],
+                                                     "serf_cfg": config["Serfs"]["Matrix"],
+                                                 })
         matrix_process.start()
-        log.info("Serf.Discord: Started")
+        log.info("Serf.Matrix: Started")
     else:
-        log.info("Serf.Discord: Disabled")
+        log.info("Serf.Matrix: Disabled")
 
     # Constellation
     constellation_process = None
@@ -139,6 +139,8 @@ def run(config_filename: str):
         telegram_process.join()
     if discord_process is not None:
         discord_process.join()
+    if matrix_process is not None:
+        matrix_process.join()
     if herald_process is not None:
         herald_process.join()
 
