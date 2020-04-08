@@ -163,14 +163,6 @@ class TelegramSerf(Serf):
                 for uid in key_uids:
                     data.unregister_keyboard_key(uid)
 
-            @classmethod
-            def register_keyboard_key(cls, identifier: str, key: rc.KeyboardKey):
-                self.key_callbacks[identifier] = key
-
-            @classmethod
-            def unregister_keyboard_key(cls, identifier: str):
-                del self.key_callbacks[identifier]
-
         return TelegramMessageData
 
     def callback_data_factory(self) -> Type[rc.CommandData]:
@@ -267,6 +259,12 @@ class TelegramSerf(Serf):
         key: rc.KeyboardKey = self.key_callbacks[uid]
         data: rc.CommandData = self.CallbackData(interface=key.interface, loop=self.loop, cbq=cbq)
         await self.press(key, data)
+
+    def register_keyboard_key(self, identifier: str, key: rc.KeyboardKey):
+        self.key_callbacks[identifier] = key
+
+    def unregister_keyboard_key(self, identifier: str):
+        del self.key_callbacks[identifier]
 
     async def run(self):
         await super().run()
