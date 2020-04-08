@@ -158,7 +158,7 @@ class TelegramSerf(Serf):
                                                                 parse_mode="HTML",
                                                                 disable_web_page_preview=True,
                                                                 reply_markup=tg_markup)
-                yield
+                yield message
                 await self.api_call(message.edit_reply_markup, reply_markup=None)
                 for uid in key_uids:
                     del self.key_callbacks[uid]
