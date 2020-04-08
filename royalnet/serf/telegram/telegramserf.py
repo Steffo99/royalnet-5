@@ -147,7 +147,7 @@ class TelegramSerf(Serf):
                 for key in keys:
                     uid: str = str(uuid.uuid4())
                     key_uids.append(uid)
-                    self.key_callbacks[uid] = key
+                    data.register_keyboard_key(uid, key)
                     tg_button: telegram.InlineKeyboardButton = telegram.InlineKeyboardButton(key.text,
                                                                                              callback_data=uid)
                     tg_row: List[telegram.InlineKeyboardButton] = [tg_button]
@@ -161,7 +161,15 @@ class TelegramSerf(Serf):
                 yield message
                 await self.api_call(message.edit_reply_markup, reply_markup=None)
                 for uid in key_uids:
-                    del self.key_callbacks[uid]
+                    data.unregister_keyboard_key(uid)
+
+            @classmethod
+            def register_keyboard_key(cls, identifier: str, key: rc.KeyboardKey):
+                self.key_callbacks[identifier] = key
+
+            @classmethod
+            def unregister_keyboard_key(cls, identifier: str):
+                del self.key_callbacks[identifier]
 
         return TelegramMessageData
 

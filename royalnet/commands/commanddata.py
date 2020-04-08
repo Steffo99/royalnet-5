@@ -80,3 +80,11 @@ class CommandData:
     async def keyboard(self, text, keys: List["KeyboardKey"]):
         yield
         raise UnsupportedError(f"{self.keyboard.__name__} is not supported")
+
+    @classmethod
+    def register_keyboard_key(cls, identifier: str, key: "KeyboardKey"):
+        raise UnsupportedError(f"{cls.register_keyboard_key.__name__} is not supported")
+
+    @classmethod
+    def unregister_keyboard_key(cls, identifier: str):
+        raise UnsupportedError(f"{cls.unregister_keyboard_key.__name__} is not supported")
