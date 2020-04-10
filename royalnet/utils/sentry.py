@@ -3,6 +3,7 @@ import sys
 import traceback
 from typing import *
 from royalnet.version import semantic
+import functools
 
 try:
     import sentry_sdk
@@ -45,3 +46,16 @@ def sentry_exc(exc: Exception,
     if __debug__:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback)
+
+
+def sentry_wrap(level: str = "ERROR"):
+    def decorator(func: Callable):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as exc:
+                sentry_exc(exc=exc, level=level)
+                raise
+        return new_func
+    return decorator

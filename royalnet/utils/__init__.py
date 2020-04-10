@@ -3,7 +3,7 @@ from .sleep_until import sleep_until
 from .formatters import andformat, underscorize, ytdldateformat, numberemojiformat, ordinalformat
 from .urluuid import to_urluuid, from_urluuid
 from .multilock import MultiLock
-from .sentry import init_sentry, sentry_exc
+from .sentry import init_sentry, sentry_exc, sentry_wrap
 from .log import init_logging
 from .royaltyping import JSON
 
@@ -20,6 +20,7 @@ __all__ = [
     "MultiLock",
     "init_sentry",
     "sentry_exc",
+    "sentry_wrap",
     "init_logging",
     "JSON",
 ]
