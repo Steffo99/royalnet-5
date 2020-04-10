@@ -59,3 +59,16 @@ def sentry_wrap(level: str = "ERROR"):
                 raise
         return new_func
     return decorator
+
+
+def sentry_async_wrap(level: str = "ERROR"):
+    def decorator(func: Callable):
+        @functools.wraps(func)
+        async def new_func(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except Exception as exc:
+                sentry_exc(exc=exc, level=level)
+                raise
+        return new_func
+    return decorator
