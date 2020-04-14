@@ -9,9 +9,7 @@ def escape(string: str) -> str:
     url_pattern = re.compile(r"\[url=(.*?)](.*?)\[/url]")
     url_replacement = r'\2 (\1)'
 
-    escaped_string = string.replace("<", "&lt;").replace(">", "&gt;")
-
-    simple_parse = escaped_string \
+    simple_parse = string \
         .replace("*", "\\*") \
         .replace("_", "\\_") \
         .replace("`", "\\`") \
