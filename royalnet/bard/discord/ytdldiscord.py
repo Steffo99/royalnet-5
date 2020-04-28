@@ -43,12 +43,15 @@ class YtdlDiscord:
                 destination_filename = re.sub(r"\.[^.]+$", ".pcm", self.ytdl_file.filename)
                 async with self.lock.exclusive():
                     log.debug(f"Converting to PCM: {self.ytdl_file.filename}")
-                    await asyncify(
+                    out, err = await asyncify(
                         ffmpeg.input(self.ytdl_file.filename)
                               .output(destination_filename, format="s16le", ac=2, ar="48000")
                               .overwrite_output()
-                              .run
+                              .run,
+                        capture_stdout=True,
+                        capture_stderr=True,
                     )
+                    log.debug(f"ffmpeg returned: ({type(out)}, {type(err)})")
             self.pcm_filename = destination_filename
 
     async def delete_asap(self) -> None:
