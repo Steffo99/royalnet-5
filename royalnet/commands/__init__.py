@@ -8,6 +8,7 @@ from .event import Event
 from .errors import \
     CommandError, InvalidInputError, UnsupportedError, ConfigurationError, ExternalError, UserError, ProgramError
 from .keyboardkey import KeyboardKey
+from .configdict import ConfigDict
 
 __all__ = [
     "CommandInterface",
@@ -23,4 +24,5 @@ __all__ = [
     "ProgramError",
     "Event",
     "KeyboardKey",
+    "ConfigDict",
 ]

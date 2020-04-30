@@ -1,6 +1,7 @@
 from typing import *
 import asyncio as aio
 from .errors import UnsupportedError
+from .configdict import ConfigDict
 
 if TYPE_CHECKING:
     from .event import Event
@@ -36,7 +37,7 @@ class CommandInterface:
         A reference to a :class:`~royalnet.constellation.Constellation`."""
 
     def __init__(self, config: Dict[str, Any]):
-        self.config: Dict[str, Any] = config
+        self.config: ConfigDict[str, Any] = ConfigDict.convert(config)
         """The config section for the pack of the command."""
 
         # Will be bound after the command/event has been created
