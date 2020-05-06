@@ -8,22 +8,8 @@ from royalnet.utils import asyncify
 from royalnet.serf import Serf
 from .escape import escape
 from .voiceplayer import VoicePlayer
+import discord
 
-
-try:
-    import discord
-except ImportError:
-    discord = None
-
-try:
-    from sqlalchemy.orm.session import Session
-except ImportError:
-    Session = None
-
-try:
-    from royalnet.herald import Config as HeraldConfig
-except ImportError:
-    HeraldConfig = None
 
 log = logging.getLogger(__name__)
 

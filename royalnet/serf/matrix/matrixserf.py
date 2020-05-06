@@ -7,13 +7,7 @@ import royalnet.commands as rc
 import royalnet.utils as ru
 from ..serf import Serf
 from .escape import escape
-
-
-try:
-    import nio
-except ImportError:
-    nio = None
-
+import nio
 
 log = logging.getLogger(__name__)
 

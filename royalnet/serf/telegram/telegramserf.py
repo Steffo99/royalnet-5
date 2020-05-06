@@ -9,14 +9,9 @@ import royalnet.backpack as rb
 from .escape import escape
 from ..serf import Serf
 
-try:
-    import telegram
-    import urllib3
-    from telegram.utils.request import Request as TRequest
-except ImportError:
-    telegram = None
-    urllib3 = None
-    TRequest = None
+import telegram
+import urllib3
+from telegram.utils.request import Request as TRequest
 
 try:
     from sqlalchemy.orm.session import Session
