@@ -11,6 +11,6 @@ class ApiUserListStar(ApiStar):
 
     tags = ["user"]
 
-    async def api(self, data: ApiData) -> dict:
+    async def api(self, data: ApiData) -> JSON:
         users: typing.List[User] = await asyncify(data.session.query(self.alchemy.get(User)).all)
         return [user.json() for user in users]

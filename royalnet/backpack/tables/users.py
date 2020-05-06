@@ -37,7 +37,7 @@ class User:
         return Column(String)
 
     @staticmethod
-    async def find_user(alchemy, session, alias: Union[str, int]):
+    async def find(alchemy, session, alias: Union[str, int]):
         result = await ru.asyncify(session.query(alchemy.get(Alias)).filter_by(alias=alias.lower()).one_or_none)
         if result is not None:
             result = result.user

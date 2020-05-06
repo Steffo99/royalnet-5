@@ -15,7 +15,7 @@ class ApiUserFindStar(ApiStar):
     }
 
     async def api(self, data: ApiData) -> dict:
-        user = await Alias.find_user(self.alchemy, data.session, data["alias"])
+        user = await User.find(self.alchemy, data.session, data["alias"])
         if user is None:
             raise NotFoundError("No such user.")
         return user.json()
