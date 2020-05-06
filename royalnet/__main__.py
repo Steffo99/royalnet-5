@@ -2,12 +2,32 @@ import click
 import multiprocessing
 import toml
 import logging
-import royalnet.constellation as rc
-import royalnet.serf.telegram as rst
-import royalnet.serf.discord as rsd
-import royalnet.serf.matrix as rsm
 import royalnet.utils as ru
-import royalnet.herald as rh
+
+try:
+    import royalnet.serf.telegram as rst
+except ImportError:
+    rst = None
+
+try:
+    import royalnet.serf.discord as rsd
+except ImportError:
+    rsd = None
+
+try:
+    import royalnet.serf.matrix as rsm
+except ImportError:
+    rsm = None
+
+try:
+    import royalnet.constellation as rc
+except ImportError:
+    rc = None
+
+try:
+    import royalnet.herald as rh
+except ImportError:
+    rh = None
 
 try:
     import coloredlogs
@@ -39,28 +59,31 @@ def run(config_filename: str):
     # Herald Server
     herald_cfg = None
     herald_process = None
-    if config["Herald"]["Local"]["enabled"]:
-        # Create a Herald server
-        herald_server = rh.Server(rh.Config.from_config(name="<server>", **config["Herald"]["Local"]))
-        # Run the Herald server on a new process
-        herald_process = multiprocessing.Process(name="Herald.Local",
-                                                 target=herald_server.run_blocking,
-                                                 daemon=True,
-                                                 kwargs={
-                                                     "logging_cfg": config["Logging"]
-                                                 })
-        herald_process.start()
-        herald_cfg = config["Herald"]["Local"]
-        log.info("Herald: Enabled (Local)")
-    elif config["Herald"]["Remote"]["enabled"]:
-        log.info("Herald: Enabled (Remote)")
-        herald_cfg = config["Herald"]["Remote"]
+    if rh is not None and "Herald" in config:
+        if "Local" in config["Herald"] and config["Herald"]["Local"]["enabled"]:
+            # Create a Herald server
+            herald_server = rh.Server(rh.Config.from_config(name="<server>", **config["Herald"]["Local"]))
+            # Run the Herald server on a new process
+            herald_process = multiprocessing.Process(name="Herald.Local",
+                                                     target=herald_server.run_blocking,
+                                                     daemon=True,
+                                                     kwargs={
+                                                         "logging_cfg": config["Logging"]
+                                                     })
+            herald_process.start()
+            herald_cfg = config["Herald"]["Local"]
+            log.info("Herald: Enabled (Local)")
+        elif "Remote" in config["Herald"] and config["Herald"]["Remote"]["enabled"]:
+            log.info("Herald: Enabled (Remote)")
+            herald_cfg = config["Herald"]["Remote"]
+        else:
+            log.info("Herald: Disabled")
     else:
         log.info("Herald: Disabled")
 
     # Serfs
     telegram_process = None
-    if "Telegram" in config["Serfs"] and config["Serfs"]["Telegram"]["enabled"]:
+    if rst is not None and "Telegram" in config["Serfs"] and config["Serfs"]["Telegram"]["enabled"]:
         telegram_process = multiprocessing.Process(name="Serf.Telegram",
                                                    target=rst.TelegramSerf.run_process,
                                                    daemon=True,
@@ -78,7 +101,7 @@ def run(config_filename: str):
         log.info("Serf.Telegram: Disabled")
 
     discord_process = None
-    if "Discord" in config["Serfs"] and config["Serfs"]["Discord"]["enabled"]:
+    if rsd is not None and "Discord" in config["Serfs"] and config["Serfs"]["Discord"]["enabled"]:
         discord_process = multiprocessing.Process(name="Serf.Discord",
                                                   target=rsd.DiscordSerf.run_process,
                                                   daemon=True,
@@ -96,7 +119,7 @@ def run(config_filename: str):
         log.info("Serf.Discord: Disabled")
 
     matrix_process = None
-    if "Matrix" in config["Serfs"] and config["Serfs"]["Matrix"]["enabled"]:
+    if rsm is not None and "Matrix" in config["Serfs"] and config["Serfs"]["Matrix"]["enabled"]:
         matrix_process = multiprocessing.Process(name="Serf.Matrix",
                                                  target=rsm.MatrixSerf.run_process,
                                                  daemon=True,
@@ -115,7 +138,7 @@ def run(config_filename: str):
 
     # Constellation
     constellation_process = None
-    if config["Constellation"]["enabled"]:
+    if rc is not None and "Constellation" in config and config["Constellation"]["enabled"]:
         constellation_process = multiprocessing.Process(name="Constellation",
                                                         target=rc.Constellation.run_process,
                                                         daemon=True,

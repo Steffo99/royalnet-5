@@ -56,7 +56,7 @@ class Constellation:
         """The :class:`~ra.Alchemy` of this Constellation."""
 
         # Alchemy
-        if ra.Alchemy is None:
+        if ra.Alchemy is None or alchemy_cfg is None:
             log.info("Alchemy: not installed")
         elif not alchemy_cfg["enabled"]:
             log.info("Alchemy: disabled")
