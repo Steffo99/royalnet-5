@@ -1,0 +1,25 @@
+import royalnet.constellation.api as rca
+import royalnet.utils as ru
+
+
+#set($CAPITALIZED_NAME = $NAME.substring(0,1).toUpperCase() + $NAME.substring(1))
+class ${CAPITALIZED_NAME}Star(rca.ApiStar):
+    summary = "$SUMMARY"
+
+    description = ""
+
+    methods = ["GET"]
+
+    path = "$PATH"
+
+    requires_auth = False
+
+    parameters = {}
+
+    tags = ["$TAG"]
+
+    async def api(self, data: rca.ApiData) -> ru.JSON:
+
+        ...
+
+        return {}
