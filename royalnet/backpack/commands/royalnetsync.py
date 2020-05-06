@@ -6,8 +6,8 @@ from ..tables.telegram import Telegram
 from ..tables.discord import Discord
 
 
-class SyncCommand(rc.Command):
-    name: str = "sync"
+class RoyalnetsyncCommand(rc.Command):
+    name: str = "royalnetsync"
 
     description: str = "Connect your chat account to Royalnet!"
 

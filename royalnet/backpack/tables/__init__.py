@@ -5,6 +5,7 @@ from .discord import Discord
 from .matrix import Matrix
 from .aliases import Alias
 from .tokens import Token
+from .roles import Role
 
 # Enter the tables of your Pack here!
 available_tables = {
@@ -14,6 +15,7 @@ available_tables = {
     Matrix,
     Alias,
     Token,
+    Role,
 }
 
 # Don't change this, it should automatically generate __all__

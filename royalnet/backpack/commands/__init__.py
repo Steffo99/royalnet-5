@@ -1,9 +1,15 @@
 # Imports go here!
-from .version import VersionCommand
+from .royalnetversion import RoyalnetversionCommand
+from .royalnetsync import RoyalnetsyncCommand
+from .royalnetroles import RoyalnetrolesCommand
+from .royalnetaliases import RoyalnetaliasesCommand
 
 # Enter the commands of your Pack here!
 available_commands = [
-    VersionCommand,
+    RoyalnetversionCommand,
+    RoyalnetsyncCommand,
+    RoyalnetrolesCommand,
+    RoyalnetaliasesCommand,
 ]
 
 # Don't change this, it should automatically generate __all__

@@ -2,8 +2,8 @@ import royalnet.version
 from royalnet.commands import *
 
 
-class VersionCommand(Command):
-    name: str = "version"
+class RoyalnetversionCommand(Command):
+    name: str = "royalnetversion"
 
     description: str = "Display the current Royalnet version."
 

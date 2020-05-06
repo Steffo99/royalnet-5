@@ -157,14 +157,19 @@ def run(config_filename: str):
 
     log.info("All processes started!")
     if constellation_process is not None:
+        log.info("Waiting for Constellation to stop...")
         constellation_process.join()
     if telegram_process is not None:
+        log.info("Waiting for Serf.Telegram to stop...")
         telegram_process.join()
     if discord_process is not None:
+        log.info("Waiting for Serf.Discord to stop...")
         discord_process.join()
     if matrix_process is not None:
+        log.info("Waiting for Serf.Matrix to stop...")
         matrix_process.join()
     if herald_process is not None:
+        log.info("Waiting for Herald to stop...")
         herald_process.join()
 
 
