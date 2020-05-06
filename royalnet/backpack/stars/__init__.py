@@ -7,7 +7,6 @@ from .api_token_create import ApiTokenCreateStar
 from .api_user_get import ApiUserGetStar
 from .api_user_list import ApiUserListStar
 from .api_user_find import ApiUserFindStar
-from .api_alias_list import ApiAliasListStar
 from .docs import DocsStar
 
 # Enter the PageStars of your Pack here!
@@ -20,7 +19,6 @@ available_page_stars = [
     ApiUserGetStar,
     ApiUserListStar,
     ApiUserFindStar,
-    ApiAliasListStar,
     DocsStar,
 ]
 
