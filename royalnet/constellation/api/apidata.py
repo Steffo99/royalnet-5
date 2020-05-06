@@ -9,10 +9,11 @@ log = logging.getLogger(__name__)
 
 
 class ApiData(dict):
-    def __init__(self, data, star):
+    def __init__(self, data, star, method):
         super().__init__(data)
         self.star = star
         self._session = None
+        self.method = method
 
     def __missing__(self, key):
         raise MissingParameterError(f"Missing '{key}'")

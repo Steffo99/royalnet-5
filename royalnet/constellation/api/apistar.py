@@ -29,7 +29,7 @@ class ApiStar(PageStar, ABC):
                 data = await request.json()
             except JSONDecodeError:
                 data = {}
-        apidata = ApiData(data, self)
+        apidata = ApiData(data=data, star=self, method=request.method)
         try:
             response = await self.api(apidata)
         except NotFoundError as e:
