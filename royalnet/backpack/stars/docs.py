@@ -37,6 +37,8 @@ class DocsStar(PageStar):
             }
         })
 
+        escaped_spec = spec.replace(r"'", r"\'")
+
         return HTMLResponse(
             f"""
             <html lang="en">
@@ -50,7 +52,7 @@ class DocsStar(PageStar):
                     <div id="docs"/>
                     <script>
                         const ui = SwaggerUIBundle({{
-                            spec: JSON.parse('{spec}'),
+                            spec: JSON.parse('{escaped_spec}'),
                             dom_id: '#docs',
                             presets: [
                                 SwaggerUIBundle.presets.apis,
