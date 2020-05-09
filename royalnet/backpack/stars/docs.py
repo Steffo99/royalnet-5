@@ -50,7 +50,7 @@ class DocsStar(PageStar):
                     <div id="docs"/>
                     <script>
                         const ui = SwaggerUIBundle({{
-                            spec: JSON.parse(r`{spec}`),
+                            spec: JSON.parse(String.raw`{spec}`),
                             dom_id: '#docs',
                             presets: [
                                 SwaggerUIBundle.presets.apis,
