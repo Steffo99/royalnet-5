@@ -52,7 +52,7 @@ class CommandData:
              text: The text to be sent, possibly formatted in the weird undescribed markup that I'm using."""
         raise UnsupportedError(f"'{self.reply.__name__}' is not supported")
 
-    async def reply_image(self, image: io.IOBase, caption: str) -> None:
+    async def reply_image(self, image: io.IOBase, caption: Optional[str] = None) -> None:
         """Send an image (with optionally a caption) to the channel where the call was made.
 
         Parameters:

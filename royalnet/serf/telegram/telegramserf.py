@@ -117,10 +117,10 @@ class TelegramSerf(Serf):
                                     parse_mode="HTML",
                                     disable_web_page_preview=True)
 
-            async def reply_image(data, image: io.IOBase, caption: str) -> None:
+            async def reply_image(data, image: io.IOBase, caption: Optional[str] = None) -> None:
                 await self.api_call(data.message.chat.send_photo,
                                     photo=image,
-                                    caption=escape(caption),
+                                    caption=escape(caption) if caption is not None else None,
                                     parse_mode="HTML",
                                     disable_web_page_preview=True)
 
