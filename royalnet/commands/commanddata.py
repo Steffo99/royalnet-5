@@ -3,6 +3,7 @@ import contextlib
 import logging
 import asyncio as aio
 import royalnet.utils as ru
+import io
 from .errors import UnsupportedError
 from .commandinterface import CommandInterface
 from royalnet.backpack.tables.aliases import Alias
@@ -50,6 +51,14 @@ class CommandData:
         Parameters:
              text: The text to be sent, possibly formatted in the weird undescribed markup that I'm using."""
         raise UnsupportedError(f"'{self.reply.__name__}' is not supported")
+
+    async def reply_image(self, image: io.IOBase, caption: str) -> None:
+        """Send an image (with optionally a caption) to the channel where the call was made.
+
+        Parameters:
+            image: The bytes of the image to send.
+            caption: The caption to attach to the image."""
+        raise UnsupportedError(f"'{self.reply_image.__name__}' is not supported")
 
     async def get_author(self, error_if_none: bool = False):
         """Try to find the identifier of the user that sent the message.

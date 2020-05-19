@@ -8,7 +8,7 @@ import royalnet.utils as ru
 import royalnet.backpack.tables as rbt
 from .escape import escape
 from ..serf import Serf
-
+import io
 import telegram
 import urllib3
 from telegram.utils.request import Request as TRequest
@@ -114,6 +114,13 @@ class TelegramSerf(Serf):
             async def reply(data, text: str):
                 await self.api_call(data.message.chat.send_message,
                                     escape(text),
+                                    parse_mode="HTML",
+                                    disable_web_page_preview=True)
+
+            async def reply_image(data, image: io.IOBase, caption: str) -> None:
+                await self.api_call(data.message.chat.send_photo,
+                                    photo=image,
+                                    caption=escape(caption),
                                     parse_mode="HTML",
                                     disable_web_page_preview=True)
 
