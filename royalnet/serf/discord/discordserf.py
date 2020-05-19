@@ -1,6 +1,7 @@
 import asyncio as aio
 import logging
 import warnings
+import io
 from typing import *
 import royalnet.backpack.tables as rbt
 import royalnet.commands as rc
@@ -76,6 +77,9 @@ class DiscordSerf(Serf):
 
             async def reply(data, text: str):
                 await data.message.channel.send(escape(text))
+
+            async def reply_image(data, image: io.IOBase, caption: str) -> None:
+                await data.message.channel.send(file=discord.File(image, 'image'))
 
             async def get_author(data, error_if_none=False):
                 user: "discord.Member" = data.message.author
