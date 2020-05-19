@@ -5,7 +5,7 @@ import uuid
 from typing import *
 import royalnet.commands as rc
 import royalnet.utils as ru
-import royalnet.backpack as rb
+import royalnet.backpack.tables as rbt
 from .escape import escape
 from ..serf import Serf
 
@@ -25,7 +25,7 @@ class TelegramSerf(Serf):
     """A Serf that connects to `Telegram <https://telegram.org/>`_ as a bot."""
     interface_name = "telegram"
 
-    _identity_table = rb.tables.Telegram
+    _identity_table = rbt.Telegram
     _identity_column = "tg_id"
 
     def __init__(self,
