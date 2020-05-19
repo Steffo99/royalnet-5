@@ -2,7 +2,7 @@ import asyncio as aio
 import logging
 import warnings
 from typing import *
-import royalnet.backpack as rb
+import royalnet.backpack.tables as rbt
 import royalnet.commands as rc
 from royalnet.utils import asyncify
 from royalnet.serf import Serf
@@ -18,7 +18,7 @@ class DiscordSerf(Serf):
     """A :class:`Serf` that connects to `Discord <https://discordapp.com/>`_ as a bot."""
     interface_name = "discord"
 
-    _identity_table = rb.tables.Discord
+    _identity_table = rbt.Discord
     _identity_column = "discord_id"
 
     def __init__(self,
