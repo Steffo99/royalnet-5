@@ -6,6 +6,10 @@ class NotFoundError(ApiError):
     pass
 
 
+class UnauthorizedError(ApiError):
+    pass
+
+
 class ForbiddenError(ApiError):
     pass
 
@@ -26,9 +30,9 @@ class InvalidParameterError(ParameterError):
     pass
 
 
-class NotImplementedError(ApiError):
+class MethodNotImplementedError(ApiError):
     pass
 
 
-class UnsupportedError(NotImplementedError):
+class UnsupportedError(MethodNotImplementedError):
     pass

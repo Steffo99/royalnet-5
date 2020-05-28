@@ -32,11 +32,13 @@ class ApiStar(PageStar, ABC):
         apidata = ApiData(data=data, star=self, method=request.method)
         try:
             response = await self.api(apidata)
+        except UnauthorizedError as e:
+            return api_error(e, code=401)
         except NotFoundError as e:
             return api_error(e, code=404)
         except ForbiddenError as e:
             return api_error(e, code=403)
-        except NotImplementedError as e:
+        except MethodNotImplementedError as e:
             return api_error(e, code=501)
         except BadRequestError as e:
             return api_error(e, code=400)
@@ -49,7 +51,7 @@ class ApiStar(PageStar, ABC):
             await apidata.session_close()
 
     async def api(self, data: ApiData) -> ru.JSON:
-        raise NotImplementedError()
+        raise MethodNotImplementedError()
 
     @classmethod
     def swagger(cls) -> ru.JSON:

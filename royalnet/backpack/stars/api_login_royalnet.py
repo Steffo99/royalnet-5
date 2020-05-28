@@ -34,7 +34,7 @@ class ApiLoginRoyalnetStar(ApiStar):
                 raise NotFoundError("User not found")
             pswd_check = user.test_password(password)
             if not pswd_check:
-                raise ApiError("Invalid password")
+                raise UnauthorizedError("Invalid password")
             token: Token = TokenT.generate(alchemy=self.alchemy, user=user, expiration_delta=datetime.timedelta(days=7))
             session.add(token)
             await ru.asyncify(session.commit)

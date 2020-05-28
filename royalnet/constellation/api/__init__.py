@@ -9,7 +9,7 @@ from .apierrors import \
     ParameterError, \
     MissingParameterError, \
     InvalidParameterError, \
-    NotImplementedError, \
+    MethodNotImplementedError, \
     UnsupportedError
 
 
@@ -29,6 +29,6 @@ __all__ = [
     "ParameterError",
     "MissingParameterError",
     "InvalidParameterError",
-    "NotImplementedError",
+    "MethodNotImplementedError",
     "UnsupportedError",
 ]
