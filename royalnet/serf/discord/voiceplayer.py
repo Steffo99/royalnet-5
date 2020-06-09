@@ -4,6 +4,7 @@ import logging
 from typing import Optional
 from .errors import *
 from .playable import Playable
+from ...utils import sentry_exc
 try:
     import discord
 except ImportError:
@@ -93,7 +94,11 @@ class VoicePlayer:
             log.debug(f"Next source would be None, stopping here...")
             return
         log.debug(f"Next: {next_source}")
-        self.voice_client.play(next_source, after=self._playback_ended)
+        try:
+            self.voice_client.play(next_source, after=self._playback_ended)
+        except discord.ClientException as e:
+            sentry_exc(e)
+            await self.disconnect()
         self.loop.create_task(self._playback_check())
 
     async def _playback_check(self):
@@ -106,8 +111,7 @@ class VoicePlayer:
 
     def _playback_ended(self, error=None):
         if error is not None:
-            # TODO: catch with Sentry
-            log.error(error)
+            sentry_exc(error)
             return
         self._playback_ended_event.set()
 
