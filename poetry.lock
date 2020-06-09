@@ -198,20 +198,16 @@ description = "A Python wrapper for the Discord API"
 name = "discord.py"
 optional = true
 python-versions = ">=3.5.3"
-version = "1.4.0a2339+gcbdf660"
+version = "1.3.3"
 
 [package.dependencies]
 aiohttp = ">=3.6.0,<3.7.0"
 websockets = ">=6.0,<7.0 || >7.0,<8.0 || >8.0,<8.0.1 || >8.0.1,<9.0"
 
 [package.extras]
-docs = ["sphinx (1.8.5)", "sphinxcontrib_trio (1.1.1)", "sphinxcontrib-websupport"]
+docs = ["sphinx (1.8.5)", "sphinxcontrib-trio (1.1.1)", "sphinxcontrib-websupport"]
 voice = ["PyNaCl (1.3.0)"]
 
-[package.source]
-reference = "cbdf660ddcee8b3d25d69b3504c2975900b6da91"
-type = "git"
-url = "https://github.com/Rapptz/discord.py/"
 [[package]]
 category = "dev"
 description = "Docutils -- Python Documentation Utilities"
@@ -560,7 +556,7 @@ description = "pytest: simple powerful testing with Python"
 name = "pytest"
 optional = false
 python-versions = ">=3.5"
-version = "5.4.2"
+version = "5.4.3"
 
 [package.dependencies]
 atomicwrites = ">=1.0"
@@ -911,11 +907,11 @@ version = "0.14.0"
 
 [[package]]
 category = "dev"
-description = "Measures number of Terminal column cells of wide-character codes"
+description = "Measures the displayed width of unicode strings in a terminal"
 name = "wcwidth"
 optional = false
 python-versions = "*"
-version = "0.1.9"
+version = "0.2.3"
 
 [[package]]
 category = "main"
@@ -943,7 +939,7 @@ description = "YouTube video downloader"
 name = "youtube-dl"
 optional = true
 python-versions = "*"
-version = "2020.5.29"
+version = "2020.6.6"
 
 [extras]
 alchemy_easy = ["sqlalchemy", "psycopg2_binary", "bcrypt"]
@@ -958,7 +954,7 @@ sentry = ["sentry_sdk"]
 telegram = ["python_telegram_bot"]
 
 [metadata]
-content-hash = "d5db7520e6b434b76360627fd06e5b414d1941b833fe08007b9a8c9391b7d5e5"
+content-hash = "218f4a253a7ef17bb871abf541ae7182f1626cd43d55417de12f9561c58ca0e9"
     python-versions = "^3.8"
 
 [metadata.files]
@@ -1099,7 +1095,10 @@ deprecation = [
     {file = "deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"},
     {file = "deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff"},
 ]
-"discord.py" = []
+"discord.py" = [
+    {file = "discord.py-1.3.3-py3-none-any.whl", hash = "sha256:406871b06d86c3dc49fba63238519f28628dac946fef8a0e22988ff58ec05580"},
+    {file = "discord.py-1.3.3.tar.gz", hash = "sha256:ad00e34c72d2faa8db2157b651d05f3c415d7d05078e7e41dc9e8dc240051beb"},
+]
 docutils = [
     {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
     {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
@@ -1361,8 +1360,8 @@ pyrsistent = [
     {file = "pyrsistent-0.16.0.tar.gz", hash = "sha256:28669905fe725965daa16184933676547c5bb40a5153055a8dee2a4bd7933ad3"},
 ]
 pytest = [
-    {file = "pytest-5.4.2-py3-none-any.whl", hash = "sha256:95c710d0a72d91c13fae35dce195633c929c3792f54125919847fdcdf7caa0d3"},
-    {file = "pytest-5.4.2.tar.gz", hash = "sha256:eb2b5e935f6a019317e455b6da83dd8650ac9ffd2ee73a7b657a30873d67a698"},
+    {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},
+    {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
@@ -1526,8 +1525,8 @@ uvloop = [
     {file = "uvloop-0.14.0.tar.gz", hash = "sha256:123ac9c0c7dd71464f58f1b4ee0bbd81285d96cdda8bc3519281b8973e3a461e"},
 ]
 wcwidth = [
-    {file = "wcwidth-0.1.9-py2.py3-none-any.whl", hash = "sha256:cafe2186b3c009a04067022ce1dcd79cb38d8d65ee4f4791b8888d6599d1bbe1"},
-    {file = "wcwidth-0.1.9.tar.gz", hash = "sha256:ee73862862a156bf77ff92b09034fc4825dd3af9cf81bc5b360668d425f3c5f1"},
+    {file = "wcwidth-0.2.3-py2.py3-none-any.whl", hash = "sha256:980fbf4f3c196c0f329cdcd1e84c554d6a211f18e252e525a0cf4223154a41d6"},
+    {file = "wcwidth-0.2.3.tar.gz", hash = "sha256:edbc2b718b4db6cdf393eefe3a420183947d6aa312505ce6754516f458ff8830"},
 ]
 websockets = [
     {file = "websockets-8.1-cp36-cp36m-macosx_10_6_intel.whl", hash = "sha256:3762791ab8b38948f0c4d281c8b2ddfa99b7e510e46bd8dfa942a5fff621068c"},
@@ -1573,6 +1572,6 @@ yarl = [
     {file = "yarl-1.4.2.tar.gz", hash = "sha256:58cd9c469eced558cd81aa3f484b2924e8897049e06889e8ff2510435b7ef74b"},
 ]
 youtube-dl = [
-    {file = "youtube_dl-2020.5.29-py2.py3-none-any.whl", hash = "sha256:2d45840772ecc57e151b0be78dd89e9772b6aa29295746be38abb9c30dad5bb3"},
-    {file = "youtube_dl-2020.5.29.tar.gz", hash = "sha256:1a3d84afa851dce2fccc2dfc0f9ffa0e22314ffba6d528b34b4a7fe3e0cf2264"},
+    {file = "youtube_dl-2020.6.6-py2.py3-none-any.whl", hash = "sha256:813310fb7ab265c379e9aebb2bd6cde6995f9a8f22a06d2ff81c05dfab7da864"},
+    {file = "youtube_dl-2020.6.6.tar.gz", hash = "sha256:74e6cc7395060fc39f0b8e21c1e4707486da904c96145bd875187bda2da83b04"},
 ]

@@ -2,10 +2,11 @@ import asyncio as aio
 import logging
 import warnings
 import io
+import sys
 from typing import *
 import royalnet.backpack.tables as rbt
 import royalnet.commands as rc
-from royalnet.utils import asyncify
+from royalnet.utils import asyncify, sentry_exc
 from royalnet.serf import Serf
 from .escape import escape
 from .voiceplayer import VoicePlayer
@@ -46,7 +47,7 @@ class DiscordSerf(Serf):
         self.Client = self.client_factory()
         """The custom :class:`discord.Client` class that will be instantiated later."""
 
-        self.client = self.Client()
+        self.client = self.Client(status=discord.Status.do_not_disturb)
         """The custom :class:`discord.Client` instance."""
 
         self.voice_players: List[VoicePlayer] = []
@@ -140,92 +141,37 @@ class DiscordSerf(Serf):
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
-            async def on_message(cli, message: "discord.Message"):
+            async def on_message(cli, message: "discord.Message") -> None:
                 """Handle messages received by passing them to the handle_message method of the bot."""
                 # TODO: keep reference to these tasks somewhere
                 self.loop.create_task(self.handle_message(message))
 
             async def on_ready(cli) -> None:
                 """Change the bot presence to ``online`` when the bot is ready."""
-                await cli.change_presence(status=discord.Status.online)
+                log.debug("Discord client is ready!")
+                await cli.change_presence(status=discord.Status.online, activity=None)
+
+            async def on_resume(cli) -> None:
+                log.debug("Discord client resumed connection.")
+
+            async def on_error(self, event_method, *args, **kwargs):
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                sentry_exc(exc_obj)
 
         return DiscordClient
 
     async def run(self):
         await super().run()
         await self.client.login(self.token)
-        await self.client.connect()
-
-    def find_channel(self,
-                     channel_type: Optional[Type["discord.abc.GuildChannel"]] = None,
-                     name: Optional[str] = None,
-                     guild: Optional["discord.Guild"] = None,
-                     accessible_to: List["discord.User"] = None,
-                     required_permissions: List[str] = None) -> Optional["discord.abc.GuildChannel"]:
-        """Find the best channel matching all requests.
-
-        In case multiple channels match all requests, return the one with the most members connected.
-
-        Args:
-            channel_type: Filter channels by type (select only :class:`discord.VoiceChannel`,
-                          :class:`discord.TextChannel`, ...).
-            name: Filter channels by name starting with ``name`` (using :meth:`str.startswith`).
-                  Note that some channel types don't have names; this check will be skipped for them.
-            guild: Filter channels by guild, keep only channels inside this one.
-            accessible_to: Filter channels by permissions, keeping only channels where *all* these users have
-                           the required permissions.
-            required_permissions: Filter channels by permissions, keeping only channels where the users have *all* these
-                                  :class:`discord.Permissions`.
-
-        Returns:
-            Either a :class:`~discord.abc.GuildChannel`, or :const:`None` if no channels were found."""
-        warnings.warn("This function will be removed soon.", category=DeprecationWarning)
-        if accessible_to is None:
-            accessible_to = []
-        if required_permissions is None:
-            required_permissions = []
-        channels: List[discord.abc.GuildChannel] = []
-        for ch in self.client.get_all_channels():
-            if channel_type is not None and not isinstance(ch, channel_type):
-                continue
-
-            if name is not None:
-                try:
-                    ch_name: str = ch.name
-                    if not ch_name.startswith(name):
-                        continue
-                except AttributeError:
-                    pass
-
-            ch_guild: "discord.Guild" = ch.guild
-            if guild is not None and guild != ch_guild:
-                continue
-
-            for user in accessible_to:
-                member: "discord.Member" = ch.guild.get_member(user.id)
-                if member is None:
-                    continue
-                permissions: "discord.Permissions" = ch.permissions_for(member)
-                missing_perms = False
-                for permission in required_permissions:
-                    if not permissions.__getattribute__(permission):
-                        missing_perms = True
-                        break
-                if missing_perms:
-                    continue
-
-            channels.append(ch)
-
-        if len(channels) == 0:
-            return None
-        else:
-            # Give priority to channels with the most people
-            def people_count(c: "discord.VoiceChannel"):
-                return len(c.members)
-
-            channels.sort(key=people_count, reverse=True)
-
-            return channels[0]
+        while True:
+            try:
+                await self.client.connect(reconnect=False)
+            except discord.GatewayNotFound:
+                log.error("Discord Gateway not found! Retrying in 60 seconds...")
+                await aio.sleep(60)
+            except discord.ConnectionClosed:
+                log.error("Discord connection was closed! Retrying in 15 seconds...")
+                await aio.sleep(60)
 
     def find_voice_players(self, guild: "discord.Guild") -> List[VoicePlayer]:
         candidate_players: List[VoicePlayer] = []
