@@ -3,7 +3,6 @@ import royalnet.utils as ru
 from royalnet.constellation.api import *
 from royalnet.constellation.api.apierrors import *
 from ..tables.users import User
-from ..tables.aliases import Alias
 from ..tables.tokens import Token
 
 
@@ -24,7 +23,6 @@ class ApiLoginRoyalnetStar(ApiStar):
     async def api(self, data: ApiData) -> ru.JSON:
         TokenT = self.alchemy.get(Token)
         UserT = self.alchemy.get(User)
-        AliasT = self.alchemy.get(Alias)
 
         username = data["username"]
         password = data["password"]
