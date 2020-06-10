@@ -1,6 +1,7 @@
 import datetime
 import royalnet.utils as ru
 from royalnet.constellation.api import *
+from royalnet.constellation.api.apierrors import *
 from ..tables.users import User
 from ..tables.aliases import Alias
 from ..tables.tokens import Token
