@@ -1,18 +1,54 @@
 # `royalnet` [![PyPI](https://img.shields.io/pypi/v/royalnet.svg)](https://pypi.org/project/royalnet/)
 
-A multipurpose bot framework and webserver
+A framework for small Internet communities
 
-## About
+## About Royalnet
 
-`royalnet` is a Python framework that allows you to create interconnected modular chat bots accessible through multiple interfaces (such as Telegram or Discord), and also modular websites that can be connected with the bots.
+`royalnet` is a Python framework composed of many interconnected services that may be useful to small Internet communities (gaming clans, university groups, etc).
 
-### Supported bot platforms ("serfs")
+### [Serfs](royalnet/serf)
+
+_Serfs_ are services that allow Royalnet to respond to **chat commands** on multiple chat platforms.
+
+Commands using the Royalnet Serf API share their code between chat platforms: each serf will handle the specifics for their respective platform, preventing potential bugs due to code duplication!
+
+#### Supported chat platforms
 
 - [Telegram](https://core.telegram.org/bots)
 - [Discord](https://discordapp.com/developers/docs/)
-- [Matrix](https://matrix.org/) (no E2E support yet)
+- [Matrix](https://matrix.org/) (alpha)
 
-## Installing
+More can easily be added by creating a new serf!
+
+### [Bard](royalnet/bard)
+
+The Bard module allows Royalnet services to safely download and convert video files through [youtube-dl](https://youtube-dl.org/) and [ffmpeg](https://ffmpeg.org/).
+
+It is mainly used to playback music on Discord Channels.
+
+### [Alchemy](royalnet/alchemy)
+
+The _Alchemy_ module allows all Royalnet services to use a **PostgreSQL database** with a [SQLAlchemy](https://www.sqlalchemy.org/) interface.
+
+This allows the usage of a shared and easy-to-use ORM: Alchemy handles for you everything, from the creation of new tables to isolating in transactions the calls made from a Serf command to the database.
+
+### [Herald Network](royalnet/herald)
+
+All Royalnet services can communicate with each other through the _Herald Network_, a websockets-based system allowing Remote Procedure Calls ("_events_") between services.
+ 
+For example, in response to a Telegram message, the Telegram Serf can contact the Discord Serf to ask it to connect to voice chat in Discord. 
+
+Connections between different hosts are possible too, even if they currently are unused by the Royalnet Launcher.
+
+### [Constellation](royalnet/constellation)
+
+The Constellation service is a [Starlette](https://www.starlette.io )-based webserver that can supply dynamic pages ("_stars_") while being connected to the other parts of Royalnet through the Herald.
+
+#### APIs
+
+The Constellation service also offers utilities for creating REST APIs as Python functions with `dict`s as inputs and outputs, leaving (de)serialization, transmission and eventually authentication to Royalnet.
+
+## Installing Royalnet
 
 To install `royalnet`, run:
 ```
@@ -31,11 +67,11 @@ pip install royalnet[telegram,discord,matrix,alchemy_easy,bard,constellation,sen
 
 ## Documentation
 
-`royalnet`'s documentation is available [here](https://gh.steffo.eu/royalnet/html).
+A work-in-progress documentation is available [here](https://gh.steffo.eu/royalnet/html).
 
-## Developing `royalnet`
+## Developing for Royalnet
 
-To develop `royalnet`, you need to have [Poetry](https://poetry.eustace.io/) installed on your PC.
+To develop for `royalnet`, you need to have [Poetry](https://poetry.eustace.io/) installed on your PC.
 
 After you've installed Poetry, clone the git repo with the command:
 
