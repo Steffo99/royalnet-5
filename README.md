@@ -60,6 +60,10 @@ New Serf _commands_, Constellation _stars_, Herald _events_ and Alchemy _tables_
 
 Each pack can access only its individual section in the configuration file, preventing key conflicts (as long as the packs themselves don't share the same name). 
 
+#### Template
+
+New packs can be created starting from [this GitHub template](https://github.com/Steffo99/royalnet-pack-template).
+
 ## Installing Royalnet
 
 To install `royalnet`, run:
