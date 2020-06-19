@@ -270,6 +270,7 @@ class TelegramSerf(Serf):
 
     async def run(self):
         await super().run()
+        await self.api_call(self.client)
         while True:
             # Get the latest 100 updates
             last_updates: List[telegram.Update] = await self.api_call(self.client.get_updates,
