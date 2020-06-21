@@ -1,3 +1,4 @@
+from typing import *
 import logging
 from .apierrors import MissingParameterError
 from royalnet.backpack.tables.tokens import Token
@@ -17,6 +18,51 @@ class ApiData(dict):
 
     def __missing__(self, key):
         raise MissingParameterError(f"Missing '{key}'")
+
+    def str(self, key, optional=False) -> Optional[str]:
+        if optional:
+            return self.get(key)
+        else:
+            return self[key]
+
+    def int(self, key, optional=False) -> Optional[int]:
+        value = self.str(key, optional)
+        if value is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            raise BadRequestError(f"Could not parse the value `{value}` as an int.")
+
+    def float(self, key, optional=False) -> Optional[float]:
+        value = self.str(key, optional)
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except ValueError:
+            raise BadRequestError(f"Could not parse the value `{value}` as a float.")
+
+    _bool_values = {
+        "true": True,
+        "t": True,
+        "yes": True,
+        "y": True,
+        "false": False,
+        "f": False,
+        "no": False,
+        "n": False
+    }
+
+    def bool(self, key, optional=False) -> Optional[bool]:
+        value = self.str(key, optional)
+        if value is None:
+            return None
+        value = value.lower()
+        try:
+            return self._bool_values[value]
+        except KeyError:
+            raise BadRequestError(f"Could not parse the value `{value}` as a bool.")
 
     async def token(self) -> Token:
         token = await Token.find(self.star.alchemy, self.session, self["token"])
