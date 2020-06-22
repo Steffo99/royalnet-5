@@ -6,12 +6,12 @@ from sqlalchemy import and_
 from ..tables.tokens import Token
 
 
-class ApiTokenPasswdStar(ApiStar):
-    path = "/api/token/passwd/v1"
+class ApiUserPasswd(ApiStar):
+    path = "/api/user/passwd/v1"
 
     methods = ["PUT"]
 
-    tags = ["token"]
+    tags = ["user"]
 
     parameters = {
         "put": {
@@ -19,10 +19,16 @@ class ApiTokenPasswdStar(ApiStar):
         }
     }
 
+    auth = {
+        "put": True
+    }
+
     requires_auth = True
 
     async def put(self, data: ApiData) -> ru.JSON:
-        """Change the password of the currently logged in user."""
+        """Change the password of the currently logged in user.
+
+        This method also revokes all the issued tokens for the user."""
         TokenT = self.alchemy.get(Token)
         token = await data.token()
         user = token.user

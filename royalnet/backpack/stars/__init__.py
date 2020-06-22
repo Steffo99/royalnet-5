@@ -1,24 +1,24 @@
 # Imports go here!
 from .api_royalnet_version import ApiRoyalnetVersionStar
-from .api_login_royalnet import ApiLoginRoyalnetStar
-from .api_token_info import ApiTokenInfoStar
-from .api_token_passwd import ApiTokenPasswdStar
-from .api_token_create import ApiTokenCreateStar
+from .api_auth_login_royalnet import ApiAuthLoginRoyalnetStar
+from .api_user_passwd import ApiUserPasswd
+from .api_auth_token import ApiAuthTokenStar
 from .api_user_get import ApiUserGetStar
 from .api_user_list import ApiUserListStar
 from .api_user_find import ApiUserFindStar
+from .api_user_create import ApiUserCreateStar
 from .docs import DocsStar
 
 # Enter the PageStars of your Pack here!
 available_page_stars = [
     ApiRoyalnetVersionStar,
-    ApiLoginRoyalnetStar,
-    ApiTokenInfoStar,
-    ApiTokenPasswdStar,
-    ApiTokenCreateStar,
+    ApiAuthLoginRoyalnetStar,
+    ApiUserPasswd,
+    ApiAuthTokenStar,
     ApiUserGetStar,
     ApiUserListStar,
     ApiUserFindStar,
+    ApiUserCreateStar,
     DocsStar,
 ]
 

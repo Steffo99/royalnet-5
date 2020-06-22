@@ -6,8 +6,8 @@ from ..tables.users import User
 from ..tables.tokens import Token
 
 
-class ApiLoginRoyalnetStar(ApiStar):
-    path = "/api/login/royalnet/v1"
+class ApiAuthLoginRoyalnetStar(ApiStar):
+    path = "/api/auth/login/royalnet/v1"
 
     methods = ["POST"]
 
@@ -18,7 +18,7 @@ class ApiLoginRoyalnetStar(ApiStar):
         }
     }
 
-    tags = ["login"]
+    tags = ["auth"]
 
     async def post(self, data: ApiData) -> ru.JSON:
         """Login with a Royalnet account.

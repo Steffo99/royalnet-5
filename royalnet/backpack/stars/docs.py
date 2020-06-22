@@ -42,11 +42,12 @@ class DocsStar(PageStar):
             <html lang="en">
                 <head>
                     <title>Royalnet Docs</title>
-                    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3.12.1/swagger-ui.css">
-                    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
-                    <script src="https://unpkg.com/swagger-ui-dist@3.12.1/swagger-ui-standalone-preset.js"></script>
+                    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3.23.4/swagger-ui.css">
+                    <script src="https://unpkg.com/swagger-ui-dist@3.23.4/swagger-ui-bundle.js"></script>
+                    <script src="https://unpkg.com/swagger-ui-dist@3.23.4/swagger-ui-standalone-preset.js"></script>
                 </head>
                 <body>
+                    <div style="display: none;">{spec}</div>
                     <div id="docs"/>
                     <script>
                         const ui = SwaggerUIBundle({{

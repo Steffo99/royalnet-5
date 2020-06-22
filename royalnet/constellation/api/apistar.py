@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 class ApiStar(PageStar, ABC):
     parameters: Dict[str, Dict[str, str]] = {}
+    auth: Dict[str, bool] = {}
 
     tags: List[str] = []
 
@@ -51,7 +52,7 @@ class ApiStar(PageStar, ABC):
         except ForbiddenError as e:
             return api_error(e, code=403)
         except MethodNotImplementedError as e:
-            return api_error(e, code=501)
+            return api_error(e, code=405)
         except BadRequestError as e:
             return api_error(e, code=400)
         except Exception as e:
@@ -63,16 +64,16 @@ class ApiStar(PageStar, ABC):
             await apidata.session_close()
 
     async def get(self, data: ApiData) -> ru.JSON:
-        raise MethodNotImplementedError()
+        raise MethodNotImplementedError("GET is not implemented on this ApiStar")
 
     async def post(self, data: ApiData) -> ru.JSON:
-        raise MethodNotImplementedError()
+        raise MethodNotImplementedError("POST is not implemented on this ApiStar")
 
     async def put(self, data: ApiData) -> ru.JSON:
-        raise MethodNotImplementedError()
+        raise MethodNotImplementedError("PUT is not implemented on this ApiStar")
 
     async def delete(self, data: ApiData) -> ru.JSON:
-        raise MethodNotImplementedError()
+        raise MethodNotImplementedError("DELETE is not implemented on this ApiStar")
 
     def __swagger_for_a_method(self, method: Callable) -> ru.JSON:
         docstring = method.__doc__ or ""
@@ -85,16 +86,25 @@ class ApiStar(PageStar, ABC):
 
         return {
             "operationId": f"{self.__class__.__name__}_{method.__name__}",
-            "summary": ru.strip_tabs(summary) if summary is not None else None,
-            "description": ru.strip_tabs(description) if description is not None else None,
+            "summary": ru.strip_tabs(summary) if summary is not None else "",
+            "description": ru.strip_tabs(description) if description is not None else "",
             "tags": self.tags,
-            "security": [{"RoyalnetLoginToken": ["logged_in"]}],
+            "security": [{"RoyalnetLoginToken": ["logged_in"]}] if self.auth.get(method.__name__) else [],
             "parameters": [{
                 "name": parameter_name,
                 "in": "query",
                 "description": ru.strip_tabs(self.parameters[method.__name__][parameter_name]),
-                "type": "string",
-            } for parameter_name in self.parameters.get(method.__name__, [])]
+                "schema": {},
+            } for parameter_name in self.parameters.get(method.__name__, [])],
+            "responses": {
+                "200": {"description": "✅ OK!"},
+                "400": {"description": "⚠️ Missing or invalid parameter."},
+                "401": {"description": "⚠️ Invalid password."},
+                "403": {"description": "⚠️ Missing or invalid token."},
+                "404": {"description": "⚠️ Not found."},
+                "405": {"description": "⚠️ Unsupported method."},
+                "500": {"description": "⛔️ Serverside unhandled exception!"},
+            }
         }
 
     def swagger(self) -> ru.JSON:

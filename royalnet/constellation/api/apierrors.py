@@ -3,36 +3,36 @@ class ApiError(Exception):
 
 
 class NotFoundError(ApiError):
-    pass
+    """404"""
 
 
 class UnauthorizedError(ApiError):
-    pass
+    """401"""
 
 
 class ForbiddenError(ApiError):
-    pass
+    """403"""
 
 
 class BadRequestError(ApiError):
-    pass
+    """400"""
 
 
 class ParameterError(BadRequestError):
-    pass
+    """400"""
 
 
 class MissingParameterError(ParameterError):
-    pass
+    """400"""
 
 
 class InvalidParameterError(ParameterError):
-    pass
+    """400"""
 
 
 class MethodNotImplementedError(ApiError):
-    pass
+    """405"""
 
 
 class UnsupportedError(MethodNotImplementedError):
-    pass
+    """405"""
