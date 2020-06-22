@@ -132,7 +132,6 @@ class Constellation:
             else:
                 self.register_page_stars(page_stars, pack_cfg)
         log.info(f"PageStars: {len(self.starlette.routes)} stars")
-        log.info(f"ExceptionStars: {len(self.starlette.exception_handlers)} stars")
 
         self.running: bool = False
         """Is the :class:`Constellation` server currently running?"""

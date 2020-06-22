@@ -6,15 +6,16 @@ from royalnet.constellation.api import *
 class ApiUserGetStar(ApiStar):
     path = "/api/user/get/v1"
 
-    summary = "Get a Royalnet user by its id."
-
     parameters = {
-        "id": "The id of the user to get."
+        "get": {
+            "id": "The id of the user to get."
+        }
     }
 
     tags = ["user"]
 
-    async def api(self, data: ApiData) -> dict:
+    async def get(self, data: ApiData) -> dict:
+        """Get details about the Royalnet user with a certain id."""
         user_id_str = data["id"]
         try:
             user_id = int(user_id_str)

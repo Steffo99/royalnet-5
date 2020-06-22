@@ -10,17 +10,18 @@ class ApiTokenCreateStar(ApiStar):
 
     methods = ["POST"]
 
-    summary = "Create a new login token of any duration."
-
     parameters = {
-        "duration": "The duration in seconds of the new token."
+        "post": {
+            "duration": "The duration in seconds of the new token."
+        }
     }
 
-    tags = ["token"]
+    tags = ["login"]
 
-    requires_auth = True
+    async def post(self, data: ApiData) -> ru.JSON:
+        """Create a new login token for the authenticated user.
 
-    async def api(self, data: ApiData) -> ru.JSON:
+        Keep it secret, as it is basically a password!"""
         user = await data.user()
         try:
             duration = int(data["duration"])

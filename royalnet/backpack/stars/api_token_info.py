@@ -5,12 +5,9 @@ from royalnet.constellation.api import *
 class ApiTokenInfoStar(ApiStar):
     path = "/api/token/info/v1"
 
-    summary = "Get info the current login token."
+    tags = ["login"]
 
-    tags = ["token"]
-
-    requires_auth = True
-
-    async def api(self, data: ApiData) -> ru.JSON:
+    async def get(self, data: ApiData) -> ru.JSON:
+        """Get information about the current login token."""
         token = await data.token()
         return token.json()

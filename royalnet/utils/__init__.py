@@ -6,6 +6,7 @@ from .multilock import MultiLock
 from .sentry import init_sentry, sentry_exc, sentry_wrap, sentry_async_wrap
 from .log import init_logging
 from .royaltyping import JSON
+from .strip_tabs import strip_tabs
 
 __all__ = [
     "asyncify",
@@ -24,4 +25,5 @@ __all__ = [
     "sentry_async_wrap",
     "init_logging",
     "JSON",
+    "strip_tabs",
 ]
