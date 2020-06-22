@@ -17,10 +17,10 @@ log = logging.getLogger(__name__)
 class ApiStar(PageStar, ABC):
     parameters: Dict[str, Dict[str, str]] = {}
     auth: Dict[str, bool] = {}
+    deprecated: Dict[str, bool] = {}
 
     tags: List[str] = []
 
-    deprecated: bool = False
 
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
@@ -89,6 +89,7 @@ class ApiStar(PageStar, ABC):
             "summary": ru.strip_tabs(summary) if summary is not None else "",
             "description": ru.strip_tabs(description) if description is not None else "",
             "tags": self.tags,
+            "deprecated": self.deprecated.get(method.__name__, False),
             "security": [{"RoyalnetLoginToken": ["logged_in"]}] if self.auth.get(method.__name__) else [],
             "parameters": [{
                 "name": parameter_name,

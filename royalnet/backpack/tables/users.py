@@ -37,16 +37,17 @@ class User:
         return Column(String)
 
     @classmethod
-    async def find(cls, alchemy, session, alias: Union[str, int]):
-        if isinstance(alias, str):
-            result = await ru.asyncify(session.query(alchemy.get(Alias)).filter_by(alias=alias.lower()).one_or_none)
-        elif isinstance(alias, int):
-            result = await ru.asyncify(session.query(alchemy.get(cls)).get, alias)
+    async def find(cls, alchemy, session, identifier: Union[str, int]):
+        if isinstance(identifier, str):
+            alias = await ru.asyncify(session.query(alchemy.get(Alias)).filter_by(alias=identifier.lower()).one_or_none)
+            if alias is None:
+                return None
+            else:
+                return alias.user
+        elif isinstance(identifier, int):
+            return await ru.asyncify(session.query(alchemy.get(cls)).get, identifier)
         else:
             raise TypeError("alias is of an invalid type.")
-        if result is not None:
-            result = result.user
-        return result
 
     def json(self) -> JSON:
         return {

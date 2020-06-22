@@ -14,7 +14,7 @@ class RoyalnetrolesCommand(rc.Command):
 
     async def run(self, args: rc.CommandArgs, data: rc.CommandData) -> None:
         if name := args.optional(0) is not None:
-            user = await User.find(alchemy=self.alchemy, session=data.session, alias=name)
+            user = await User.find(alchemy=self.alchemy, session=data.session, identifier=name)
         else:
             user = await data.get_author(error_if_none=True)
 
