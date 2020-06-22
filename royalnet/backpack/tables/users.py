@@ -36,9 +36,14 @@ class User:
     def avatar_url(self):
         return Column(String)
 
-    @staticmethod
-    async def find(alchemy, session, alias: Union[str, int]):
-        result = await ru.asyncify(session.query(alchemy.get(Alias)).filter_by(alias=alias.lower()).one_or_none)
+    @classmethod
+    async def find(cls, alchemy, session, alias: Union[str, int]):
+        if isinstance(alias, str):
+            result = await ru.asyncify(session.query(alchemy.get(Alias)).filter_by(alias=alias.lower()).one_or_none)
+        elif isinstance(alias, int):
+            result = await ru.asyncify(session.query(alchemy.get(cls)).get, alias)
+        else:
+            raise TypeError("alias is of an invalid type.")
         if result is not None:
             result = result.user
         return result
