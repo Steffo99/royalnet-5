@@ -42,9 +42,9 @@ class ApiUserCreateStar(rca.ApiStar):
             email=email,
             avatar_url=avatar_url
         )
+        data.session.add(user)
         user.set_password(password)
         user.add_alias(self.alchemy, username)
-        data.session.add(user)
         await data.session_commit()
 
         return user.json()

@@ -7,6 +7,9 @@ from starlette.responses import Response, HTMLResponse
 from royalnet.version import semantic
 
 
+backtick = "\u0060"
+
+
 class DocsStar(PageStar):
     path = "/docs"
 
