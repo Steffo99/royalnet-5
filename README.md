@@ -1,4 +1,5 @@
 # `royalnet` [![PyPI](https://img.shields.io/pypi/v/royalnet.svg)](https://pypi.org/project/royalnet/)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSteffo99%2Froyalnet.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSteffo99%2Froyalnet?ref=badge_shield)
 
 A framework for small Internet communities
 
@@ -110,3 +111,6 @@ poetry install -E telegram -E discord -E matrix -E alchemy_easy -E bard -E const
 ## Help!
 
 Need help in anything Royalnet-related? [Open a issue on GitHub!](https://github.com/Steffo99/royalnet/issues/new)
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSteffo99%2Froyalnet.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSteffo99%2Froyalnet?ref=badge_large)
