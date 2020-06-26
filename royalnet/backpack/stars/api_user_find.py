@@ -12,6 +12,7 @@ class ApiUserFindStar(rca.ApiStar):
         }
     }
 
+    @rca.magic
     async def get(self, data: rca.ApiData) -> ru.JSON:
         """Get details about the Royalnet user with a certain alias."""
         user = await rbt.User.find(self.alchemy, data.session, data["alias"])
