@@ -127,6 +127,8 @@ class ApiStar(PageStar, ABC):
         """Generate one or more swagger paths for this ApiStar."""
         result = {}
         for method in self.methods():
+            if method not in ["get", "post", "put", "delete"]:
+                continue
             result[method.lower()] = self.__swagger_for_a_method(self.__getattribute__(method.lower()))
         return result
 
