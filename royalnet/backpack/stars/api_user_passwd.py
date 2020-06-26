@@ -1,15 +1,13 @@
 from typing import *
 import datetime
 import royalnet.utils as ru
-from royalnet.constellation.api import *
+import royalnet.constellation.api as rca
 from sqlalchemy import and_
 from ..tables.tokens import Token
 
 
-class ApiUserPasswd(ApiStar):
+class ApiUserPasswd(rca.ApiStar):
     path = "/api/user/passwd/v1"
-
-    methods = ["PUT"]
 
     tags = ["user"]
 
@@ -25,7 +23,8 @@ class ApiUserPasswd(ApiStar):
 
     requires_auth = True
 
-    async def put(self, data: ApiData) -> ru.JSON:
+    @rca.magic
+    async def put(self, data: rca.ApiData) -> ru.JSON:
         """Change the password of the currently logged in user.
 
         This method also revokes all the issued tokens for the user."""

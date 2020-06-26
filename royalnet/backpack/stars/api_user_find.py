@@ -1,12 +1,10 @@
-from royalnet.utils import *
-from royalnet.backpack.tables import *
-from royalnet.constellation.api import *
+import royalnet.utils as ru
+import royalnet.backpack.tables as rbt
+import royalnet.constellation.api as rca
 
 
-class ApiUserFindStar(ApiStar):
+class ApiUserFindStar(rca.ApiStar):
     path = "/api/user/find/v1"
-
-    tags = ["user"]
 
     parameters = {
         "get": {
@@ -14,9 +12,9 @@ class ApiUserFindStar(ApiStar):
         }
     }
 
-    async def get(self, data: ApiData) -> dict:
+    async def get(self, data: rca.ApiData) -> ru.JSON:
         """Get details about the Royalnet user with a certain alias."""
-        user = await User.find(self.alchemy, data.session, data["alias"])
+        user = await rbt.User.find(self.alchemy, data.session, data["alias"])
         if user is None:
-            raise NotFoundError("No such user.")
+            raise rca.NotFoundError("No such user.")
         return user.json()

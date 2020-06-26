@@ -98,16 +98,7 @@ class Constellation:
         self.events: Dict[str, rc.Event] = {}
         """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
-        middleware = []
-        if constellation_cfg.get("cors_middleware", False):
-            log.info("CORS middleware: enabled")
-            middleware.append(
-                starlette.middleware.Middleware(starlette.middleware.cors.CORSMiddleware, {"allow_origins": ["*"]})
-            )
-        else:
-            log.info("CORS middleware: disabled")
-
-        self.starlette = starlette.applications.Starlette(debug=__debug__, middleware=middleware)
+        self.starlette = starlette.applications.Starlette(debug=__debug__)
         """The :class:`~starlette.Starlette` app."""
 
         self.stars: List[PageStar] = []
@@ -269,7 +260,7 @@ class Constellation:
             log.info(f"Running {page_star}")
             return await page_star.page(request)
 
-        return page_star.path, f, page_star.methods
+        return page_star.path, f, page_star.methods()
 
     def register_page_stars(self, page_stars: List[Type[PageStar]], pack_cfg: Dict[str, Any]):
         for SelectedPageStar in page_stars:

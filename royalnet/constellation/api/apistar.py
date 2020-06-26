@@ -20,6 +20,7 @@ class ApiStar(PageStar, ABC):
     deprecated: Dict[str, bool] = {}
 
     tags: List[str] = []
+    __override__: List[str] = []
 
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
@@ -42,23 +43,25 @@ class ApiStar(PageStar, ABC):
                 response = await self.put(apidata)
             elif method == "delete":
                 response = await self.delete(apidata)
+            elif method == "options":
+                return api_success("Preflight allowed.", methods=self.methods())
             else:
                 raise MethodNotImplementedError("Unknown method")
         except UnauthorizedError as e:
-            return api_error(e, code=401)
+            return api_error(e, code=401, methods=self.methods())
         except NotFoundError as e:
-            return api_error(e, code=404)
+            return api_error(e, code=404, methods=self.methods())
         except ForbiddenError as e:
-            return api_error(e, code=403)
+            return api_error(e, code=403, methods=self.methods())
         except MethodNotImplementedError as e:
-            return api_error(e, code=405)
+            return api_error(e, code=405, methods=self.methods())
         except BadRequestError as e:
-            return api_error(e, code=400)
+            return api_error(e, code=400, methods=self.methods())
         except Exception as e:
             ru.sentry_exc(e)
-            return api_error(e, code=500)
+            return api_error(e, code=500, methods=self.methods())
         else:
-            return api_success(response)
+            return api_success(response, methods=self.methods())
         finally:
             await apidata.session_close()
 
@@ -107,10 +110,23 @@ class ApiStar(PageStar, ABC):
             }
         }
 
+    @classmethod
+    def methods(cls):
+        magics = []
+        for key, value in cls.__dict__.items():
+            attr = value
+            try:
+                magic = attr.__magic__
+            except AttributeError:
+                continue
+            if magic:
+                magics.append(key)
+        return [*magics, "options"]
+
     def swagger(self) -> ru.JSON:
         """Generate one or more swagger paths for this ApiStar."""
         result = {}
-        for method in self.methods:
+        for method in self.methods():
             result[method.lower()] = self.__swagger_for_a_method(self.__getattribute__(method.lower()))
         return result
 

@@ -11,6 +11,7 @@ from .apierrors import \
     InvalidParameterError, \
     MethodNotImplementedError, \
     UnsupportedError
+from .magic import magic
 
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     "InvalidParameterError",
     "MethodNotImplementedError",
     "UnsupportedError",
+    "magic",
 ]

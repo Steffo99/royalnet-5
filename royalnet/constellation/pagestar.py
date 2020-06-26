@@ -18,17 +18,19 @@ class PageStar(Star):
 
     """
 
-    methods: List[str] = ["GET"]
-    """The HTTP methods supported by the Star, in form of a list.
+    @classmethod
+    def methods(cls):
+        """The HTTP methods supported by the Star, in form of a list.
 
-    By default, a Star only supports the ``GET`` method, but more can be added.
+        By default, a Star only supports the ``GET`` method, but more can be added.
 
-    Example:
-        ::
+        Example:
+            ::
 
-            methods: List[str] = ["GET", "POST", "PUT", "DELETE"]
+                methods: List[str] = ["GET", "POST", "PUT", "DELETE"]
 
-    """
+        """
+        return ["GET"]
 
     def __repr__(self):
         return f"<{self.__class__.__qualname__}: {self.path}>"

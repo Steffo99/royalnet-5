@@ -9,8 +9,6 @@ from ..tables import *
 class ApiUserCreateStar(rca.ApiStar):
     path = "/api/user/create/v1"
 
-    methods = ["POST"]
-
     parameters = {
         "post": {
             "username": "The name of the user you are creating.",

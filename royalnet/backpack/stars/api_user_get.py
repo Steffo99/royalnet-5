@@ -1,9 +1,9 @@
-from royalnet.utils import *
-from royalnet.backpack.tables import *
-from royalnet.constellation.api import *
+import royalnet.utils as ru
+import royalnet.backpack.tables as rbt
+import royalnet.constellation.api as rca
 
 
-class ApiUserGetStar(ApiStar):
+class ApiUserGetStar(rca.ApiStar):
     path = "/api/user/get/v1"
 
     parameters = {
@@ -14,14 +14,15 @@ class ApiUserGetStar(ApiStar):
 
     tags = ["user"]
 
-    async def get(self, data: ApiData) -> dict:
+    @rca.magic
+    async def get(self, data: rca.ApiData) -> dict:
         """Get details about the Royalnet user with a certain id."""
         user_id_str = data["id"]
         try:
             user_id = int(user_id_str)
         except (ValueError, TypeError):
-            raise InvalidParameterError("'id' is not a valid int.")
-        user: User = await asyncify(data.session.query(self.alchemy.get(User)).get, user_id)
+            raise rca.InvalidParameterError("'id' is not a valid int.")
+        user: rbt.User = await ru.asyncify(data.session.query(self.alchemy.get(rbt.User)).get, user_id)
         if user is None:
-            raise NotFoundError("No such user.")
+            raise rca.NotFoundError("No such user.")
         return user.json()
