@@ -55,6 +55,9 @@ enabled = true
 address = "0.0.0.0"
 # The port on which the Constellation should run
 port = 44445
+# If the CORS middleware should be enabled
+# https://www.starlette.io/middleware/#corsmiddleware
+cors_middleware = true
 
 [Serfs]
 

@@ -4,6 +4,8 @@ import logging
 import importlib
 import uvicorn
 import starlette.applications
+import starlette.middleware
+import starlette.middleware.cors
 import royalnet.alchemy as ra
 import royalnet.herald as rh
 import royalnet.utils as ru
@@ -96,7 +98,16 @@ class Constellation:
         self.events: Dict[str, rc.Event] = {}
         """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
-        self.starlette = starlette.applications.Starlette(debug=__debug__)
+        middleware = []
+        if constellation_cfg.get("cors_middleware", False):
+            log.info("CORS middleware: enabled")
+            middleware.append(
+                starlette.middleware.Middleware(starlette.middleware.cors.CORSMiddleware, {"allow_origins": ["*"]})
+            )
+        else:
+            log.info("CORS middleware: disabled")
+
+        self.starlette = starlette.applications.Starlette(debug=__debug__, middleware=middleware)
         """The :class:`~starlette.Starlette` app."""
 
         self.stars: List[PageStar] = []

@@ -21,7 +21,6 @@ class ApiStar(PageStar, ABC):
 
     tags: List[str] = []
 
-
     async def page(self, request: Request) -> JSONResponse:
         if request.query_params:
             data = request.query_params
