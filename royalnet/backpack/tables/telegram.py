@@ -42,10 +42,18 @@ class Telegram:
     def __str__(self):
         return f"[c]telegram:{self.mention()}[/c]"
 
+    def name(self) -> str:
+        if self.username is not None:
+            return f"{self.username}"
+        elif self.last_name is not None:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return f"{self.first_name}"
+
     def mention(self) -> str:
         if self.username is not None:
             return f"@{self.username}"
         elif self.last_name is not None:
-            return f"{self.first_name} {self.last_name}"
+            return f"[url=tg://user?id={self.tg_id}]{self.first_name} {self.last_name}[/url]"
         else:
-            return self.first_name
+            return f"[url=tg://user?id={self.tg_id}]{self.first_name}[/url]"

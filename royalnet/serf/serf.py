@@ -300,7 +300,7 @@ class Serf(abc.ABC):
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             ru.sentry_exc(e)
-            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
+            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(map(lambda a: repr(a), e.args)))
         finally:
             await data.session_close()
 
@@ -324,7 +324,7 @@ class Serf(abc.ABC):
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             ru.sentry_exc(e)
-            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(e.args))
+            await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(map(lambda a: repr(a), e.args)))
         finally:
             await data.session_close()
 

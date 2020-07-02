@@ -5,7 +5,7 @@
 
 [tool.poetry]
     name = "royalnet"
-    version = "5.10.2"
+    version = "5.10.3"
     description = "A multipurpose bot and web framework"
     authors = ["Stefano Pigozzi <ste.pigozzi@gmail.com>"]
     license = "AGPL-3.0+"
@@ -70,7 +70,7 @@
 # Optional dependencies
 [tool.poetry.extras]
     telegram = ["python_telegram_bot"]
-    discord = ["discord.py", "pynacl"]
+    discord = ["discord.py", "pynacl", "lavalink", "aiohttp", "cchardet"]
     matrix = ["matrix-nio"]
     alchemy_easy = ["sqlalchemy", "psycopg2_binary", "bcrypt"]
     alchemy_hard = ["sqlalchemy", "psycopg2", "bcrypt"]

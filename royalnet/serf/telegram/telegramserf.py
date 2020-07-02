@@ -258,6 +258,7 @@ class TelegramSerf(Serf):
         uid = cbq.data
         if uid not in self.key_callbacks:
             await self.api_call(cbq.answer, text="⚠️ This keyboard has expired.", show_alert=True)
+            return
         key: rc.KeyboardKey = self.key_callbacks[uid]
         data: rc.CommandData = self.CallbackData(interface=key.interface, loop=self.loop, cbq=cbq)
         await self.press(key, data)
