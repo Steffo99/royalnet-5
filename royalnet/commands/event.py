@@ -3,7 +3,7 @@ from .commandinterface import CommandInterface
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from serf import Serf
+    from ..serf import Serf
 
 
 class Event:
