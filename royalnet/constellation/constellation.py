@@ -95,7 +95,7 @@ class Constellation:
         self.Interface: Type[rc.CommandInterface] = self.interface_factory()
         """The :class:`~rc.CommandInterface` class of this :class:`Constellation`."""
 
-        self.events: Dict[str, rc.Event] = {}
+        self.events: Dict[str, rc.HeraldEvent] = {}
         """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
         self.starlette = starlette.applications.Starlette(debug=__debug__)
@@ -208,7 +208,7 @@ class Constellation:
 
     async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
-            event: rc.Event = self.events[message.handler]
+            event: rc.HeraldEvent = self.events[message.handler]
         except KeyError:
             log.warning(f"No event for '{message.handler}'")
             return rh.ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
@@ -228,7 +228,7 @@ class Constellation:
         elif isinstance(message, rh.Broadcast):
             await event.run(**message.data)
 
-    def register_events(self, events: List[Type[rc.Event]], pack_cfg: Dict[str, Any]):
+    def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
             # Create a new interface
             interface = self.Interface(config=pack_cfg)

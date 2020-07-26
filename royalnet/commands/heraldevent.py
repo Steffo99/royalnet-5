@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from ..serf import Serf
 
 
-class Event:
+class HeraldEvent:
     """A remote procedure call triggered by a :mod:`royalnet.herald` request."""
 
     name = NotImplemented

@@ -1,7 +1,7 @@
 from royalnet.commands import *
 
 
-class ExceptionEvent(Event):
+class ExceptionEvent(HeraldEvent):
     name = "exception"
 
     def run(self, **kwargs):

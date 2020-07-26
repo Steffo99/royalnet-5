@@ -89,7 +89,7 @@ class Serf(abc.ABC):
         self.herald_task: Optional[aio.Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
 
-        self.events: Dict[str, Event] = {}
+        self.events: Dict[str, HeraldEvent] = {}
         """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
 
         self.commands: Dict[str, Command] = {}
@@ -211,7 +211,7 @@ class Serf(abc.ABC):
         herald_cfg["name"] = self.interface_name
         self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
-    def register_events(self, events: List[Type[Event]], pack_cfg: Dict[str, Any]):
+    def register_events(self, events: List[Type[HeraldEvent]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
             # Initialize the event
             try:
@@ -230,7 +230,7 @@ class Serf(abc.ABC):
 
     async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
-            event: Event = self.events[message.handler]
+            event: HeraldEvent = self.events[message.handler]
         except KeyError:
             log.warning(f"No event for '{message.handler}'")
             return rh.ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
