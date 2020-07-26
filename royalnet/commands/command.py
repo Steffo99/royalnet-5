@@ -1,10 +1,10 @@
+import abc
 from typing import *
-from .commandinterface import CommandInterface
 from .commandargs import CommandArgs
 from .commanddata import CommandData
 
 
-class Command:
+class Command(metaclass=abc.ABCMeta):
     name: str = NotImplemented
     """The main name of the command.
     
@@ -24,31 +24,23 @@ class Command:
     """The syntax of the command, to be displayed when a :py:exc:`InvalidInputError` is raised,
      in the format ``(required_arg) [optional_arg]``."""
 
-    def __init__(self, interface: CommandInterface):
-        self.interface = interface
+    def __init__(self, serf, config):
+        self.serf = serf
+        self.config = config
 
     def __str__(self):
-        return f"[c]{self.interface.prefix}{self.name}[/c]"
-
-    @property
-    def serf(self):
-        """A shortcut for :attr:`.interface.serf`."""
-        return self.interface.serf
+        return f"[c]{self.serf.prefix}{self.name}[/c]"
 
     @property
     def alchemy(self):
         """A shortcut for :attr:`.interface.alchemy`."""
-        return self.interface.alchemy
+        return self.serf.alchemy
 
     @property
     def loop(self):
         """A shortcut for :attr:`.interface.loop`."""
-        return self.interface.loop
+        return self.serf.loop
 
-    @property
-    def config(self):
-        """A shortcut for :attr:`.interface.config`."""
-        return self.interface.config
-
+    @abc.abstractmethod
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         raise NotImplementedError()

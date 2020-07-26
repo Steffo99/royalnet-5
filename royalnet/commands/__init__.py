@@ -1,6 +1,5 @@
 """The subpackage providing all classes related to Royalnet commands."""
 
-from .commandinterface import CommandInterface
 from .command import Command
 from .commanddata import CommandData
 from .commandargs import CommandArgs
@@ -11,7 +10,6 @@ from .keyboardkey import KeyboardKey
 from .configdict import ConfigDict
 
 __all__ = [
-    "CommandInterface",
     "Command",
     "CommandData",
     "CommandArgs",

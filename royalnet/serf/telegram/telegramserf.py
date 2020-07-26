@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 class TelegramSerf(Serf):
     """A Serf that connects to `Telegram <https://telegram.org/>`_ as a bot."""
     interface_name = "telegram"
+    prefix = "/"
 
     _identity_table = rbt.Telegram
     _identity_column = "tg_id"
@@ -90,25 +91,13 @@ class TelegramSerf(Serf):
                 break
         return None
 
-    def interface_factory(self) -> Type[rc.CommandInterface]:
-        # noinspection PyPep8Naming
-        GenericInterface = super().interface_factory()
-
-        # noinspection PyMethodParameters
-        class TelegramInterface(GenericInterface):
-            name = self.interface_name
-            prefix = "/"
-
-        return TelegramInterface
-
     def message_data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters
         class TelegramMessageData(rc.CommandData):
             def __init__(data,
-                         interface: rc.CommandInterface,
-                         loop: aio.AbstractEventLoop,
+                         command: rc.Command,
                          message: telegram.Message):
-                super().__init__(interface=interface, loop=loop)
+                super().__init__(command=command)
                 data.message: telegram.Message = message
 
             async def reply(data, text: str):
@@ -171,10 +160,9 @@ class TelegramSerf(Serf):
         # noinspection PyMethodParameters
         class TelegramKeyboardData(rc.CommandData):
             def __init__(data,
-                         interface: rc.CommandInterface,
-                         loop: aio.AbstractEventLoop,
+                         command: rc.Command,
                          cbq: telegram.CallbackQuery):
-                super().__init__(interface=interface, loop=loop)
+                super().__init__(command=command)
                 data.cbq: telegram.CallbackQuery = cbq
 
             async def reply(data, text: str):
@@ -250,7 +238,7 @@ class TelegramSerf(Serf):
         # Send a typing notification
         await self.api_call(message.chat.send_action, telegram.ChatAction.TYPING)
         # Prepare data
-        data = self.MessageData(interface=command.interface, loop=self.loop, message=message)
+        data = self.MessageData(command=command, message=message)
         # Call the command
         await self.call(command, data, parameters)
 
@@ -260,7 +248,7 @@ class TelegramSerf(Serf):
             await self.api_call(cbq.answer, text="⚠️ This keyboard has expired.", show_alert=True)
             return
         key: rc.KeyboardKey = self.key_callbacks[uid]
-        data: rc.CommandData = self.CallbackData(interface=key.interface, loop=self.loop, cbq=cbq)
+        data: rc.CommandData = self.CallbackData(command=command, cbq=cbq)
         await self.press(key, data)
 
     def register_keyboard_key(self, identifier: str, key: rc.KeyboardKey):

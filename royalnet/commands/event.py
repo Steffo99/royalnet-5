@@ -1,5 +1,4 @@
 import asyncio as aio
-from .commandinterface import CommandInterface
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -12,30 +11,19 @@ class Event:
     name = NotImplemented
     """The event_name that will trigger this event."""
 
-    def __init__(self, interface: CommandInterface):
-        """Bind the event to a :class:`~royalnet.serf.Serf`."""
-        self.interface: CommandInterface = interface
-        """The :class:`CommandInterface` available to this :class:`Event`."""
-
-    @property
-    def serf(self) -> "Serf":
-        """A shortcut for :attr:`.interface.serf`."""
-        return self.interface.serf
+    def __init__(self, serf, config):
+        self.serf = serf
+        self.config = config
 
     @property
     def alchemy(self):
         """A shortcut for :attr:`.interface.alchemy`."""
-        return self.interface.alchemy
+        return self.serf.alchemy
 
     @property
     def loop(self) -> aio.AbstractEventLoop:
         """A shortcut for :attr:`.interface.loop`."""
-        return self.interface.loop
-
-    @property
-    def config(self) -> dict:
-        """A shortcut for :attr:`.interface.config`."""
-        return self.interface.config
+        return self.serf.loop
 
     async def run(self, **kwargs):
         raise NotImplementedError()

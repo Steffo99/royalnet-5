@@ -1,4 +1,4 @@
-import royalnet.version
+import pkg_resources
 from royalnet.commands import *
 
 
@@ -7,12 +7,16 @@ class RoyalnetversionCommand(Command):
 
     description: str = "Display the current Royalnet version."
 
+    @property
+    def royalnet_version(self):
+        return pkg_resources.get_distribution("royalnet").version
+
     async def run(self, args: CommandArgs, data: CommandData) -> None:
         # noinspection PyUnreachableCode
         if __debug__:
             message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/]Unreleased[/url]\n"
         else:
-            message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/releases/tag/{royalnet.version.semantic}]{royalnet.version.semantic}[/url]\n"
+            message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/releases/tag/{self.royalnet_version}]{self.royalnet_version}[/url]\n"
         if "69" in royalnet.version.semantic:
             message += "(Nice.)"
         await data.reply(message)

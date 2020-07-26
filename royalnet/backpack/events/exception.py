@@ -5,6 +5,6 @@ class ExceptionEvent(Event):
     name = "exception"
 
     def run(self, **kwargs):
-        if not self.interface.config["exc_debug"]:
-            raise UserError(f"{self.interface.prefix}{self.name} is not enabled.")
+        if not self.config["exc_debug"]:
+            raise UserError(f"{self.__class__.__name__} is not enabled.")
         raise Exception(f"{self.name} event was called")
