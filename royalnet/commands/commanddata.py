@@ -5,8 +5,7 @@ import asyncio as aio
 import royalnet.utils as ru
 import io
 from .errors import UnsupportedError
-from .commandinterface import CommandInterface
-from royalnet.backpack.tables.aliases import Alias
+from royalnet.backpack.tables.users import User
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
@@ -83,7 +82,7 @@ class CommandData:
 
         Parameters:
             alias: the Alias to search for."""
-        return await Alias.find_user(self._interface.alchemy, self.session, alias)
+        return await User.find(self.command.serf.alchemy, self.session, alias)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
