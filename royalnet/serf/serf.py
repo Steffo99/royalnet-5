@@ -41,10 +41,10 @@ class Serf(abc.ABC):
             log.debug(f"Importing pack: {pack_name}")
             try:
                 packs[pack_name] = {
-                    "commands": importlib.import_module(f"{pack_name}.commands"),
-                    "events": importlib.import_module(f"{pack_name}.events"),
-                    "stars": importlib.import_module(f"{pack_name}.stars"),
-                    "tables": importlib.import_module(f"{pack_name}.tables"),
+                    "commands": importlib.import_module(f".commands", pack_name),
+                    "events": importlib.import_module(f".events", pack_name),
+                    "stars": importlib.import_module(f".stars", pack_name),
+                    "tables": importlib.import_module(f".tables", pack_name),
                 }
             except ImportError as e:
                 log.error(f"{e.__class__.__name__} during the import of {pack_name}:\n"
