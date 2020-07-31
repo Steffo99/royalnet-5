@@ -2,7 +2,7 @@ import logging
 import sys
 import traceback
 from typing import *
-from royalnet.version import semantic
+import royalnet
 import functools
 
 try:
@@ -24,7 +24,7 @@ def init_sentry(sentry_cfg: Dict[str, Any]):
     if sentry_sdk is None:
         raise ImportError("`sentry` extra is not installed")
     log.debug("Initializing Sentry...")
-    release = f"royalnet@{semantic}"
+    release = f"royalnet@{royalnet.__version__}"
     sentry_sdk.init(sentry_cfg["dsn"],
                     integrations=[AioHttpIntegration(),
                                   SqlalchemyIntegration(),
