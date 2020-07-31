@@ -6,7 +6,7 @@ Creating a new Pack
 Prerequisites
 ------------------------------------
 
-You'll need to have `Python 3.8 <https://www.python.org/downloads/release/python-382/>`_ and `poetry <https://github.com/python-poetry/poetry>`_
+You'll need to have `Python 3.8 <https://www.pyth1on.org/downloads/release/python-382/>`_ and `poetry <https://github.com/python-poetry/poetry>`_
 to develop Royalnet Packs.
 
 Creating the repository
@@ -15,7 +15,7 @@ Creating the repository
 To create a new pack, create a new repository based on the `Royalnet Pack template <https://github.com/Steffo99/royalnet-pack-template>`_
 and clone it to your workspace.
 
-After cloning the template, run ``poetry install`` to install the dependencies for the pack, creating the ``poetry.lock`` file.
+After cloning the template, run ``poetry install`` to create a virtualenv and install the dependencies for the pack in it.
 
 pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,9 +102,21 @@ As the Pack is actually a Python package, you can use ``poetry`` to add new depe
 
 Use ``poetry add packagename`` to add and install a new dependency from the PyPI.
 
+Updating the dependencies
+------------------------------------
+
+You can update all your dependencies by using: ``poetry update``.
+
+The README.md file
+------------------------------------
+
+The README.md file is the first thing that users of your pack will see!
+
+It's recommended to describe accurately how to install and configure the pack, so other users will be able to use it too!
+
 Publishing the pack
 ------------------------------------
 
 To publish your Pack on the PyPI, run ``poetry publish --build``.
 
-Poetry will build your Pack and upload it to the PyPI for you.
+Poetry will build your Pack and upload it to the PyPI for you!
