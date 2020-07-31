@@ -1,3 +1,5 @@
+.. currentmodule:: royalnet
+
 Creating a new Pack
 ====================================
 
@@ -35,7 +37,7 @@ examplepack
 
 The ``examplepack`` folder contains the source code of your pack, and should be renamed to the name you set in the ``pyproject.toml`` file.
 
-It should contain a ``version.py`` file and six folders: ::
+It should contain six folders: ::
 
     examplepack
     ├── commands
@@ -43,19 +45,7 @@ It should contain a ``version.py`` file and six folders: ::
     ├── stars
     ├── tables
     ├── types
-    ├── utils
-    └── version.py
-
-version.py
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``version.py`` file contains the version number of your pack.
-
-If you changed the ``version`` field in the ``pyproject.toml`` file, change the value of ``semantic`` in ``version.py`` to the same value.
-
-Remember to use `semantic versioning <https://semver.org/>`_! ::
-
-    semantic = "1.0.0"
+    └── utils
 
 The commands folder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,13 +98,13 @@ However, its files are **forbidden from importing anything else** from the rest 
 Adding new dependencies to the Pack
 ------------------------------------
 
-As the Pack is actually a Python package, you can use ``poetry`` (or ``pip``) to add new dependencies!
+As the Pack is actually a Python package, you can use ``poetry`` to add new dependencies!
 
 Use ``poetry add packagename`` to add and install a new dependency from the PyPI.
 
 Publishing the pack
 ------------------------------------
 
-To publish your Pack on the PyPI, run ``poetry build``, then ``poetry publish``.
+To publish your Pack on the PyPI, run ``poetry publish --build``.
 
 Poetry will build your Pack and upload it to the PyPI for you.
