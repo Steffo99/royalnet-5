@@ -14,15 +14,15 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from royalnet import __version__ as royalnet_version
+import royalnet
 
 # -- Project information -----------------------------------------------------
 
 project = 'Royalnet'
 copyright = '2019, Stefano Pigozzi'
 author = 'Stefano Pigozzi'
-version = royalnet_version
-release = royalnet_version
+version = royalnet.__version__
+release = royalnet.__version__
 
 # -- General configuration ---------------------------------------------------
 
