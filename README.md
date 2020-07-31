@@ -20,12 +20,6 @@ Commands using the Royalnet Serf API share their code between chat platforms: ea
 
 More can easily be added by creating a new serf!
 
-### [Bard](royalnet/bard)
-
-The Bard module allows Royalnet services to safely download and convert video files through [youtube-dl](https://youtube-dl.org/) and [ffmpeg](https://ffmpeg.org/).
-
-It is mainly used to playback music on Discord Channels.
-
 ### [Alchemy](royalnet/alchemy)
 
 The _Alchemy_ module allows all Royalnet services to use a **PostgreSQL database** with a [SQLAlchemy](https://www.sqlalchemy.org/) interface.
@@ -43,6 +37,12 @@ Connections between different hosts are possible too, even if they currently are
 ### [Constellation](royalnet/constellation)
 
 The Constellation service is a [Starlette](https://www.starlette.io )-based webserver that can supply dynamic pages ("_stars_") while being connected to the other parts of Royalnet through the Herald.
+
+### _Deprecated:_ [Bard](royalnet/bard)
+
+The Bard module allows Royalnet services to safely download and convert video files through [youtube-dl](https://youtube-dl.org/) and [ffmpeg](https://ffmpeg.org/).
+
+It is mainly used to playback music on Discord Channels.
 
 #### APIs
 
