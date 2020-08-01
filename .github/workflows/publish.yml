@@ -1,0 +1,20 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+    - name: Build and publish the package
+      uses: abatilo/actions-poetry@v1.5.0
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
+      with:
+        python_version: 3.8
+        poetry_version: 1.0
+        args: publish --build
