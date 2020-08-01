@@ -76,6 +76,25 @@ command to the ``available_commands`` list: ::
     # Don't change this, it should automatically generate __all__
     __all__ = [command.__name__ for command in available_commands]
 
+Formatting command replies
+------------------------------------
+
+You can use a subset of [BBCode](https://en.wikipedia.org/wiki/BBCode) to format messages sent with :meth:`CommandData.reply`: ::
+
+    async def run(self, args: rc.CommandArgs, data: rc.CommandData):
+        await data.reply("[b]Bold of you to assume that my code has no bugs.[/b]")
+
+Available tags
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here's a list of all tags that can be used:
+
+- ``[b]bold[/b]``
+- ``[i]italic[/i]``
+- ``[c]code[/c]``
+- ``[p]multiline \n code[/p]``
+- ``[url=https://google.com]inline link[/url]`` (will be rendered differently on every platform)
+
 Command arguments
 ------------------------------------
 
@@ -96,10 +115,15 @@ ones. ::
 
         description = "Send a spaghetti emoji in the chat."
 
-        syntax = "(requestedpasta)"
+        syntax = "{first_pasta} [second_pasta]"
 
         async def run(self, args: rc.CommandArgs, data: rc.CommandData):
-            await data.reply(f"🍝 Here's your {args[0]}!")
+            first_pasta = args[0]
+            second_pasta = args.optional(1)
+            if second_pasta is None:
+                await data.reply(f"🍝 Here's your {first_pasta}!")
+            else:
+                await data.reply(f"🍝 Here's your {first_pasta} and your {second_pasta}!")
 
 
 Direct access
@@ -192,13 +216,13 @@ There are some subclasses of :exc:`.CommandError` that can be used for some more
 
 :exc:`.InvalidInputError`
     The arguments the user passed to the command by the user are invalid.
-    Displays the command syntax in the error message.
+    *Additionally displays the command syntax in the error message.*
 
 :exc:`.UnsupportedError`
     The command is not supported on the interface it is being called.
 
 :exc:`.ConfigurationError`
-    The ``config.toml`` file was misconfigured (a value is missing or invalid).
+    A value is missing or invalid in the ``config.toml`` section of your pack.
 
 :exc:`.ExternalError`
     An external API the command depends on is unavailable or returned an error.
@@ -262,10 +286,31 @@ to True: ::
         else:
             await data.reply("✅ The message was deleted!")
 
-Using the database
+Sharing data between multiple calls
 ------------------------------------
 
-Bots can be connected to a PostgreSQL database through a special SQLAlchemy interface called
+The :class:`Command` class is shared between multiple command calls: if you need to store some data, you may store it as a protected/private field of your command class: ::
+
+    class SpaghettiCommand(rc.Command):
+        name = "spaghetti"
+
+        description = "Send a spaghetti emoji in the chat."
+
+        syntax = "(requestedpasta)"
+
+        __total_spaghetti = 0
+
+        async def run(self, args: rc.CommandArgs, data: rc.CommandData):
+            self.__total_spaghetti += 1
+            await data.reply(f"🍝 Here's your {args[0]}!\n"
+                             f"[i]Spaghetti have been served {self.__total_spaghetti} times.[/i]")
+
+Values stored in this way persist **only until the bot is restarted**, and **won't be shared between different serfs**; if you need persistent values, it is recommended to use a database through the Alchemy service.
+
+Using the Alchemy
+------------------------------------
+
+Royalnet can be connected to a PostgreSQL database through a special SQLAlchemy interface called
 :class:`royalnet.alchemy.Alchemy`.
 
 If the connection is established, the ``self.alchemy`` and ``data.session`` fields will be
@@ -344,7 +389,19 @@ You can read more about sqlalchemy at their `website <https://www.sqlalchemy.org
 Calling Events
 ------------------------------------
 
-This section is not documented yet.
+You can **call an event** from inside a command, and receive its return value.
+
+This may be used for example to get data from a different platform, such as getting the users online in a specific Discord server.
+
+You can call an event with the :meth:`CommandInterface.call_herald_event` method: ::
+
+    result = await self.interface.call_herald_event("event_name")
+
+You can also pass parameters to the called event: ::
+
+    result = await self.interface.call_herald_event("event_name", ..., kwarg=..., *..., **...)
+
+Errors raised by the event will also be raised by the :meth:`CommandInterface.call_herald_event` method as one of the exceptions described in the :ref:`Raising errors` section.
 
 Displaying Keyboards
 ------------------------------------
