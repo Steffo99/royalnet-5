@@ -14,5 +14,5 @@ Welcome to the documentation of Royalnet!
 Some useful links
 ------------------------------------
 
-* `Royalnet on GitHub <https://github.com/royal-games/royalnet>`_
+* `Royalnet on GitHub <https://github.com/Steffo99/royalnet>`_
 * :ref:`genindex`
