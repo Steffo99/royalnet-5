@@ -2,9 +2,9 @@ from typing import *
 import royalnet
 import royalnet.commands as rc
 import royalnet.utils as ru
-import royalnet.serf.telegram
-import royalnet.serf.discord
-import royalnet.serf.matrix
+import royalnet.serf.telegram as rst
+import royalnet.serf.discord as rsd
+import royalnet.serf.matrix as rsm
 from ..tables.telegram import Telegram
 from ..tables.discord import Discord
 
@@ -30,7 +30,7 @@ class RoyalnetsyncCommand(rc.Command):
         if not successful:
             raise rc.InvalidInputError(f"Invalid password!")
 
-        if isinstance(self.serf, royalnet.serf.telegram.TelegramSerf):
+        if isinstance(self.serf, rst.TelegramSerf):
             import telegram
             message: telegram.Message = data.message
             from_user: telegram.User = message.from_user
@@ -56,7 +56,7 @@ class RoyalnetsyncCommand(rc.Command):
             await data.session_commit()
             await data.reply(f"↔️ Account {tg_user} synced to {author}!")
 
-        elif isinstance(self.serf, royalnet.serf.discord.DiscordSerf):
+        elif isinstance(self.serf, rsd.DiscordSerf):
             import discord
             message: discord.Message = data.message
             author: discord.User = message.author
@@ -82,7 +82,7 @@ class RoyalnetsyncCommand(rc.Command):
             await data.session_commit()
             await data.reply(f"↔️ Account {ds_user} synced to {author}!")
 
-        elif isinstance(self.serf, royalnet.serf.matrix.MatrixSerf):
+        elif isinstance(self.serf, rsm.MatrixSerf):
             raise rc.UnsupportedError(f"{self} hasn't been implemented for Matrix yet")
 
         else:
