@@ -1,17 +1,19 @@
+from typing import *
 import contextlib
 import logging
 import asyncio as aio
 import uuid
-from typing import *
-import royalnet.commands as rc
-import royalnet.utils as ru
-import royalnet.backpack.tables as rbt
-from .escape import escape
-from ..serf import Serf
-import io
 import telegram
 import urllib3
 from telegram.utils.request import Request as TRequest
+from dataclasses import dataclass
+
+import royalnet.commands as rc
+import royalnet.utils as ru
+import royalnet.backpack.tables as rbt
+
+from .escape import escape
+from ..serf import Serf
 
 try:
     from sqlalchemy.orm.session import Session
@@ -19,6 +21,12 @@ except ImportError:
     Session = None
 
 log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class TelegramKeyCallback:
+    command: rc.Command
+    key: rc.KeyboardKey
 
 
 class TelegramSerf(Serf):
@@ -55,7 +63,7 @@ class TelegramSerf(Serf):
         self.update_offset: int = -100
         """The current `update offset <https://core.telegram.org/bots/api#getupdates>`_."""
 
-        self.key_callbacks: Dict[str, rc.KeyboardKey] = {}
+        self.key_callbacks: Dict[str, TelegramKeyCallback] = {}
 
         self.MessageData: Type[rc.CommandData] = self.message_data_factory()
         self.CallbackData: Type[rc.CommandData] = self.callback_data_factory()
@@ -106,7 +114,7 @@ class TelegramSerf(Serf):
                                     parse_mode="HTML",
                                     disable_web_page_preview=True)
 
-            async def reply_image(data, image: io.IOBase, caption: Optional[str] = None) -> None:
+            async def reply_image(data, image: BinaryIO, caption: Optional[str] = None) -> None:
                 await self.api_call(data.message.chat.send_photo,
                                     photo=image,
                                     caption=escape(caption) if caption is not None else None,
@@ -138,7 +146,7 @@ class TelegramSerf(Serf):
                 for key in keys:
                     uid: str = str(uuid.uuid4())
                     key_uids.append(uid)
-                    self.register_keyboard_key(uid, key)
+                    data.register_keyboard_key(uid, key)
                     tg_button: telegram.InlineKeyboardButton = telegram.InlineKeyboardButton(key.text,
                                                                                              callback_data=uid)
                     tg_row: List[telegram.InlineKeyboardButton] = [tg_button]
@@ -152,7 +160,13 @@ class TelegramSerf(Serf):
                 yield message
                 await self.api_call(message.edit_reply_markup, reply_markup=None)
                 for uid in key_uids:
-                    self.unregister_keyboard_key(uid)
+                    data.unregister_keyboard_key(uid)
+
+            def register_keyboard_key(data, identifier: str, key: rc.KeyboardKey):
+                self.key_callbacks[identifier] = TelegramKeyCallback(key=key, command=data.command)
+
+            def unregister_keyboard_key(data, identifier: str):
+                del self.key_callbacks[identifier]
 
         return TelegramMessageData
 
@@ -238,6 +252,7 @@ class TelegramSerf(Serf):
         # Send a typing notification
         await self.api_call(message.chat.send_action, telegram.ChatAction.TYPING)
         # Prepare data
+        # noinspection PyArgumentList
         data = self.MessageData(command=command, message=message)
         # Call the command
         await self.call(command, data, parameters)
@@ -247,15 +262,10 @@ class TelegramSerf(Serf):
         if uid not in self.key_callbacks:
             await self.api_call(cbq.answer, text="⚠️ This keyboard has expired.", show_alert=True)
             return
-        key: rc.KeyboardKey = self.key_callbacks[uid]
-        data: rc.CommandData = self.CallbackData(command=command, cbq=cbq)
-        await self.press(key, data)
-
-    def register_keyboard_key(self, identifier: str, key: rc.KeyboardKey):
-        self.key_callbacks[identifier] = key
-
-    def unregister_keyboard_key(self, identifier: str):
-        del self.key_callbacks[identifier]
+        cbd = self.key_callbacks[uid]
+        # noinspection PyArgumentList
+        data: rc.CommandData = self.CallbackData(command=cbd.command, cbq=cbq)
+        await self.press(cbd.key, data)
 
     async def run(self):
         await super().run()
