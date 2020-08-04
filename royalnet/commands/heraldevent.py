@@ -11,8 +11,8 @@ class HeraldEvent:
     name = NotImplemented
     """The event_name that will trigger this event."""
 
-    def __init__(self, serf, config):
-        self.serf = serf
+    def __init__(self, serf: "Serf", config):
+        self.serf: "Serf" = serf
         self.config = config
 
     @property
