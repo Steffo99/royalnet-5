@@ -1,6 +1,5 @@
 import asyncio as aio
 import logging
-import warnings
 import io
 import sys
 from typing import *
@@ -19,6 +18,7 @@ log = logging.getLogger(__name__)
 class DiscordSerf(Serf):
     """A :class:`Serf` that connects to `Discord <https://discordapp.com/>`_ as a bot."""
     interface_name = "discord"
+    prefix = "!"
 
     _identity_table = rbt.Discord
     _identity_column = "discord_id"
@@ -55,26 +55,14 @@ class DiscordSerf(Serf):
 
         self.Data: Type[rc.CommandData] = self.data_factory()
 
-    def interface_factory(self) -> Type[rc.CommandInterface]:
-        # noinspection PyPep8Naming
-        GenericInterface = super().interface_factory()
-
-        # noinspection PyMethodParameters,PyAbstractClass
-        class DiscordInterface(GenericInterface):
-            name = self.interface_name
-            prefix = "!"
-
-        return DiscordInterface
-
     def data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
         class DiscordData(rc.CommandData):
             def __init__(data,
-                         interface: rc.CommandInterface,
-                         loop: aio.AbstractEventLoop,
+                         command: rc.Command,
                          message: "discord.Message"):
-                super().__init__(interface=interface, loop=loop)
-                data.message = message
+                super().__init__(command=command)
+                data.message: "discord.Message" = message
 
             async def reply(data, text: str):
                 await data.message.channel.send(escape(text))
@@ -130,7 +118,8 @@ class DiscordSerf(Serf):
             else:
                 session = None
             # Prepare data
-            data = self.Data(interface=command.interface, loop=self.loop, message=message)
+            # noinspection PyArgumentList
+            data = self.Data(command=command, message=message)
             # Call the command
             await self.call(command, data, parameters)
             # Close the alchemy session
@@ -141,6 +130,7 @@ class DiscordSerf(Serf):
         """Create a custom class inheriting from :py:class:`discord.Client`."""
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
+            # noinspection PyMethodMayBeStatic
             async def on_message(cli, message: "discord.Message") -> None:
                 """Handle messages received by passing them to the handle_message method of the bot."""
                 # TODO: keep reference to these tasks somewhere
@@ -151,6 +141,7 @@ class DiscordSerf(Serf):
                 log.debug("Discord client is ready!")
                 await cli.change_presence(status=discord.Status.online, activity=None)
 
+            # noinspection PyMethodMayBeStatic
             async def on_resume(cli) -> None:
                 log.debug("Discord client resumed connection.")
 
