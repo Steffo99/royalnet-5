@@ -3,6 +3,9 @@ from typing import *
 from .commandargs import CommandArgs
 from .commanddata import CommandData
 
+if TYPE_CHECKING:
+    from ..serf import Serf
+
 
 class Command(metaclass=abc.ABCMeta):
     name: str = NotImplemented
@@ -24,8 +27,8 @@ class Command(metaclass=abc.ABCMeta):
     """The syntax of the command, to be displayed when a :py:exc:`InvalidInputError` is raised,
      in the format ``(required_arg) [optional_arg]``."""
 
-    def __init__(self, serf, config):
-        self.serf = serf
+    def __init__(self, serf: "Serf", config):
+        self.serf: "Serf" = serf
         self.config = config
 
     def __str__(self):

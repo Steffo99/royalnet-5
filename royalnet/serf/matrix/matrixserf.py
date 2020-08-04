@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 class MatrixSerf(Serf):
     """A serf that connects to `Matrix <https://matrix.org/>`_ as an user."""
     interface_name = "matrix"
+    prefix = "!"
 
     _identity_table = rb.tables.Matrix
     _identity_column = "matrix_id"
@@ -47,26 +48,14 @@ class MatrixSerf(Serf):
 
         self.Data: Type[rc.CommandData] = self.data_factory()
 
-    def interface_factory(self) -> Type[rc.CommandInterface]:
-        # noinspection PyPep8Naming
-        GenericInterface = super().interface_factory()
-
-        # noinspection PyMethodParameters,PyAbstractClass
-        class DiscordInterface(GenericInterface):
-            name = self.interface_name
-            prefix = "!"
-
-        return DiscordInterface
-
     def data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters,PyAbstractClass
         class MatrixData(rc.CommandData):
             def __init__(data,
-                         interface: rc.CommandInterface,
-                         loop: aio.AbstractEventLoop,
+                         command: rc.Command,
                          room: nio.MatrixRoom,
                          event: nio.Event):
-                super().__init__(interface=interface, loop=loop)
+                super().__init__(command=command)
                 data.room: nio.MatrixRoom = room
                 data.event: nio.Event = event
 
@@ -118,7 +107,8 @@ class MatrixSerf(Serf):
         else:
             session = None
         # Prepare data
-        data = self.Data(interface=command.interface, loop=self.loop, room=room, event=event)
+        # noinspection PyArgumentList
+        data = self.Data(command=command, room=room, event=event)
         # Call the command
         await self.call(command, data, parameters)
         # Close the alchemy session
