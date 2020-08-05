@@ -1,13 +1,15 @@
-from typing import *
-import logging
-import datetime
 import asyncio as aio
+import datetime
+import logging
+from typing import *
+
+import nio
+
 import royalnet.backpack as rb
 import royalnet.commands as rc
 import royalnet.utils as ru
-from ..serf import Serf
 from .escape import escape
-import nio
+from ..serf import Serf
 
 log = logging.getLogger(__name__)
 

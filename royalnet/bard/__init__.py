@@ -15,9 +15,9 @@ try:
 except ImportError:
     raise ImportError("The `bard` extra is not installed. Please install it with `pip install royalnet[bard]`.")
 
-from .ytdlinfo import YtdlInfo
-from .ytdlfile import YtdlFile
 from .errors import BardError, YtdlError, NotFoundError, MultipleFilesError
+from .ytdlfile import YtdlFile
+from .ytdlinfo import YtdlInfo
 
 __all__ = [
     "YtdlInfo",

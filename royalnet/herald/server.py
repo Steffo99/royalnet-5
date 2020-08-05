@@ -1,20 +1,22 @@
-from typing import *
 import asyncio as aio
-import re
 import datetime
-import uuid
 import logging
-import websockets
-import royalnet.utils as ru
-from .package import Package
-from .config import Config
+import re
+import uuid
+from typing import *
 
+import websockets
+
+import royalnet.utils as ru
+from .config import Config
+from .package import Package
 
 log = logging.getLogger(__name__)
 
 
 class ConnectedClient:
     """The :py:class:`Server`-side representation of a connected :py:class:`Link`."""
+
     def __init__(self, socket: "websockets.WebSocketServerProtocol"):
         self.socket: "websockets.WebSocketServerProtocol" = socket
         self.nid: Optional[str] = None

@@ -2,6 +2,7 @@ class CommandError(Exception):
     """Something went wrong during the execution of this command.
 
     Display an error message to the user, explaining what went wrong."""
+
     def __init__(self, message=""):
         self.message = message
 

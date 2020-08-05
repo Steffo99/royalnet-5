@@ -1,11 +1,11 @@
 import json
-from typing import *
-from royalnet.constellation import PageStar
-from royalnet.constellation.api import ApiStar
+
 from starlette.requests import Request
 from starlette.responses import Response, HTMLResponse
-import royalnet
 
+import royalnet
+from royalnet.constellation import PageStar
+from royalnet.constellation.api import ApiStar
 
 backtick = "\u0060"
 

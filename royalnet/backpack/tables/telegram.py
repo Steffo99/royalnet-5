@@ -1,10 +1,11 @@
 from sqlalchemy import Column, \
-                       Integer, \
-                       String, \
-                       BigInteger, \
-                       ForeignKey
-from sqlalchemy.orm import relationship
+    Integer, \
+    String, \
+    BigInteger, \
+    ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
+
 # noinspection PyUnresolvedReferences
 from .users import User
 

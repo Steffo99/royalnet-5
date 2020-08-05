@@ -1,10 +1,10 @@
-from typing import *
 import logging
-from .apierrors import MissingParameterError
+from typing import *
+
+import royalnet.utils as ru
 from royalnet.backpack.tables.tokens import Token
 from royalnet.backpack.tables.users import User
 from .apierrors import *
-import royalnet.utils as ru
 
 log = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 # Imports go here!
-from .royalnetversion import RoyalnetversionCommand
-from .royalnetsync import RoyalnetsyncCommand
-from .royalnetroles import RoyalnetrolesCommand
 from .royalnetaliases import RoyalnetaliasesCommand
+from .royalnetroles import RoyalnetrolesCommand
+from .royalnetsync import RoyalnetsyncCommand
+from .royalnetversion import RoyalnetversionCommand
 
 # Enter the commands of your Pack here!
 available_commands = [

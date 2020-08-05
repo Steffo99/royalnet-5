@@ -1,7 +1,9 @@
-import click
-import multiprocessing
-import toml
 import logging
+import multiprocessing
+
+import click
+import toml
+
 import royalnet.utils as ru
 
 try:
@@ -33,7 +35,6 @@ try:
     import coloredlogs
 except ImportError:
     coloredlogs = None
-
 
 log = logging.getLogger(__name__)
 

@@ -1,16 +1,17 @@
 import logging
 from typing import Optional, AsyncGenerator, Tuple, Any, Dict
+
 try:
     import discord
 except ImportError:
     discord = None
-
 
 log = logging.getLogger(__name__)
 
 
 class Playable:
     """An abstract class representing something that can be played back in a :class:`VoicePlayer`."""
+
     def __init__(self):
         """Create a :class:`Playable`.
 

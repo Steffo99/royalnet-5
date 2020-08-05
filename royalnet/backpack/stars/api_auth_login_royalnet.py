@@ -1,9 +1,10 @@
 import datetime
-import royalnet.utils as ru
+
 import royalnet.constellation.api as rca
 import royalnet.constellation.api.apierrors as rcae
-from ..tables.users import User
+import royalnet.utils as ru
 from ..tables.tokens import Token
+from ..tables.users import User
 
 
 class ApiAuthLoginRoyalnetStar(rca.ApiStar):

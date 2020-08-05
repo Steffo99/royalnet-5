@@ -14,8 +14,8 @@ then run: ::
 """
 
 from .alchemy import Alchemy
-from .table_dfs import table_dfs
 from .errors import *
+from .table_dfs import table_dfs
 
 __all__ = [
     "Alchemy",

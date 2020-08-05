@@ -1,11 +1,11 @@
-from typing import *
 import contextlib
-import logging
-import asyncio as aio
-import royalnet.utils as ru
 import io
-from .errors import UnsupportedError
+import logging
+from typing import *
+
+import royalnet.utils as ru
 from royalnet.backpack.tables.users import User
+from .errors import UnsupportedError
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey

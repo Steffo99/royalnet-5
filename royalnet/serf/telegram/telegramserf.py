@@ -1,17 +1,17 @@
-from typing import *
+import asyncio as aio
 import contextlib
 import logging
-import asyncio as aio
 import uuid
+from dataclasses import dataclass
+from typing import *
+
 import telegram
 import urllib3
 from telegram.utils.request import Request as TRequest
-from dataclasses import dataclass
 
+import royalnet.backpack.tables as rbt
 import royalnet.commands as rc
 import royalnet.utils as ru
-import royalnet.backpack.tables as rbt
-
 from .escape import escape
 from ..serf import Serf
 

@@ -1,18 +1,19 @@
-from typing import *
 import asyncio as aio
-import logging
 import importlib
-import uvicorn
+import logging
+from typing import *
+
 import starlette.applications
 import starlette.middleware
 import starlette.middleware.cors
+import uvicorn
+
 import royalnet.alchemy as ra
+import royalnet.commands as rc
 import royalnet.herald as rh
 import royalnet.utils as ru
-import royalnet.commands as rc
 from .pagestar import PageStar
 from ..utils import init_logging
-
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class Constellation:
     It runs multiple :class:`Star`, which represent the routes of the website.
 
     It also handles the :class:`Alchemy` connection, and Herald connections too."""
+
     def __init__(self,
                  alchemy_cfg: Dict[str, Any],
                  herald_cfg: Dict[str, Any],

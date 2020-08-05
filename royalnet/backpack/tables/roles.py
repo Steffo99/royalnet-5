@@ -1,9 +1,9 @@
 from sqlalchemy import Column, \
-                       Integer, \
-                       String, \
-                       ForeignKey
-from sqlalchemy.orm import relationship
+    Integer, \
+    String, \
+    ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
 
 
 class Role:

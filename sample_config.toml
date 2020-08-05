@@ -121,7 +121,7 @@ dsn = "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@sentry.io/1111111"
 # The Python package name of the Packs you want to be usable in Royalnet
 # Please note that the `royalnet.backpack` Pack should always be available!
 active = [
-    "royalnet.backpack",  # DO NOT REMOVE THIS OR THINGS WILL BREAK
+    "royalnet.backpack", # DO NOT REMOVE THIS OR THINGS WILL BREAK
     # "yourpack",
 
 ]

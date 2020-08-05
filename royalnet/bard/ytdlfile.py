@@ -1,15 +1,16 @@
-import os
 import logging
+import os
 import re
-import eyed3
+from asyncio import AbstractEventLoop, get_event_loop
 from contextlib import asynccontextmanager
 from typing import *
-from royalnet.utils import *
-from asyncio import AbstractEventLoop, get_event_loop
-from .ytdlinfo import YtdlInfo
-from .errors import NotFoundError, MultipleFilesError
+
+import eyed3
 from youtube_dl import YoutubeDL
 
+from royalnet.utils import *
+from .errors import NotFoundError, MultipleFilesError
+from .ytdlinfo import YtdlInfo
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ class YtdlFile:
 
     async def download_file(self) -> None:
         """Download the file."""
+
         def download():
             """Download function block to be asyncified."""
             with YoutubeDL(self.ytdl_args) as ytdl:

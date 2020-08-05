@@ -1,10 +1,12 @@
 import asyncio
-import threading
 import logging
+import threading
 from typing import Optional
+
 from .errors import *
 from .playable import Playable
 from ...utils import sentry_exc
+
 try:
     import discord
 except ImportError:

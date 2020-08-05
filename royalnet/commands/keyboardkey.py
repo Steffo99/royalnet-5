@@ -1,4 +1,5 @@
 from typing import *
+
 from .commanddata import CommandData
 
 

@@ -15,8 +15,8 @@ You can install them with: ::
 """
 
 from .constellation import Constellation
-from .star import Star
 from .pagestar import PageStar
+from .star import Star
 
 __all__ = [
     "Constellation",

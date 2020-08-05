@@ -1,13 +1,13 @@
+import logging
 from asyncio import Event
 from contextlib import asynccontextmanager
-import logging
-
 
 log = logging.getLogger(__name__)
 
 
 class MultiLock:
     """A lock that can allow both simultaneous access and exclusive access to a resource."""
+
     def __init__(self):
         self._counter: int = 0
         self._normal_event: Event = Event()

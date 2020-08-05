@@ -1,5 +1,5 @@
-from typing import *
 import royalnet.utils as ru
+
 try:
     from starlette.responses import JSONResponse
 except ImportError:

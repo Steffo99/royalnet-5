@@ -1,9 +1,10 @@
+import functools
 import logging
 import sys
 import traceback
 from typing import *
+
 import royalnet
-import functools
 
 try:
     import sentry_sdk
@@ -15,7 +16,6 @@ except ImportError:
     AioHttpIntegration = None
     SqlalchemyIntegration = None
     LoggingIntegration = None
-
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,9 @@ def sentry_wrap(level: str = "ERROR"):
             except Exception as exc:
                 sentry_exc(exc=exc, level=level)
                 raise
+
         return new_func
+
     return decorator
 
 
@@ -70,5 +72,7 @@ def sentry_async_wrap(level: str = "ERROR"):
             except Exception as exc:
                 sentry_exc(exc=exc, level=level)
                 raise
+
         return new_func
+
     return decorator

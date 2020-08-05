@@ -8,8 +8,8 @@ Install it with: ::
 
 """
 
-from .matrixserf import MatrixSerf
 from .escape import escape
+from .matrixserf import MatrixSerf
 
 __all__ = [
     "MatrixSerf",

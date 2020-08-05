@@ -1,7 +1,7 @@
 """The subpackage providing all Serf implementations."""
 
-from .serf import Serf
 from .errors import SerfError
+from .serf import Serf
 
 __all__ = [
     "Serf",

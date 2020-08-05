@@ -1,6 +1,6 @@
-import royalnet.utils as ru
 import royalnet.backpack.tables as rbt
 import royalnet.constellation.api as rca
+import royalnet.utils as ru
 
 
 class ApiUserGetStar(rca.ApiStar):

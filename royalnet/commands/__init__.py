@@ -1,13 +1,13 @@
 """The subpackage providing all classes related to Royalnet commands."""
 
 from .command import Command
-from .commanddata import CommandData
 from .commandargs import CommandArgs
-from .heraldevent import HeraldEvent
+from .commanddata import CommandData
+from .configdict import ConfigDict
 from .errors import \
     CommandError, InvalidInputError, UnsupportedError, ConfigurationError, ExternalError, UserError, ProgramError
+from .heraldevent import HeraldEvent
 from .keyboardkey import KeyboardKey
-from .configdict import ConfigDict
 
 __all__ = [
     "Command",

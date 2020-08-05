@@ -1,7 +1,7 @@
-from typing import *
 import datetime
-import royalnet.utils as ru
+
 import royalnet.constellation.api as rca
+import royalnet.utils as ru
 from ..tables.tokens import Token
 
 

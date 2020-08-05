@@ -1,16 +1,17 @@
-from typing import *
 import asyncio as aio
-import uuid
 import functools
 import logging
+import uuid
+from typing import *
+
 import websockets
+
+from .broadcast import Broadcast
+from .config import Config
+from .errors import ConnectionClosedError, InvalidServerResponseError
 from .package import Package
 from .request import Request
 from .response import Response, ResponseSuccess, ResponseFailure
-from .broadcast import Broadcast
-from .errors import ConnectionClosedError, InvalidServerResponseError
-from .config import Config
-
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ def requires_connection(func):
     async def new_func(self, *args, **kwargs):
         await self.connect_event.wait()
         return await func(self, *args, **kwargs)
+
     return new_func
 
 
@@ -47,6 +49,7 @@ def requires_identification(func):
     async def new_func(self, *args, **kwargs):
         await self.identify_event.wait()
         return await func(self, *args, **kwargs)
+
     return new_func
 
 

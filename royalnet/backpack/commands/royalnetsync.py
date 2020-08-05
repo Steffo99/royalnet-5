@@ -1,12 +1,10 @@
-from typing import *
-import royalnet
 import royalnet.commands as rc
-import royalnet.utils as ru
-import royalnet.serf.telegram as rst
 import royalnet.serf.discord as rsd
 import royalnet.serf.matrix as rsm
-from ..tables.telegram import Telegram
+import royalnet.serf.telegram as rst
+import royalnet.utils as ru
 from ..tables.discord import Discord
+from ..tables.telegram import Telegram
 
 
 class RoyalnetsyncCommand(rc.Command):

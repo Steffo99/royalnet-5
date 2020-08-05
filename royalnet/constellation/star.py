@@ -1,4 +1,5 @@
 from typing import *
+
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -13,6 +14,7 @@ class Star:
     """A Star is a class representing a part of the website.
 
     It shouldn't be used directly: please use :class:`PageStar` and :class:`ExceptionStar` instead!"""
+
     def __init__(self, constellation: "Constellation", config: "ConfigDict"):
         self.constellation: "Constellation" = constellation
         self.config: "ConfigDict" = config

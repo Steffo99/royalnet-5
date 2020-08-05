@@ -10,11 +10,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v2
-    - name: Install Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-    - name: Check all .py files
-      run: python -m compileall royalnet
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Install Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Check all .py files
+        run: python -m compileall royalnet

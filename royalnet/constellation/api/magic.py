@@ -1,4 +1,3 @@
-from typing import *
 import functools
 
 
@@ -12,4 +11,5 @@ def magic(func):
     @functools.wraps(func)
     async def f(*args, **kwargs):
         return await func(*args, **kwargs)
+
     return f

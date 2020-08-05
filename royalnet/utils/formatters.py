@@ -1,5 +1,5 @@
-import typing
 import re
+import typing
 
 
 def andformat(coll: typing.Collection[str], middle=", ", final=" and ") -> str:

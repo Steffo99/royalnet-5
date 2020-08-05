@@ -1,4 +1,3 @@
-from typing import *
 from .star import Star
 
 

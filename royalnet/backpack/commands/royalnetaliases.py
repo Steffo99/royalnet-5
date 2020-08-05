@@ -1,4 +1,3 @@
-from typing import *
 import royalnet.commands as rc
 from ..tables import User
 

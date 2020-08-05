@@ -1,5 +1,3 @@
-from .apistar import ApiStar
-from .jsonapi import api_response, api_success, api_error
 from .apidata import ApiData
 from .apierrors import \
     ApiError, \
@@ -11,8 +9,9 @@ from .apierrors import \
     InvalidParameterError, \
     MethodNotImplementedError, \
     UnsupportedError
+from .apistar import ApiStar
+from .jsonapi import api_response, api_success, api_error
 from .magic import magic
-
 
 __all__ = [
     "ApiStar",

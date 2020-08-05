@@ -1,5 +1,5 @@
-from typing import *
 import logging
+from typing import *
 
 try:
     import coloredlogs

@@ -8,8 +8,8 @@ You can install them with: ::
 
 """
 
-from .ytdldiscord import YtdlDiscord
 from .fileaudiosource import FileAudioSource
+from .ytdldiscord import YtdlDiscord
 
 __all__ = [
     "YtdlDiscord",

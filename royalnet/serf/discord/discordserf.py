@@ -1,16 +1,17 @@
 import asyncio as aio
-import logging
 import io
+import logging
 import sys
 from typing import *
-import royalnet.backpack.tables as rbt
-import royalnet.commands as rc
-from royalnet.utils import asyncify, sentry_exc
-from royalnet.serf import Serf
-from .escape import escape
-from .voiceplayer import VoicePlayer
+
 import discord
 
+import royalnet.backpack.tables as rbt
+import royalnet.commands as rc
+from royalnet.serf import Serf
+from royalnet.utils import asyncify, sentry_exc
+from .escape import escape
+from .voiceplayer import VoicePlayer
 
 log = logging.getLogger(__name__)
 
@@ -128,6 +129,7 @@ class DiscordSerf(Serf):
 
     def client_factory(self) -> Type["discord.Client"]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""
+
         # noinspection PyMethodParameters
         class DiscordClient(discord.Client):
             # noinspection PyMethodMayBeStatic

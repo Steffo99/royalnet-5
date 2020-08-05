@@ -1,9 +1,11 @@
+import re
+
 from sqlalchemy import *
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
+
 # noinspection PyUnresolvedReferences
 from .users import User
-import re
 
 
 class Matrix:

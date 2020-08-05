@@ -1,14 +1,16 @@
 from typing import *
+
 import bcrypt
-import royalnet.utils as ru
 from sqlalchemy import Column, \
-                       Integer, \
-                       String, \
-                       LargeBinary, \
-                       inspect
+    Integer, \
+    String, \
+    LargeBinary, \
+    inspect
 from sqlalchemy.ext.declarative import declared_attr
-from .roles import Role
+
+import royalnet.utils as ru
 from .aliases import Alias
+from .roles import Role
 from ...utils import JSON, asyncify
 
 

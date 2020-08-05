@@ -1,8 +1,10 @@
-from typing import *
 import datetime
-import royalnet.utils as ru
-import royalnet.constellation.api as rca
+from typing import *
+
 from sqlalchemy import and_
+
+import royalnet.constellation.api as rca
+import royalnet.utils as ru
 from ..tables.tokens import Token
 
 
@@ -36,10 +38,10 @@ class ApiUserPasswd(rca.ApiStar):
             data.session
                 .query(self.alchemy.get(Token))
                 .filter(
-                    and_(
-                        TokenT.user == user,
-                        TokenT.expiration >= datetime.datetime.now()
-                    ))
+                and_(
+                    TokenT.user == user,
+                    TokenT.expiration >= datetime.datetime.now()
+                ))
                 .all
         )
         for t in tokens:

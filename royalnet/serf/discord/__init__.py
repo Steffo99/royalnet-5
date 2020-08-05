@@ -8,8 +8,8 @@ Install it with: ::
 
 """
 
-from .escape import escape
 from .discordserf import DiscordSerf
+from .escape import escape
 from .playable import Playable
 from .voiceplayer import VoicePlayer
 

@@ -1,12 +1,14 @@
-import typing
-import re
-import os
 import logging
-import ffmpeg
-import discord
+import os
+import re
+import typing
 from contextlib import asynccontextmanager
-from royalnet.utils import asyncify, MultiLock
+
+import discord
+import ffmpeg
+
 from royalnet.bard import YtdlInfo, YtdlFile
+from royalnet.utils import asyncify, MultiLock
 from .fileaudiosource import FileAudioSource
 
 log = logging.getLogger(__name__)
@@ -45,9 +47,9 @@ class YtdlDiscord:
                     log.debug(f"Converting to PCM: {self.ytdl_file.filename}")
                     out, err = await asyncify(
                         ffmpeg.input(self.ytdl_file.filename)
-                              .output(destination_filename, format="s16le", ac=2, ar="48000")
-                              .overwrite_output()
-                              .run,
+                            .output(destination_filename, format="s16le", ac=2, ar="48000")
+                            .overwrite_output()
+                            .run,
                         capture_stdout=True,
                         capture_stderr=True,
                     )
@@ -99,7 +101,8 @@ class YtdlDiscord:
         }
         embed = discord.Embed(title=self.info.title,
                               colour=discord.Colour(colors.get(self.info.extractor, 0x4F545C)),
-                              url=self.info.webpage_url if (self.info.webpage_url and self.info.webpage_url.startswith("http")) else discord.embeds.EmptyEmbed)
+                              url=self.info.webpage_url if (self.info.webpage_url and self.info.webpage_url.startswith(
+                                  "http")) else discord.embeds.EmptyEmbed)
         if self.info.thumbnail:
             embed.set_thumbnail(url=self.info.thumbnail)
         if self.info.uploader:
