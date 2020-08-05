@@ -1,7 +1,9 @@
+from abc import ABCMeta
+
 from .star import Star
 
 
-class PageStar(Star):
+class PageStar(Star, metaclass=ABCMeta):
     """A PageStar is a class representing a single route of the website (for example, ``/api/user/get``).
 
     To create a new website route you should create a new class inheriting from this class with a function overriding

@@ -220,7 +220,7 @@ class Constellation:
         for SelectedEvent in events:
             # Initialize the event
             try:
-                event = SelectedEvent(serf=self, config=pack_cfg)
+                event = SelectedEvent(constellation=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")

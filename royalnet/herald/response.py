@@ -47,4 +47,8 @@ class ResponseFailure(Response):
         self.extra_info: Optional[dict] = extra_info
 
     def __repr__(self):
-        return f"{self.__class__.__qualname__}(name={self.name}, description={self.description}, extra_info={self.extra_info})"
+        return f"{self.__class__.__qualname__}(" \
+               f"name={self.name}, " \
+               f"description={self.description}, " \
+               f"extra_info={self.extra_info}" \
+               f")"

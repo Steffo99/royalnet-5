@@ -1,8 +1,9 @@
+from typing import TYPE_CHECKING, Union
 import asyncio as aio
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..serf import Serf
+    from ..constellation import Constellation
 
 
 class HeraldEvent:
@@ -11,19 +12,19 @@ class HeraldEvent:
     name = NotImplemented
     """The event_name that will trigger this event."""
 
-    def __init__(self, serf: "Serf", config):
-        self.serf: "Serf" = serf
+    def __init__(self, parent: Union["Serf", "Constellation"], config):
+        self.parent: Union["Serf", "Constellation"] = parent
         self.config = config
 
     @property
     def alchemy(self):
-        """A shortcut for :attr:`.interface.alchemy`."""
-        return self.serf.alchemy
+        """A shortcut for :attr:`.parent.alchemy`."""
+        return self.parent.alchemy
 
     @property
     def loop(self) -> aio.AbstractEventLoop:
-        """A shortcut for :attr:`.interface.loop`."""
-        return self.serf.loop
+        """A shortcut for :attr:`.parent.loop`."""
+        return self.parent.loop
 
     async def run(self, **kwargs):
         raise NotImplementedError()

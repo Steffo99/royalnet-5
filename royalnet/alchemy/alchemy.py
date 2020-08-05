@@ -2,7 +2,6 @@ from contextlib import contextmanager, asynccontextmanager
 from typing import *
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import sessionmaker
@@ -12,10 +11,14 @@ from sqlalchemy.schema import Table
 from royalnet.alchemy.errors import TableNotFoundError
 from royalnet.utils import asyncify
 
+if TYPE_CHECKING:
+    # noinspection PyProtectedMember
+    from sqlalchemy.engine import Engine
+
 
 class Alchemy:
-    """A wrapper around :mod:`sqlalchemy.orm` that allows the instantiation of multiple engines at once while maintaining
-    a single declarative class for all of them."""
+    """A wrapper around :mod:`sqlalchemy.orm` that allows the instantiation of multiple engines at once while
+    maintaining a single declarative class for all of them."""
 
     def __init__(self, database_uri: str, tables: Set):
         """Create a new :class:`.Alchemy` object.
@@ -28,7 +31,7 @@ class Alchemy:
         if database_uri.startswith("sqlite"):
             raise NotImplementedError("sqlite databases aren't supported, as they can't be used in multithreaded"
                                       " applications")
-        self._engine: Engine = create_engine(database_uri)
+        self._engine: "Engine" = create_engine(database_uri)
         self._Base = declarative_base(bind=self._engine)
         self.Session: sessionmaker = sessionmaker(bind=self._engine)
         self._tables: Dict[str, Table] = {}

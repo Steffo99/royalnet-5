@@ -285,7 +285,8 @@ class Serf(abc.ABC):
         finally:
             await data.session_close()
 
-    async def press(self, key: rc.KeyboardKey, data: rc.CommandData):
+    @staticmethod
+    async def press(key: rc.KeyboardKey, data: rc.CommandData):
         log.info(f"Calling key_callback: {repr(key)}")
         try:
             await key.press(data)

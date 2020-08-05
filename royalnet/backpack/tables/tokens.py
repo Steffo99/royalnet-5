@@ -8,6 +8,7 @@ from sqlalchemy.orm import *
 import royalnet.utils as ru
 
 
+# noinspection PyAttributeOutsideInit
 class Token:
     __tablename__ = "tokens"
 

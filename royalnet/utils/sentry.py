@@ -40,6 +40,7 @@ def sentry_exc(exc: Exception,
         with sentry_sdk.configure_scope() as scope:
             scope.set_level(level.lower())
             sentry_sdk.capture_exception(exc)
+    # noinspection PyUnresolvedReferences,PyProtectedMember
     level_int: int = logging._nameToLevel[level.upper()]
     log.log(level_int, f"Captured {level.capitalize()}: {exc}")
     # If started in debug mode (without -O), raise the exception, allowing you to see its source

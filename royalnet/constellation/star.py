@@ -1,5 +1,6 @@
 from typing import *
 
+import abc
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     import sqlalchemy.orm.session
 
 
-class Star:
+class Star(metaclass=abc.ABCMeta):
     """A Star is a class representing a part of the website.
 
     It shouldn't be used directly: please use :class:`PageStar` and :class:`ExceptionStar` instead!"""
@@ -19,6 +20,7 @@ class Star:
         self.constellation: "Constellation" = constellation
         self.config: "ConfigDict" = config
 
+    @abc.abstractmethod
     async def page(self, request: Request) -> Response:
         """The function generating the :class:`~starlette.Response` to a web :class:`~starlette.Request`.
 
