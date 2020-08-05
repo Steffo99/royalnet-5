@@ -1,10 +1,13 @@
 import abc
+import asyncio as aio
 from typing import *
 from .commandargs import CommandArgs
 from .commanddata import CommandData
 
 if TYPE_CHECKING:
+    from .configdict import ConfigDict
     from ..serf import Serf
+    from ..alchemy import Alchemy
 
 
 class Command(metaclass=abc.ABCMeta):
@@ -27,20 +30,20 @@ class Command(metaclass=abc.ABCMeta):
     """The syntax of the command, to be displayed when a :py:exc:`InvalidInputError` is raised,
      in the format ``(required_arg) [optional_arg]``."""
 
-    def __init__(self, serf: "Serf", config):
+    def __init__(self, serf: "Serf", config: "ConfigDict"):
         self.serf: "Serf" = serf
-        self.config = config
+        self.config: "ConfigDict" = config
 
     def __str__(self):
         return f"[c]{self.serf.prefix}{self.name}[/c]"
 
     @property
-    def alchemy(self):
+    def alchemy(self) -> Alchemy:
         """A shortcut for :attr:`.interface.alchemy`."""
         return self.serf.alchemy
 
     @property
-    def loop(self):
+    def loop(self) -> aio.AbstractEventLoop:
         """A shortcut for :attr:`.interface.loop`."""
         return self.serf.loop
 

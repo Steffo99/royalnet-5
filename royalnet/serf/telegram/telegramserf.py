@@ -39,11 +39,11 @@ class TelegramSerf(Serf):
 
     def __init__(self,
                  loop: aio.AbstractEventLoop,
-                 alchemy_cfg: Dict[str, Any],
-                 herald_cfg: Dict[str, Any],
-                 sentry_cfg: Dict[str, Any],
-                 packs_cfg: Dict[str, Any],
-                 serf_cfg: Dict[str, Any],
+                 alchemy_cfg: rc.ConfigDict,
+                 herald_cfg: rc.ConfigDict,
+                 sentry_cfg: rc.ConfigDict,
+                 packs_cfg: rc.ConfigDict,
+                 serf_cfg: rc.ConfigDict,
                  **_):
         if telegram is None:
             raise ImportError("'telegram' extra is not installed")

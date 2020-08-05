@@ -4,15 +4,18 @@ from starlette.responses import Response
 
 if TYPE_CHECKING:
     from .constellation import Constellation
+    from ..commands import ConfigDict
+    from ..alchemy import Alchemy
+    import sqlalchemy.orm.session
 
 
 class Star:
     """A Star is a class representing a part of the website.
 
     It shouldn't be used directly: please use :class:`PageStar` and :class:`ExceptionStar` instead!"""
-    def __init__(self, constellation: "Constellation", config):
+    def __init__(self, constellation: "Constellation", config: "ConfigDict"):
         self.constellation: "Constellation" = constellation
-        self.config = config
+        self.config: "ConfigDict" = config
 
     async def page(self, request: Request) -> Response:
         """The function generating the :class:`~starlette.Response` to a web :class:`~starlette.Request`.
@@ -21,13 +24,13 @@ class Star:
         raise NotImplementedError()
 
     @property
-    def alchemy(self):
+    def alchemy(self) -> Alchemy:
         """A shortcut for the :class:`~royalnet.alchemy.Alchemy` of the :class:`Constellation`."""
         return self.constellation.alchemy
 
     # noinspection PyPep8Naming
     @property
-    def Session(self):
+    def Session(self) -> sqlalchemy.orm.session.Session:
         """A shortcut for the :class:`~royalnet.alchemy.Alchemy` :class:`Session` of the :class:`Constellation`."""
         return self.constellation.alchemy.Session
 

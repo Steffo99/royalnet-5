@@ -25,11 +25,11 @@ class DiscordSerf(Serf):
 
     def __init__(self,
                  loop: aio.AbstractEventLoop,
-                 alchemy_cfg: Dict[str, Any],
-                 herald_cfg: Dict[str, Any],
-                 sentry_cfg: Dict[str, Any],
-                 packs_cfg: Dict[str, Any],
-                 serf_cfg: Dict[str, Any],
+                 alchemy_cfg: rc.ConfigDict,
+                 herald_cfg: rc.ConfigDict,
+                 sentry_cfg: rc.ConfigDict,
+                 packs_cfg: rc.ConfigDict,
+                 serf_cfg: rc.ConfigDict,
                  **_):
         if discord is None:
             raise ImportError("'discord' extra is not installed")
@@ -96,7 +96,7 @@ class DiscordSerf(Serf):
         if not text.startswith("!"):
             return
         # Skip bot messages
-        author: Union["discord.User"] = message.author
+        author: Union["discord.User", "discord.Member"] = message.author
         if author.bot:
             return
         # Find and clean parameters

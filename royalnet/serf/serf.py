@@ -27,9 +27,9 @@ class Serf(abc.ABC):
 
     def __init__(self,
                  loop: aio.AbstractEventLoop,
-                 alchemy_cfg: Dict[str, Any],
-                 herald_cfg: Dict[str, Any],
-                 packs_cfg: Dict[str, Any],
+                 alchemy_cfg: rc.ConfigDict,
+                 herald_cfg: rc.ConfigDict,
+                 packs_cfg: rc.ConfigDict,
                  **_):
         self.loop: Optional[aio.AbstractEventLoop] = loop
         """The event loop this Serf is running on."""
@@ -176,7 +176,7 @@ class Serf(abc.ABC):
             raise rc.ProgramError(f"Other Herald Link returned unknown response:\n"
                                   f"[p]{response}[/p]")
 
-    def register_commands(self, commands: List[Type[rc.Command]], pack_cfg: Dict[str, Any]) -> None:
+    def register_commands(self, commands: List[Type[rc.Command]], pack_cfg: rc.ConfigDict) -> None:
         """Initialize and register all commands passed as argument."""
         # Instantiate the Commands
         for SelectedCommand in commands:
@@ -205,12 +205,12 @@ class Serf(abc.ABC):
                 else:
                     log.warning(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {alias}")
 
-    def init_herald(self, herald_cfg: Dict[str, Any]):
+    def init_herald(self, herald_cfg: rc.ConfigDict):
         """Create a :class:`Link` and bind :class:`Event`."""
         herald_cfg["name"] = self.interface_name
         self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
-    def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: Dict[str, Any]):
+    def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: rc.ConfigDict):
         for SelectedEvent in events:
             # Initialize the event
             try:

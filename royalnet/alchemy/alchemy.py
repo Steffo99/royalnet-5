@@ -6,8 +6,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import DeclarativeMeta, AbstractConcreteBase
+from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
 
 
 class Alchemy:
@@ -61,7 +62,7 @@ class Alchemy:
             raise TypeError(f"Can't get tables with objects of type '{table.__class__.__qualname__}'")
 
     @contextmanager
-    def session_cm(self):
+    def session_cm(self) -> Iterator[Session]:
         """Create a Session as a context manager (that can be used in ``with`` statements).
 
         The Session will be closed safely when the context manager exits (even in case of error).
@@ -86,7 +87,7 @@ class Alchemy:
             session.close()
 
     @asynccontextmanager
-    async def session_acm(self):
+    async def session_acm(self) -> AsyncIterator[Session]:
         """Create a Session as a async context manager (that can be used in ``async with`` statements).
 
         The Session will be closed safely when the context manager exits (even in case of error).
