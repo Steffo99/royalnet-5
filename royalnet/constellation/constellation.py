@@ -92,10 +92,7 @@ class Constellation:
         self.herald_task: Optional[aio.Task] = None
         """A reference to the :class:`aio.Task` that runs the :class:`rh.Link`."""
 
-        self.Interface: Type[rc.CommandInterface] = self.interface_factory()
-        """The :class:`~rc.CommandInterface` class of this :class:`Constellation`."""
-
-        self.events: Dict[str, rc.Event] = {}
+        self.events: Dict[str, rc.HeraldEvent] = {}
         """A dictionary containing all :class:`~rc.Event` that can be handled by this :class:`Constellation`."""
 
         self.starlette = starlette.applications.Starlette(debug=__debug__)
@@ -149,66 +146,55 @@ class Constellation:
         
         Because of how :mod:`uvicorn` runs, it will stay :const:`None` until the first page is requested."""
 
-    # TODO: is this a good idea?
-    def interface_factory(self) -> Type[rc.CommandInterface]:
-        """Create the :class:`rc.CommandInterface` class for the :class:`Constellation`."""
-
-        # noinspection PyMethodParameters
-        class GenericInterface(rc.CommandInterface):
-            alchemy: ra.Alchemy = self.alchemy
-            constellation = self
-
-            async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
-                """Send a :class:`royalherald.Request` to a specific destination, and wait for a
-                :class:`royalherald.Response`."""
-                if self.herald is None:
-                    raise rc.UnsupportedError("`royalherald` is not enabled on this serf.")
-                request: rh.Request = rh.Request(handler=event_name, data=kwargs)
-                response: rh.Response = await self.herald.request(destination=destination, request=request)
-                if isinstance(response, rh.ResponseFailure):
-                    if response.name == "no_event":
-                        raise rc.ProgramError(f"There is no event named {event_name} in {destination}.")
-                    elif response.name == "error_in_event":
-                        if response.extra_info["type"] == "CommandError":
-                            raise rc.CommandError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "UserError":
-                            raise rc.UserError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "InvalidInputError":
-                            raise rc.InvalidInputError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "UnsupportedError":
-                            raise rc.UnsupportedError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "ConfigurationError":
-                            raise rc.ConfigurationError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "ExternalError":
-                            raise rc.ExternalError(response.extra_info["message"])
-                        else:
-                            raise rc.ProgramError(f"Invalid error in Herald event '{event_name}':\n"
-                                                  f"[b]{response.extra_info['type']}[/b]\n"
-                                                  f"{response.extra_info['message']}")
-                    elif response.name == "unhandled_exception_in_event":
-                        raise rc.ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
-                                              f"[b]{response.extra_info['type']}[/b]\n"
-                                              f"{response.extra_info['message']}")
-                    else:
-                        raise rc.ProgramError(f"Unknown response in Herald event '{event_name}':\n"
-                                              f"[b]{response.name}[/b]"
-                                              f"[p]{response}[/p]")
-                elif isinstance(response, rh.ResponseSuccess):
-                    return response.data
-                else:
-                    raise rc.ProgramError(f"Other Herald Link returned unknown response:\n"
-                                          f"[p]{response}[/p]")
-
-        return GenericInterface
-
     def init_herald(self, herald_cfg: Dict[str, Any]):
         """Create a :class:`rh.Link`."""
         herald_cfg["name"] = "constellation"
         self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
+    async def call_herald_event(self, destination: str, event_name: str, **kwargs) -> Dict:
+        """Send a :class:`royalherald.Request` to a specific destination, and wait for a
+        :class:`royalherald.Response`."""
+        if self.herald is None:
+            raise rc.UnsupportedError("`royalherald` is not enabled on this serf.")
+        request: rh.Request = rh.Request(handler=event_name, data=kwargs)
+        response: rh.Response = await self.herald.request(destination=destination, request=request)
+        if isinstance(response, rh.ResponseFailure):
+            if response.name == "no_event":
+                raise rc.ProgramError(f"There is no event named {event_name} in {destination}.")
+            elif response.name == "error_in_event":
+                if response.extra_info["type"] == "CommandError":
+                    raise rc.CommandError(response.extra_info["message"])
+                elif response.extra_info["type"] == "UserError":
+                    raise rc.UserError(response.extra_info["message"])
+                elif response.extra_info["type"] == "InvalidInputError":
+                    raise rc.InvalidInputError(response.extra_info["message"])
+                elif response.extra_info["type"] == "UnsupportedError":
+                    raise rc.UnsupportedError(response.extra_info["message"])
+                elif response.extra_info["type"] == "ConfigurationError":
+                    raise rc.ConfigurationError(response.extra_info["message"])
+                elif response.extra_info["type"] == "ExternalError":
+                    raise rc.ExternalError(response.extra_info["message"])
+                else:
+                    raise rc.ProgramError(f"Invalid error in Herald event '{event_name}':\n"
+                                          f"[b]{response.extra_info['type']}[/b]\n"
+                                          f"{response.extra_info['message']}")
+            elif response.name == "unhandled_exception_in_event":
+                raise rc.ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
+                                      f"[b]{response.extra_info['type']}[/b]\n"
+                                      f"{response.extra_info['message']}")
+            else:
+                raise rc.ProgramError(f"Unknown response in Herald event '{event_name}':\n"
+                                      f"[b]{response.name}[/b]"
+                                      f"[p]{response}[/p]")
+        elif isinstance(response, rh.ResponseSuccess):
+            return response.data
+        else:
+            raise rc.ProgramError(f"Other Herald Link returned unknown response:\n"
+                                  f"[p]{response}[/p]")
+
     async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
-            event: rc.Event = self.events[message.handler]
+            event: rc.HeraldEvent = self.events[message.handler]
         except KeyError:
             log.warning(f"No event for '{message.handler}'")
             return rh.ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
@@ -228,13 +214,11 @@ class Constellation:
         elif isinstance(message, rh.Broadcast):
             await event.run(**message.data)
 
-    def register_events(self, events: List[Type[rc.Event]], pack_cfg: Dict[str, Any]):
+    def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
-            # Create a new interface
-            interface = self.Interface(config=pack_cfg)
             # Initialize the event
             try:
-                event = SelectedEvent(interface)
+                event = SelectedEvent(serf=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
@@ -266,7 +250,7 @@ class Constellation:
         for SelectedPageStar in page_stars:
             log.debug(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__qualname__}")
             try:
-                page_star_instance = SelectedPageStar(interface=self.Interface(pack_cfg))
+                page_star_instance = SelectedPageStar(constellation=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedPageStar.__qualname__} - {e.__class__.__qualname__} in the initialization.")
@@ -277,7 +261,6 @@ class Constellation:
 
     def run_blocking(self):
         log.info(f"Running Constellation on https://{self.address}:{self.port}/...")
-        loop: aio.AbstractEventLoop = aio.get_event_loop()
         self.running = True
         try:
             uvicorn.run(self.starlette, host=self.address, port=self.port, log_config=UVICORN_LOGGING_CONFIG)

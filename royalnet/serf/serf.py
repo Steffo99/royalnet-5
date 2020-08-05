@@ -4,14 +4,13 @@ import asyncio as aio
 import sys
 from typing import *
 from sqlalchemy.schema import Table
-from royalnet.commands import *
+import royalnet.commands as rc
 import royalnet.utils as ru
 import royalnet.alchemy as ra
 import royalnet.backpack.tables as rbt
 import royalnet.herald as rh
 import traceback
 import abc
-
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +19,7 @@ class Serf(abc.ABC):
     """An abstract class, to be used as base to implement Royalnet bots on multiple interfaces (such as Telegram or
     Discord)."""
     interface_name = NotImplemented
+    prefix = NotImplemented
 
     _master_table: type = rbt.User
     _identity_table: type = NotImplemented
@@ -41,10 +41,10 @@ class Serf(abc.ABC):
             log.debug(f"Importing pack: {pack_name}")
             try:
                 packs[pack_name] = {
-                    "commands": importlib.import_module(f"{pack_name}.commands"),
-                    "events": importlib.import_module(f"{pack_name}.events"),
-                    "stars": importlib.import_module(f"{pack_name}.stars"),
-                    "tables": importlib.import_module(f"{pack_name}.tables"),
+                    "commands": importlib.import_module(f".commands", pack_name),
+                    "events": importlib.import_module(f".events", pack_name),
+                    "stars": importlib.import_module(f".stars", pack_name),
+                    "tables": importlib.import_module(f".tables", pack_name),
                 }
             except ImportError as e:
                 log.error(f"{e.__class__.__name__} during the import of {pack_name}:\n"
@@ -88,13 +88,10 @@ class Serf(abc.ABC):
         self.herald_task: Optional[aio.Task] = None
         """A reference to the :class:`asyncio.Task` that runs the :class:`Link`."""
 
-        self.events: Dict[str, Event] = {}
+        self.events: Dict[str, rc.HeraldEvent] = {}
         """A dictionary containing all :class:`Event` that can be handled by this :class:`Serf`."""
 
-        self.Interface: Type[CommandInterface] = self.interface_factory()
-        """The :class:`CommandInterface` class of this Serf."""
-
-        self.commands: Dict[str, Command] = {}
+        self.commands: Dict[str, rc.Command] = {}
         """The :class:`dict` connecting each command name to its :class:`Command` object."""
 
         for pack_name in packs:
@@ -138,104 +135,86 @@ class Serf(abc.ABC):
         """Find a relationship path starting from the master table and ending at the identity table, and return it."""
         return ra.table_dfs(self.master_table, self.identity_table)
 
-    def interface_factory(self) -> Type[CommandInterface]:
-        """Create the :class:`CommandInterface` class for the Serf."""
-
-        # noinspection PyMethodParameters
-        class GenericInterface(CommandInterface):
-            alchemy: ra.Alchemy = self.alchemy
-            serf: "Serf" = self
-
-            async def call_herald_event(ci, destination: str, event_name: str, **kwargs) -> Dict:
-                """Send a :class:`royalherald.Request` to a specific destination, and wait for a
-                :class:`royalherald.Response`."""
-                if self.herald is None:
-                    raise UnsupportedError("`royalherald` is not enabled on this serf.")
-                request: rh.Request = rh.Request(handler=event_name, data=kwargs)
-                response: rh.Response = await self.herald.request(destination=destination, request=request)
-                if isinstance(response, rh.ResponseFailure):
-                    if response.name == "no_event":
-                        raise ProgramError(f"There is no event named {event_name} in {destination}.")
-                    elif response.name == "error_in_event":
-                        if response.extra_info["type"] == "CommandError":
-                            raise CommandError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "UserError":
-                            raise UserError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "InvalidInputError":
-                            raise InvalidInputError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "UnsupportedError":
-                            raise UnsupportedError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "ConfigurationError":
-                            raise ConfigurationError(response.extra_info["message"])
-                        elif response.extra_info["type"] == "ExternalError":
-                            raise ExternalError(response.extra_info["message"])
-                        else:
-                            raise ProgramError(f"Invalid error in Herald event '{event_name}':\n"
-                                               f"[b]{response.extra_info['type']}[/b]\n"
-                                               f"{response.extra_info['message']}")
-                    elif response.name == "unhandled_exception_in_event":
-                        raise ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
-                                           f"[b]{response.extra_info['type']}[/b]\n"
-                                           f"{response.extra_info['message']}")
-                    else:
-                        raise ProgramError(f"Unknown response in Herald event '{event_name}':\n"
-                                           f"[b]{response.name}[/b]"
-                                           f"[p]{response}[/p]")
-                elif isinstance(response, rh.ResponseSuccess):
-                    return response.data
+    async def call_herald_event(self, destination: str, event_name: str, **kwargs) -> Dict:
+        """Send a :class:`royalherald.Request` to a specific destination, and wait for a
+        :class:`royalherald.Response`."""
+        if self.herald is None:
+            raise rc.UnsupportedError("`royalherald` is not enabled on this serf.")
+        request: rh.Request = rh.Request(handler=event_name, data=kwargs)
+        response: rh.Response = await self.herald.request(destination=destination, request=request)
+        if isinstance(response, rh.ResponseFailure):
+            if response.name == "no_event":
+                raise rc.ProgramError(f"There is no event named {event_name} in {destination}.")
+            elif response.name == "error_in_event":
+                if response.extra_info["type"] == "CommandError":
+                    raise rc.CommandError(response.extra_info["message"])
+                elif response.extra_info["type"] == "UserError":
+                    raise rc.UserError(response.extra_info["message"])
+                elif response.extra_info["type"] == "InvalidInputError":
+                    raise rc.InvalidInputError(response.extra_info["message"])
+                elif response.extra_info["type"] == "UnsupportedError":
+                    raise rc.UnsupportedError(response.extra_info["message"])
+                elif response.extra_info["type"] == "ConfigurationError":
+                    raise rc.ConfigurationError(response.extra_info["message"])
+                elif response.extra_info["type"] == "ExternalError":
+                    raise rc.ExternalError(response.extra_info["message"])
                 else:
-                    raise ProgramError(f"Other Herald Link returned unknown response:\n"
-                                       f"[p]{response}[/p]")
+                    raise rc.ProgramError(f"Invalid error in Herald event '{event_name}':\n"
+                                          f"[b]{response.extra_info['type']}[/b]\n"
+                                          f"{response.extra_info['message']}")
+            elif response.name == "unhandled_exception_in_event":
+                raise rc.ProgramError(f"Unhandled exception in Herald event '{event_name}':\n"
+                                      f"[b]{response.extra_info['type']}[/b]\n"
+                                      f"{response.extra_info['message']}")
+            else:
+                raise rc.ProgramError(f"Unknown response in Herald event '{event_name}':\n"
+                                      f"[b]{response.name}[/b]"
+                                      f"[p]{response}[/p]")
+        elif isinstance(response, rh.ResponseSuccess):
+            return response.data
+        else:
+            raise rc.ProgramError(f"Other Herald Link returned unknown response:\n"
+                                  f"[p]{response}[/p]")
 
-        return GenericInterface
-
-    def register_commands(self, commands: List[Type[Command]], pack_cfg: Dict[str, Any]) -> None:
+    def register_commands(self, commands: List[Type[rc.Command]], pack_cfg: Dict[str, Any]) -> None:
         """Initialize and register all commands passed as argument."""
         # Instantiate the Commands
         for SelectedCommand in commands:
-            # Create a new interface
-            interface = self.Interface(config=pack_cfg)
             # Try to instantiate the command
             try:
-                command = SelectedCommand(interface)
+                command = SelectedCommand(serf=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedCommand.__qualname__} - {e.__class__.__qualname__} in the initialization.")
                 ru.sentry_exc(e)
                 continue
-            # Link the interface to the command
-            interface.command = command
             # Warn if the command would be overriding something
-            if f"{self.Interface.prefix}{SelectedCommand.name}" in self.commands:
+            if SelectedCommand.name in self.commands:
                 log.info(f"Overriding (already defined): "
-                         f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
+                         f"{SelectedCommand.__qualname__} -> {SelectedCommand.name}")
             else:
                 log.debug(f"Registering: "
-                          f"{SelectedCommand.__qualname__} -> {self.Interface.prefix}{SelectedCommand.name}")
+                          f"{SelectedCommand.__qualname__} -> {SelectedCommand.name}")
             # Register the command in the commands dict
-            self.commands[f"{interface.prefix}{SelectedCommand.name}"] = command
+            self.commands[SelectedCommand.name] = command
             # Register aliases, but don't override anything
             for alias in SelectedCommand.aliases:
-                if f"{interface.prefix}{alias}" not in self.commands:
-                    log.debug(f"Aliasing: {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
-                    self.commands[f"{interface.prefix}{alias}"] = \
-                        self.commands[f"{interface.prefix}{SelectedCommand.name}"]
+                if alias not in self.commands:
+                    log.debug(f"Aliasing: {SelectedCommand.__qualname__} -> {alias}")
+                    self.commands[alias] = self.commands[SelectedCommand.name]
                 else:
-                    log.warning(
-                        f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {interface.prefix}{alias}")
+                    log.warning(f"Ignoring (already defined): {SelectedCommand.__qualname__} -> {alias}")
 
     def init_herald(self, herald_cfg: Dict[str, Any]):
         """Create a :class:`Link` and bind :class:`Event`."""
         herald_cfg["name"] = self.interface_name
         self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
-    def register_events(self, events: List[Type[Event]], pack_cfg: Dict[str, Any]):
+    def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: Dict[str, Any]):
         for SelectedEvent in events:
-            # Create a new interface
-            interface = self.Interface(config=pack_cfg)
             # Initialize the event
             try:
-                event = SelectedEvent(interface)
+                event = SelectedEvent(serf=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
@@ -250,7 +229,7 @@ class Serf(abc.ABC):
 
     async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
         try:
-            event: Event = self.events[message.handler]
+            event: rc.HeraldEvent = self.events[message.handler]
         except KeyError:
             log.warning(f"No event for '{message.handler}'")
             return rh.ResponseFailure("no_event", f"This serf does not have any event for {message.handler}.")
@@ -259,7 +238,7 @@ class Serf(abc.ABC):
             try:
                 response_data = await event.run(**message.data)
                 return rh.ResponseSuccess(data=response_data)
-            except CommandError as e:
+            except rc.CommandError as e:
                 return rh.ResponseFailure("error_in_event",
                                           f"The event '{message.handler}' raised a {e.__class__.__qualname__}.",
                                           extra_info={
@@ -278,25 +257,25 @@ class Serf(abc.ABC):
         elif isinstance(message, rh.Broadcast):
             await event.run(**message.data)
 
-    async def call(self, command: Command, data: CommandData, parameters: List[str]):
+    async def call(self, command: rc.Command, data: rc.CommandData, parameters: List[str]):
         log.info(f"Calling command: {command.name}")
         try:
             # Run the command
-            await command.run(CommandArgs(parameters), data)
-        except InvalidInputError as e:
+            await command.run(rc.CommandArgs(parameters), data)
+        except rc.InvalidInputError as e:
             await data.reply(f"⚠️ {e.message}\n"
-                             f"Syntax: [c]{command.interface.prefix}{command.name} {command.syntax}[/c]")
-        except UserError as e:
+                             f"Syntax: [c]{self.prefix}{command.name} {command.syntax}[/c]")
+        except rc.UserError as e:
             await data.reply(f"⚠️ {e.message}")
-        except UnsupportedError as e:
+        except rc.UnsupportedError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ExternalError as e:
+        except rc.ExternalError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ConfigurationError as e:
+        except rc.ConfigurationError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ProgramError as e:
+        except rc.ProgramError as e:
             await data.reply(f"⛔️ {e.message}")
-        except CommandError as e:
+        except rc.CommandError as e:
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             ru.sentry_exc(e)
@@ -304,23 +283,23 @@ class Serf(abc.ABC):
         finally:
             await data.session_close()
 
-    async def press(self, key: KeyboardKey, data: CommandData):
+    async def press(self, key: rc.KeyboardKey, data: rc.CommandData):
         log.info(f"Calling key_callback: {repr(key)}")
         try:
             await key.press(data)
-        except InvalidInputError as e:
+        except rc.InvalidInputError as e:
             await data.reply(f"⚠️ {e.message}")
-        except UserError as e:
+        except rc.UserError as e:
             await data.reply(f"⚠️ {e.message}")
-        except UnsupportedError as e:
+        except rc.UnsupportedError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ExternalError as e:
+        except rc.ExternalError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ConfigurationError as e:
+        except rc.ConfigurationError as e:
             await data.reply(f"⚠️ {e.message}")
-        except ProgramError as e:
+        except rc.ProgramError as e:
             await data.reply(f"⛔️ {e.message}")
-        except CommandError as e:
+        except rc.CommandError as e:
             await data.reply(f"⚠️ {e.message}")
         except Exception as e:
             ru.sentry_exc(e)

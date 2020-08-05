@@ -1,7 +1,5 @@
 from typing import *
-import royalnet
 import royalnet.commands as rc
-import royalnet.utils as ru
 from ..tables import User
 
 

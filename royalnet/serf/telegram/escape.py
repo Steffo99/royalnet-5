@@ -1,11 +1,13 @@
+from typing import *
 import re
 
 
-def escape(string: str) -> str:
+def escape(string: Optional[str]) -> Optional[str]:
     """Escape a string to be sent through Telegram (as HTML), and format it using RoyalCode.
 
     Warning:
         Currently escapes everything, even items in code blocks."""
+
     url_pattern = re.compile(r"\[url=(.*?)](.*?)\[/url]")
     url_replacement = r'<a href="\1">\2</a>'
 

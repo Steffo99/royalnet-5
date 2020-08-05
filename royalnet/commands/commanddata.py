@@ -5,31 +5,32 @@ import asyncio as aio
 import royalnet.utils as ru
 import io
 from .errors import UnsupportedError
-from .commandinterface import CommandInterface
-from royalnet.backpack.tables.aliases import Alias
+from royalnet.backpack.tables.users import User
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
-    from royalnet.backpack.tables.users import User
 
 log = logging.getLogger(__name__)
 
 
 class CommandData:
-    def __init__(self, interface: CommandInterface, loop: aio.AbstractEventLoop):
-        self.loop: aio.AbstractEventLoop = loop
-        self._interface: CommandInterface = interface
+    def __init__(self, command):
+        self.command = command
         self._session = None
 
     # TODO: make this asyncronous... somehow?
     @property
     def session(self):
         if self._session is None:
-            if self._interface.alchemy is None:
+            if self.command.serf.alchemy is None:
                 raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
             log.debug("Creating Session...")
-            self._session = self._interface.alchemy.Session()
+            self._session = self.command.serf.alchemy.Session()
         return self._session
+
+    @property
+    def loop(self):
+        return self.command.serf.loop
 
     async def session_commit(self):
         """Asyncronously commit the :attr:`.session` of this object."""
@@ -83,7 +84,7 @@ class CommandData:
 
         Parameters:
             alias: the Alias to search for."""
-        return await Alias.find_user(self._interface.alchemy, self.session, alias)
+        return await User.find(self.command.serf.alchemy, self.session, alias)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
