@@ -23,9 +23,9 @@ class Playable:
     # PyCharm doesn't like what I'm doing here.
     # noinspection PyTypeChecker
     @classmethod
-    async def create(cls, *args, **kwargs):
+    async def create(cls):
         """Create a :class:`Playable` and initialize its generator."""
-        playable = cls(*args, **kwargs)
+        playable = cls()
         log.debug("Sending None to the generator...")
         await playable.generator.asend(None)
         log.debug("Playable ready!")
