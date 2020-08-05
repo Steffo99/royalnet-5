@@ -16,7 +16,8 @@ class RoyalnetversionCommand(Command):
         if __debug__:
             message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/]Unreleased[/url]\n"
         else:
-            message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/releases/tag/{self.royalnet_version}]{self.royalnet_version}[/url]\n"
+            message = f"ℹ️ Royalnet [url=https://github.com/Steffo99/royalnet/releases/tag/{self.royalnet_version}]" \
+                      f"{self.royalnet_version}[/url]\n"
         if "69" in royalnet.version.semantic:
             message += "(Nice.)"
         await data.reply(message)
