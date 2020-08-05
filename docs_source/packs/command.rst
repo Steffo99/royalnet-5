@@ -14,9 +14,9 @@ A Command code looks like this: ::
 
         description = "Play ping-pong with the bot."
 
-        def __init__(self, interface):
+        def __init__(self, serf: "Serf", config):
             # This code is run just once, while the bot is starting
-            super().__init__()
+            super().__init__(serf=serf, config=config)
 
         async def run(self, args: rc.CommandArgs, data: rc.CommandData):
             # This code is run every time the command is called
@@ -393,15 +393,15 @@ You can **call an event** from inside a command, and receive its return value.
 
 This may be used for example to get data from a different platform, such as getting the users online in a specific Discord server.
 
-You can call an event with the :meth:`CommandInterface.call_herald_event` method: ::
+You can call an event with the :meth:`Serf.call_herald_event` method: ::
 
-    result = await self.interface.call_herald_event("event_name")
+    result = await self.serf.call_herald_event("event_name")
 
 You can also pass parameters to the called event: ::
 
-    result = await self.interface.call_herald_event("event_name", ..., kwarg=..., *..., **...)
+    result = await self.serf.call_herald_event("event_name", ..., kwarg=..., *..., **...)
 
-Errors raised by the event will also be raised by the :meth:`CommandInterface.call_herald_event` method as one of the exceptions described in the :ref:`Raising errors` section.
+Errors raised by the event will also be raised by the :meth:`Serf.call_herald_event` method as one of the exceptions described in the :ref:`Raising errors` section.
 
 Displaying Keyboards
 ------------------------------------
