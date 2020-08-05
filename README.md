@@ -38,15 +38,15 @@ Connections between different hosts are possible too, even if they currently are
 
 The Constellation service is a [Starlette](https://www.starlette.io )-based webserver that can supply dynamic pages ("_stars_") while being connected to the other parts of Royalnet through the Herald.
 
+#### APIs
+
+The Constellation service also offers utilities for creating REST APIs as Python functions with `dict`s as inputs and outputs, leaving (de)serialization, transmission and eventually authentication to Royalnet.
+
 ### _Deprecated:_ [Bard](royalnet/bard)
 
 The Bard module allows Royalnet services to safely download and convert video files through [youtube-dl](https://youtube-dl.org/) and [ffmpeg](https://ffmpeg.org/).
 
 It is mainly used to playback music on Discord Channels.
-
-#### APIs
-
-The Constellation service also offers utilities for creating REST APIs as Python functions with `dict`s as inputs and outputs, leaving (de)serialization, transmission and eventually authentication to Royalnet.
 
 ### Sentry
 
