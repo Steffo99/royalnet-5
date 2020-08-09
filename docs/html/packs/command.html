@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating a new Command &mdash; Royalnet 5.6.2 documentation</title>
+  <title>Creating a new Command &mdash; Royalnet 5.10.4 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                5.6.2
+                5.10.4
               </div>
             
           
@@ -90,6 +90,10 @@
 <li class="toctree-l2"><a class="reference internal" href="newpack.html">Creating a new Pack</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Creating a new Command</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Creating a new Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#formatting-command-replies">Formatting command replies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-tags">Available tags</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#command-arguments">Command arguments</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#direct-access">Direct access</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#optional-access">Optional access</a></li>
@@ -100,7 +104,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#raising-errors">Raising errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#coroutines-and-slow-operations">Coroutines and slow operations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#delete-the-invoking-message">Delete the invoking message</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-the-database">Using the database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sharing-data-between-multiple-calls">Sharing data between multiple calls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-alchemy">Using the Alchemy</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#querying-the-database">Querying the database</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#adding-filters-to-the-query">Adding filters to the query</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ordering-the-results-of-a-query">Ordering the results of a query</a></li>
@@ -109,8 +114,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#calling-events">Calling Events</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#displaying-keyboards">Displaying Keyboards</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-code-at-the-initialization-of-the-bot">Running code at the initialization of the bot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#distinguish-between-platforms">Distinguish between platforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#displaying-keyboards">Displaying Keyboards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#replies-in-callbacks">Replies in callbacks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#reading-data-from-the-configuration-file">Reading data from the configuration file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-code-on-serf-start">Running code on Serf start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#running-repeating-jobs">Running repeating jobs</a></li>
 </ul>
 </li>
@@ -191,7 +201,7 @@
             
   <div class="section" id="creating-a-new-command">
 <h1>Creating a new Command<a class="headerlink" href="#creating-a-new-command" title="Permalink to this headline">¶</a></h1>
-<p>A Royalnet Command is a small script that is run whenever a specific message is sent to a Royalnet interface.</p>
+<p>A Royalnet Command is a small script that is run whenever a specific message is sent to a Royalnet platform.</p>
 <p>A Command code looks like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">royalnet.commands</span> <span class="k">as</span> <span class="nn">rc</span>
 
@@ -200,12 +210,12 @@
 
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Play ping-pong with the bot.&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
-        <span class="c1"># This code is run just once, while the bot is starting</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="c1"># This code is run just once, while the bot is starting</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serf</span><span class="p">:</span> <span class="s2">&quot;Serf&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">serf</span><span class="o">=</span><span class="n">serf</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 
+    <span class="c1"># This code is run every time the command is called</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandArgs</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandData</span><span class="p">):</span>
-        <span class="c1"># This code is run every time the command is called</span>
         <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;Pong!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -232,8 +242,8 @@ The previously mentioned “spaghetti” command should have a file called <code
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
 </pre></div>
 </div>
-<p>Now override the <a class="reference internal" href="../apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a> method, adding the code you want the bot to run when the command is called.</p>
-<p>To send a message in the chat the command was called in, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> coroutine:</p>
+<p>Now override the <a class="reference internal" href="../apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> method, adding the code you want the bot to run when the command is called.</p>
+<p>To send a message in the chat the command was called in, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reply()</span></code></a> coroutine:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">royalnet.commands</span> <span class="k">as</span> <span class="nn">rc</span>
 
 <span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">rc</span><span class="o">.</span><span class="n">Command</span><span class="p">):</span>
@@ -260,11 +270,30 @@ command to the <code class="docutils literal notranslate"><span class="pre">avai
 </pre></div>
 </div>
 </div>
+<div class="section" id="formatting-command-replies">
+<h2>Formatting command replies<a class="headerlink" href="#formatting-command-replies" title="Permalink to this headline">¶</a></h2>
+<p>You can use a subset of <a class="reference external" href="https://en.wikipedia.org/wiki/BBCode">BBCode</a> to format messages sent with <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reply()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandArgs</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandData</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;[b]Bold of you to assume that my code has no bugs.[/b]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="available-tags">
+<h3>Available tags<a class="headerlink" href="#available-tags" title="Permalink to this headline">¶</a></h3>
+<p>Here’s a list of all tags that can be used:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[b]bold[/b]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[i]italic[/i]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[c]code[/c]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[p]multiline</span> <span class="pre">\n</span> <span class="pre">code[/p]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[url=https://google.com]inline</span> <span class="pre">link[/url]</span></code> (will be rendered differently on every platform)</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="command-arguments">
 <h2>Command arguments<a class="headerlink" href="#command-arguments" title="Permalink to this headline">¶</a></h2>
 <p>A command can have some arguments passed by the user: for example, on Telegram an user may type <cite>/spaghetti carbonara al-dente</cite>
 to pass the <a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <cite>“carbonara al-dente”</cite> to the command code.</p>
-<p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <a class="reference internal" href="../apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Command.run()</span></code></a>
+<p>These arguments can be accessed in multiple ways through the <code class="docutils literal notranslate"><span class="pre">args</span></code> parameter passed to the <a class="reference internal" href="../apireference.html#royalnet.commands.Command.run" title="royalnet.commands.Command.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>
 method.</p>
 <p>If you want your command to use arguments, override the <code class="docutils literal notranslate"><span class="pre">syntax</span></code> class attribute with a brief description of the
 syntax of your command, possibly using {curly braces} for required arguments and [square brackets] for optional
@@ -276,10 +305,15 @@ ones.</p>
 
     <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
 
-    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;(requestedpasta)&quot;</span>
+    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{first_pasta}</span><span class="s2"> [second_pasta]&quot;</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandArgs</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandData</span><span class="p">):</span>
-        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{args[0]}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="n">first_pasta</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">second_pasta</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">second_pasta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{</span><span class="n">first_pasta</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{</span><span class="n">first_pasta</span><span class="si">}</span><span class="s2"> and your </span><span class="si">{</span><span class="n">second_pasta</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="direct-access">
@@ -301,7 +335,7 @@ ones.</p>
 </div>
 <div class="section" id="optional-access">
 <h3>Optional access<a class="headerlink" href="#optional-access" title="Permalink to this headline">¶</a></h3>
-<p>If you don’t want arguments to be required, you can access them through the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.optional" title="royalnet.commands.CommandArgs.optional"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.optional()</span></code></a> method: it
+<p>If you don’t want arguments to be required, you can access them through the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.optional" title="royalnet.commands.CommandArgs.optional"><code class="xref py py-meth docutils literal notranslate"><span class="pre">optional()</span></code></a> method: it
 will return <code class="docutils literal notranslate"><span class="pre">None</span></code> if the argument wasn’t passed, making it <strong>optional</strong>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="c1"># &quot;carbonara&quot;</span>
@@ -321,7 +355,7 @@ will return <code class="docutils literal notranslate"><span class="pre">None</s
 </div>
 <div class="section" id="full-string">
 <h3>Full string<a class="headerlink" href="#full-string" title="Permalink to this headline">¶</a></h3>
-<p>If you want the full argument string, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.joined" title="royalnet.commands.CommandArgs.joined"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.joined()</span></code></a> method.</p>
+<p>If you want the full argument string, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.joined" title="royalnet.commands.CommandArgs.joined"><code class="xref py py-meth docutils literal notranslate"><span class="pre">joined()</span></code></a> method.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">joined</span><span class="p">()</span>
 <span class="c1"># &quot;carbonara al-dente&quot;</span>
 </pre></div>
@@ -336,7 +370,7 @@ raised if not enough arguments are present:</p>
 <div class="section" id="regular-expressions">
 <h3>Regular expressions<a class="headerlink" href="#regular-expressions" title="Permalink to this headline">¶</a></h3>
 <p>For more complex commands, you may want to get arguments through <a class="reference external" href="https://regexr.com/">regular expressions</a>.</p>
-<p>You can then use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.match" title="royalnet.commands.CommandArgs.match"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandArgs.match()</span></code></a> method, which tries to match a pattern to the command argument string,
+<p>You can then use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandArgs.match" title="royalnet.commands.CommandArgs.match"><code class="xref py py-meth docutils literal notranslate"><span class="pre">match()</span></code></a> method, which tries to match a pattern to the command argument string,
 which returns a tuple of the matched groups and raises an <a class="reference internal" href="../apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a> if there is no match.</p>
 <p>To match a pattern, <a class="reference external" href="https://docs.python.org/3.8/library/re.html#re.match" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.match()</span></code></a> is used, meaning that Python will try to match only at the beginning of the string.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">args</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(carb\w+)&quot;</span><span class="p">)</span>
@@ -366,11 +400,11 @@ which returns a tuple of the matched groups and raises an <a class="reference in
 <dt><a class="reference internal" href="../apireference.html#royalnet.commands.UserError" title="royalnet.commands.UserError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UserError</span></code></a></dt><dd><p>The user did something wrong, it is not a problem with the bot.</p>
 </dd>
 <dt><a class="reference internal" href="../apireference.html#royalnet.commands.InvalidInputError" title="royalnet.commands.InvalidInputError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a></dt><dd><p>The arguments the user passed to the command by the user are invalid.
-Displays the command syntax in the error message.</p>
+<em>Additionally displays the command syntax in the error message.</em></p>
 </dd>
-<dt><a class="reference internal" href="../apireference.html#royalnet.commands.UnsupportedError" title="royalnet.commands.UnsupportedError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedError</span></code></a></dt><dd><p>The command is not supported on the interface it is being called.</p>
+<dt><a class="reference internal" href="../apireference.html#royalnet.commands.UnsupportedError" title="royalnet.commands.UnsupportedError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedError</span></code></a></dt><dd><p>The command is not supported on the platform it is being called.</p>
 </dd>
-<dt><a class="reference internal" href="../apireference.html#royalnet.commands.ConfigurationError" title="royalnet.commands.ConfigurationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">config.toml</span></code> file was misconfigured (a value is missing or invalid).</p>
+<dt><a class="reference internal" href="../apireference.html#royalnet.commands.ConfigurationError" title="royalnet.commands.ConfigurationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></dt><dd><p>A value is missing or invalid in the <code class="docutils literal notranslate"><span class="pre">config.toml</span></code> section of your pack.</p>
 </dd>
 <dt><a class="reference internal" href="../apireference.html#royalnet.commands.ExternalError" title="royalnet.commands.ExternalError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ExternalError</span></code></a></dt><dd><p>An external API the command depends on is unavailable or returned an error.</p>
 </dd>
@@ -381,7 +415,7 @@ Displays the command syntax in the error message.</p>
 <div class="section" id="coroutines-and-slow-operations">
 <h2>Coroutines and slow operations<a class="headerlink" href="#coroutines-and-slow-operations" title="Permalink to this headline">¶</a></h2>
 <p>You may have noticed that in the previous examples we used <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">data.reply(&quot;🍝&quot;)</span></code> instead of just <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>.</p>
-<p>This is because <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CommandData.reply()</span></code></a> isn’t a simple method: it is a coroutine, a special kind of function that
+<p>This is because <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reply()</span></code></a> isn’t a simple method: it is a coroutine, a special kind of function that
 can be executed separately from the rest of the code, allowing the bot to do other things in the meantime.</p>
 <p>By adding the <code class="docutils literal notranslate"><span class="pre">await</span></code> keyword before the <code class="docutils literal notranslate"><span class="pre">data.reply(&quot;🍝&quot;)</span></code>, we tell the bot that it can do other things, like
 receiving new messages, while the message is being sent.</p>
@@ -408,13 +442,13 @@ a coroutine that does the same exact thing but in an asyncronous way.</p>
 <h2>Delete the invoking message<a class="headerlink" href="#delete-the-invoking-message" title="Permalink to this headline">¶</a></h2>
 <p>The invoking message of a command is the message that the user sent that the bot recognized as a command; for example,
 the message <code class="docutils literal notranslate"><span class="pre">/spaghetti</span> <span class="pre">carbonara</span></code> is the invoking message for the <code class="docutils literal notranslate"><span class="pre">spaghetti</span></code> command run.</p>
-<p>You can have the bot delete the invoking message for a command by calling the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.delete_invoking" title="royalnet.commands.CommandData.delete_invoking"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData.delete_invoking</span></code></a>
+<p>You can have the bot delete the invoking message for a command by calling the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.delete_invoking" title="royalnet.commands.CommandData.delete_invoking"><code class="xref py py-class docutils literal notranslate"><span class="pre">delete_invoking</span></code></a>
 method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_invoking</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Not all interfaces support deleting messages; by default, if the interface does not support deletions, the call is
+<p>Not all platforms support deleting messages; by default, if the platform does not support deletions, the call is
 ignored.</p>
 <p>You can have the method raise an error if the message can’t be deleted by setting the <code class="docutils literal notranslate"><span class="pre">error_if_unavailable</span></code> parameter
 to True:</p>
@@ -428,9 +462,29 @@ to True:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="using-the-database">
-<h2>Using the database<a class="headerlink" href="#using-the-database" title="Permalink to this headline">¶</a></h2>
-<p>Bots can be connected to a PostgreSQL database through a special SQLAlchemy interface called
+<div class="section" id="sharing-data-between-multiple-calls">
+<h2>Sharing data between multiple calls<a class="headerlink" href="#sharing-data-between-multiple-calls" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="../apireference.html#royalnet.commands.Command" title="royalnet.commands.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> class is shared between multiple command calls: if you need to store some data, you may store it as a protected/private field of your command class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SpaghettiCommand</span><span class="p">(</span><span class="n">rc</span><span class="o">.</span><span class="n">Command</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;spaghetti&quot;</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Send a spaghetti emoji in the chat.&quot;</span>
+
+    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;(requestedpasta)&quot;</span>
+
+    <span class="n">__total_spaghetti</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandArgs</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">rc</span><span class="o">.</span><span class="n">CommandData</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__total_spaghetti</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🍝 Here&#39;s your </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">!</span><span class="se">\n</span><span class="s2">&quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;[i]Spaghetti have been served </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__total_spaghetti</span><span class="si">}</span><span class="s2"> times.[/i]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Values stored in this way persist <strong>only until the bot is restarted</strong>, and <strong>won’t be shared between different serfs</strong>; if you need persistent values, it is recommended to use a database through the Alchemy service.</p>
+</div>
+<div class="section" id="using-the-alchemy">
+<h2>Using the Alchemy<a class="headerlink" href="#using-the-alchemy" title="Permalink to this headline">¶</a></h2>
+<p>Royalnet can be connected to a PostgreSQL database through a special SQLAlchemy interface called
 <a class="reference internal" href="../apireference.html#royalnet.alchemy.Alchemy" title="royalnet.alchemy.Alchemy"><code class="xref py py-class docutils literal notranslate"><span class="pre">royalnet.alchemy.Alchemy</span></code></a>.</p>
 <p>If the connection is established, the <code class="docutils literal notranslate"><span class="pre">self.alchemy</span></code> and <code class="docutils literal notranslate"><span class="pre">data.session</span></code> fields will be
 available for use in commands.</p>
@@ -501,18 +555,112 @@ if you want the command to raise an error if the number of results is greater th
 </div>
 <div class="section" id="calling-events">
 <h2>Calling Events<a class="headerlink" href="#calling-events" title="Permalink to this headline">¶</a></h2>
-<p>This section is not documented yet.</p>
+<p>You can <strong>call an event</strong> from inside a command, and receive its return value.</p>
+<p>This may be used for example to get data from a different platform, such as getting the users online in a specific Discord server.</p>
+<p>You can call an event with the <a class="reference internal" href="../apireference.html#royalnet.serf.Serf.call_herald_event" title="royalnet.serf.Serf.call_herald_event"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Serf.call_herald_event()</span></code></a> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">serf</span><span class="o">.</span><span class="n">call_herald_event</span><span class="p">(</span><span class="s2">&quot;event_name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also pass parameters to the called event:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">serf</span><span class="o">.</span><span class="n">call_herald_event</span><span class="p">(</span><span class="s2">&quot;event_name&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">kwarg</span><span class="o">=...</span><span class="p">,</span> <span class="o">*...</span><span class="p">,</span> <span class="o">**...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Errors raised by the event will also be raised by the <a class="reference internal" href="../apireference.html#royalnet.serf.Serf.call_herald_event" title="royalnet.serf.Serf.call_herald_event"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Serf.call_herald_event()</span></code></a> method as one of the exceptions described in the <span class="xref std std-ref">Raising errors</span> section.</p>
+</div>
+<div class="section" id="distinguish-between-platforms">
+<h2>Distinguish between platforms<a class="headerlink" href="#distinguish-between-platforms" title="Permalink to this headline">¶</a></h2>
+<p>To see if a command is being run on a specific platform, you can check the type of the <code class="docutils literal notranslate"><span class="pre">self.serf</span></code> object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">royalnet.serf.telegram</span> <span class="k">as</span> <span class="nn">rst</span>
+<span class="kn">import</span> <span class="nn">royalnet.serf.discord</span> <span class="k">as</span> <span class="nn">rsd</span>
+<span class="o">...</span>
+
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serf</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">TelegramSerf</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;This command is being run on Telegram.&quot;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serf</span><span class="p">,</span> <span class="n">rsd</span><span class="o">.</span><span class="n">DiscordSerf</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;This command is being run on Discord.&quot;</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="displaying-keyboards">
 <h2>Displaying Keyboards<a class="headerlink" href="#displaying-keyboards" title="Permalink to this headline">¶</a></h2>
-<p>This section is not documented yet.</p>
+<p>A keyboard is a message with multiple buttons (“keys”) attached which can be pressed by an user viewing the message.</p>
+<p>Once a button is pressed, a callback function is run, which has its own <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData" title="royalnet.commands.CommandData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData</span></code></a> context and can do everything a regular comment call could.</p>
+<p>The callback function is a coroutine accepting a single <code class="docutils literal notranslate"><span class="pre">data:</span> <span class="pre">CommandData</span></code> argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">answer</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">CommandData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;Spaghetti were ejected from your floppy drive!&quot;</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="running-code-at-the-initialization-of-the-bot">
-<h2>Running code at the initialization of the bot<a class="headerlink" href="#running-code-at-the-initialization-of-the-bot" title="Permalink to this headline">¶</a></h2>
-<p>This section is not documented yet.</p>
+<p>To create a new key, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.KeyboardKey" title="royalnet.commands.KeyboardKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyboardKey</span></code></a> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">KeyboardKey</span><span class="p">(</span>
+    <span class="n">short</span><span class="o">=</span><span class="s2">&quot;⏏️&quot;</span><span class="p">,</span>  <span class="c1"># An emoji representing the key on platforms the full message cannot be displayed</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Eject spaghetti from the floppy drive&quot;</span><span class="p">,</span>  <span class="c1"># The text displayed on the key</span>
+    <span class="n">callback</span><span class="o">=</span><span class="n">answer</span>  <span class="c1"># The coroutine to call when the key is pressed.</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>To display a keyboard and wait for a keyboard press, you can use the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.keyboard" title="royalnet.commands.CommandData.keyboard"><code class="xref py py-meth docutils literal notranslate"><span class="pre">keyboard()</span></code></a> asynccontextmanager.
+While the contextmanager is in scope, the keyboard will be valid and it will be possible to interact with it.
+Any further key pressed will be answered with an error message.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">with</span> <span class="n">data</span><span class="o">.</span><span class="n">keyboard</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;What kind of spaghetti would you want to order?&quot;</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="n">keyboard</span><span class="p">):</span>
+    <span class="c1"># This will keep the keyboard valid for 10 seconds</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="replies-in-callbacks">
+<h3>Replies in callbacks<a class="headerlink" href="#replies-in-callbacks" title="Permalink to this headline">¶</a></h3>
+<p>Calls to <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData.reply" title="royalnet.commands.CommandData.reply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reply()</span></code></a> made with the <a class="reference internal" href="../apireference.html#royalnet.commands.CommandData" title="royalnet.commands.CommandData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandData</span></code></a> of a keyboard callback won’t always result in a message being sent: for example, on Telegram, replies will result in a small message being displayed on the top of the screen.</p>
+</div>
+</div>
+<div class="section" id="reading-data-from-the-configuration-file">
+<h2>Reading data from the configuration file<a class="headerlink" href="#reading-data-from-the-configuration-file" title="Permalink to this headline">¶</a></h2>
+<p>You can read data from your pack’s configuration section through the <code class="xref py py-attr docutils literal notranslate"><span class="pre">config</span></code> attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Packs</span><span class="o">.</span><span class="s2">&quot;spaghettipack&quot;</span><span class="p">]</span>
+<span class="n">spaghetti</span> <span class="o">=</span> <span class="p">{</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;al_dente&quot;</span><span class="p">,</span> <span class="n">two</span><span class="o">=</span><span class="n">true</span> <span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Here&#39;s your spaghetti </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;spaghetti&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-code-on-serf-start">
+<h2>Running code on Serf start<a class="headerlink" href="#running-code-on-serf-start" title="Permalink to this headline">¶</a></h2>
+<p>The code inside <code class="docutils literal notranslate"><span class="pre">__init__</span></code> is run only once, during the initialization step of the bot:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serf</span><span class="p">:</span> <span class="s2">&quot;Serf&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">serf</span><span class="o">=</span><span class="n">serf</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># The contents of this variable will be persisted across command calls</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">persistent_variable</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># The text will be printed only if the config flag is set to something</span>
+    <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;spaghetti&quot;</span><span class="p">][</span><span class="s2">&quot;two&quot;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Famme due spaghi!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some methods may be unavailable during the initialization of the Serf.</p>
+</div>
 <div class="section" id="running-repeating-jobs">
 <h3>Running repeating jobs<a class="headerlink" href="#running-repeating-jobs" title="Permalink to this headline">¶</a></h3>
-<p>This section is not documented yet.</p>
+<p>To run a job independently from the rest of the command, you can schedule the execution of a coroutine inside <code class="docutils literal notranslate"><span class="pre">__init__</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">mycoroutine</span><span class="p">():</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Free spaghetti every 60 seconds!&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serf</span><span class="p">:</span> <span class="s2">&quot;Serf&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">serf</span><span class="o">=</span><span class="n">serf</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">mycoroutine</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>As it will be executed once for every platform Royalnet is running on, you may want to run the task only on a single platform:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serf</span><span class="p">:</span> <span class="s2">&quot;Serf&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">serf</span><span class="o">=</span><span class="n">serf</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serf</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">TelegramSerf</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">mycoroutine</span><span class="p">())</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -537,7 +685,7 @@ if you want the command to raise an error if the number of results is greater th
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Stefano Pigozzi
+        &copy; Copyright 2020, Stefano Pigozzi
 
     </p>
   </div>

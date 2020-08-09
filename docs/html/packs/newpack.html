@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating a new Pack &mdash; Royalnet 5.6.2 documentation</title>
+  <title>Creating a new Pack &mdash; Royalnet 5.10.4 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                5.6.2
+                5.10.4
               </div>
             
           
@@ -92,7 +92,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#creating-the-repository">Creating the repository</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pyproject-toml">pyproject.toml</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#examplepack">examplepack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#version-py">version.py</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#the-commands-folder">The commands folder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#the-events-folder">The events folder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#the-stars-folder">The stars folder</a></li>
@@ -102,6 +101,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#adding-new-dependencies-to-the-pack">Adding new dependencies to the Pack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-the-dependencies">Updating the dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-readme-md-file">The README.md file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#publishing-the-pack">Publishing the pack</a></li>
 </ul>
 </li>
@@ -183,14 +184,14 @@
 <h1>Creating a new Pack<a class="headerlink" href="#creating-a-new-pack" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p>You’ll need to have <a class="reference external" href="https://www.python.org/downloads/release/python-382/">Python 3.8</a> and <a class="reference external" href="https://github.com/python-poetry/poetry">poetry</a>
+<p>You’ll need to have <a class="reference external" href="https://www.pyth1on.org/downloads/release/python-382/">Python 3.8</a> and <a class="reference external" href="https://github.com/python-poetry/poetry">poetry</a>
 to develop Royalnet Packs.</p>
 </div>
 <div class="section" id="creating-the-repository">
 <h2>Creating the repository<a class="headerlink" href="#creating-the-repository" title="Permalink to this headline">¶</a></h2>
 <p>To create a new pack, create a new repository based on the <a class="reference external" href="https://github.com/Steffo99/royalnet-pack-template">Royalnet Pack template</a>
 and clone it to your workspace.</p>
-<p>After cloning the template, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code> to install the dependencies for the pack, creating the <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code> file.</p>
+<p>After cloning the template, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code> to create a virtualenv and install the dependencies for the pack in it.</p>
 <div class="section" id="pyproject-toml">
 <h3>pyproject.toml<a class="headerlink" href="#pyproject-toml" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file contains information about your Python project that will be read by <code class="docutils literal notranslate"><span class="pre">poetry</span></code> while building
@@ -207,24 +208,14 @@ the pack and publishing it to PyPI.</p>
 <div class="section" id="examplepack">
 <h3>examplepack<a class="headerlink" href="#examplepack" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">examplepack</span></code> folder contains the source code of your pack, and should be renamed to the name you set in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file.</p>
-<p>It should contain a <code class="docutils literal notranslate"><span class="pre">version.py</span></code> file and six folders:</p>
+<p>It should contain six folders:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>examplepack
 ├── commands
 ├── events
 ├── stars
 ├── tables
 ├── types
-├── utils
-└── version.py
-</pre></div>
-</div>
-</div>
-<div class="section" id="version-py">
-<h3>version.py<a class="headerlink" href="#version-py" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">version.py</span></code> file contains the version number of your pack.</p>
-<p>If you changed the <code class="docutils literal notranslate"><span class="pre">version</span></code> field in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file, change the value of <code class="docutils literal notranslate"><span class="pre">semantic</span></code> in <code class="docutils literal notranslate"><span class="pre">version.py</span></code> to the same value.</p>
-<p>Remember to use <a class="reference external" href="https://semver.org/">semantic versioning</a>!</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">semantic</span> <span class="o">=</span> <span class="s2">&quot;1.0.0&quot;</span>
+└── utils
 </pre></div>
 </div>
 </div>
@@ -264,13 +255,22 @@ the pack and publishing it to PyPI.</p>
 </div>
 <div class="section" id="adding-new-dependencies-to-the-pack">
 <h2>Adding new dependencies to the Pack<a class="headerlink" href="#adding-new-dependencies-to-the-pack" title="Permalink to this headline">¶</a></h2>
-<p>As the Pack is actually a Python package, you can use <code class="docutils literal notranslate"><span class="pre">poetry</span></code> (or <code class="docutils literal notranslate"><span class="pre">pip</span></code>) to add new dependencies!</p>
+<p>As the Pack is actually a Python package, you can use <code class="docutils literal notranslate"><span class="pre">poetry</span></code> to add new dependencies!</p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">add</span> <span class="pre">packagename</span></code> to add and install a new dependency from the PyPI.</p>
+</div>
+<div class="section" id="updating-the-dependencies">
+<h2>Updating the dependencies<a class="headerlink" href="#updating-the-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>You can update all your dependencies by using: <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">update</span></code>.</p>
+</div>
+<div class="section" id="the-readme-md-file">
+<h2>The README.md file<a class="headerlink" href="#the-readme-md-file" title="Permalink to this headline">¶</a></h2>
+<p>The README.md file is the first thing that users of your pack will see!</p>
+<p>It’s recommended to describe accurately how to install and configure the pack, so other users will be able to use it too!</p>
 </div>
 <div class="section" id="publishing-the-pack">
 <h2>Publishing the pack<a class="headerlink" href="#publishing-the-pack" title="Permalink to this headline">¶</a></h2>
-<p>To publish your Pack on the PyPI, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">build</span></code>, then <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">publish</span></code>.</p>
-<p>Poetry will build your Pack and upload it to the PyPI for you.</p>
+<p>To publish your Pack on the PyPI, run <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">publish</span> <span class="pre">--build</span></code>.</p>
+<p>Poetry will build your Pack and upload it to the PyPI for you!</p>
 </div>
 </div>
 
@@ -294,7 +294,7 @@ the pack and publishing it to PyPI.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Stefano Pigozzi
+        &copy; Copyright 2020, Stefano Pigozzi
 
     </p>
   </div>

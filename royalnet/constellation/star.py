@@ -28,13 +28,13 @@ class Star(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     @property
-    def alchemy(self) -> Alchemy:
+    def alchemy(self) -> "Alchemy":
         """A shortcut for the :class:`~royalnet.alchemy.Alchemy` of the :class:`Constellation`."""
         return self.constellation.alchemy
 
     # noinspection PyPep8Naming
     @property
-    def Session(self) -> sqlalchemy.orm.session.Session:
+    def Session(self) -> "sqlalchemy.orm.session.Session":
         """A shortcut for the :class:`~royalnet.alchemy.Alchemy` :class:`Session` of the :class:`Constellation`."""
         return self.constellation.alchemy.Session
 

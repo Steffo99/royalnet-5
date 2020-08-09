@@ -39,7 +39,7 @@ class Command(metaclass=abc.ABCMeta):
         return f"[c]{self.serf.prefix}{self.name}[/c]"
 
     @property
-    def alchemy(self) -> Alchemy:
+    def alchemy(self) -> "Alchemy":
         """A shortcut for :attr:`.interface.alchemy`."""
         return self.serf.alchemy
 

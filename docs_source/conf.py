@@ -20,7 +20,7 @@ import royalnet
 
 project = 'Royalnet'
 # noinspection PyShadowingBuiltins
-copyright = '2019, Stefano Pigozzi'
+copyright = '2020, Stefano Pigozzi'
 author = 'Stefano Pigozzi'
 version = royalnet.__version__
 release = royalnet.__version__
