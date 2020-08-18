@@ -1,7 +1,9 @@
-from contextlib import contextmanager, asynccontextmanager
 from typing import *
+import contextlib
+import logging
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import sessionmaker
@@ -14,6 +16,8 @@ from royalnet.utils import asyncify
 if TYPE_CHECKING:
     # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
 
 
 class Alchemy:
@@ -42,7 +46,12 @@ class Alchemy:
             # noinspection PyTypeChecker
             bound_table: Table = type(name, (self._Base, table), {})
             self._tables[name] = bound_table
-        self._Base.metadata.create_all()
+        # FIXME: Dirty hack
+        try:
+            self._Base.metadata.create_all()
+        except ProgrammingError:
+            log.warning("Skipping table creation, as it is probably being created by a different process.")
+
 
     def get(self, table: Union[str, type]) -> DeclarativeMeta:
         """Get the table with a specified name or class.
@@ -66,7 +75,7 @@ class Alchemy:
         else:
             raise TypeError(f"Can't get tables with objects of type '{table.__class__.__qualname__}'")
 
-    @contextmanager
+    @contextlib.contextmanager
     def session_cm(self) -> Iterator[Session]:
         """Create a Session as a context manager (that can be used in ``with`` statements).
 
@@ -91,7 +100,7 @@ class Alchemy:
         finally:
             session.close()
 
-    @asynccontextmanager
+    @contextlib.asynccontextmanager
     async def session_acm(self) -> AsyncIterator[Session]:
         """Create a Session as a async context manager (that can be used in ``async with`` statements).
 

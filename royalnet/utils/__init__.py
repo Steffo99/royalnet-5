@@ -7,6 +7,7 @@ from .sentry import init_sentry, sentry_exc, sentry_wrap, sentry_async_wrap
 from .sleep_until import sleep_until
 from .strip_tabs import strip_tabs
 from .urluuid import to_urluuid, from_urluuid
+from .taskslist import TaskList
 
 __all__ = [
     "asyncify",
@@ -26,4 +27,5 @@ __all__ = [
     "init_logging",
     "JSON",
     "strip_tabs",
+    "TaskList",
 ]

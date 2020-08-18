@@ -6,7 +6,9 @@ log = logging.getLogger(__name__)
 
 
 class MultiLock:
-    """A lock that can allow both simultaneous access and exclusive access to a resource."""
+    """A lock that allows either simultaneous read access or exclusive write access.
+
+    Basically, a reimplementation of Rust's `RwLock <https://doc.rust-lang.org/beta/std/sync/struct.RwLock.html>`_ ."""
 
     def __init__(self):
         self._counter: int = 0
@@ -40,7 +42,6 @@ class MultiLock:
     async def exclusive(self):
         """Acquire the lock for exclusive access."""
         log.debug(f"Waiting for exclusive lock end: {self}")
-        # TODO: check if this actually works
         await self._exclusive_event.wait()
         self._exclusive_event.clear()
         log.debug(f"Waiting for normal lock end: {self}")

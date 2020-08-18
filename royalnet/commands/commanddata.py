@@ -21,6 +21,16 @@ class CommandData:
     def loop(self):
         return self.command.serf.loop
 
+    @property
+    def alchemy(self):
+        """A shortcut for :attr:`.command.alchemy`."""
+        return self.command.alchemy
+
+    @property
+    def session_acm(self):
+        """A shortcut for :attr:`.alchemy.session_acm`."""
+        return self.alchemy.session_acm
+
     async def reply(self, text: str) -> None:
         """Send a text message to the channel where the call was made.
 

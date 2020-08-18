@@ -40,12 +40,17 @@ class Command(metaclass=abc.ABCMeta):
 
     @property
     def alchemy(self) -> "Alchemy":
-        """A shortcut for :attr:`.interface.alchemy`."""
+        """A shortcut for :attr:`.serf.alchemy`."""
         return self.serf.alchemy
 
     @property
+    def session_acm(self):
+        """A shortcut for :attr:`.alchemy.session_acm`."""
+        return self.alchemy.session_acm
+
+    @property
     def loop(self) -> aio.AbstractEventLoop:
-        """A shortcut for :attr:`.interface.loop`."""
+        """A shortcut for :attr:`.serf.loop`."""
         return self.serf.loop
 
     @abc.abstractmethod

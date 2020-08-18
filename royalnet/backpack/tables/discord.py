@@ -15,7 +15,7 @@ class Discord:
 
     @declared_attr
     def user_id(self):
-        return Column(Integer, ForeignKey("users.uid"))
+        return Column(Integer, ForeignKey("users.uid"), nullable=False)
 
     @declared_attr
     def user(self):

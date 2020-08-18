@@ -17,6 +17,7 @@ class ApiUserCreateStar(rca.ApiStar):
 
     tags = ["user"]
 
+    @rca.magic
     async def post(self, data: rca.ApiData) -> ru.JSON:
         """Create a new Royalnet account."""
         UserT = self.alchemy.get(User)

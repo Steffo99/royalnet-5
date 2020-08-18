@@ -220,7 +220,7 @@ class Constellation:
         for SelectedEvent in events:
             # Initialize the event
             try:
-                event = SelectedEvent(constellation=self, config=pack_cfg)
+                event = SelectedEvent(parent=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
@@ -262,7 +262,7 @@ class Constellation:
             self.starlette.add_route(*self._page_star_wrapper(page_star_instance))
 
     def run_blocking(self):
-        log.info(f"Running Constellation on https://{self.address}:{self.port}/...")
+        log.info(f"Running Constellation on http://{self.address}:{self.port}/...")
         self.running = True
         try:
             uvicorn.run(self.starlette, host=self.address, port=self.port, log_config=UVICORN_LOGGING_CONFIG)

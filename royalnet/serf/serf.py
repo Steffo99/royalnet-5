@@ -36,6 +36,9 @@ class Serf(abc.ABC):
         self.loop: Optional[aio.AbstractEventLoop] = loop
         """The event loop this Serf is running on."""
 
+        self.tasks: Optional[ru.TaskList] = ru.TaskList(self.loop)
+        """A list of all running tasks of the serf. Initialized at the serf start."""
+
         # Import packs
         pack_names = packs_cfg["active"]
         packs = {}
@@ -63,8 +66,8 @@ class Serf(abc.ABC):
         """The identity table containing the interface data (such as the Telegram user data) and that is in a 
         many-to-one relationship with the master table."""
 
-        # TODO: I'm not sure what this is either
         self.identity_column: Optional[str] = None
+        """The name of the column in the identity table that contains a unique user identifier. (???)"""
 
         # Alchemy
         if ra.Alchemy is None:
@@ -76,6 +79,7 @@ class Serf(abc.ABC):
             tables = set()
             for pack in packs.values():
                 try:
+                    # noinspection PyUnresolvedReferences
                     tables = tables.union(pack["tables"].available_tables)
                 except AttributeError:
                     log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
@@ -100,12 +104,14 @@ class Serf(abc.ABC):
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
+                # noinspection PyUnresolvedReferences
                 events = pack["events"].available_events
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_events` attribute.")
             else:
                 self.register_events(events, pack_cfg)
             try:
+                # noinspection PyUnresolvedReferences
                 commands = pack["commands"].available_commands
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_commands` attribute.")
@@ -216,7 +222,7 @@ class Serf(abc.ABC):
         for SelectedEvent in events:
             # Initialize the event
             try:
-                event = SelectedEvent(serf=self, config=pack_cfg)
+                event = SelectedEvent(parent=self, config=pack_cfg)
             except Exception as e:
                 log.error(f"Skipping: "
                           f"{SelectedEvent.__qualname__} - {e.__class__.__qualname__} in the initialization.")
@@ -282,8 +288,6 @@ class Serf(abc.ABC):
         except Exception as e:
             ru.sentry_exc(e)
             await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(map(lambda a: repr(a), e.args)))
-        finally:
-            await data.session_close()
 
     @staticmethod
     async def press(key: rc.KeyboardKey, data: rc.CommandData):
@@ -307,12 +311,10 @@ class Serf(abc.ABC):
         except Exception as e:
             ru.sentry_exc(e)
             await data.reply(f"⛔️ [b]{e.__class__.__name__}[/b]\n" + '\n'.join(map(lambda a: repr(a), e.args)))
-        finally:
-            await data.session_close()
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""
-        self.herald_task = self.loop.create_task(self.herald.run())
+        self.herald_task = self.tasks.add(self.herald.run())
         # OVERRIDE THIS METHOD!
 
     @classmethod

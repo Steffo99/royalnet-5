@@ -127,7 +127,8 @@ class TelegramSerf(Serf):
                     if error_if_none:
                         raise rc.CommandError("No command caller for this message")
                     return None
-                query = data.session.query(self.master_table)
+                async with data.session_acm() as session:
+                    query = session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -189,7 +190,8 @@ class TelegramSerf(Serf):
                     if error_if_none:
                         raise rc.CommandError("No command caller for this message")
                     return None
-                query = data.session.query(self.master_table)
+                async with data.session_acm() as session:
+                    query = session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -206,25 +208,27 @@ class TelegramSerf(Serf):
     async def handle_update(self, update: telegram.Update):
         """Delegate :class:`telegram.Update` handling to the correct message type submethod."""
         if update.message is not None:
+            log.debug(f"Handling update as a message")
             await self.handle_message(update.message)
         elif update.edited_message is not None:
-            pass
+            log.debug(f"Update is a edited message, not doing anything")
         elif update.channel_post is not None:
-            pass
+            log.debug(f"Update is a channel post, not doing anything")
         elif update.edited_channel_post is not None:
-            pass
+            log.debug(f"Update is a channel edit, not doing anything")
         elif update.inline_query is not None:
-            pass
+            log.debug(f"Update is a inline query, not doing anything")
         elif update.chosen_inline_result is not None:
-            pass
+            log.debug(f"Update is a chosen inline result, not doing anything")
         elif update.callback_query is not None:
+            log.debug(f"Handling update as a callback query")
             await self.handle_callback_query(update.callback_query)
         elif update.shipping_query is not None:
-            pass
+            log.debug(f"Update is a shipping query, not doing anything")
         elif update.pre_checkout_query is not None:
-            pass
+            log.debug(f"Update is a precheckout query, not doing anything")
         elif update.poll is not None:
-            pass
+            log.debug(f"Update is a poll, not doing anything")
         else:
             log.warning(f"Unknown update type: {update}")
 
@@ -236,25 +240,31 @@ class TelegramSerf(Serf):
             text: str = message.caption
         # No text or caption, ignore the message
         if text is None:
+            log.debug("Skipping message as it had no text or caption")
             return
         # Skip non-command updates
-        if not text.startswith("/"):
+        if not text.startswith(self.prefix):
+            log.debug(f"Skipping message as it didn't start with {self.prefix}")
             return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
-        command_name = command_text.replace(f"@{self.client.username}", "").lower()
+        command_name = command_text.replace(f"@{self.client.username}", "").lstrip(self.prefix).lower()
+        log.debug(f"Parsed '{command_name}' as command name")
         # Find the command
         try:
             command = self.commands[command_name]
         except KeyError:
             # Skip the message
+            log.debug(f"Skipping message as I could not find the command {command_name}")
             return
         # Send a typing notification
+        log.debug(f"Sending typing notification")
         await self.api_call(message.chat.send_action, telegram.ChatAction.TYPING)
         # Prepare data
         # noinspection PyArgumentList
         data = self.MessageData(command=command, message=message)
         # Call the command
+        log.debug(f"Calling {command}")
         await self.call(command, data, parameters)
 
     async def handle_callback_query(self, cbq: telegram.CallbackQuery):
@@ -270,16 +280,25 @@ class TelegramSerf(Serf):
     async def run(self):
         await super().run()
         while True:
+            # Collect ended tasks
+            self.tasks.collect()
             # Get the latest 100 updates
-            last_updates: List[telegram.Update] = await self.api_call(self.client.get_updates,
-                                                                      offset=self.update_offset,
-                                                                      timeout=60,
-                                                                      read_latency=5.0)
+            log.debug("Getting updates...")
+            last_updates: Optional[List[telegram.Update]] = await self.api_call(
+                self.client.get_updates,
+                offset=self.update_offset,
+                timeout=60,
+                read_latency=5.0
+            )
+            # Ensure a list was returned from the API call
+            if not isinstance(last_updates, list):
+                log.warning("Received invalid data from get_updates, sleeping for 60 seconds, hoping it fixes itself.")
+                await aio.sleep(60)
+                continue
             # Handle updates
+            log.debug("Handling updates...")
             for update in last_updates:
-                # TODO: don't lose the reference to the task
-                # noinspection PyAsyncCall
-                self.loop.create_task(self.handle_update(update))
+                self.tasks.add(self.handle_update(update))
             # Recalculate offset
             try:
                 self.update_offset = last_updates[-1].update_id + 1

@@ -73,7 +73,8 @@ class DiscordSerf(Serf):
 
             async def get_author(data, error_if_none=False):
                 user: "discord.Member" = data.message.author
-                query = data.session.query(self.master_table)
+                async with data.session_acm() as session:
+                    query = session.query(self.master_table)
                 for link in self.identity_chain:
                     query = query.join(link.mapper.class_)
                 query = query.filter(self.identity_column == user.id)
@@ -135,8 +136,7 @@ class DiscordSerf(Serf):
             # noinspection PyMethodMayBeStatic
             async def on_message(cli, message: "discord.Message") -> None:
                 """Handle messages received by passing them to the handle_message method of the bot."""
-                # TODO: keep reference to these tasks somewhere
-                self.loop.create_task(self.handle_message(message))
+                self.tasks.add(self.handle_message(message))
 
             async def on_ready(cli) -> None:
                 """Change the bot presence to ``online`` when the bot is ready."""
