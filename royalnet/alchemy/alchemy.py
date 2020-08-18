@@ -1,6 +1,6 @@
-from typing import *
 import contextlib
 import logging
+from typing import *
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError
@@ -51,7 +51,6 @@ class Alchemy:
             self._Base.metadata.create_all()
         except ProgrammingError:
             log.warning("Skipping table creation, as it is probably being created by a different process.")
-
 
     def get(self, table: Union[str, type]) -> DeclarativeMeta:
         """Get the table with a specified name or class.

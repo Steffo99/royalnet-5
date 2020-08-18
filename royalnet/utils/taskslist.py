@@ -1,6 +1,7 @@
-from typing import *
 import asyncio as aio
 import logging
+from typing import *
+
 from .sentry import sentry_exc
 
 log = logging.getLogger(__name__)

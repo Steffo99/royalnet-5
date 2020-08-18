@@ -3,7 +3,6 @@ import io
 import logging
 from typing import *
 
-import royalnet.utils as ru
 from royalnet.backpack.tables.users import User
 from .errors import UnsupportedError
 

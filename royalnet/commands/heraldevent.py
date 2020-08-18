@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING, Union
 import asyncio as aio
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from ..serf import Serf
