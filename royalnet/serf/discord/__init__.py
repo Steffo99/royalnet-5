@@ -10,12 +10,8 @@ Install it with: ::
 
 from .discordserf import DiscordSerf
 from .escape import escape
-from .playable import Playable
-from .voiceplayer import VoicePlayer
 
 __all__ = [
     "escape",
     "DiscordSerf",
-    "Playable",
-    "VoicePlayer",
 ]

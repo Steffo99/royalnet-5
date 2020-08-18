@@ -8,6 +8,7 @@ from .sleep_until import sleep_until
 from .strip_tabs import strip_tabs
 from .taskslist import TaskList
 from .urluuid import to_urluuid, from_urluuid
+from .royalnetprocess import RoyalnetProcess
 
 __all__ = [
     "asyncify",
@@ -28,4 +29,5 @@ __all__ = [
     "JSON",
     "strip_tabs",
     "TaskList",
+    "RoyalnetProcess",
 ]
