@@ -180,5 +180,6 @@ def run(config_file: str):
             process.current_process.kill()
         log.info("Goodbye!")
 
+
 if __name__ == "__main__":
     run()
