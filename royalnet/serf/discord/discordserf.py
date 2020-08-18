@@ -93,40 +93,38 @@ class DiscordSerf(Serf):
         text = message.content
         # Skip non-text messages
         if not text:
+            log.debug("Skipping message as it had no text")
             return
         # Skip non-command updates
-        if not text.startswith("!"):
+        if not text.startswith(self.prefix):
+            log.debug(f"Skipping message as it didn't start with {self.prefix}")
             return
         # Skip bot messages
         author: Union["discord.User", "discord.Member"] = message.author
         if author.bot:
+            log.debug(f"Skipping message as it was from another bot")
             return
         # Find and clean parameters
         command_text, *parameters = text.split(" ")
         # Don't use a case-sensitive command name
-        command_name = command_text.lower()
+        command_name = command_text.lstrip(self.prefix).lower()
+        log.debug(f"Parsed '{command_name}' as command name")
         # Find the command
         try:
             command = self.commands[command_name]
         except KeyError:
             # Skip the message
+            log.debug(f"Skipping message as I could not find the command {command_name}")
             return
         # Call the command
-        log.debug(f"Calling command '{command.name}'")
+        log.debug(f"Sending typing notification")
         with message.channel.typing():
-            # Open an alchemy session, if available
-            if self.alchemy is not None:
-                session = await asyncify(self.alchemy.Session)
-            else:
-                session = None
             # Prepare data
             # noinspection PyArgumentList
             data = self.Data(command=command, message=message)
             # Call the command
+            log.debug(f"Calling {command}")
             await self.call(command, data, parameters)
-            # Close the alchemy session
-            if session is not None:
-                await asyncify(session.close)
 
     def client_factory(self) -> Type["discord.Client"]:
         """Create a custom class inheriting from :py:class:`discord.Client`."""

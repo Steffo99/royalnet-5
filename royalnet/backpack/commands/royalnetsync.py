@@ -69,12 +69,13 @@ class RoyalnetsyncCommand(rc.Command):
                 )
                 if ds_user is None:
                     # Create
+                    # noinspection PyProtectedMember
                     ds_user = DiscordT(
                         user=user,
                         discord_id=ds_author.id,
                         username=ds_author.name,
                         discriminator=ds_author.discriminator,
-                        avatar_url=ds_author.avatar_url
+                        avatar_url=ds_author.avatar_url._url
                     )
                     session.add(ds_user)
                 else:
