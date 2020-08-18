@@ -54,15 +54,15 @@ class Config:
 
     @classmethod
     def from_config(
-                cls, *,
-                name: str,
-                address: str,
-                port: int,
-                secret: str,
-                secure: bool = False,
-                path: str = "/",
-                **_,
-            ):
+            cls, *,
+            name: str,
+            address: str,
+            port: int,
+            secret: str,
+            secure: bool = False,
+            path: str = "/",
+            **_,
+    ):
         return cls(
             name=name,
             address=address,

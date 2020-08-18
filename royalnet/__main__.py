@@ -1,14 +1,13 @@
-from typing import *
-
 import logging
 import multiprocessing
 import time
+from typing import *
 
 import click
 import toml
 
-import royalnet.utils as ru
 import royalnet.serf as rs
+import royalnet.utils as ru
 
 try:
     import royalnet.serf.telegram as rst
@@ -124,6 +123,7 @@ def run(config_file: str):
                             "serf_cfg": serf_cfg,
                         }
                     )
+
                 processes[f"Serf.{name}"] = ru.RoyalnetProcess(serf_constructor, None)
                 log.info(f"Serf.{name}: Enabled")
 
@@ -154,6 +154,7 @@ def run(config_file: str):
                     "constellation_cfg": config["Constellation"],
                 }
             )
+
         processes["Constellation"] = ru.RoyalnetProcess(constellation_constructor, None)
 
         log.info("Constellation: Enabled")

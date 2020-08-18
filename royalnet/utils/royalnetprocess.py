@@ -1,6 +1,6 @@
-from typing import *
 import dataclasses
 import multiprocessing
+from typing import *
 
 
 @dataclasses.dataclass()
