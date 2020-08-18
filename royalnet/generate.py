@@ -36,6 +36,7 @@ def run(config_filename, file_format):
             lines = []
 
             try:
+                # noinspection PyUnresolvedReferences
                 commands = pack["commands"].available_commands
             except AttributeError:
                 p(f"Pack `{pack}` does not have the `available_commands` attribute.", err=True)

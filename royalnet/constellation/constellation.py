@@ -69,6 +69,7 @@ class Constellation:
             tables = set()
             for pack in packs.values():
                 try:
+                    # noinspection PyUnresolvedReferences
                     tables = tables.union(pack["tables"].available_tables)
                 except AttributeError:
                     log.warning(f"Pack `{pack}` does not have the `available_tables` attribute.")
@@ -108,6 +109,7 @@ class Constellation:
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
+                # noinspection PyUnresolvedReferences
                 events = pack["events"].available_events
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_events` attribute.")
@@ -127,6 +129,7 @@ class Constellation:
             pack = packs[pack_name]
             pack_cfg = packs_cfg.get(pack_name, {})
             try:
+                # noinspection PyUnresolvedReferences
                 page_stars = pack["stars"].available_page_stars
             except AttributeError:
                 log.warning(f"Pack `{pack}` does not have the `available_page_stars` attribute.")
@@ -248,7 +251,7 @@ class Constellation:
 
         return page_star.path, f, page_star.methods()
 
-    def register_page_stars(self, page_stars: List[Type[PageStar]], pack_cfg: Dict[str, Any]):
+    def register_page_stars(self, page_stars: List[Type[PageStar]], pack_cfg: rc.ConfigDict):
         for SelectedPageStar in page_stars:
             log.debug(f"Registering: {SelectedPageStar.path} -> {SelectedPageStar.__qualname__}")
             try:

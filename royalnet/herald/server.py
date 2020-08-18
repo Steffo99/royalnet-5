@@ -60,6 +60,7 @@ class Server:
             matching = [client for client in self.identified_clients if client.link_type == link_type]
             return matching or []
 
+    # noinspection PyUnusedLocal
     async def listener(self, websocket: "websockets.server.WebSocketServerProtocol", path):
         connected_client = ConnectedClient(websocket)
         # Wait for identification

@@ -74,6 +74,7 @@ class User:
 
     @property
     def roles(self) -> list:
+        # noinspection PyUnresolvedReferences
         return list(map(lambda a: a.role, self._roles))
 
     def add_role(self, alchemy, role: str) -> None:
@@ -90,6 +91,7 @@ class User:
 
     @property
     def aliases(self) -> list:
+        # noinspection PyUnresolvedReferences
         return list(map(lambda a: a.alias, self._aliases))
 
     def add_alias(self, alchemy, alias: str) -> None:

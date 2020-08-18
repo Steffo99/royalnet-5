@@ -16,9 +16,8 @@ Commands using the Royalnet Serf API share their code between chat platforms: ea
 
 - [Telegram](https://core.telegram.org/bots)
 - [Discord](https://discordapp.com/developers/docs/)
-- [Matrix](https://matrix.org/) (alpha)
 
-More can easily be added by creating a new serf!
+More can easily be added by implementing a new serf!
 
 ### [Alchemy](royalnet/alchemy)
 

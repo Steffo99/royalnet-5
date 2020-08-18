@@ -37,11 +37,7 @@ class ApiUserPasswd(rca.ApiStar):
         tokens: List[Token] = await ru.asyncify(
             data.session
                 .query(self.alchemy.get(Token))
-                .filter(
-                and_(
-                    TokenT.user == user,
-                    TokenT.expiration >= datetime.datetime.now()
-                ))
+                .filter(and_(TokenT.user == user, TokenT.expiration >= datetime.datetime.now()))
                 .all
         )
         for t in tokens:

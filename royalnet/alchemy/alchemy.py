@@ -5,7 +5,6 @@ from typing import *
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Table
@@ -52,7 +51,7 @@ class Alchemy:
         except ProgrammingError:
             log.warning("Skipping table creation, as it is probably being created by a different process.")
 
-    def get(self, table: Union[str, type]) -> DeclarativeMeta:
+    def get(self, table: Union[str, type]) -> Any:
         """Get the table with a specified name or class.
 
         Args:

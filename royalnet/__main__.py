@@ -20,11 +20,6 @@ except ImportError:
     rsd = None
 
 try:
-    import royalnet.serf.matrix as rsm
-except ImportError:
-    rsm = None
-
-try:
     import royalnet.constellation as rc
 except ImportError:
     rc = None
@@ -100,18 +95,18 @@ def run(config_file: str):
     else:
         log.debug("__serfs__: Configured")
 
-        def configure_serf(name: str, module, class_: Type[rs.Serf]):
-            serf_cfg = serfs_cfg.get(name)
+        def configure_serf(n: str, module, class_: Type[rs.Serf]):
+            serf_cfg = serfs_cfg.get(n)
             if module is None:
-                log.info(f"Serf.{name}: Not installed")
+                log.info(f"Serf.{n}: Not installed")
             elif serf_cfg is None:
-                log.warning(f"Serf.{name}: Not configured")
+                log.warning(f"Serf.{n}: Not configured")
             elif not serf_cfg["enabled"]:
-                log.info(f"Serf.{name}: Disabled")
+                log.info(f"Serf.{n}: Disabled")
             else:
                 def serf_constructor() -> multiprocessing.Process:
                     return multiprocessing.Process(
-                        name=f"Serf.{name}",
+                        name=f"Serf.{n}",
                         target=class_.run_process,
                         daemon=True,
                         kwargs={
@@ -124,12 +119,11 @@ def run(config_file: str):
                         }
                     )
 
-                processes[f"Serf.{name}"] = ru.RoyalnetProcess(serf_constructor, None)
-                log.info(f"Serf.{name}: Enabled")
+                processes[f"Serf.{n}"] = ru.RoyalnetProcess(serf_constructor, None)
+                log.info(f"Serf.{n}: Enabled")
 
         configure_serf("Telegram", rst, rst.TelegramSerf)
         configure_serf("Discord", rsd, rsd.DiscordSerf)
-        configure_serf("Matrix", rsm, rsm.MatrixSerf)
 
     # Constellation
     constellation_cfg = config.get("Constellation")

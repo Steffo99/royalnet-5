@@ -48,6 +48,7 @@ intersphinx_mapping = {
 }
 
 
+# noinspection PyUnusedLocal
 def skip(app, what, name: str, obj, would_skip, options):
     if name == "__init__" or name == "__getitem__" or name == "__getattr__":
         return not bool(obj.__doc__)
