@@ -16,35 +16,10 @@ log = logging.getLogger(__name__)
 class CommandData:
     def __init__(self, command):
         self.command = command
-        self._session = None
-
-    # TODO: make this asyncronous... somehow?
-    @property
-    def session(self):
-        if self._session is None:
-            if self.command.serf.alchemy is None:
-                raise UnsupportedError("'alchemy' is not enabled on this Royalnet instance")
-            log.debug("Creating Session...")
-            self._session = self.command.serf.alchemy.Session()
-        return self._session
 
     @property
     def loop(self):
         return self.command.serf.loop
-
-    async def session_commit(self):
-        """Asyncronously commit the :attr:`.session` of this object."""
-        if self._session:
-            log.warning("Session had to be created to be committed")
-        # noinspection PyUnresolvedReferences
-        log.debug("Committing Session...")
-        await ru.asyncify(self.session.commit)
-
-    async def session_close(self):
-        """Asyncronously close the :attr:`.session` of this object."""
-        if self._session is not None:
-            log.debug("Closing Session...")
-            await ru.asyncify(self._session.close)
 
     async def reply(self, text: str) -> None:
         """Send a text message to the channel where the call was made.
@@ -84,7 +59,8 @@ class CommandData:
 
         Parameters:
             alias: the Alias to search for."""
-        return await User.find(self.command.serf.alchemy, self.session, alias)
+        async with self.command.alchemy.session_acm() as session:
+            return await User.find(self.command.serf.alchemy, session, alias)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
