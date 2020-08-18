@@ -42,12 +42,6 @@ The Constellation service is a [Starlette](https://www.starlette.io )-based webs
 
 The Constellation service also offers utilities for creating REST APIs as Python functions with `dict`s as inputs and outputs, leaving (de)serialization, transmission and eventually authentication to Royalnet.
 
-### _Deprecated:_ [Bard](royalnet/bard)
-
-The Bard module allows Royalnet services to safely download and convert video files through [youtube-dl](https://youtube-dl.org/) and [ffmpeg](https://ffmpeg.org/).
-
-It is mainly used to playback music on Discord Channels.
-
 ### Sentry
 
 Royalnet can automatically report uncaught errors in all services to a [Sentry](https://sentry.io )-compatible server, while logging them in the console in development environments to facilitate debugging.
@@ -104,7 +98,7 @@ cd royalnet
 And finally install all dependencies and the package:
 
 ```
-poetry install -E telegram -E discord -E matrix -E alchemy_easy -E bard -E constellation -E sentry -E herald -E coloredlogs
+poetry install -E telegram -E discord -E matrix -E alchemy_easy -E constellation -E sentry -E herald -E coloredlogs
 ```
 
 ## Help!

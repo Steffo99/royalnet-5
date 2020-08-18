@@ -11,7 +11,6 @@ import royalnet.commands as rc
 from royalnet.serf import Serf
 from royalnet.utils import asyncify, sentry_exc
 from .escape import escape
-from .voiceplayer import VoicePlayer
 
 log = logging.getLogger(__name__)
 
@@ -50,9 +49,6 @@ class DiscordSerf(Serf):
 
         self.client = self.Client(status=discord.Status.do_not_disturb)
         """The custom :class:`discord.Client` instance."""
-
-        self.voice_players: List[VoicePlayer] = []
-        """A :class:`list` of the :class:`VoicePlayer` in use by this :class:`DiscordSerf`."""
 
         self.Data: Type[rc.CommandData] = self.data_factory()
 
@@ -163,16 +159,3 @@ class DiscordSerf(Serf):
             except discord.ConnectionClosed:
                 log.error("Discord connection was closed! Retrying in 15 seconds...")
                 await aio.sleep(60)
-
-    def find_voice_players(self, guild: "discord.Guild") -> List[VoicePlayer]:
-        candidate_players: List[VoicePlayer] = []
-        for player in self.voice_players:
-            player: VoicePlayer
-            if not player.voice_client.is_connected():
-                continue
-            if guild is not None and guild != player.voice_client.guild:
-                continue
-            candidate_players.append(player)
-        if guild:
-            assert len(candidate_players) <= 1
-        return candidate_players
