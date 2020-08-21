@@ -1,6 +1,5 @@
 import royalnet.commands as rc
 import royalnet.serf.discord as rsd
-import royalnet.serf.matrix as rsm
 import royalnet.serf.telegram as rst
 import royalnet.utils as ru
 from ..tables.discord import Discord
@@ -85,9 +84,6 @@ class RoyalnetsyncCommand(rc.Command):
                     ds_user.avatar_url = ds_author.avatar_url
                 await ru.asyncify(session.commit)
                 await data.reply(f"↔️ Account {ds_user} synced to {ds_author}!")
-
-            elif isinstance(self.serf, rsm.MatrixSerf):
-                raise rc.UnsupportedError(f"{self} hasn't been implemented for Matrix yet")
 
             else:
                 raise rc.UnsupportedError(f"Unknown interface: {self.serf.__class__.__qualname__}")
