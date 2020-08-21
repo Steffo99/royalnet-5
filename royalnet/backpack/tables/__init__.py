@@ -1,7 +1,6 @@
 # Imports go here!
 from .aliases import Alias
 from .discord import Discord
-from .matrix import Matrix
 from .roles import Role
 from .telegram import Telegram
 from .tokens import Token
@@ -12,7 +11,6 @@ available_tables = {
     User,
     Telegram,
     Discord,
-    Matrix,
     Alias,
     Token,
     Role,
