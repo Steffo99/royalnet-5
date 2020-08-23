@@ -34,9 +34,6 @@ class TelegramSerf(Serf):
     interface_name = "telegram"
     prefix = "/"
 
-    _identity_table = rbt.Telegram
-    _identity_column = "tg_id"
-
     def __init__(self,
                  loop: aio.AbstractEventLoop,
                  alchemy_cfg: rc.ConfigDict,

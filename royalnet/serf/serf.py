@@ -132,11 +132,6 @@ class Serf(abc.ABC):
         """Create and initialize the :class:`Alchemy` with the required tables, and find the link between the master
         table and the identity table."""
         self.alchemy = ra.Alchemy(alchemy_cfg["database_url"], tables)
-        self.master_table = self.alchemy.get(self._master_table)
-        self.identity_table = self.alchemy.get(self._identity_table)
-        # This is fine, as Pycharm doesn't know that identity_table is a class and not an object
-        # noinspection PyArgumentList
-        self.identity_column = self.identity_table.__getattribute__(self.identity_table, self._identity_column)
 
     @property
     def identity_chain(self) -> tuple:
