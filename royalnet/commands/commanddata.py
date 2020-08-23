@@ -8,17 +8,18 @@ from .errors import UnsupportedError
 
 if TYPE_CHECKING:
     from .keyboardkey import KeyboardKey
+    from .command import Command
 
 log = logging.getLogger(__name__)
 
 
 class CommandData:
-    def __init__(self, command):
-        self.command = command
+    def __init__(self, command: "Command"):
+        self.command: "Command" = command
 
     @property
     def loop(self):
-        return self.command.serf.loop
+        return self.command.loop
 
     @property
     def alchemy(self):
@@ -53,7 +54,7 @@ class CommandData:
             error_if_none: Raise an exception if this is True and the call has no author."""
         raise UnsupportedError(f"'{self.get_author.__name__}' is not supported")
 
-    async def delete_invoking(self, error_if_unavailable=False) -> None:
+    async def delete_invoking(self, error_if_unavailable: bool = False) -> None:
         """Delete the invoking message, if supported by the interface.
 
         The invoking message is the message send by the user that contains the command.
@@ -63,13 +64,13 @@ class CommandData:
         if error_if_unavailable:
             raise UnsupportedError(f"'{self.delete_invoking.__name__}' is not supported")
 
-    async def find_user(self, alias: str) -> Optional["User"]:
-        """Find the User having a specific Alias.
+    async def find_user(self, identifier: Union[str, int], *, session) -> Optional["User"]:
+        """Find the User having a specific identifier.
 
         Parameters:
-            alias: the Alias to search for."""
-        async with self.command.alchemy.session_acm() as session:
-            return await User.find(self.command.serf.alchemy, session, alias)
+            identifier: the identifier to search for.
+            session: the session that the user should be returned from"""
+        return await User.find(alchemy=self.alchemy, session=session, identifier=identifier)
 
     @contextlib.asynccontextmanager
     async def keyboard(self, text, keys: List["KeyboardKey"]):
