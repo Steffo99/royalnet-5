@@ -128,7 +128,7 @@ class TelegramSerf(Serf):
                 user: "telegram.User" = data.message.from_user
                 TelegramT = data.alchemy.get(rbt.Telegram)
                 result = await ru.asyncify(
-                    session.query(TelegramT).filter(TelegramT.discord_id == user.id).one_or_none
+                    session.query(TelegramT).filter(TelegramT.tg_id == user.id).one_or_none
                 )
                 if result is None and required:
                     raise rc.CommandError("You must be registered to use this command.")
