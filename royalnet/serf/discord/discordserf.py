@@ -20,9 +20,6 @@ class DiscordSerf(Serf):
     interface_name = "discord"
     prefix = "!"
 
-    _identity_table = rbt.Discord
-    _identity_column = "discord_id"
-
     def __init__(self,
                  loop: aio.AbstractEventLoop,
                  alchemy_cfg: rc.ConfigDict,
@@ -67,15 +64,16 @@ class DiscordSerf(Serf):
             async def reply_image(data, image: io.IOBase, caption: Optional[str] = None) -> None:
                 await data.message.channel.send(caption, file=discord.File(image, 'image'))
 
-            async def get_author(data, error_if_none=False):
-                user: "discord.Member" = data.message.author
-                async with data.session_acm() as session:
-                    query = session.query(self.master_table)
-                for link in self.identity_chain:
-                    query = query.join(link.mapper.class_)
-                query = query.filter(self.identity_column == user.id)
-                result = await asyncify(query.one_or_none)
-                if result is None and error_if_none:
+            async def find_author(data,
+                                  *,
+                                  session,
+                                  required: bool = False) -> Optional[rbt.User]:
+                user: Union["discord.User", "discord.Member"] = data.message.author
+                DiscordT = data.alchemy.get(rbt.Discord)
+                result = await asyncify(
+                    session.query(DiscordT).filter(DiscordT.discord_id == user.id).one_or_none
+                )
+                if result is None and required:
                     raise rc.CommandError("You must be registered to use this command.")
                 return result
 

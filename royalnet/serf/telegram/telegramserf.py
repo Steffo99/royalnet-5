@@ -121,21 +121,18 @@ class TelegramSerf(Serf):
                                     parse_mode="HTML",
                                     disable_web_page_preview=True)
 
-            async def get_author(data, error_if_none=False):
-                user: Optional[telegram.User] = data.message.from_user
-                if user is None:
-                    if error_if_none:
-                        raise rc.CommandError("No command caller for this message")
-                    return None
-                async with data.session_acm() as session:
-                    query = session.query(self.master_table)
-                for link in self.identity_chain:
-                    query = query.join(link.mapper.class_)
-                query = query.filter(self.identity_column == user.id)
-                result = await ru.asyncify(query.one_or_none)
-                if result is None and error_if_none:
-                    raise rc.CommandError("Command caller is not registered")
-                return result
+            async def find_author(data,
+                                  *,
+                                  session,
+                                  required: bool = False) -> Optional[rbt.User]:
+                user: "telegram.User" = data.message.from_user
+                TelegramT = data.alchemy.get(rbt.Telegram)
+                result = await ru.asyncify(
+                    session.query(TelegramT).filter(TelegramT.discord_id == user.id).one_or_none
+                )
+                if result is None and required:
+                    raise rc.CommandError("You must be registered to use this command.")
+                return result.user
 
             async def delete_invoking(data, error_if_unavailable=False) -> None:
                 await self.api_call(data.message.delete)
