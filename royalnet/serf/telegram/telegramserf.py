@@ -165,6 +165,12 @@ class TelegramSerf(Serf):
 
         return TelegramMessageData
 
+    def register_keyboard_key(self, identifier: str, key: rc.KeyboardKey, command: rc.Command):
+        self.key_callbacks[identifier] = TelegramKeyCallback(key=key, command=command)
+
+    def unregister_keyboard_key(self, identifier: str):
+        del self.key_callbacks[identifier]
+
     def callback_data_factory(self) -> Type[rc.CommandData]:
         # noinspection PyMethodParameters
         class TelegramKeyboardData(rc.CommandData):
