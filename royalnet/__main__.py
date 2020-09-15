@@ -95,8 +95,7 @@ def run(config_file: str):
     else:
         log.debug("__serfs__: Configured")
 
-        def configure_serf(n: str, module):
-            class_ = module.__getattribute__(f"{n}Serf")
+        def configure_serf(n: str, module, class_: Type[rs.Serf]):
             serf_cfg = serfs_cfg.get(n)
             if module is None:
                 log.info(f"Serf.{n}: Not installed")
@@ -123,8 +122,10 @@ def run(config_file: str):
                 processes[f"Serf.{n}"] = ru.RoyalnetProcess(serf_constructor, None)
                 log.info(f"Serf.{n}: Enabled")
 
-        configure_serf("Telegram", rst)
-        configure_serf("Discord", rsd)
+        if rst is not None:
+            configure_serf("Telegram", rst, rst.TelegramSerf)
+        if rsd is not None:
+            configure_serf("Discord", rsd, rsd.DiscordSerf)
 
     # Constellation
     constellation_cfg = config.get("Constellation")

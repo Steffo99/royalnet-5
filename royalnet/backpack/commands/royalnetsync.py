@@ -1,6 +1,15 @@
 import royalnet.commands as rc
-import royalnet.serf.discord as rsd
-import royalnet.serf.telegram as rst
+
+try:
+    import royalnet.serf.telegram as rst
+except ImportError:
+    rst = None
+
+try:
+    import royalnet.serf.discord as rsd
+except ImportError:
+    rsd = None
+
 import royalnet.utils as ru
 from ..tables.discord import Discord
 from ..tables.telegram import Telegram
@@ -14,25 +23,25 @@ class RoyalnetsyncCommand(rc.Command):
     syntax: str = "{username} {password}"
 
     async def run(self, args: rc.CommandArgs, data: rc.CommandData) -> None:
-        author = await data.get_author(error_if_none=False)
-        if author is not None:
-            raise rc.UserError(f"This account is already connected to {author}!")
-
-        username = args[0]
-        password = " ".join(args[1:])
-
-        user = await data.find_user(username)
-        if user is None:
-            raise rc.UserError("No such user.")
-        try:
-            successful = user.test_password(password)
-        except ValueError:
-            raise rc.UserError(f"User {user} has no password set!")
-        if not successful:
-            raise rc.InvalidInputError(f"Invalid password!")
-
         async with data.session_acm() as session:
-            if isinstance(self.serf, rst.TelegramSerf):
+            author = await data.find_author(session=session, required=False)
+            if author is not None:
+                raise rc.UserError(f"This account is already connected to {author}!")
+
+            username = args[0]
+            password = " ".join(args[1:])
+
+            user = await data.find_user(session=session, identifier=username)
+            if user is None:
+                raise rc.UserError("No such user.")
+            try:
+                successful = user.test_password(password)
+            except ValueError:
+                raise rc.UserError(f"User {user} has no password set!")
+            if not successful:
+                raise rc.InvalidInputError(f"Invalid password!")
+
+            if rst is not None and isinstance(self.serf, rst.TelegramSerf):
                 import telegram
                 message: telegram.Message = data.message
                 from_user: telegram.User = message.from_user
@@ -58,7 +67,7 @@ class RoyalnetsyncCommand(rc.Command):
                 await ru.asyncify(session.commit)
                 await data.reply(f"↔️ Account {tg_user} synced to {user}!")
 
-            elif isinstance(self.serf, rsd.DiscordSerf):
+            elif rsd is not None and isinstance(self.serf, rsd.DiscordSerf):
                 import discord
                 message: discord.Message = data.message
                 ds_author: discord.User = message.author
