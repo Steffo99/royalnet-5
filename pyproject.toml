@@ -28,6 +28,7 @@ click = "^7.1.2"
 
 # telegram
 python_telegram_bot = { version = "^12.2.0", optional = true }
+urllib3 = { version = "^1.25.10", optional = true }
 
 # discord
 "discord.py" = { version = "^1.3.1", optional = true }
@@ -62,7 +63,7 @@ sphinx_rtd_theme = "^0.4.3"
 
 # Optional dependencies
 [tool.poetry.extras]
-telegram = ["python_telegram_bot"]
+telegram = ["python_telegram_bot", "urllib3"]
 discord = ["discord.py", "pynacl", "lavalink", "aiohttp", "cchardet"]
 alchemy_easy = ["sqlalchemy", "psycopg2_binary", "bcrypt"]
 alchemy_hard = ["sqlalchemy", "psycopg2", "bcrypt"]

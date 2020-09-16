@@ -770,7 +770,7 @@ coloredlogs = ["coloredlogs"]
 [metadata]
 lock-version = "1.0"
 python-versions = "^3.8"
-content-hash = "f881e1e657016b0d37e024b2add5bf8f818119275dcb3a80361bd9a7f8c9a81b"
+content-hash = "88bf2cfd1fc7d44eadf8222999146e8ba8846200bcc37899bb0ce268d441a313"
 
 [metadata.files]
 aiohttp = [
