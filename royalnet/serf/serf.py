@@ -11,8 +11,13 @@ from sqlalchemy.schema import Table
 import royalnet.alchemy as ra
 import royalnet.backpack.tables as rbt
 import royalnet.commands as rc
-import royalnet.herald as rh
 import royalnet.utils as ru
+
+try:
+    import royalnet.herald as rh
+except ImportError:
+    rh = None
+
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +93,7 @@ class Serf(abc.ABC):
             self.init_alchemy(alchemy_cfg, tables)
             log.info(f"Alchemy: {self.alchemy}")
 
-        self.herald: Optional[rh.Link] = None
+        self.herald: Optional["rh.Link"] = None
         """The :class:`Link` object connecting the :class:`Serf` to the rest of the Herald network."""
 
         self.herald_task: Optional[aio.Task] = None
@@ -120,7 +125,7 @@ class Serf(abc.ABC):
         log.info(f"Events: {len(self.events)} events")
         log.info(f"Commands: {len(self.commands)} commands")
 
-        if rh.Link is None:
+        if rh is None:
             log.info("Herald: not installed")
         elif not herald_cfg["enabled"]:
             log.info("Herald: disabled")
@@ -143,8 +148,8 @@ class Serf(abc.ABC):
         :class:`royalherald.Response`."""
         if self.herald is None:
             raise rc.UnsupportedError("`royalherald` is not enabled on this serf.")
-        request: rh.Request = rh.Request(handler=event_name, data=kwargs)
-        response: rh.Response = await self.herald.request(destination=destination, request=request)
+        request: "rh.Request" = rh.Request(handler=event_name, data=kwargs)
+        response: "rh.Response" = await self.herald.request(destination=destination, request=request)
         if isinstance(response, rh.ResponseFailure):
             if response.name == "no_event":
                 raise rc.ProgramError(f"There is no event named {event_name} in {destination}.")
@@ -211,7 +216,7 @@ class Serf(abc.ABC):
     def init_herald(self, herald_cfg: rc.ConfigDict):
         """Create a :class:`Link` and bind :class:`Event`."""
         herald_cfg["name"] = self.interface_name
-        self.herald: rh.Link = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
+        self.herald: "rh.Link" = rh.Link(rh.Config.from_config(**herald_cfg), self.network_handler)
 
     def register_events(self, events: List[Type[rc.HeraldEvent]], pack_cfg: rc.ConfigDict):
         for SelectedEvent in events:
@@ -230,7 +235,7 @@ class Serf(abc.ABC):
                 log.debug(f"Registering: {SelectedEvent.__qualname__} -> {SelectedEvent.name}")
             self.events[SelectedEvent.name] = event
 
-    async def network_handler(self, message: Union[rh.Request, rh.Broadcast]) -> rh.Response:
+    async def network_handler(self, message: Union["rh.Request", "rh.Broadcast"]) -> "rh.Response":
         try:
             event: rc.HeraldEvent = self.events[message.handler]
         except KeyError:
