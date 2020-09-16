@@ -314,7 +314,8 @@ class Serf(abc.ABC):
 
     async def run(self):
         """A coroutine that starts the event loop and handles command calls."""
-        self.herald_task = self.tasks.add(self.herald.run())
+        if self.herald is not None:
+            self.herald_task = self.tasks.add(self.herald.run())
         # OVERRIDE THIS METHOD!
 
     @classmethod
