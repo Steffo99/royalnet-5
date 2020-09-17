@@ -9,6 +9,7 @@ from .sleep_until import sleep_until
 from .strip_tabs import strip_tabs
 from .taskslist import TaskList
 from .urluuid import to_urluuid, from_urluuid
+from .escalating_odds import escalating_odds
 
 __all__ = [
     "asyncify",
@@ -30,4 +31,5 @@ __all__ = [
     "strip_tabs",
     "TaskList",
     "RoyalnetProcess",
+    "escalating_odds",
 ]

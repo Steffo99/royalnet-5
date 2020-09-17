@@ -1,4 +1,14 @@
 import re
+from ...utils import escalating_odds
+import datetime
+
+
+# https://stackoverflow.com/questions/18621568/regex-replace-text-outside-html-tags
+spooky_pattern = re.compile(r"o(?![^\[]*]|[^[]]*\[/)")
+spooky_replacement = r'⊕'
+
+url_pattern = re.compile(r"\[url=(.*?)](.*?)\[/url]")
+url_replacement = r'\2 (\1)'
 
 
 def escape(string: str) -> str:
@@ -6,10 +16,10 @@ def escape(string: str) -> str:
 
     Warning:
         Currently escapes everything, even items in code blocks."""
-    url_pattern = re.compile(r"\[url=(.*?)](.*?)\[/url]")
-    url_replacement = r'\2 (\1)'
+    if escalating_odds(datetime.datetime(2020, 10, 17, 4, 0)):
+        string = re.sub(spooky_pattern, spooky_replacement, string)
 
-    simple_parse = string \
+    string = string \
         .replace("*", "\\*") \
         .replace("_", "\\_") \
         .replace("`", "\\`") \
@@ -24,6 +34,6 @@ def escape(string: str) -> str:
         .replace("[p]", "```") \
         .replace("[/p]", "```")
 
-    advanced_parse = re.sub(url_pattern, url_replacement, simple_parse)
+    string = re.sub(url_pattern, url_replacement, string)
 
-    return advanced_parse
+    return string
