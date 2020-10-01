@@ -1,31 +1,8 @@
 # ROYALNET CONFIGURATION FILE
 
-[Herald]
-# Enable the herald module, allowing different parts of Royalnet to talk to each other
-# Requires the `herald` extra to be installed
-enabled = true
-# Herald can run locally or connect to a remote instance
-# "local" = run a local server
-# "remote" = connect to a remote
-mode = "local"
-# The address of the network interface on which the Herald server should listen for connections
-# If 0.0.0.0, listen for connections on all interfaces
-# If 127.0.0.1, listen only for connections coming from the local machine
-# OR
-# The address of the remote Herald server
-address = "127.0.0.1"
-# The port on which the Herald server should run
-# OR
-# The port of the remote Herald server
-port = 44444
-# A password required to connect to the local Herald server
-# OR
-# The password required to connect to the remote Herald server
-secret = "p4ssw0rd"
-# Use HTTPS instead of HTTP for Herald connections
-secure = false  # Not supported yet!
-# Use a different HTTP path for Herald connections
-path = "/"  # Different values aren't supported yet
+[Baron]
+host = "combo.steffo.eu"
+port =
 
 
 [Alchemy]
@@ -106,10 +83,5 @@ active = [
 
 ]
 
-# Configuration settings for specific packs
-[Packs."royalnet.backpack"]
-# Enable exception debug commands and stars
-exc_debug = false
-
-# Add your packs config here!
+# Add packs config here!
 # [Packs."yourpack"]

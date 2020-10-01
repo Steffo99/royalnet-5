@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "royalnet"
-version = "5.11.13"
+version = "6.0.0a1"
 description = "A multipurpose bot and web framework"
 authors = ["Stefano Pigozzi <ste.pigozzi@gmail.com>"]
 license = "AGPL-3.0+"
@@ -48,11 +48,11 @@ python-multipart = { version = "^0.0.5", optional = true }
 # sentry
 sentry_sdk = { version = "~0.13.2", optional = true }
 
-# herald
-websockets = { version = "^8.1", optional = true }
-
 # logging
 coloredlogs = { version = "^10.0", optional = true }
+
+# baron
+redis = { version = "^3.5.3", optional = true }
 
 # Development dependencies
 [tool.poetry.dev-dependencies]
@@ -69,8 +69,8 @@ alchemy_easy = ["sqlalchemy", "psycopg2_binary", "bcrypt"]
 alchemy_hard = ["sqlalchemy", "psycopg2", "bcrypt"]
 constellation = ["starlette", "uvicorn", "python-multipart"]
 sentry = ["sentry_sdk"]
-herald = ["websockets"]
 coloredlogs = ["coloredlogs"]
+baron = ["redis"]
 
 
 # Executable aliases
